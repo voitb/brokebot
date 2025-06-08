@@ -20,5 +20,5 @@ export interface ConversationGroup {
   conversations: Conversation[];
 }
 
-export type ModelType = 'gemini' | 'gpt-4' | 'claude' | 'local';
+export type ModelType = 'local' | 'phi3' | 'gemma-2b' | 'qwen' | 'mistral' | 'gpt-4' | 'claude' | 'gemini';
 export type QualityLevel = 'high' | 'medium' | 'low'; 

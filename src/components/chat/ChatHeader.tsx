@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { History, Star, Plus, Keyboard, Home } from "lucide-react";
+import { Star, Plus, Keyboard, Home } from "lucide-react";
 import { Button } from "../ui/button";
 import { useSidebarContext } from "../layout/ResponsiveChatLayout";
+import { useConversations } from "../../hooks/useConversations";
 import {
   Tooltip,
   TooltipContent,
@@ -124,12 +125,18 @@ function KeyboardShortcutsModal({
 export function ChatHeader() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
+  const { conversations, togglePinConversation } = useConversations();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const { sidebarOpen } = useSidebarContext();
 
-  const conversationTitle = conversationId
-    ? getConversationTitle(conversationId)
-    : null;
+  // Get current conversation from database
+  const currentConversation = conversations?.find(
+    (c) => c.id === conversationId
+  );
+  const conversationTitle =
+    currentConversation?.title ||
+    (conversationId ? getConversationTitle(conversationId) : null);
+  const isConversationPinned = currentConversation?.pinned || false;
 
   // Handle question mark key to toggle shortcuts
   useEffect(() => {
@@ -221,29 +228,31 @@ export function ChatHeader() {
             </TooltipContent>
           </Tooltip>
 
-          {/* History Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <History className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>View conversation history</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Star/Favorite Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <Star className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Favorite this conversation</p>
-            </TooltipContent>
-          </Tooltip>
+          {/* Star/Pin Button */}
+          {conversationId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    conversationId && togglePinConversation(conversationId)
+                  }
+                >
+                  <Star
+                    className={`w-4 h-4 ${
+                      isConversationPinned ? "fill-current text-yellow-500" : ""
+                    }`}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {isConversationPinned ? "Unpin" : "Pin"} conversation (Alt+P)
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </header>
 

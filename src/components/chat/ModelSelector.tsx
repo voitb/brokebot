@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Cpu, Cloud, Zap } from "lucide-react";
+import { Check, ChevronsUpDown, Cpu, Cloud } from "lucide-react";
 import type { ModelType } from "../../types";
 import { Button } from "../ui/button";
 import {
@@ -29,26 +29,51 @@ interface ModelOption {
 }
 
 const modelOptions: ModelOption[] = [
+  // WebLLM Local Models (Real models from WebLLM)
   {
     value: "local",
-    label: "Local AI (WebLLM)",
-    description: "Runs locally in your browser - private & free",
+    label: "Llama-3.1-8B-Instruct",
+    description: "Meta's latest Llama model - runs locally in browser",
     icon: <Cpu className="w-4 h-4" />,
-    badge: "Free",
+    badge: "Free • 8B",
   },
   {
-    value: "gemini",
-    label: "Gemini 2.5 Pro",
-    description: "Google's most capable AI model",
-    icon: <Cloud className="w-4 h-4" />,
-    badge: "API Key Required",
+    value: "phi3",
+    label: "Phi-3-mini-4k-instruct",
+    description: "Microsoft's efficient small model - fast & lightweight",
+    icon: <Cpu className="w-4 h-4" />,
+    badge: "Free • 3.8B",
   },
+  {
+    value: "gemma-2b",
+    label: "Gemma-2B-it",
+    description: "Google's compact model - very fast inference",
+    icon: <Cpu className="w-4 h-4" />,
+    badge: "Free • 2B",
+  },
+  {
+    value: "qwen",
+    label: "Qwen2-1.5B-Instruct",
+    description: "Alibaba's efficient model - good for quick responses",
+    icon: <Cpu className="w-4 h-4" />,
+    badge: "Free • 1.5B",
+  },
+  {
+    value: "mistral",
+    label: "Mistral-7B-Instruct-v0.3",
+    description: "High-quality 7B model - balanced performance",
+    icon: <Cpu className="w-4 h-4" />,
+    badge: "Free • 7B",
+  },
+
+  // External API Models
   {
     value: "gpt-4",
     label: "GPT-4 Turbo",
     description: "OpenAI's most advanced model",
-    icon: <Zap className="w-4 h-4" />,
+    icon: <Cloud className="w-4 h-4" />,
     badge: "API Key Required",
+    disabled: true,
   },
   {
     value: "claude",
@@ -56,6 +81,15 @@ const modelOptions: ModelOption[] = [
     description: "Anthropic's reasoning specialist",
     icon: <Cloud className="w-4 h-4" />,
     badge: "API Key Required",
+    disabled: true,
+  },
+  {
+    value: "gemini",
+    label: "Gemini 2.0 Flash",
+    description: "Google's latest multimodal model",
+    icon: <Cloud className="w-4 h-4" />,
+    badge: "API Key Required",
+    disabled: true,
   },
 ];
 
@@ -90,7 +124,15 @@ export function ModelSelector({
             {selectedOption?.icon}
             <span className="hidden sm:inline text-xs">
               {selectedOption?.value === "local"
-                ? "Local"
+                ? "Llama-3.1"
+                : selectedOption?.value === "phi3"
+                ? "Phi-3"
+                : selectedOption?.value === "gemma-2b"
+                ? "Gemma-2B"
+                : selectedOption?.value === "qwen"
+                ? "Qwen2"
+                : selectedOption?.value === "mistral"
+                ? "Mistral-7B"
                 : selectedOption?.label?.split(" ")[0]}
             </span>
           </div>
