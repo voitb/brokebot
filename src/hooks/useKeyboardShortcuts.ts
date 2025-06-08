@@ -33,12 +33,12 @@ export function useKeyboardShortcuts({
       return;
     }
 
-    const { ctrlKey, metaKey, key } = event;
+    const { ctrlKey, metaKey, key, altKey } = event;
     const cmdOrCtrl = ctrlKey || metaKey;
 
     switch (true) {
-      // Ctrl/Cmd + Shift + N - New Chat
-      case cmdOrCtrl && event.shiftKey && key === 'N':
+      // Ctrl/Cmd + N - New Chat (changed from Ctrl+Shift+N)
+      case altKey && key === 'n':
         event.preventDefault();
         if (onNewChat) {
           onNewChat();
@@ -49,31 +49,31 @@ export function useKeyboardShortcuts({
         break;
 
       // Ctrl/Cmd + B - Toggle Sidebar
-      case cmdOrCtrl && key === 'b':
+      case altKey && key === 'b':
         event.preventDefault();
         onToggleSidebar?.();
         break;
 
-      // Ctrl/Cmd + K - Search
-      case cmdOrCtrl && key === 'k':
+      // Ctrl/Cmd + J - Search (changed from Ctrl+K to avoid conflict)
+      case altKey && key === 'j':
         event.preventDefault();
         onSearch?.();
         break;
 
-      // Ctrl/Cmd + F - Favourite current chat
-      case cmdOrCtrl && key === 'f' && !!conversationId:
+      // Ctrl/Cmd + P - Pin current chat (changed from Ctrl+F)
+      case altKey && key === 'p' && !!conversationId:
         event.preventDefault();
         onPinChat?.();
         break;
 
       // F2 - Rename current chat
-      case key === 'F2' && !!conversationId:
+      case altKey && key === 'F2' && !!conversationId:
         event.preventDefault();
         onRenameChat?.();
         break;
 
       // Delete - Delete current chat
-      case key === 'Delete' && !!conversationId:
+      case altKey &&  key === 'Delete' && !!conversationId:
         event.preventDefault();
         onDeleteChat?.();
         break;
