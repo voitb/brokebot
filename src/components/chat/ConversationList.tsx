@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
 import type { ConversationGroup } from "../../types";
 import type { IConversation } from "../../lib/db";
@@ -121,6 +121,7 @@ interface ConversationListProps {
 
 export function ConversationList({ searchQuery = "" }: ConversationListProps) {
   const navigate = useNavigate();
+  const { conversationId } = useParams<{ conversationId: string }>();
   const { conversations, deleteConversation, togglePinConversation } =
     useConversations();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
@@ -220,7 +221,14 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
             <div
               key={conversation.id}
               className={`group relative px-2 py-1.5 text-sm text-foreground rounded-md transition-all duration-200 cursor-pointer ${
-                openMenuId === conversation.id ? "bg-muted" : "hover:bg-muted"
+                // Check if this conversation is currently active
+                conversations?.find(
+                  (c) => parseInt(c.id.slice(-8), 16) === conversation.id
+                )?.id === conversationId
+                  ? "bg-primary/20 border-l-2 border-primary text-primary"
+                  : openMenuId === conversation.id
+                  ? "bg-muted"
+                  : "hover:bg-muted"
               }`}
               onClick={() => handleConversationClick(conversation.id)}
             >
