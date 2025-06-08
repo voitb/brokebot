@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, Plus, Keyboard, Home } from "lucide-react";
+import { Star, Plus, Keyboard, Home, Sun, Moon, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { useSidebarContext } from "../layout/ResponsiveChatLayout";
 import { useConversations } from "../../hooks/useConversations";
+import { useTheme } from "../../hooks/useTheme";
 import {
   Tooltip,
   TooltipContent,
@@ -25,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { SettingsDialog } from "../dialogs/SettingsDialog";
 
 // Mock function to get conversation title - later replace with IndexedDB
 const getConversationTitle = (id: string) => {
@@ -127,7 +129,9 @@ export function ChatHeader() {
   const navigate = useNavigate();
   const { conversations, togglePinConversation } = useConversations();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { sidebarOpen } = useSidebarContext();
+  const { theme, setTheme } = useTheme();
 
   // Get current conversation from database
   const currentConversation = conversations?.find(
@@ -212,6 +216,42 @@ export function ChatHeader() {
 
         {/* Right side - Action buttons */}
         <div className="flex items-center gap-2 shrink-0">
+          {/* Theme Toggle Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle theme</p>
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Settings Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSettingsOpen(true)}
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Settings</p>
+            </TooltipContent>
+          </Tooltip>
+
           {/* Shortcuts Button */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -261,6 +301,9 @@ export function ChatHeader() {
         open={shortcutsOpen}
         onOpenChange={setShortcutsOpen}
       />
+
+      {/* Settings Dialog */}
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </TooltipProvider>
   );
 }
