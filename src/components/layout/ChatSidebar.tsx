@@ -1,6 +1,7 @@
 import { Plus, Search, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ConversationList } from "../chat/ConversationList";
+import { useConversations } from "../../hooks/useConversations";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
@@ -18,12 +19,19 @@ import { useState } from "react";
 
 export function ChatSidebar() {
   const navigate = useNavigate();
+  const { createConversation } = useConversations();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleNewChat = () => {
-    // Generate new conversation ID (later this will be from IndexedDB)
-    const newConversationId = Date.now();
-    navigate(`/chat/${newConversationId}`);
+  const handleNewChat = async () => {
+    // Create new conversation in IndexedDB with a placeholder first message
+    const conversationId = await createConversation(
+      "New Conversation",
+      "Hello! How can I help you today?"
+    );
+
+    if (conversationId) {
+      navigate(`/chat/${conversationId}`);
+    }
   };
 
   return (

@@ -62,19 +62,19 @@ function KeyboardShortcutsModal({
                 <div className="flex justify-between items-center">
                   <span>New Chat</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Ctrl+Shift+N
+                    Alt+N
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Toggle Sidebar</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Ctrl+B
+                    Alt+B
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Search</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Ctrl+K
+                    Alt+J
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
@@ -89,21 +89,21 @@ function KeyboardShortcutsModal({
               <h4 className="font-medium mb-3">Chat Actions</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span>Favourite Chat</span>
+                  <span>Pin Chat</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Ctrl+F
+                    Alt+P
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Rename Chat</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    F2
+                    Alt+F2
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span>Delete Chat</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Del
+                    Alt+Del
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
@@ -174,7 +174,7 @@ export function ChatHeader() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Create new conversation (Ctrl+Shift+N)</p>
+                <p>Create new conversation (Alt+N)</p>
               </TooltipContent>
             </Tooltip>
           )}

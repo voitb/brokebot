@@ -1,6 +1,9 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
 import type { ConversationGroup } from "../../types";
+import type { IConversation } from "../../lib/db";
+import { useConversations } from "../../hooks/useConversations";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -9,105 +12,108 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { useState } from "react";
 
-// Mock data - later replace with IndexedDB data
-const mockConversationGroups: ConversationGroup[] = [
-  {
-    label: "Pinned",
-    conversations: [
-      {
-        id: 1,
-        title: "How does blockchain work?",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPinned: true,
-      },
-      {
-        id: 2,
-        title: "Hackathon Winning App Ideas",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isPinned: true,
-      },
-    ],
-  },
-  {
-    label: "Today",
-    conversations: [
-      {
-        id: 3,
-        title: "R3F Library with Components",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 4,
-        title: "Fabric Canvas Component Integration",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 5,
-        title: "Image Loading Problem",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 6,
-        title: "JavaScript/React Libraries for Data",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 7,
-        title: "Meme Creation App",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-  },
-  {
-    label: "Yesterday",
-    conversations: [
-      {
-        id: 8,
-        title: "NestJS 15 Folders in Parentheses",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 9,
-        title: "Folder Structure for Meme App",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 10,
-        title: "Reddit API, Algorand, Revenue",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 11,
-        title: "Web3 SaaS Application Ideas",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-  },
-  {
-    label: "Last 7 Days",
-    conversations: [
-      {
-        id: 12,
-        title: "Applications and Monetization",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ],
-  },
-];
+// Helper function to group conversations by time periods
+const groupConversationsByTime = (
+  conversations: IConversation[]
+): ConversationGroup[] => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const pinned = conversations.filter((c) => c.pinned);
+  const unpinned = conversations.filter((c) => !c.pinned);
+
+  const todayConversations = unpinned.filter((c) => c.updatedAt >= today);
+  const yesterdayConversations = unpinned.filter(
+    (c) => c.updatedAt >= yesterday && c.updatedAt < today
+  );
+  const lastWeekConversations = unpinned.filter(
+    (c) => c.updatedAt >= lastWeek && c.updatedAt < yesterday
+  );
+  const olderConversations = unpinned.filter((c) => c.updatedAt < lastWeek);
+
+  const groups: ConversationGroup[] = [];
+
+  if (pinned.length > 0) {
+    groups.push({
+      label: "Pinned",
+      conversations: pinned.map((c) => ({
+        id: parseInt(c.id.slice(-8), 16) || 1, // Convert string ID to number for UI compatibility
+        title: c.title,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isPinned: c.pinned,
+      })),
+    });
+  }
+
+  if (todayConversations.length > 0) {
+    groups.push({
+      label: "Today",
+      conversations: todayConversations.map((c) => ({
+        id: parseInt(c.id.slice(-8), 16) || 1,
+        title: c.title,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isPinned: c.pinned,
+      })),
+    });
+  }
+
+  if (yesterdayConversations.length > 0) {
+    groups.push({
+      label: "Yesterday",
+      conversations: yesterdayConversations.map((c) => ({
+        id: parseInt(c.id.slice(-8), 16) || 1,
+        title: c.title,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isPinned: c.pinned,
+      })),
+    });
+  }
+
+  if (lastWeekConversations.length > 0) {
+    groups.push({
+      label: "Last 7 Days",
+      conversations: lastWeekConversations.map((c) => ({
+        id: parseInt(c.id.slice(-8), 16) || 1,
+        title: c.title,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isPinned: c.pinned,
+      })),
+    });
+  }
+
+  if (olderConversations.length > 0) {
+    groups.push({
+      label: "Older",
+      conversations: olderConversations.map((c) => ({
+        id: parseInt(c.id.slice(-8), 16) || 1,
+        title: c.title,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        isPinned: c.pinned,
+      })),
+    });
+  }
+
+  return groups;
+};
 
 interface ConversationListProps {
   searchQuery?: string;
@@ -115,29 +121,58 @@ interface ConversationListProps {
 
 export function ConversationList({ searchQuery = "" }: ConversationListProps) {
   const navigate = useNavigate();
+  const { conversations, deleteConversation, togglePinConversation } =
+    useConversations();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    open: boolean;
+    conversationId: string | null;
+    conversationTitle: string;
+  }>({
+    open: false,
+    conversationId: null,
+    conversationTitle: "",
+  });
 
-  // Filter conversations based on search query
-  const filteredGroups = mockConversationGroups
-    .map((group) => ({
-      ...group,
-      conversations: group.conversations.filter((conversation) =>
-        conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    }))
-    .filter((group) => group.conversations.length > 0);
+  // Group conversations and filter based on search query
+  const filteredGroups = useMemo(() => {
+    if (!conversations) return [];
+
+    const grouped = groupConversationsByTime(conversations);
+
+    if (!searchQuery) return grouped;
+
+    return grouped
+      .map((group) => ({
+        ...group,
+        conversations: group.conversations.filter((conversation) =>
+          conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
+        ),
+      }))
+      .filter((group) => group.conversations.length > 0);
+  }, [conversations, searchQuery]);
 
   const handleConversationClick = (conversationId: number) => {
-    navigate(`/chat/${conversationId}`);
+    // Convert UI ID back to original string ID for navigation
+    const originalConversation = conversations?.find(
+      (c) => parseInt(c.id.slice(-8), 16) === conversationId
+    );
+    if (originalConversation) {
+      navigate(`/chat/${originalConversation.id}`);
+    }
   };
 
-  const handleFavouriteConversation = (
+  const handleFavouriteConversation = async (
     conversationId: number,
     event: React.MouseEvent
   ) => {
     event.stopPropagation();
-    console.log("Favourite conversation:", conversationId);
-    // TODO: Implement favourite functionality with IndexedDB
+    const originalConversation = conversations?.find(
+      (c) => parseInt(c.id.slice(-8), 16) === conversationId
+    );
+    if (originalConversation) {
+      await togglePinConversation(originalConversation.id);
+    }
   };
 
   const handleRenameConversation = (
@@ -149,13 +184,21 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
     // TODO: Implement rename functionality with IndexedDB
   };
 
-  const handleDeleteConversation = (
-    conversationId: number,
-    event: React.MouseEvent
-  ) => {
-    event.stopPropagation();
-    console.log("Delete conversation:", conversationId);
-    // TODO: Implement delete functionality with IndexedDB
+  const handleDeleteConversation = async (conversationStringId: string) => {
+    await deleteConversation(conversationStringId);
+    setDeleteConfirmation({
+      open: false,
+      conversationId: null,
+      conversationTitle: "",
+    });
+  };
+
+  const handleCloseDeleteConfirmation = () => {
+    setDeleteConfirmation({
+      open: false,
+      conversationId: null,
+      conversationTitle: "",
+    });
   };
 
   if (filteredGroups.length === 0 && searchQuery) {
@@ -182,9 +225,7 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
               onClick={() => handleConversationClick(conversation.id)}
             >
               <div className="flex items-center justify-between min-w-0">
-                <span className="truncate flex-1 pr-10">
-                  {conversation.title}
-                </span>
+                <span className="truncate flex-1">{conversation.title}</span>
 
                 {/* Proper shadcn dropdown menu on hover with better positioning */}
                 <DropdownMenu
@@ -237,7 +278,17 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
                       className="text-destructive focus:text-destructive"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteConversation(conversation.id, e);
+                        const originalConversation = conversations?.find(
+                          (c) =>
+                            parseInt(c.id.slice(-8), 16) === conversation.id
+                        );
+                        if (originalConversation) {
+                          setDeleteConfirmation({
+                            open: true,
+                            conversationId: originalConversation.id,
+                            conversationTitle: conversation.title,
+                          });
+                        }
                       }}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -251,6 +302,38 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
           {group.label !== "Last 7 Days" && <div className="h-4" />}
         </div>
       ))}
+
+      {/* Delete Confirmation Modal */}
+      <AlertDialog
+        open={deleteConfirmation.open}
+        onOpenChange={handleCloseDeleteConfirmation}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the conversation "
+              {deleteConfirmation.conversationTitle}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCloseDeleteConfirmation}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteConfirmation.conversationId) {
+                  handleDeleteConversation(deleteConfirmation.conversationId);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

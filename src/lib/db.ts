@@ -1,6 +1,6 @@
 // src/lib/db.ts
 import Dexie, { type Table } from "dexie";
-import { v4 as uuidv4 } from "uuid"; // Zainstaluj: npm install uuid @types/uuid
+// Import will be used in hooks
 
 // Definicja interfejsu dla pojedynczej wiadomości
 export interface IMessage {
