@@ -1,0 +1,274 @@
+# PROJEKT EIDOLON - Asystent AI o Rozszerzonej Pamięci
+
+# Klon ChatGPT działający w przeglądarce z WebLLM i IndexedDB
+
+## OPIS PROJEKTU
+
+Eidolon to aplikacja webowa będąca klonem ChatGPT, która działa w 100% lokalnie w przeglądarce.
+Wykorzystuje WebLLM dla modelu AI i IndexedDB dla trwałej pamięci, zapewniając prywatność,
+darmowe użytkowanie i pracę offline.
+
+## KONWENCJE KODOWANIA
+
+### Język
+
+- **TYLKO ANGIELSKI** w kodzie - wszystkie nazwy zmiennych, funkcji, komentarze, stringi
+- Interfejs użytkownika może być po polsku, ale kod tylko po angielsku
+- Konsystentna nomenclatura w całym projekcie
+
+### TypeScript
+
+- Ścisłe typowanie (strict mode)
+- Interfejsy dla wszystkich struktur danych
+- Enums dla stałych wartości
+- Generic types gdzie możliwe
+
+### React
+
+- Functional components + hooks
+- Custom hooks dla logiki biznesowej
+- Proper error boundaries
+- Lazy loading dla dużych komponentów
+
+### Styling
+
+- Tailwind CSS classes
+- Shadcn/ui components jako baza
+- CSS modules dla custom stylów
+- Mobile-first approach
+
+### Struktura Plików
+
+- Jeden komponent na plik
+- Index.ts dla łatwego importowania
+- Separacja logiki biznesowej od UI
+- Współdzielone typy w types/
+
+## STOS TECHNOLOGICZNY
+
+- **Frontend**: Vite + React 18 + TypeScript
+- **UI Library**: Shadcn/ui + Tailwind CSS
+- **Routing**: react-router-dom
+- **Lokalne AI**: @mlc-ai/web-llm
+- **Baza Danych**: Dexie.js (wrapper na IndexedDB)
+- **Backend**: Firebase (auth, sync, backup)
+- **Obsługa PDF**: pdf.js (opcjonalnie)
+- **Podświetlanie Składni**: react-syntax-highlighter (opcjonalnie)
+
+## ARCHITEKTURA BAZY DANYCH (IndexedDB przez Dexie.js)
+
+### Tabela: conversations
+
+- id: number (primary key, auto-increment)
+- title: string (tytuł rozmowy)
+- createdAt: Date
+- updatedAt: Date
+- isPinned?: boolean
+- userId?: string (dla zalogowanych użytkowników)
+
+### Tabela: messages
+
+- id: number (primary key, auto-increment)
+- conversationId: number (foreign key, indexed)
+- role: 'user' | 'assistant'
+- content: string
+- createdAt: Date
+- parentId?: number (dla Chat Branching)
+
+### Tabela: documents
+
+- id: number (primary key, auto-increment)
+- filename: string
+- content: string
+- createdAt: Date
+- fileType: 'txt' | 'md' | 'pdf'
+
+### Tabela: users (przyszłość)
+
+- id: string (firebase uid)
+- email: string
+- displayName: string
+- createdAt: Date
+- plan: 'free' | 'pro'
+
+## ROUTING I NAWIGACJA
+
+### URL Structure
+
+- `/` - główna strona z welcome screen
+- `/chat/:conversationId` - konkretna rozmowa (bez hasha!)
+- `/chat/:userId/:conversationId` - rozmowa zalogowanego użytkownika (przyszłość)
+- `/settings` - ustawienia
+- `/auth` - logowanie/rejestracja
+
+### Nawigacja
+
+- Używaj react-router-dom navigate(), NIE window.location.hash
+- Programatyczna nawigacja, nie linki z href
+- Animacje przejść między chatami
+
+## CHAT MANAGEMENT
+
+### Operacje na Chatach
+
+- **Filter/Search** - filtrowanie po tytule i zawartości
+- **Pin/Unpin** - przypinanie ważnych rozmów
+- **Rename** - zmiana tytułu rozmowy
+- **Delete** - usuwanie z konfirmacją
+- **Archive** - archiwizacja starych rozmów
+- **Export** - eksport do JSON/PDF
+
+### Chat Operations Menu
+
+- 3-dot menu on hover dla każdego chatu
+- Opcje: Pin, Rename, Delete, Archive, Export
+- Keyboard shortcuts dla power users
+- Bulk operations dla wielu chatów
+
+## PLAN ROZWOJU - FAZA PO FAZIE
+
+### FAZA 1: Podstawowa Konfiguracja Projektu ✅
+
+**Cel**: Przygotowanie środowiska i podstawowej struktury
+
+### FAZA 2: Lokalna Baza Danych ✅
+
+**Cel**: Implementacja IndexedDB z Dexie.js
+
+### FAZA 3: Podstawowy Interfejs Użytkownika ✅
+
+**Cel**: Stworzenie responsywnego UI bez AI
+
+### FAZA 4: Integracja z WebLLM ✅
+
+**Cel**: Połączenie z lokalnym modelem AI
+
+### FAZA 5: MVP - Podstawowa Funkcjonalność Czatu ✅
+
+**Cel**: Działający chat z trwałą pamięcią
+
+### FAZA 6: Chat Management & UX ⏳
+
+**Cel**: Zaawansowane zarządzanie chatami
+
+**Kroki**:
+
+1. Animacje sidebar (slide in/out)
+2. Chat filtering i search
+3. 3-dot menu z opcjami
+4. Proper routing bez hashów
+5. Keyboard shortcuts
+6. Bulk operations
+
+### FAZA 7: Obsługa Załączników
+
+**Cel**: Upload i przetwarzanie plików .txt i .md
+
+### FAZA 8: Firebase Integration
+
+**Cel**: Authentication i cloud backup
+
+**Kroki**:
+
+1. Firebase setup (auth, firestore)
+2. User authentication
+3. Cloud backup rozmów
+4. Multi-device sync
+5. Sharing conversations
+
+### FAZA 9: WebLLM Integration
+
+**Cel**: Prawdziwe lokalne AI
+
+### FAZA 10: Stretch Goals
+
+**Cel**: Zaawansowane funkcje
+
+## KLUCZOWE KOMPONENTY DO IMPLEMENTACJI
+
+### 1. ChatInterface
+
+```typescript
+interface ChatInterfaceProps {
+  conversationId?: string;
+  userId?: string;
+}
+```
+
+### 2. ConversationManager
+
+```typescript
+interface ConversationOperations {
+  filterConversations: (query: string) => Conversation[];
+  pinConversation: (id: number) => Promise<void>;
+  renameConversation: (id: number, title: string) => Promise<void>;
+  deleteConversation: (id: number) => Promise<void>;
+  archiveConversation: (id: number) => Promise<void>;
+}
+```
+
+### 3. ChatContextMenu
+
+```typescript
+interface ChatContextMenuProps {
+  conversation: Conversation;
+  onPin: () => void;
+  onRename: () => void;
+  onDelete: () => void;
+  onArchive: () => void;
+}
+```
+
+## METRYKI SUKCESU MVP
+
+- [ ] Użytkownik może napisać wiadomość i otrzymać odpowiedź
+- [ ] Historia rozmów jest zachowana po odświeżeniu
+- [ ] Można tworzyć nowe rozmowy
+- [ ] Można załączyć plik .txt/.md i AI odpowiada na jego podstawie
+- [ ] UI jest responsywne i profesjonalne
+- [ ] Aplikacja działa offline
+- [ ] Smooth animations i transitions
+- [ ] Chat filtering i search
+- [ ] Chat management (pin, rename, delete)
+
+## TESTOWANIE
+
+- Unit testy dla funkcji utilsowych
+- Integration testy dla bazy danych
+- E2E testy dla kluczowych przepływów
+- Performance testy dla WebLLM
+
+## DEPLOYMENT
+
+- Build statyczny przez Vite
+- Hosting na GitHub Pages / Netlify / Vercel
+- Service Worker dla offline functionality
+- PWA manifest dla instalacji
+
+## UWAGI DLA DEVELOPERA
+
+1. Rozpocznij od FAZY 1-2, upewnij się że baza danych działa
+2. UI rób równolegle z logiką - nie czekaj na kompletną implementację
+3. WebLLM wymaga dużo RAM - testuj na różnych urządzeniach
+4. IndexedDB ma limity - dodaj sprawdzanie rozmiaru
+5. Pliki można cachować w IndexedDB jako blob
+6. Używaj lazy loading dla dużych komponentów
+7. Optymalizuj bundle size - WebLLM jest duży
+8. Wszystkie stringi w kodzie PO ANGIELSKU!
+9. Smooth animations wszędzie gdzie można
+10. Keyboard shortcuts dla power users
+
+## KOLEJNOŚĆ IMPLEMENTACJI
+
+1. ✅ Setup projektu + Shadcn/ui
+2. ✅ Baza danych (Dexie.js)
+3. ✅ Podstawowy UI (bez AI)
+4. ✅ WebLLM integration
+5. ✅ Trwała pamięć rozmów
+6. ⏳ Chat management + animations
+7. 📋 Obsługa załączników (.txt/.md)
+8. 📋 Firebase integration
+9. 📋 WebLLM integration
+10. 📋 Stretch goals (PDF, branching, etc.)
+
+To jest Twoja mapa drogowa. Aktualnie pracujemy nad FAZĄ 6!
