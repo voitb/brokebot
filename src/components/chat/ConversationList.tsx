@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
 import type { ConversationGroup } from "../../types";
 import type { IConversation } from "../../lib/db";
 import { useConversations } from "../../hooks/useConversations";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -122,9 +123,15 @@ interface ConversationListProps {
 export function ConversationList({ searchQuery = "" }: ConversationListProps) {
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
-  const { conversations, deleteConversation, togglePinConversation } =
-    useConversations();
+  const {
+    conversations,
+    deleteConversation,
+    togglePinConversation,
+    updateConversationTitle,
+  } = useConversations();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     open: boolean;
     conversationId: string | null;
@@ -134,6 +141,25 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
     conversationId: null,
     conversationTitle: "",
   });
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+    if (editingId && editInputRef.current) {
+      // Use setTimeout to ensure DOM is updated and input is rendered
+      setTimeout(() => {
+        if (editInputRef.current) {
+          editInputRef.current.focus();
+          editInputRef.current.select();
+          // Force cursor to be visible immediately
+          editInputRef.current.setSelectionRange(
+            editInputRef.current.value.length,
+            editInputRef.current.value.length
+          );
+        }
+      }, 0);
+    }
+  }, [editingId]);
 
   // Group conversations and filter based on search query
   const filteredGroups = useMemo(() => {
@@ -153,7 +179,37 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
       .filter((group) => group.conversations.length > 0);
   }, [conversations, searchQuery]);
 
+  // Listen for global rename event from keyboard shortcuts
+  useEffect(() => {
+    const handleGlobalRename = () => {
+      if (!conversationId) return;
+
+      // Find the current conversation in the filtered groups
+      const currentConversation = filteredGroups
+        .flatMap((g) => g.conversations)
+        .find((c) => {
+          const originalConversation = conversations?.find(
+            (orig) => parseInt(orig.id.slice(-8), 16) === c.id
+          );
+          return originalConversation?.id === conversationId;
+        });
+
+      if (currentConversation) {
+        setEditingId(currentConversation.id);
+        setEditingTitle(currentConversation.title);
+      }
+    };
+
+    // Custom event for global rename
+    document.addEventListener("conversation:rename", handleGlobalRename);
+    return () =>
+      document.removeEventListener("conversation:rename", handleGlobalRename);
+  }, [conversationId, filteredGroups, conversations]);
+
   const handleConversationClick = (conversationId: number) => {
+    // Don't navigate if we're editing
+    if (editingId === conversationId) return;
+
     // Convert UI ID back to original string ID for navigation
     const originalConversation = conversations?.find(
       (c) => parseInt(c.id.slice(-8), 16) === conversationId
@@ -181,8 +237,51 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
     event: React.MouseEvent
   ) => {
     event.stopPropagation();
-    console.log("Rename conversation:", conversationId);
-    // TODO: Implement rename functionality with IndexedDB
+    const conversation = filteredGroups
+      .flatMap((g) => g.conversations)
+      .find((c) => c.id === conversationId);
+
+    if (conversation) {
+      setEditingId(conversationId);
+      setEditingTitle(conversation.title);
+      setOpenMenuId(null); // Close dropdown
+    }
+  };
+
+  const handleSaveRename = async () => {
+    if (!editingId || !editingTitle.trim()) return;
+
+    const originalConversation = conversations?.find(
+      (c) => parseInt(c.id.slice(-8), 16) === editingId
+    );
+
+    if (
+      originalConversation &&
+      editingTitle.trim() !== originalConversation.title
+    ) {
+      await updateConversationTitle(
+        originalConversation.id,
+        editingTitle.trim()
+      );
+    }
+
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
+  const handleCancelRename = () => {
+    setEditingId(null);
+    setEditingTitle("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.altKey && e.key === "Enter") {
+      e.preventDefault();
+      handleSaveRename();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      handleCancelRename();
+    }
   };
 
   const handleDeleteConversation = async (conversationStringId: string) => {
@@ -221,19 +320,40 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
             <div
               key={conversation.id}
               className={`group relative px-2 py-1.5 text-sm text-foreground rounded-md transition-all duration-200 cursor-pointer ${
-                // Check if this conversation is currently active
-                conversations?.find(
-                  (c) => parseInt(c.id.slice(-8), 16) === conversation.id
-                )?.id === conversationId
-                  ? "bg-primary/20 border-l-2 border-primary text-primary"
-                  : openMenuId === conversation.id
-                  ? "bg-muted"
-                  : "hover:bg-muted"
+                // Check if this conversation is currently active - porównaj string ID
+                (() => {
+                  const originalConversation = conversations?.find(
+                    (c) => parseInt(c.id.slice(-8), 16) === conversation.id
+                  );
+                  const isActive = originalConversation?.id === conversationId;
+                  const isEditing = editingId === conversation.id;
+                  const isMenuOpen = openMenuId === conversation.id;
+
+                  if (isActive || isEditing) {
+                    return "bg-primary/10 border-l-2 border-primary text-primary font-medium";
+                  } else if (isMenuOpen) {
+                    return "bg-muted/70";
+                  } else {
+                    return "hover:bg-muted/50";
+                  }
+                })()
               }`}
               onClick={() => handleConversationClick(conversation.id)}
             >
               <div className="flex items-center justify-between min-w-0">
-                <span className="truncate flex-1">{conversation.title}</span>
+                {editingId === conversation.id ? (
+                  <Input
+                    ref={editInputRef}
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="flex-1 h-auto p-0 border-0 shadow-none bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="Alt+Enter to save, Esc to cancel"
+                  />
+                ) : (
+                  <span className="truncate flex-1">{conversation.title}</span>
+                )}
 
                 {/* Proper shadcn dropdown menu on hover with better positioning */}
                 <DropdownMenu

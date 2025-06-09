@@ -21,6 +21,7 @@ import {
 } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Card,
   CardContent,
@@ -81,8 +82,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     switch (activeTab) {
       case "profile":
         return (
-          <div className="space-y-8 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="fullName" className="text-sm font-medium">
                   Full name
@@ -172,13 +173,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "appearance":
         return (
-          <div className="space-y-8 w-full">
+          <div className="space-y-6">
             <div>
               <Label className="text-base font-medium">Theme</Label>
               <p className="text-sm text-muted-foreground">
                 Choose how BrokeBot looks and feels
               </p>
-              <div className="mt-6 grid grid-cols-3 gap-6">
+              <div className="mt-4 grid grid-cols-3 gap-4">
                 {(["light", "dark", "system"] as const).map((themeOption) => (
                   <Card
                     key={themeOption}
@@ -189,8 +190,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     }`}
                     onClick={() => setTheme(themeOption)}
                   >
-                    <CardContent className="p-6 text-center">
-                      <div className="mb-2 h-8 w-full rounded border bg-gradient-to-br from-background to-muted"></div>
+                    <CardContent className="p-4 text-center">
+                      <div className="mb-2 h-6 w-full rounded border bg-gradient-to-br from-background to-muted"></div>
                       <p className="text-sm font-medium capitalize">
                         {themeOption}
                       </p>
@@ -204,7 +205,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             <div>
               <Label className="text-base font-medium">Display settings</Label>
-              <div className="mt-6 space-y-8">
+              <div className="mt-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Compact mode</Label>
@@ -230,7 +231,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "models":
         return (
-          <div className="space-y-8 w-full">
+          <div className="space-y-6">
             <div>
               <Label className="text-base font-medium">Local AI Models</Label>
               <p className="text-sm text-muted-foreground">
@@ -302,7 +303,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "integrations":
         return (
-          <div className="space-y-8 w-full">
+          <div className="space-y-6">
             <div>
               <Label className="text-base font-medium">API Integrations</Label>
               <p className="text-sm text-muted-foreground">
@@ -414,7 +415,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "privacy":
         return (
-          <div className="space-y-8 w-full">
+          <div className="space-y-6">
             <div>
               <Label className="text-base font-medium">Privacy & Data</Label>
               <p className="text-sm text-muted-foreground">
@@ -458,7 +459,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             <div>
               <Label className="text-base font-medium">Data Export</Label>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-3">
                 Download your data for backup or migration
               </p>
               <div className="space-y-2">
@@ -476,7 +477,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 Danger Zone
               </Label>
               <Card className="border-destructive/20">
-                <CardContent className="pt-6">
+                <CardContent className="pt-4">
                   <div className="space-y-4">
                     <div>
                       <Label>Clear all conversations</Label>
@@ -505,7 +506,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "billing":
         return (
-          <div className="space-y-8 w-full">
+          <div className="space-y-6">
             <div>
               <Label className="text-base font-medium">Current Plan</Label>
               <p className="text-sm text-muted-foreground">
@@ -561,11 +562,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             <div>
               <Label className="text-base font-medium">API Usage</Label>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-3">
                 Track your external API usage and costs
               </p>
               <Card>
-                <CardContent className="pt-6">
+                <CardContent className="pt-4">
                   <p className="text-sm text-muted-foreground text-center">
                     Connect API keys in Integrations to see usage statistics
                   </p>
@@ -582,56 +583,58 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[90vw] h-[85vh] overflow-hidden p-0 gap-0">
-        <DialogHeader className="px-6 py-5 border-b bg-card/50">
-          <DialogTitle className="text-2xl font-semibold">Settings</DialogTitle>
-          <DialogDescription className="text-base text-muted-foreground">
-            Manage your preferences and account settings
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-none w-[95vw] h-[90vh] p-0 overflow-hidden">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <DialogHeader className="px-6 py-4 border-b bg-muted/20 shrink-0">
+            <DialogTitle className="text-xl font-semibold">
+              Settings
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Manage your preferences and account settings
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="flex flex-1 overflow-hidden h-full">
-          {/* Sidebar */}
-          <nav className="w-72 border-r bg-muted/20 p-6 overflow-y-auto">
-            <div className="space-y-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
+          {/* Main Content */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Sidebar */}
+            <nav className="w-64 lg:w-72 border-r bg-muted/10 shrink-0">
+              <ScrollArea className="h-full p-4">
+                <div className="space-y-1">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
+                          activeTab === tab.id
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="hidden lg:inline">{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </nav>
 
-          {/* Content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-8 w-full">{renderTabContent()}</div>
-            </div>
+            {/* Content Area */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <ScrollArea className="flex-1">
+                <div className="p-6 lg:p-8">{renderTabContent()}</div>
+              </ScrollArea>
 
-            {/* Footer */}
-            <div className="border-t bg-card/50 px-8 py-6 flex justify-end gap-3 shrink-0">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                size="lg"
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleSave} size="lg">
-                Save Changes
-              </Button>
+              {/* Footer */}
+              <div className="border-t bg-muted/20 px-6 py-4 flex justify-end gap-3 shrink-0">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSave}>Save Changes</Button>
+              </div>
             </div>
           </div>
         </div>

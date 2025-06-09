@@ -39,6 +39,24 @@ export function useConversations() {
     }
   };
 
+  const createEmptyConversation = async (title: string = "New Conversation"): Promise<string | null> => {
+    try {
+      const newConversation: IConversation = {
+        id: uuidv4(),
+        title,
+        messages: [], // Pusta tablica wiadomości
+        pinned: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await db.conversations.add(newConversation);
+      return newConversation.id;
+    } catch (error) {
+      console.error("Błąd przy tworzeniu pustej rozmowy:", error);
+      return null;
+    }
+  };
+
   const addMessage = async (
     conversationId: string,
     message: Omit<IMessage, "id" | "createdAt">
@@ -79,11 +97,38 @@ export function useConversations() {
     }
   };
 
+  // 6. Aktualizacja tytułu rozmowy (UPDATE) - bez zmiany updatedAt
+  const updateConversationTitle = async (id: string, newTitle: string) => {
+    try {
+      await db.conversations.where("id").equals(id).modify(convo => {
+        convo.title = newTitle;
+        // Nie zmieniamy updatedAt - chat zostaje w tym samym miejscu na liście
+      });
+    } catch (error) {
+      console.error("Błąd przy aktualizacji tytułu rozmowy:", error);
+    }
+  };
+
   return {
     conversations,
     createConversation,
+    createEmptyConversation,
     addMessage,
     deleteConversation,
     togglePinConversation,
+    updateConversationTitle,
+  };
+}
+
+// Hook do pobierania konkretnej rozmowy
+export function useConversation(conversationId: string | undefined) {
+  const conversation = useLiveQuery(
+    () => conversationId ? db.conversations.get(conversationId) : undefined,
+    [conversationId]
+  );
+
+  return {
+    conversation,
+    messages: conversation?.messages || [],
   };
 }

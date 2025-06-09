@@ -48,6 +48,10 @@ export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
         searchInput.select();
       }
     },
+    onRenameChat: () => {
+      // Dispatch custom event for conversation list to handle
+      document.dispatchEvent(new CustomEvent("conversation:rename"));
+    },
   });
 
   return (
