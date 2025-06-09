@@ -8,7 +8,6 @@ import {
   SidebarContent,
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "../ui/sidebar";
 
 // Context for backward compatibility
@@ -49,31 +48,22 @@ export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
     },
   });
 
-  console.log("🟢 ResponsiveChatLayout");
-
   return (
     <SidebarContext.Provider value={{ sidebarOpen }}>
-      <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <Sidebar>
-          <SidebarContent>
+      <SidebarProvider
+        className="bg-background! overflow-hidden"
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      >
+        <Sidebar className="border-none! bg-background! [&>div]:bg-background! w-80 shrink-0">
+          <SidebarContent className="bg-background! overflow-hidden">
             <ChatSidebar />
           </SidebarContent>
         </Sidebar>
 
-        <SidebarInset>
-          {/* Mobile Header */}
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:hidden">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2 flex-1 justify-center">
-              <h1 className="text-lg font-bold">BrokeBot</h1>
-              <div className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full font-medium">
-                💸 Free
-              </div>
-            </div>
-          </header>
-
+        <SidebarInset className="min-w-0 flex-1">
           {/* Main Content */}
-          <main className="flex-1 flex flex-col">{children}</main>
+          <main className="flex-1 flex flex-col min-w-0">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </SidebarContext.Provider>

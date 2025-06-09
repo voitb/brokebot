@@ -27,7 +27,7 @@ const groupConversationsByTime = (
 
   if (pinned.length > 0) {
     groups.push({
-      label: "Pinned",
+      label: "Favourites",
       conversations: pinned.map((c) => ({
         id: parseInt(c.id.slice(-8), 16) || 1,
         title: c.title,

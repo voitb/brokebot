@@ -177,7 +177,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <div>
               <Label className="text-base font-medium">Theme</Label>
               <p className="text-sm text-muted-foreground">
-                Choose how BrokeBot looks and feels
+                Choose how Local-GPT looks and feels
               </p>
               <div className="mt-4 grid grid-cols-3 gap-4">
                 {(["light", "dark", "system"] as const).map((themeOption) => (
@@ -438,7 +438,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 <div>
                   <Label>Analytics</Label>
                   <p className="text-sm text-muted-foreground">
-                    Help improve BrokeBot with anonymous usage data
+                    Help improve Local-GPT with anonymous usage data
                   </p>
                 </div>
                 <Switch />
@@ -491,7 +491,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     <div>
                       <Label>Reset all settings</Label>
                       <p className="text-sm text-muted-foreground">
-                        Reset BrokeBot to default settings
+                        Reset Local-GPT to default settings
                       </p>
                       <Button variant="destructive" size="sm" className="mt-2">
                         Reset settings
@@ -598,7 +598,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           {/* Main Content */}
           <div className="flex flex-1 overflow-hidden">
             {/* Sidebar */}
-            <nav className="w-64 lg:w-72 border-r bg-muted/10 shrink-0">
+            <nav className="w-64 lg:w-72 bg-muted/10 shrink-0">
               <ScrollArea className="h-full p-4">
                 <div className="space-y-1">
                   {tabs.map((tab) => {

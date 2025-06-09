@@ -1,5 +1,5 @@
 // src/lib/db.ts
-import Dexie, { type Table } from "dexie";
+import Dexie, { type EntityTable } from "dexie";
 // Import will be used in hooks
 
 // Definicja interfejsu dla pojedynczej wiadomości
@@ -20,16 +20,25 @@ export interface IConversation {
   updatedAt: Date;
 }
 
-export class BrokeBotDB extends Dexie {
-  conversations!: Table<IConversation>;
+export interface IDocument {
+  id?: number;
+  filename: string;
+  content: string;
+  createdAt: Date;
+  fileType: "txt" | "md" | "pdf";
+}
+
+export class LocalGptDB extends Dexie {
+  conversations!: EntityTable<IConversation, "id">;
+  documents!: EntityTable<IDocument, "id">;
 
   constructor() {
-    super("BrokeBotDB");
+    super("LocalGptDB");
     this.version(1).stores({
-      // Indeksujemy 'id' jako klucz główny, a 'updatedAt' i 'pinned' do sortowania
-      conversations: "&id, updatedAt, pinned",
+      conversations: "id, title, pinned, createdAt, updatedAt",
+      documents: "++id, filename, fileType, createdAt",
     });
   }
 }
 
-export const db = new BrokeBotDB();
+export const db = new LocalGptDB();

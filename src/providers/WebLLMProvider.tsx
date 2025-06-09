@@ -141,10 +141,9 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     [loadModel]
   );
 
-  // Initialize with selected model on mount
   useEffect(() => {
     loadModel(selectedModel.id);
-  }, []); // Only run once on mount
+  }, []);
 
   const contextValue: EngineState = {
     ...engineState,
