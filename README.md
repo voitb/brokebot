@@ -26,7 +26,33 @@ Jeśli nie ustawisz klucza, aplikacja wygeneruje i zapisze go lokalnie w przegl�
 - `Alt + Delete` - Usuń chat
 - `?` - Pokaż wszystkie skróty
 
+## 🗂️ Architektura Routingu
+
+Aplikacja używa **pathname parsing** zamiast standardowych React Router params:
+
+```typescript
+// ❌ Stare podejście z useParams
+const { conversationId } = useParams<{ conversationId: string }>();
+
+// ✅ Nowe podejście z useConversationId
+const conversationId = useConversationId();
+```
+
+**Zalety:**
+
+- 🛣️ Większa kontrola nad URL parsing
+- 🔍 Łatwiejsze debugowanie routing problems
+- 🎯 Spójne zachowanie na wszystkich route'ach
+- 🛡️ Brak dependency na React Router params definition
+
 ## 🛠️ Technologie
+
+- **Frontend**: Vite + React 18 + TypeScript
+- **UI Library**: Shadcn/ui + Tailwind CSS + Radix UI
+- **Routing**: react-router-dom (z custom pathname parsing)
+- **AI**: @mlc-ai/web-llm (lokalne modele)
+- **Database**: Dexie.js (IndexedDB wrapper)
+- **Encryption**: Web Crypto API (AES-GCM 256-bit)
 
 Currently, two official plugins are available:
 
