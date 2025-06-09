@@ -28,7 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "../../providers/ThemeProvider";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -81,8 +81,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     switch (activeTab) {
       case "profile":
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-8 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
                 <Label htmlFor="fullName" className="text-sm font-medium">
                   Full name
@@ -172,13 +172,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "appearance":
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             <div>
               <Label className="text-base font-medium">Theme</Label>
               <p className="text-sm text-muted-foreground">
                 Choose how BrokeBot looks and feels
               </p>
-              <div className="mt-6 grid grid-cols-3 gap-4">
+              <div className="mt-6 grid grid-cols-3 gap-6">
                 {(["light", "dark", "system"] as const).map((themeOption) => (
                   <Card
                     key={themeOption}
@@ -189,7 +189,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     }`}
                     onClick={() => setTheme(themeOption)}
                   >
-                    <CardContent className="p-4 text-center">
+                    <CardContent className="p-6 text-center">
                       <div className="mb-2 h-8 w-full rounded border bg-gradient-to-br from-background to-muted"></div>
                       <p className="text-sm font-medium capitalize">
                         {themeOption}
@@ -204,7 +204,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
             <div>
               <Label className="text-base font-medium">Display settings</Label>
-              <div className="mt-6 space-y-6">
+              <div className="mt-6 space-y-8">
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Compact mode</Label>
@@ -230,7 +230,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "models":
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             <div>
               <Label className="text-base font-medium">Local AI Models</Label>
               <p className="text-sm text-muted-foreground">
@@ -302,7 +302,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "integrations":
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             <div>
               <Label className="text-base font-medium">API Integrations</Label>
               <p className="text-sm text-muted-foreground">
@@ -414,7 +414,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "privacy":
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             <div>
               <Label className="text-base font-medium">Privacy & Data</Label>
               <p className="text-sm text-muted-foreground">
@@ -505,7 +505,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
       case "billing":
         return (
-          <div className="space-y-8">
+          <div className="space-y-8 w-full">
             <div>
               <Label className="text-base font-medium">Current Plan</Label>
               <p className="text-sm text-muted-foreground">
@@ -615,9 +615,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </nav>
 
           {/* Content */}
-          <div className="flex-1 flex flex-col overflow-hidden max-w-4xl">
-            <div className="flex-1 overflow-y-auto max-w-4xl">
-              <div className="p-8 max-w-4xl">{renderTabContent()}</div>
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-8 w-full">{renderTabContent()}</div>
             </div>
 
             {/* Footer */}

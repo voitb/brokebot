@@ -1,5 +1,5 @@
 import { Send, Rocket, Search, Paperclip } from "lucide-react";
-import type { ModelType, QualityLevel } from "../../types";
+import type { QualityLevel } from "../../types";
 import { ModelSelector } from "./ModelSelector";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -20,17 +20,13 @@ import {
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isLoading?: boolean;
-  selectedModel?: ModelType;
   quality?: QualityLevel;
-  onModelChange?: (model: ModelType) => void;
 }
 
 export function ChatInput({
   onSendMessage,
   isLoading = false,
-  selectedModel = "local",
   quality = "high",
-  onModelChange = () => {},
 }: ChatInputProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,11 +90,7 @@ export function ChatInput({
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-1">
             {/* Model Selector */}
-            <ModelSelector
-              selectedModel={selectedModel}
-              onModelChange={onModelChange}
-              disabled={isLoading}
-            />
+            <ModelSelector disabled={isLoading} />
 
             {/* Quality Selector */}
             <Tooltip>
@@ -153,7 +145,7 @@ export function ChatInput({
           {/* Status Badge - smaller */}
           <Badge variant="secondary" className="text-xs h-5 px-2">
             <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse mr-1" />
-            {selectedModel === "local" ? "Local" : "Cloud"}
+            Local
           </Badge>
         </div>
       </div>
