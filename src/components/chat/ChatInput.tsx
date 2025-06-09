@@ -4,7 +4,7 @@ import { Send, Rocket, Search, Paperclip } from "lucide-react";
 import type { QualityLevel } from "../../types";
 import { ModelSelector } from "./ModelSelector";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { AutosizeTextarea } from "../ui/auto-size-textarea";
 import { Badge } from "../ui/badge";
 import {
   Tooltip,
@@ -17,6 +17,7 @@ import {
   useConversation,
 } from "../../hooks/useConversations";
 import { useWebLLM } from "../../providers/WebLLMProvider";
+import { ScrollArea } from "../ui";
 
 // Importy shadcn - tymczasowo komentowane do czasu instalacji
 // import { Button } from '../ui/button';
@@ -109,7 +110,7 @@ export function ChatInput({ quality = "high" }: ChatInputProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       const form = e.currentTarget.form;
@@ -127,16 +128,18 @@ export function ChatInput({ quality = "high" }: ChatInputProps) {
 
   return (
     <TooltipProvider>
-      <div className="p-3 border-t border-border bg-background">
+      <div className="p-3  border-border bg-background w-[60%] mx-auto">
         <form onSubmit={handleSubmit}>
           {/* Input Area - ultra compact */}
-          <div className="flex items-center gap-2">
-            <Input
+          <div className="flex items-end gap-2">
+            <AutosizeTextarea
               name="message"
-              className="flex-1 h-9 text-sm"
+              className="flex-1 text-sm resize-none"
               placeholder="Type your message..."
               disabled={isDisabled}
               onKeyDown={handleKeyDown}
+              maxHeight={300}
+              minHeight={40}
             />
 
             {/* Send Button */}

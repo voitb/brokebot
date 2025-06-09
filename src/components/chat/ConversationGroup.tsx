@@ -68,6 +68,7 @@ export const ConversationGroup: React.FC<ConversationGroupProps> = ({
           }}
           onRename={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             onRename(conversation.id);
           }}
           onDelete={(e) => {

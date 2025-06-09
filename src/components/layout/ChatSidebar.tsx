@@ -8,6 +8,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { useState } from "react";
+import { SidebarTrigger } from "../ui/sidebar";
 
 // Importy shadcn - tymczasowo komentowane do czasu instalacji
 // import { Button } from '../ui/button';
@@ -35,9 +36,10 @@ export function ChatSidebar() {
 
   return (
     <aside className="w-full h-full bg-card flex flex-col border-r border-border">
-      {/* Header - clean without badge collision */}
-      <div className="p-4 pb-3">
+      {/* Header with close button */}
+      <div className="p-4 pb-3 flex items-center justify-between">
         <h1 className="text-xl font-bold">BrokeBot</h1>
+        <SidebarTrigger className="hidden md:flex" />
       </div>
 
       {/* New Chat Button */}

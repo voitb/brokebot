@@ -52,10 +52,11 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
   return (
     <div
-      className={`group relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${getItemStyles()}`}
+      className={`group/item relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${getItemStyles()}`}
       onClick={onConversationClick}
+      onDoubleClick={onRename}
     >
-      <div className="flex items-center justify-between min-w-0">
+      <div className="flex items-center justify-between min-w-0 ">
         {isEditing ? (
           <EditableConversationTitle
             initialTitle={conversation.title}
@@ -72,7 +73,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
               variant="ghost"
               size="sm"
               className={`absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 transition-opacity bg-muted/90 hover:bg-muted/100 backdrop-blur-sm shrink-0 z-10 ${
-                isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                isMenuOpen
+                  ? "opacity-100"
+                  : "opacity-0 group-hover/item:opacity-100"
               }`}
               onClick={(e) => e.stopPropagation()}
             >
