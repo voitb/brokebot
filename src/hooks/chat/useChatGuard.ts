@@ -1,27 +1,37 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useConversation } from "../../hooks/useConversations";
+import { useConversation } from "../useConversations";
 
-interface ChatGuardProps {
-  children: React.ReactNode;
+interface UseChatGuardOptions {
+  conversationId?: string;
+  timeoutMs?: number;
 }
 
-export function ChatGuard({ children }: ChatGuardProps) {
-  const { conversationId } = useParams<{ conversationId: string }>();
+interface UseChatGuardReturn {
+  isChecking: boolean;
+  conversationExists: boolean;
+}
+
+export function useChatGuard({ 
+  conversationId, 
+  timeoutMs = 500 
+}: UseChatGuardOptions): UseChatGuardReturn {
   const navigate = useNavigate();
   const { conversation } = useConversation(conversationId);
   const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
-    // Skip if no conversationId (for general /chat route)
+    // Skip validation if no conversationId (for general /chat route)
     if (!conversationId) {
       setHasChecked(true);
       return;
     }
 
+    // Create timeout to check if conversation exists
     const timer = setTimeout(() => {
       if (conversation === undefined && !hasChecked) {
+        // After timeout, if still undefined, conversation doesn't exist
         toast.error("Conversation not found", {
           description: "The requested conversation does not exist.",
           duration: 4000,
@@ -29,7 +39,7 @@ export function ChatGuard({ children }: ChatGuardProps) {
         navigate("/chat", { replace: true });
       }
       setHasChecked(true);
-    }, 500);
+    }, timeoutMs);
 
     // If conversation is found immediately, mark as checked
     if (conversation !== undefined) {
@@ -38,12 +48,10 @@ export function ChatGuard({ children }: ChatGuardProps) {
     }
 
     return () => clearTimeout(timer);
-  }, [conversationId, conversation, navigate, hasChecked]);
+  }, [conversationId, conversation, navigate, hasChecked, timeoutMs]);
 
-  // Show nothing while checking
-  if (conversationId && !hasChecked) {
-    return null;
-  }
-
-  return <>{children}</>;
-}
+  return {
+    isChecking: conversationId ? !hasChecked : false,
+    conversationExists: conversationId ? conversation !== undefined : true,
+  };
+} 

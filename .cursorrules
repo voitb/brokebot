@@ -1,12 +1,68 @@
-# PROJEKT EIDOLON - Asystent AI o Rozszerzonej Pamięci
+# PROJEKT LOCAL-GPT - Lokalny Asystent AI
 
 # Klon ChatGPT działający w przeglądarce z WebLLM i IndexedDB
 
 ## OPIS PROJEKTU
 
-Eidolon to aplikacja webowa będąca klonem ChatGPT, która działa w 100% lokalnie w przeglądarce.
+Local-GPT to aplikacja webowa będąca klonem ChatGPT, która działa w 100% lokalnie w przeglądarce.
 Wykorzystuje WebLLM dla modelu AI i IndexedDB dla trwałej pamięci, zapewniając prywatność,
 darmowe użytkowanie i pracę offline.
+
+## SENIOR-LEVEL DEVELOPMENT PRACTICES
+
+### Architektura Komponentów
+
+- **Single Responsibility Principle** - każdy komponent ma jedną odpowiedzialność
+- **Composition over Inheritance** - komponenty składane z mniejszych części
+- **Container/Presentational Pattern** - separacja logiki od UI
+- **Custom Hooks** - wydzielenie logiki biznesowej do hooków
+- **Proper Error Boundaries** - obsługa błędów na odpowiednim poziomie
+- **Performance Optimization** - React.memo, useMemo, useCallback gdzie potrzeba
+
+### Struktura Folderów
+
+```
+src/components/
+├── feature-name/
+│   ├── components/
+│   │   ├── SubComponent.tsx
+│   │   └── index.ts
+│   ├── hooks/
+│   │   ├── useFeatureLogic.ts
+│   │   └── index.ts
+│   ├── types/
+│   │   └── index.ts
+│   ├── utils/
+│   │   └── index.ts
+│   ├── FeatureComponent.tsx
+│   └── index.ts
+```
+
+### Konwencje Komponentów
+
+- **Max 150 linii na komponent** - większe dzielić na mniejsze
+- **Props interface nad typem inline** - czytelność i reużywalność
+- **Default props przez destructuring** - `{ prop = defaultValue }`
+- **Event handlers prefixed** - `handleSomething`, `onSomething`
+- **Boolean props prefixed** - `isLoading`, `hasError`, `canEdit`
+- **Render functions suffixed** - `renderHeader`, `renderContent`
+
+### Custom Hooks Guidelines
+
+- **Prefix z `use`** - konsystentne nazewnictwo
+- **Single concern** - jeden hook = jedna odpowiedzialność
+- **Return object dla multiple values** - `{ data, isLoading, error }`
+- **Memoization** - używaj useMemo/useCallback dla performance
+- **Dependencies arrays** - zawsze kompletne i poprawne
+
+### TypeScript Best Practices
+
+- **Strict mode enabled** - najwyższy poziom typowania
+- **Interface over type** - dla object shapes
+- **Generic constraints** - `<T extends SomeType>`
+- **Utility types** - `Pick`, `Omit`, `Partial`, `Required`
+- **Proper return types** - nie rely na inferencji dla public APIs
+- **No `any`** - zawsze konkretne typy
 
 ## KONWENCJE KODOWANIA
 
@@ -16,64 +72,115 @@ darmowe użytkowanie i pracę offline.
 - Interfejs użytkownika może być po polsku, ale kod tylko po angielsku
 - Konsystentna nomenclatura w całym projekcie
 
-### TypeScript
+### React Patterns
 
-- Ścisłe typowanie (strict mode)
-- Interfejsy dla wszystkich struktur danych
-- Enums dla stałych wartości
-- Generic types gdzie możliwe
+- **Functional components only** - no class components
+- **Hooks first** - custom hooks dla logiki biznesowej
+- **Error boundaries** - na poziomie feature i app
+- **Suspense boundaries** - dla lazy loading
+- **Portal usage** - dla modali i tooltipów
+- **Forward refs** - dla reusable input components
 
-### React
+### State Management
 
-- Functional components + hooks
-- Custom hooks dla logiki biznesowej
-- Proper error boundaries
-- Lazy loading dla dużych komponentów
+- **Local state first** - useState for component state
+- **Custom hooks** - dla shared state logic
+- **Context sparingly** - tylko dla truly global state
+- **Reducer pattern** - dla complex state logic
+- **Optimistic updates** - dla lepszego UX
+
+### Performance
+
+- **React.memo** - dla expensive renders
+- **useMemo** - dla expensive calculations
+- **useCallback** - dla stable function references
+- **Lazy loading** - dla route-based code splitting
+- **Virtual scrolling** - dla długich list
+- **Image optimization** - proper loading strategies
 
 ### Styling
 
-- Tailwind CSS classes
-- Shadcn/ui components jako baza
-- CSS modules dla custom stylów
-- Mobile-first approach
+- **Tailwind CSS classes** - utility-first approach
+- **Shadcn/ui components** - consistent design system
+- **CSS-in-JS sparingly** - tylko gdy Tailwind nie wystarcza
+- **Mobile-first approach** - responsive design pattern
+- **Design tokens** - consistent spacing, colors, typography
 
-### Struktura Plików
+### Testing Strategy
 
-- Jeden komponent na plik
-- Index.ts dla łatwego importowania
-- Separacja logiki biznesowej od UI
-- Współdzielone typy w types/
+- **Unit tests** - dla utils i pure functions
+- **Integration tests** - dla hook interactions
+- **Component tests** - React Testing Library
+- **E2E tests** - dla critical user flows
+- **Visual regression** - dla UI consistency
+
+## STRUKTURA PLIKÓW
+
+### Component Organization
+
+```
+src/components/chat/
+├── interface/
+│   ├── components/
+│   │   ├── ChatGuard.tsx
+│   │   └── index.ts
+│   ├── hooks/
+│   │   ├── useChatGuard.ts
+│   │   └── index.ts
+│   ├── ChatInterface.tsx
+│   └── index.ts
+├── header/
+│   ├── components/
+│   │   ├── BreadcrumbNavigation.tsx
+│   │   ├── ActionButtons.tsx
+│   │   └── index.ts
+│   ├── hooks/
+│   │   ├── useHeaderActions.ts
+│   │   └── index.ts
+│   ├── ChatHeader.tsx
+│   └── index.ts
+```
+
+### Hook Organization
+
+```
+src/hooks/
+├── api/
+│   ├── useConversations.ts
+│   ├── useMessages.ts
+│   └── index.ts
+├── ui/
+│   ├── useKeyboardShortcuts.ts
+│   ├── useToast.ts
+│   └── index.ts
+├── business/
+│   ├── useChatLogic.ts
+│   ├── useConversationManagement.ts
+│   └── index.ts
+```
 
 ## STOS TECHNOLOGICZNY
 
 - **Frontend**: Vite + React 18 + TypeScript
-- **UI Library**: Shadcn/ui + Tailwind CSS
+- **UI Library**: Shadcn/ui + Tailwind CSS + Radix UI
 - **Routing**: react-router-dom
+- **State**: React hooks + Context (sparingly)
 - **Lokalne AI**: @mlc-ai/web-llm
 - **Baza Danych**: Dexie.js (wrapper na IndexedDB)
-- **Backend**: Firebase (auth, sync, backup)
-- **Obsługa PDF**: pdf.js (opcjonalnie)
-- **Podświetlanie Składni**: react-syntax-highlighter (opcjonalnie)
+- **Testing**: Vitest + React Testing Library + Playwright
+- **Linting**: ESLint + Prettier + TypeScript strict
 
 ## ARCHITEKTURA BAZY DANYCH (IndexedDB przez Dexie.js)
 
 ### Tabela: conversations
 
-- id: number (primary key, auto-increment)
+- id: string (UUID, primary key)
 - title: string (tytuł rozmowy)
+- messages: IMessage[] (embedded documents)
+- pinned: boolean
 - createdAt: Date
 - updatedAt: Date
-- isPinned?: boolean
 - userId?: string (dla zalogowanych użytkowników)
-
-### Tabela: messages
-
-- id: number (primary key, auto-increment)
-- conversationId: number (foreign key, indexed)
-- role: 'user' | 'assistant'
-- content: string
-- createdAt: Date
-- parentId?: number (dla Chat Branching)
 
 ### Tabela: documents
 
@@ -83,192 +190,71 @@ darmowe użytkowanie i pracę offline.
 - createdAt: Date
 - fileType: 'txt' | 'md' | 'pdf'
 
-### Tabela: users (przyszłość)
+## QUALITY GATES
 
-- id: string (firebase uid)
-- email: string
-- displayName: string
-- createdAt: Date
-- plan: 'free' | 'pro'
+### Code Review Checklist
 
-## ROUTING I NAWIGACJA
+- [ ] Single responsibility per component/hook
+- [ ] Proper TypeScript typing (no `any`)
+- [ ] Performance optimizations where needed
+- [ ] Accessibility compliance (WCAG 2.1)
+- [ ] Mobile responsiveness
+- [ ] Error handling implemented
+- [ ] Loading states handled
+- [ ] Tests written and passing
+- [ ] No console errors or warnings
+- [ ] Consistent naming conventions
 
-### URL Structure
+### Performance Targets
 
-- `/` - główna strona z welcome screen
-- `/chat/:conversationId` - konkretna rozmowa (bez hasha!)
-- `/chat/:userId/:conversationId` - rozmowa zalogowanego użytkownika (przyszłość)
-- `/settings` - ustawienia
-- `/auth` - logowanie/rejestracja
+- [ ] Bundle size < 2MB
+- [ ] First Contentful Paint < 1.5s
+- [ ] Largest Contentful Paint < 2.5s
+- [ ] Cumulative Layout Shift < 0.1
+- [ ] First Input Delay < 100ms
 
-### Nawigacja
+### Accessibility Targets
 
-- Używaj react-router-dom navigate(), NIE window.location.hash
-- Programatyczna nawigacja, nie linki z href
-- Animacje przejść między chatami
-
-## CHAT MANAGEMENT
-
-### Operacje na Chatach
-
-- **Filter/Search** - filtrowanie po tytule i zawartości
-- **Pin/Unpin** - przypinanie ważnych rozmów
-- **Rename** - zmiana tytułu rozmowy
-- **Delete** - usuwanie z konfirmacją
-- **Archive** - archiwizacja starych rozmów
-- **Export** - eksport do JSON/PDF
-
-### Chat Operations Menu
-
-- 3-dot menu on hover dla każdego chatu
-- Opcje: Pin, Rename, Delete, Archive, Export
-- Keyboard shortcuts dla power users
-- Bulk operations dla wielu chatów
-
-## PLAN ROZWOJU - FAZA PO FAZIE
-
-### FAZA 1: Podstawowa Konfiguracja Projektu ✅
-
-**Cel**: Przygotowanie środowiska i podstawowej struktury
-
-### FAZA 2: Lokalna Baza Danych ✅
-
-**Cel**: Implementacja IndexedDB z Dexie.js
-
-### FAZA 3: Podstawowy Interfejs Użytkownika ✅
-
-**Cel**: Stworzenie responsywnego UI bez AI
-
-### FAZA 4: Integracja z WebLLM ✅
-
-**Cel**: Połączenie z lokalnym modelem AI
-
-### FAZA 5: MVP - Podstawowa Funkcjonalność Czatu ✅
-
-**Cel**: Działający chat z trwałą pamięcią
-
-### FAZA 6: Chat Management & UX ⏳
-
-**Cel**: Zaawansowane zarządzanie chatami
-
-**Kroki**:
-
-1. Animacje sidebar (slide in/out)
-2. Chat filtering i search
-3. 3-dot menu z opcjami
-4. Proper routing bez hashów
-5. Keyboard shortcuts
-6. Bulk operations
-
-### FAZA 7: Obsługa Załączników
-
-**Cel**: Upload i przetwarzanie plików .txt i .md
-
-### FAZA 8: Firebase Integration
-
-**Cel**: Authentication i cloud backup
-
-**Kroki**:
-
-1. Firebase setup (auth, firestore)
-2. User authentication
-3. Cloud backup rozmów
-4. Multi-device sync
-5. Sharing conversations
-
-### FAZA 9: WebLLM Integration
-
-**Cel**: Prawdziwe lokalne AI
-
-### FAZA 10: Stretch Goals
-
-**Cel**: Zaawansowane funkcje
-
-## KLUCZOWE KOMPONENTY DO IMPLEMENTACJI
-
-### 1. ChatInterface
-
-```typescript
-interface ChatInterfaceProps {
-  conversationId?: string;
-  userId?: string;
-}
-```
-
-### 2. ConversationManager
-
-```typescript
-interface ConversationOperations {
-  filterConversations: (query: string) => Conversation[];
-  pinConversation: (id: number) => Promise<void>;
-  renameConversation: (id: number, title: string) => Promise<void>;
-  deleteConversation: (id: number) => Promise<void>;
-  archiveConversation: (id: number) => Promise<void>;
-}
-```
-
-### 3. ChatContextMenu
-
-```typescript
-interface ChatContextMenuProps {
-  conversation: Conversation;
-  onPin: () => void;
-  onRename: () => void;
-  onDelete: () => void;
-  onArchive: () => void;
-}
-```
+- [ ] Keyboard navigation support
+- [ ] Screen reader compatibility
+- [ ] Color contrast compliance
+- [ ] Focus management
+- [ ] ARIA labels where needed
 
 ## METRYKI SUKCESU MVP
 
-- [ ] Użytkownik może napisać wiadomość i otrzymać odpowiedź
-- [ ] Historia rozmów jest zachowana po odświeżeniu
-- [ ] Można tworzyć nowe rozmowy
+- [x] Użytkownik może napisać wiadomość i otrzymać odpowiedź
+- [x] Historia rozmów jest zachowana po odświeżeniu
+- [x] Można tworzyć nowe rozmowy
 - [ ] Można załączyć plik .txt/.md i AI odpowiada na jego podstawie
-- [ ] UI jest responsywne i profesjonalne
-- [ ] Aplikacja działa offline
-- [ ] Smooth animations i transitions
-- [ ] Chat filtering i search
-- [ ] Chat management (pin, rename, delete)
+- [x] UI jest responsywne i profesjonalne
+- [x] Aplikacja działa offline
+- [x] Smooth animations i transitions
+- [x] Chat filtering i search
+- [x] Chat management (pin, rename, delete)
 
-## TESTOWANIE
+## DEVELOPMENT WORKFLOW
 
-- Unit testy dla funkcji utilsowych
-- Integration testy dla bazy danych
-- E2E testy dla kluczowych przepływów
-- Performance testy dla WebLLM
+1. **Feature Planning** - wireframes + technical design
+2. **Component Breakdown** - identify reusable pieces
+3. **Hook Design** - plan state management strategy
+4. **TDD Approach** - write tests first for complex logic
+5. **Progressive Enhancement** - start with basic functionality
+6. **Performance Optimization** - measure and optimize
+7. **Accessibility Testing** - keyboard and screen reader testing
+8. **Code Review** - peer review against quality gates
 
-## DEPLOYMENT
+## UWAGI DLA SENIOR DEVELOPERA
 
-- Build statyczny przez Vite
-- Hosting na GitHub Pages / Netlify / Vercel
-- Service Worker dla offline functionality
-- PWA manifest dla instalacji
+1. **Composition Pattern** - prefer composition over large monolithic components
+2. **Performance First** - measure before optimizing, but think about it early
+3. **Accessibility by Design** - not an afterthought
+4. **Error Boundaries** - fail gracefully, inform users appropriately
+5. **Type Safety** - leverage TypeScript's power fully
+6. **Testing Strategy** - test behavior, not implementation
+7. **Code Reusability** - abstract common patterns into hooks/utils
+8. **Documentation** - code should be self-documenting with proper naming
+9. **Progressive Enhancement** - work offline, sync when online
+10. **User Experience** - every interaction should feel smooth and predictable
 
-## UWAGI DLA DEVELOPERA
-
-1. Rozpocznij od FAZY 1-2, upewnij się że baza danych działa
-2. UI rób równolegle z logiką - nie czekaj na kompletną implementację
-3. WebLLM wymaga dużo RAM - testuj na różnych urządzeniach
-4. IndexedDB ma limity - dodaj sprawdzanie rozmiaru
-5. Pliki można cachować w IndexedDB jako blob
-6. Używaj lazy loading dla dużych komponentów
-7. Optymalizuj bundle size - WebLLM jest duży
-8. Wszystkie stringi w kodzie PO ANGIELSKU!
-9. Smooth animations wszędzie gdzie można
-10. Keyboard shortcuts dla power users
-
-## KOLEJNOŚĆ IMPLEMENTACJI
-
-1. ✅ Setup projektu + Shadcn/ui
-2. ✅ Baza danych (Dexie.js)
-3. ✅ Podstawowy UI (bez AI)
-4. ✅ WebLLM integration
-5. ✅ Trwała pamięć rozmów
-6. ⏳ Chat management + animations
-7. 📋 Obsługa załączników (.txt/.md)
-8. 📋 Firebase integration
-9. 📋 WebLLM integration
-10. 📋 Stretch goals (PDF, branching, etc.)
-
-To jest Twoja mapa drogowa. Aktualnie pracujemy nad FAZĄ 6!
+Pamiętaj: "Make it work, make it right, make it fast" - w tej kolejności!
