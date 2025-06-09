@@ -4,7 +4,7 @@ import { Star, Plus, Keyboard, Home, Sun, Moon, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { useSidebarContext } from "../layout/ResponsiveChatLayout";
 import { useConversations } from "../../hooks/useConversations";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "../../providers/ThemeProvider";
 import {
   Tooltip,
   TooltipContent,
