@@ -54,6 +54,8 @@ export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
     },
   });
 
+  console.log("🟢 ResponsiveChatLayout");
+
   return (
     <SidebarContext.Provider value={{ sidebarOpen: desktopSidebarOpen }}>
       <div className="bg-background text-foreground flex h-screen overflow-hidden">

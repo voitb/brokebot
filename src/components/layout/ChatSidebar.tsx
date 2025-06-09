@@ -31,6 +31,8 @@ export function ChatSidebar() {
     }
   };
 
+  console.log("🟢 searchQuery", searchQuery);
+
   return (
     <aside className="w-full h-full bg-card flex flex-col border-r border-border">
       {/* Header - clean without badge collision */}

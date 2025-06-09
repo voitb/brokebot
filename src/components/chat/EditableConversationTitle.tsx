@@ -1,4 +1,4 @@
-import React, { useState, useRef, type KeyboardEvent } from "react";
+import React, { useState, useEffect, useRef, type KeyboardEvent } from "react";
 import { Input } from "@/components/ui/input";
 
 interface EditableConversationTitleProps {
@@ -14,23 +14,16 @@ export const EditableConversationTitle: React.FC<
   const [title, setTitle] = useState(initialTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto focus when component mounts
-  React.useEffect(() => {
-    const input = inputRef.current;
-    if (input) {
-      const timeoutId = setTimeout(() => {
-        if (input && document.activeElement !== input) {
-          input.focus();
-          input.select();
-        }
-      }, 0);
-
-      return () => clearTimeout(timeoutId);
+  // // Auto focus when component mounts
+  useEffect(() => {
+    if (inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
     }
   }, []);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    e.stopPropagation();
     if (e.key === "Enter" && e.altKey) {
       e.preventDefault();
       handleSave();
@@ -38,7 +31,7 @@ export const EditableConversationTitle: React.FC<
       e.preventDefault();
       onCancel();
     } else if (e.key === "Enter") {
-      e.preventDefault();
+      e.preventDefault(); // Prevent default Enter behavior
     }
   };
 
@@ -51,28 +44,27 @@ export const EditableConversationTitle: React.FC<
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    setTitle(e.target.value);
+  const handleBlur = () => {
+    // Auto-save on blur if title changed
+    const trimmedTitle = title.trim();
+    if (trimmedTitle && trimmedTitle !== initialTitle) {
+      onSave(trimmedTitle);
+    } else {
+      onCancel();
+    }
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-  };
-
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-  };
+  console.log("title", title);
 
   return (
     <Input
       ref={inputRef}
       value={title}
-      onChange={handleChange}
+      onChange={(e) => setTitle(e.target.value)}
       onKeyDown={handleKeyDown}
-      onClick={handleClick}
-      onFocus={handleFocus}
-      className={`flex-1 h-auto p-0 border-0 shadow-none bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none ${className}`}
+      onBlur={handleBlur}
+      onClick={(e) => e.stopPropagation()}
+      className={`flex-1 h-auto p-0 border-0 shadow-none bg-transparent! text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none ${className}`}
       placeholder="Alt+Enter to save, Esc to cancel"
     />
   );
