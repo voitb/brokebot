@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { User, Palette, Shield, CreditCard, Plug, Bot } from "lucide-react";
+import { User, Shield, CreditCard, Plug, Bot } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,7 +29,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "../../ui/sidebar";
-import { useSettingsData } from "./hooks";
+
 import {
   ProfileTab,
   ModelsTab,
@@ -64,13 +64,6 @@ const navigationItems = [
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = React.useState<SettingsTab>("profile");
-  const { userData, setUserData, apiKeys, setApiKeys, handleSave } =
-    useSettingsData();
-
-  const handleSaveAndClose = () => {
-    handleSave();
-    onOpenChange(false);
-  };
 
   const getTabDisplayName = (tabId: SettingsTab) => {
     const tab = navigationItems.find((item) => item.id === tabId);
@@ -80,15 +73,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const renderTabContent = () => {
     switch (activeTab) {
       case "profile":
-        return (
-          <ProfileTab userData={userData} onUserDataChange={setUserData} />
-        );
+        return <ProfileTab />;
       case "models":
         return <ModelsTab />;
       case "integrations":
-        return (
-          <IntegrationsTab apiKeys={apiKeys} onApiKeysChange={setApiKeys} />
-        );
+        return <IntegrationsTab />;
       case "privacy":
         return <PrivacyTab />;
       case "billing":
@@ -148,7 +137,10 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             >
               Cancel
             </Button>
-            <Button onClick={handleSaveAndClose} className="w-full sm:w-auto">
+            <Button
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
               Save Changes
             </Button>
           </div>
@@ -209,7 +201,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveAndClose}>Save Changes</Button>
+              <Button onClick={() => onOpenChange(false)}>Save Changes</Button>
             </div>
           </main>
         </SidebarProvider>

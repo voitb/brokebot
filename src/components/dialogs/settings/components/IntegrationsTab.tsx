@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { Label } from "../../../ui/label";
 import { Input } from "../../../ui/input";
-import { Badge } from "../../../ui/badge";
 import {
   Card,
   CardContent,
@@ -8,114 +8,124 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../ui/card";
+import { Button } from "../../../ui/button";
+import { Eye, EyeOff } from "lucide-react";
+import { useUserConfig } from "../../../../hooks/useUserConfig";
 
-interface ApiKeys {
+interface ApiKeysState {
   openai: string;
   anthropic: string;
   google: string;
 }
 
-interface IntegrationsTabProps {
-  apiKeys: ApiKeys;
-  onApiKeysChange: (keys: ApiKeys) => void;
-}
+export function IntegrationsTab() {
+  const { config, updateConfig } = useUserConfig();
 
-export function IntegrationsTab({
-  apiKeys,
-  onApiKeysChange,
-}: IntegrationsTabProps) {
-  const handleKeyChange = (provider: keyof ApiKeys, value: string) => {
-    onApiKeysChange({ ...apiKeys, [provider]: value });
+  // Initialize with config values
+  const [apiKeys, setApiKeys] = useState<ApiKeysState>({
+    openai: config.openaiApiKey || "",
+    anthropic: config.anthropicApiKey || "",
+    google: config.googleApiKey || "",
+  });
+
+  const [showKeys, setShowKeys] = useState({
+    openai: false,
+    anthropic: false,
+    google: false,
+  });
+
+  const handleApiKeyChange = (provider: keyof ApiKeysState, value: string) => {
+    const newKeys = { ...apiKeys, [provider]: value };
+    setApiKeys(newKeys);
+
+    // Update config with new key
+    const updateField = `${provider}ApiKey` as keyof typeof config;
+    updateConfig({
+      [updateField]: value,
+    });
   };
+
+  const toggleShowKey = (provider: keyof typeof showKeys) => {
+    setShowKeys((prev) => ({ ...prev, [provider]: !prev[provider] }));
+  };
+
+  const integrations = [
+    {
+      id: "openai" as const,
+      name: "OpenAI",
+      description: "GPT-4, GPT-3.5, and other OpenAI models",
+      apiKey: apiKeys.openai,
+    },
+    {
+      id: "anthropic" as const,
+      name: "Anthropic",
+      description: "Claude models for advanced reasoning",
+      apiKey: apiKeys.anthropic,
+    },
+    {
+      id: "google" as const,
+      name: "Google AI",
+      description: "Gemini and other Google AI models",
+      apiKey: apiKeys.google,
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div>
         <Label className="text-base font-medium">API Integrations</Label>
         <p className="text-sm text-muted-foreground">
-          Connect external AI services to access more models
+          Connect external AI providers to access more models
         </p>
       </div>
 
       <div className="space-y-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">OpenAI API</CardTitle>
-              <Badge variant={apiKeys.openai ? "default" : "secondary"}>
-                {apiKeys.openai ? "Connected" : "Not connected"}
-              </Badge>
-            </div>
-            <CardDescription>
-              Access GPT-4, GPT-4 Turbo, and other OpenAI models
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="openai-key">API Key</Label>
-              <Input
-                id="openai-key"
-                type="password"
-                value={apiKeys.openai}
-                onChange={(e) => handleKeyChange("openai", e.target.value)}
-                placeholder="sk-..."
-              />
-              <p className="text-xs text-muted-foreground">
-                Get your API key from OpenAI Platform
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {integrations.map((integration) => (
+          <Card key={integration.id}>
+            <CardHeader>
+              <CardTitle className="text-sm">{integration.name}</CardTitle>
+              <CardDescription>{integration.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor={`${integration.id}-key`}>API Key</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id={`${integration.id}-key`}
+                    type={showKeys[integration.id] ? "text" : "password"}
+                    value={integration.apiKey}
+                    onChange={(e) =>
+                      handleApiKeyChange(integration.id, e.target.value)
+                    }
+                    placeholder="Enter your API key"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => toggleShowKey(integration.id)}
+                    className="shrink-0"
+                  >
+                    {showKeys[integration.id] ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Anthropic API</CardTitle>
-              <Badge variant={apiKeys.anthropic ? "default" : "secondary"}>
-                {apiKeys.anthropic ? "Connected" : "Not connected"}
-              </Badge>
-            </div>
-            <CardDescription>
-              Access Claude models from Anthropic
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="anthropic-key">API Key</Label>
-              <Input
-                id="anthropic-key"
-                type="password"
-                value={apiKeys.anthropic}
-                onChange={(e) => handleKeyChange("anthropic", e.target.value)}
-                placeholder="sk-ant-api..."
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">Google AI Studio</CardTitle>
-              <Badge variant={apiKeys.google ? "default" : "secondary"}>
-                {apiKeys.google ? "Connected" : "Not connected"}
-              </Badge>
-            </div>
-            <CardDescription>Access Gemini models from Google</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="google-key">API Key</Label>
-              <Input
-                id="google-key"
-                type="password"
-                value={apiKeys.google}
-                onChange={(e) => handleKeyChange("google", e.target.value)}
-                placeholder="AIza..."
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="text-xs text-muted-foreground">
+        <p>
+          API keys are stored locally in your browser and are only sent to the
+          respective AI providers. Your keys are never shared with us or third
+          parties.
+        </p>
       </div>
     </div>
   );

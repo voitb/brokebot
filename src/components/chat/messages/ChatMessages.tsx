@@ -6,6 +6,7 @@ import { MessageBubble, LoadingIndicator, EmptyState } from "./components";
 
 interface ChatMessagesProps {
   isLoading?: boolean;
+  isGenerating?: boolean;
 }
 
 /**
@@ -13,6 +14,7 @@ interface ChatMessagesProps {
  */
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isLoading = false,
+  isGenerating = false,
 }) => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { messages, conversation } = useConversation(conversationId);
@@ -22,7 +24,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-6 h-[calc(100vh-10.625rem)]">
           {/* Empty state when no messages */}
-          {messages.length === 0 && !isLoading && (
+          {messages.length === 0 && !isLoading && !isGenerating && (
             <EmptyState conversation={conversation} />
           )}
 
@@ -31,8 +33,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             <MessageBubble key={message.id} message={message} />
           ))}
 
-          {/* Loading indicator */}
-          {isLoading && <LoadingIndicator />}
+          {/* Loading indicator for AI generation */}
+          {isGenerating && <LoadingIndicator />}
         </div>
       </ScrollArea>
     </div>

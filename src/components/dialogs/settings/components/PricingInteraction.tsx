@@ -61,7 +61,7 @@ export function PricingInteraction({
 
       <div className="w-full relative flex flex-col items-center justify-center gap-3">
         <div
-          className="w-full flex justify-between cursor-pointer border p-4 rounded-lg hover:bg-muted/50 transition-colors"
+          className="w-full flex justify-between cursor-pointer border p-3 rounded-lg hover:bg-muted/50 transition-colors"
           onClick={() => handleChangePlan(0)}
         >
           <div className="flex flex-col items-start">

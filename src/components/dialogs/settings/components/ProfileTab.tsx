@@ -1,30 +1,13 @@
 import { Label } from "../../../ui/label";
 import { Input } from "../../../ui/input";
-import { Textarea } from "../../../ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../ui/select";
-import { Badge } from "../../../ui/badge";
+import { useUserConfig } from "../../../../hooks/useUserConfig";
+import { AutosizeTextarea } from "@/components/ui/auto-size-textarea";
 
-interface UserData {
-  fullName: string;
-  nickname: string;
-  workFunction: string;
-  preferences: string;
-}
+export function ProfileTab() {
+  const { config, updateConfig } = useUserConfig();
 
-interface ProfileTabProps {
-  userData: UserData;
-  onUserDataChange: (data: UserData) => void;
-}
-
-export function ProfileTab({ userData, onUserDataChange }: ProfileTabProps) {
-  const handleChange = (field: keyof UserData, value: string) => {
-    onUserDataChange({ ...userData, [field]: value });
+  const handleChange = (field: string, value: string) => {
+    updateConfig({ [field]: value });
   };
 
   return (
@@ -36,7 +19,7 @@ export function ProfileTab({ userData, onUserDataChange }: ProfileTabProps) {
           </Label>
           <Input
             id="fullName"
-            value={userData.fullName}
+            value={config.fullName}
             onChange={(e) => handleChange("fullName", e.target.value)}
             className="mt-1"
           />
@@ -47,12 +30,13 @@ export function ProfileTab({ userData, onUserDataChange }: ProfileTabProps) {
           </Label>
           <Input
             id="nickname"
-            value={userData.nickname}
+            value={config.nickname}
             onChange={(e) => handleChange("nickname", e.target.value)}
             className="mt-1"
           />
         </div>
       </div>
+
       <div>
         <Label htmlFor="preferences" className="text-sm font-medium">
           Personal AI preferences
@@ -60,12 +44,14 @@ export function ProfileTab({ userData, onUserDataChange }: ProfileTabProps) {
         <p className="text-xs text-muted-foreground mt-1 mb-2">
           Your preferences will apply to all conversations with local AI models.
         </p>
-        <Textarea
+        <AutosizeTextarea
           id="preferences"
-          value={userData.preferences}
+          value={config.preferences}
+          maxHeight={300}
+          minHeight={100}
           onChange={(e) => handleChange("preferences", e.target.value)}
           placeholder="e.g. keep explanations brief and to the point"
-          className="mt-1 min-h-[100px]"
+          className="mt-1 resize-none"
         />
       </div>
     </div>

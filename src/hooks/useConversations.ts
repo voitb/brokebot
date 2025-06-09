@@ -60,7 +60,7 @@ export function useConversations() {
   const addMessage = async (
     conversationId: string,
     message: Omit<IMessage, "id" | "createdAt">
-  ) => {
+  ): Promise<string> => {
     try {
       const newMessage: IMessage = {
         ...message,
@@ -71,8 +71,28 @@ export function useConversations() {
         convo.messages.push(newMessage);
         convo.updatedAt = new Date(); 
       });
+      return newMessage.id;
     } catch (error) {
       console.error("Błąd przy dodawaniu wiadomości:", error);
+      throw error;
+    }
+  };
+
+  const updateMessage = async (
+    conversationId: string,
+    messageId: string,
+    newContent: string
+  ) => {
+    try {
+      await db.conversations.where("id").equals(conversationId).modify(convo => {
+        const messageIndex = convo.messages.findIndex(msg => msg.id === messageId);
+        if (messageIndex !== -1) {
+          convo.messages[messageIndex].content = newContent;
+          convo.updatedAt = new Date();
+        }
+      });
+    } catch (error) {
+      console.error("Błąd przy aktualizacji wiadomości:", error);
     }
   };
 
@@ -113,6 +133,7 @@ export function useConversations() {
     createConversation,
     createEmptyConversation,
     addMessage,
+    updateMessage,
     deleteConversation,
     togglePinConversation,
     updateConversationTitle,

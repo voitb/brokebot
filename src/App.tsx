@@ -3,26 +3,35 @@ import { ResponsiveChatLayout } from "./components/layout/ResponsiveChatLayout";
 import { ChatInterface } from "./components/chat/interface";
 import { ChatGuard } from "./components/chat/interface/components";
 import { WelcomeScreen } from "./components/WelcomeScreen";
+import { TermsOfService } from "./pages/TermsOfService";
 import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
     <BrowserRouter>
-      <ResponsiveChatLayout>
-        <Routes>
-          <Route path="/" element={<WelcomeScreen />} />
-          <Route path="/chat" element={<ChatInterface />} />
-          <Route
-            path="/chat/:conversationId"
-            element={
-              <ChatGuard>
-                <ChatInterface />
-              </ChatGuard>
-            }
-          />
-        </Routes>
-        <Toaster />
-      </ResponsiveChatLayout>
+      <Routes>
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route
+          path="/*"
+          element={
+            <ResponsiveChatLayout>
+              <Routes>
+                <Route path="/" element={<WelcomeScreen />} />
+                <Route path="/chat" element={<ChatInterface />} />
+                <Route
+                  path="/chat/:conversationId"
+                  element={
+                    <ChatGuard>
+                      <ChatInterface />
+                    </ChatGuard>
+                  }
+                />
+              </Routes>
+              <Toaster />
+            </ResponsiveChatLayout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

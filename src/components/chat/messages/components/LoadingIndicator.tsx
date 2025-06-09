@@ -1,23 +1,21 @@
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 
 /**
- * Loading indicator for AI response
+ * Loading indicator showing animated dots while AI is generating response
  */
 export const LoadingIndicator: React.FC = () => {
   return (
-    <div className="flex justify-start">
-      <Avatar className="w-8 h-8 mr-3 mt-1">
-        <AvatarImage src="" />
-        <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-          🤖
-        </AvatarFallback>
-      </Avatar>
-      <div className="bg-muted p-3 rounded-lg">
-        <div className="flex space-x-1">
-          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse delay-200"></div>
-          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse delay-400"></div>
+    <div className="flex justify-start mb-4">
+      <div className="max-w-[80%] bg-muted rounded-lg px-4 py-3">
+        <div className="flex items-center space-x-1">
+          <div className="flex space-x-1">
+            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]" />
+            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]" />
+            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
+          </div>
+          <span className="text-sm text-muted-foreground ml-2">
+            AI is thinking...
+          </span>
         </div>
       </div>
     </div>
