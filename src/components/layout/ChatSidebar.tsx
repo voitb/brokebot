@@ -19,15 +19,12 @@ import { useState } from "react";
 
 export function ChatSidebar() {
   const navigate = useNavigate();
-  const { createConversation } = useConversations();
+  const { createEmptyConversation } = useConversations();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleNewChat = async () => {
-    // Create new conversation in IndexedDB with a placeholder first message
-    const conversationId = await createConversation(
-      "New Conversation",
-      "Hello! How can I help you today?"
-    );
+    // Create empty conversation without any placeholder messages
+    const conversationId = await createEmptyConversation("New Conversation");
 
     if (conversationId) {
       navigate(`/chat/${conversationId}`);

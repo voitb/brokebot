@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Send, Rocket, Search, Paperclip } from "lucide-react";
 import type { QualityLevel } from "../../types";
 import { ModelSelector } from "./ModelSelector";
@@ -10,6 +12,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import {
+  useConversations,
+  useConversation,
+} from "../../hooks/useConversations";
+import { useWebLLM } from "../../providers/WebLLMProvider";
 
 // Importy shadcn - tymczasowo komentowane do czasu instalacji
 // import { Button } from '../ui/button';
@@ -18,24 +25,87 @@ import {
 // import { Badge } from '../ui/badge';
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
-  isLoading?: boolean;
   quality?: QualityLevel;
 }
 
-export function ChatInput({
-  onSendMessage,
-  isLoading = false,
-  quality = "high",
-}: ChatInputProps) {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+export function ChatInput({ quality = "high" }: ChatInputProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { conversationId } = useParams<{ conversationId: string }>();
+  const navigate = useNavigate();
+  const { createConversation, addMessage, updateConversationTitle } =
+    useConversations();
+  const { conversation } = useConversation(conversationId);
+  const { engine, isLoading: isEngineLoading } = useWebLLM();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const message = formData.get("message") as string;
 
-    if (message.trim()) {
-      onSendMessage(message.trim());
-      e.currentTarget.reset();
+    if (!message.trim()) return;
+
+    setIsLoading(true);
+    e.currentTarget.reset();
+
+    try {
+      let currentConversationId = conversationId;
+
+      // Jeśli nie ma conversation ID, stwórz nową rozmowę
+      if (!currentConversationId) {
+        const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
+        const newConversationId = await createConversation(title, message);
+
+        if (newConversationId) {
+          currentConversationId = newConversationId;
+          navigate(`/chat/${newConversationId}`);
+        } else {
+          throw new Error("Failed to create conversation");
+        }
+      } else {
+        // Dodaj wiadomość użytkownika do istniejącej rozmowy (może być pusta)
+        await addMessage(currentConversationId, {
+          role: "user",
+          content: message,
+        });
+
+        // Jeśli to pierwsza wiadomość w pustej rozmowie, zaktualizuj tytuł
+        if (conversation && conversation.messages.length === 0) {
+          const title =
+            message.slice(0, 50) + (message.length > 50 ? "..." : "");
+          await updateConversationTitle(currentConversationId, title);
+        }
+      }
+
+      // Jeśli silnik AI jest gotowy, wygeneruj odpowiedź
+      if (engine && currentConversationId) {
+        try {
+          const response = await engine.chat.completions.create({
+            messages: [{ role: "user", content: message }],
+            temperature: 0.7,
+            max_tokens: 1000,
+          });
+
+          const aiResponse =
+            response.choices[0]?.message?.content ||
+            "Sorry, I couldn't generate a response.";
+
+          await addMessage(currentConversationId, {
+            role: "assistant",
+            content: aiResponse,
+          });
+        } catch (aiError) {
+          console.error("AI response error:", aiError);
+          await addMessage(currentConversationId, {
+            role: "assistant",
+            content:
+              "I'm sorry, I'm having trouble processing your request right now. Please try again later.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -53,6 +123,8 @@ export function ChatInput({
     }
   };
 
+  const isDisabled = isLoading || isEngineLoading;
+
   return (
     <TooltipProvider>
       <div className="p-3 border-t border-border bg-background">
@@ -63,7 +135,7 @@ export function ChatInput({
               name="message"
               className="flex-1 h-9 text-sm"
               placeholder="Type your message..."
-              disabled={isLoading}
+              disabled={isDisabled}
               onKeyDown={handleKeyDown}
             />
 
@@ -73,7 +145,7 @@ export function ChatInput({
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={isLoading}
+                  disabled={isDisabled}
                   className="h-9 w-9 p-0 shrink-0"
                 >
                   <Send className="w-4 h-4" />
@@ -90,7 +162,7 @@ export function ChatInput({
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-1">
             {/* Model Selector */}
-            <ModelSelector disabled={isLoading} />
+            <ModelSelector disabled={isDisabled} />
 
             {/* Quality Selector */}
             <Tooltip>
@@ -145,7 +217,7 @@ export function ChatInput({
           {/* Status Badge - smaller */}
           <Badge variant="secondary" className="text-xs h-5 px-2">
             <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse mr-1" />
-            Local
+            {isEngineLoading ? "Loading..." : "Local"}
           </Badge>
         </div>
       </div>

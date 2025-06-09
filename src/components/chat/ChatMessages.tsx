@@ -1,15 +1,16 @@
-import type { Message } from "../../types";
+import { useParams } from "react-router-dom";
+import { useConversation } from "../../hooks/useConversations";
+import type { IMessage } from "../../lib/db";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface ChatMessagesProps {
-  messages: Message[];
   isLoading?: boolean;
 }
 
 interface MessageBubbleProps {
-  message: Message;
+  message: IMessage;
 }
 
 function MessageBubble({ message }: MessageBubbleProps) {
@@ -89,10 +90,10 @@ function LoadingIndicator() {
   );
 }
 
-export function ChatMessages({
-  messages,
-  isLoading = false,
-}: ChatMessagesProps) {
+export function ChatMessages({ isLoading = false }: ChatMessagesProps) {
+  const { conversationId } = useParams<{ conversationId: string }>();
+  const { messages, conversation } = useConversation(conversationId);
+
   return (
     <div className="flex-1 flex flex-col">
       <ScrollArea className="flex-1">
@@ -101,10 +102,14 @@ export function ChatMessages({
             <div className="text-center text-muted-foreground py-12">
               <div className="text-4xl mb-4">💸</div>
               <h3 className="text-lg font-semibold mb-2">
-                Welcome to BrokeBot!
+                {conversation
+                  ? `Chat: ${conversation.title}`
+                  : "Welcome to BrokeBot!"}
               </h3>
               <p className="text-sm">
-                Start a conversation with your free AI assistant.
+                {conversation
+                  ? "Start chatting with your AI assistant."
+                  : "Start a conversation with your free AI assistant."}
               </p>
             </div>
           )}
