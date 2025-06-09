@@ -1,3 +1,4 @@
 export { MessageBubble } from './MessageBubble';
 export { LoadingIndicator } from './LoadingIndicator';
-export { EmptyState } from './EmptyState'; 
+export { EmptyState } from './EmptyState';
+export { ScrollToBottomButton } from './ScrollToBottomButton'; 
