@@ -27,6 +27,8 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { SettingsDialog } from "../dialogs/SettingsDialog";
+import { EditableConversationTitle } from "./EditableConversationTitle";
+import { SidebarTrigger } from "../ui/sidebar";
 
 // Mock function to get conversation title - later replace with IndexedDB
 const getConversationTitle = (id: string) => {
@@ -127,9 +129,11 @@ function KeyboardShortcutsModal({
 export function ChatHeader() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
-  const { conversations, togglePinConversation } = useConversations();
+  const { conversations, togglePinConversation, updateConversationTitle } =
+    useConversations();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const { sidebarOpen } = useSidebarContext();
   const { theme, setTheme } = useTheme();
 
@@ -166,6 +170,23 @@ export function ChatHeader() {
     navigate(`/chat/${newConversationId}`);
   };
 
+  const handleTitleClick = () => {
+    if (conversationId && currentConversation) {
+      setIsEditingTitle(true);
+    }
+  };
+
+  const handleSaveTitle = async (newTitle: string) => {
+    if (conversationId && newTitle.trim() !== conversationTitle) {
+      await updateConversationTitle(conversationId, newTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleCancelTitleEdit = () => {
+    setIsEditingTitle(false);
+  };
+
   return (
     <TooltipProvider>
       <header className="p-4 flex justify-between items-center gap-4 border-b border-border">
@@ -177,17 +198,20 @@ export function ChatHeader() {
         >
           {/* New Chat button when sidebar is closed */}
           {!sidebarOpen && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" onClick={handleNewChat}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Chat
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Create new conversation (Alt+N)</p>
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" onClick={handleNewChat}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Chat
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Create new conversation (Alt+N)</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           )}
 
           {/* Breadcrumbs when conversation is selected */}
@@ -204,10 +228,24 @@ export function ChatHeader() {
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="truncate max-w-64">
-                    {conversationTitle}
-                  </BreadcrumbPage>
+                <BreadcrumbItem
+                  className={`${isEditingTitle ? "rounded-none!" : ""}`}
+                >
+                  {isEditingTitle ? (
+                    <EditableConversationTitle
+                      initialTitle={conversationTitle}
+                      onSave={handleSaveTitle}
+                      onCancel={handleCancelTitleEdit}
+                      className="max-w-64"
+                    />
+                  ) : (
+                    <BreadcrumbPage
+                      className="truncate max-w-64 cursor-pointer hover:text-foreground transition-colors"
+                      onClick={handleTitleClick}
+                    >
+                      {conversationTitle}
+                    </BreadcrumbPage>
+                  )}
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

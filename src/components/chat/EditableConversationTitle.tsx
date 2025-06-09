@@ -14,12 +14,16 @@ export const EditableConversationTitle: React.FC<
   const [title, setTitle] = useState(initialTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // // Auto focus when component mounts
+  // Auto focus when component mounts - faster for breadcrumbs
   useEffect(() => {
     if (inputRef.current) {
       setTimeout(() => {
         inputRef.current?.focus();
-      }, 300);
+        const textLength = inputRef.current?.value.length;
+        if (textLength) {
+          inputRef.current?.setSelectionRange(textLength, textLength);
+        }
+      }, 100);
     }
   }, []);
 
@@ -31,7 +35,8 @@ export const EditableConversationTitle: React.FC<
       e.preventDefault();
       onCancel();
     } else if (e.key === "Enter") {
-      e.preventDefault(); // Prevent default Enter behavior
+      e.preventDefault();
+      handleSave(); // Allow simple Enter to save in breadcrumbs
     }
   };
 
@@ -54,8 +59,6 @@ export const EditableConversationTitle: React.FC<
     }
   };
 
-  console.log("title", title);
-
   return (
     <Input
       ref={inputRef}
@@ -64,8 +67,8 @@ export const EditableConversationTitle: React.FC<
       onKeyDown={handleKeyDown}
       onBlur={handleBlur}
       onClick={(e) => e.stopPropagation()}
-      className={`flex-1 h-auto p-0 border-0 shadow-none bg-transparent! text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none ${className}`}
-      placeholder="Alt+Enter to save, Esc to cancel"
+      className={`rounded-none! h-auto p-0 border-0 shadow-none bg-transparent! text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none max-w-64 ${className}`}
+      placeholder="Enter to save, Esc to cancel"
     />
   );
 };

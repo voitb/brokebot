@@ -89,8 +89,7 @@ export function useConversations() {
   const togglePinConversation = async (id: string) => {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
-        convo.pinned = !convo.pinned;
-        convo.updatedAt = new Date();
+        convo.pinned = !convo.pinned; 
       });
     } catch (error) {
       console.error("Błąd przy przypinaniu rozmowy:", error);
