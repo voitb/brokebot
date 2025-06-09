@@ -6,6 +6,7 @@ interface ChatLayoutProps {
 }
 
 export function ChatLayout({ children }: ChatLayoutProps) {
+  console.log("🟢 ChatLayout");
   return (
     <div className="bg-background text-foreground flex h-screen overflow-hidden">
       <ChatSidebar />

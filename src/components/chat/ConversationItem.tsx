@@ -39,9 +39,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   onMenuOpenChange,
 }) => {
   const getItemStyles = () => {
-    if (isEditing) {
-      return "bg-primary/10 border-l-2 border-primary text-primary font-medium";
-    } else if (isActive) {
+    if (isEditing || isActive) {
       return "bg-primary/10 border-primary text-primary font-medium";
     } else if (isMenuOpen) {
       return "bg-muted/70";
@@ -49,6 +47,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
       return "hover:bg-muted/50";
     }
   };
+
+  console.log(isEditing);
 
   return (
     <div
@@ -79,7 +79,13 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
               <MoreHorizontal className="w-3 h-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent
+            align="end"
+            className="w-48"
+            onCloseAutoFocus={(e) => {
+              e.preventDefault();
+            }}
+          >
             <DropdownMenuItem onClick={onFavouriteToggle}>
               <Star
                 className={`w-4 h-4 mr-2 ${

@@ -4,6 +4,7 @@ import { ChatInterface } from "./components/chat/ChatInterface";
 import { WelcomeScreen } from "./components/chat/WelcomeScreen";
 
 function App() {
+  console.log("🟢 App");
   return (
     <BrowserRouter>
       <ResponsiveChatLayout>

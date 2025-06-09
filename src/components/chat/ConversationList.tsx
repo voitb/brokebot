@@ -18,6 +18,8 @@ export function ConversationList({ searchQuery = "" }: ConversationListProps) {
     updateConversationTitle,
   } = useConversations();
 
+  console.log("🟢 conversations", conversations);
+
   // Custom hooks for different concerns
   const { filteredGroups } = useConversationGroups(conversations, searchQuery);
 
