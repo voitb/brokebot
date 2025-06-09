@@ -20,7 +20,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ quality = "high" }) => {
 
   return (
     <TooltipProvider>
-      <div className="p-1 bg-background w-full max-w-[95%] mx-auto">
+      <div className="p-1 pb-4 bg-background w-full max-w-[95%] mx-auto">
         <MessageForm
           onSubmit={handleMessageSubmit}
           disabled={isDisabled}
