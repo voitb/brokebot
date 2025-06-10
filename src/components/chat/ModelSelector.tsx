@@ -1,6 +1,7 @@
-import React from "react";
-import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield, Search } from "lucide-react";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,13 +26,29 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   disabled = false,
 }) => {
   const { selectedModel, availableModels, setSelectedModel } = useWebLLM();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleModelSelect = (model: ModelInfo) => {
     setSelectedModel(model);
   };
 
-  // Group models by category
-  const modelsByCategory = availableModels.reduce((acc, model) => {
+  // Filter models based on search query
+  const filteredModels = useMemo(() => {
+    if (!searchQuery.trim()) return availableModels;
+    
+    const query = searchQuery.toLowerCase();
+    return availableModels.filter(model => 
+      model.name.toLowerCase().includes(query) ||
+      model.description.toLowerCase().includes(query) ||
+      model.specialization?.toLowerCase().includes(query) ||
+      model.performance.toLowerCase().includes(query) ||
+      model.category.toLowerCase().includes(query) ||
+      model.modelType.toLowerCase().includes(query)
+    );
+  }, [availableModels, searchQuery]);
+
+  // Group filtered models by category
+  const modelsByCategory = filteredModels.reduce((acc, model) => {
     if (!acc[model.category]) {
       acc[model.category] = [];
     }
@@ -161,86 +178,108 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
+        {/* Search Input */}
+        <div className="p-2 border-b">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-3 w-3 text-muted-foreground" />
+            <Input
+              placeholder="Search models..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-7 h-8 text-xs"
+            />
+          </div>
+        </div>
+
         <ScrollArea className="h-96">
-          {sortedCategories.map((category) => {
-            const models = modelsByCategory[category];
-            return (
-              <div key={category}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-help">
-                      {getCategoryIcon(category)}
-                      {getCategoryLabel(category)}
-                    </DropdownMenuLabel>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{getCategoryTooltip(category)}</p>
-                  </TooltipContent>
-                </Tooltip>
-                {models.map((model) => (
-                  <DropdownMenuItem
-                    key={model.id}
-                    onClick={() => handleModelSelect(model)}
-                    className="flex flex-col items-start gap-2 p-3 cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{model.name}</span>
-                        {getModelTypeIcon(model.modelType)}
-                        {getSpecializationIcon(model.specialization)}
-                      </div>
-                      <div className="flex gap-1">
-                        <Badge 
-                          variant={getPerformanceBadgeVariant(model.performance)} 
-                          className="text-xs"
-                        >
-                          {model.performance}
+          {sortedCategories.length === 0 ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No models found matching "{searchQuery}"
+            </div>
+          ) : (
+            sortedCategories.map((category) => {
+              const models = modelsByCategory[category];
+              return (
+                <div key={category}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-help">
+                        {getCategoryIcon(category)}
+                        {getCategoryLabel(category)}
+                        <Badge variant="outline" className="text-xs">
+                          {models.length}
                         </Badge>
-                        {selectedModel.id === model.id && (
-                          <Badge variant="default" className="text-xs">
-                            Active
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground space-y-1 w-full">
-                      <div className="flex items-center gap-1">
-                        {model.description}
-                        {model.warning && (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <AlertTriangle className="w-3 h-3 text-amber-500" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>{model.warning}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Size: {model.size}</span>
-                        <span>Download: {model.downloadSize}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Requirements: {model.ramRequirement}</span>
-                        {model.modelType && model.modelType !== 'LLM' && (
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">
-                            {model.modelType}
-                          </span>
-                        )}
-                      </div>
-                      {model.specialization && (
-                        <div className="text-purple-600 dark:text-purple-400 font-medium">
-                          Specialized: {model.specialization}
+                      </DropdownMenuLabel>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{getCategoryTooltip(category)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {models.map((model) => (
+                    <DropdownMenuItem
+                      key={model.id}
+                      onClick={() => handleModelSelect(model)}
+                      className="flex flex-col items-start gap-2 p-3 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{model.name}</span>
+                          {getModelTypeIcon(model.modelType)}
+                          {getSpecializationIcon(model.specialization)}
                         </div>
-                      )}
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-              </div>
-            );
-          })}
+                        <div className="flex gap-1">
+                          <Badge 
+                            variant={getPerformanceBadgeVariant(model.performance)} 
+                            className="text-xs"
+                          >
+                            {model.performance}
+                          </Badge>
+                          {selectedModel.id === model.id && (
+                            <Badge variant="default" className="text-xs">
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-1 w-full">
+                        <div className="flex items-center gap-1">
+                          {model.description}
+                          {model.warning && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <AlertTriangle className="w-3 h-3 text-amber-500" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{model.warning}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Size: {model.size}</span>
+                          <span>Download: {model.downloadSize}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Requirements: {model.ramRequirement}</span>
+                          {model.modelType && model.modelType !== 'LLM' && (
+                            <span className="text-blue-600 dark:text-blue-400 font-medium">
+                              {model.modelType}
+                            </span>
+                          )}
+                        </div>
+                        {model.specialization && (
+                          <div className="text-purple-600 dark:text-purple-400 font-medium">
+                            Specialized: {model.specialization}
+                          </div>
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                </div>
+              );
+            })
+          )}
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>

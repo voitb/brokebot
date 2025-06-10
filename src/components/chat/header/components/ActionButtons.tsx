@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, Sun, Moon, Settings, Keyboard } from "lucide-react";
+import { Star, Sun, Moon, Settings, Keyboard, Share2 } from "lucide-react";
 import { Button } from "../../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
 
@@ -12,10 +12,11 @@ interface ActionButtonsProps {
   onTogglePinConversation: () => Promise<void>;
   onOpenSettings: () => void;
   onOpenShortcuts: () => void;
+  onOpenShare: () => void;
 }
 
 /**
- * Reusable action buttons for header - theme, settings, shortcuts, pin
+ * Reusable action buttons for header - theme, settings, shortcuts, pin, share
  * Can be configured to show/hide certain buttons based on context
  */
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -27,6 +28,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onTogglePinConversation,
   onOpenSettings,
   onOpenShortcuts,
+  onOpenShare,
 }) => {
   return (
     <>
@@ -45,6 +47,20 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           <p>Toggle theme</p>
         </TooltipContent>
       </Tooltip>
+
+      {/* Share Button (conditional) */}
+      {conversationId && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={onOpenShare}>
+              <Share2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Share conversation {showShortcuts ? "(Alt+S)" : ""}</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Settings Button */}
       <Tooltip>

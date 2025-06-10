@@ -50,8 +50,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
             <EmptyState conversation={conversation} />
           )}
 
-          {messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+          {messages.map((message, index) => (
+            <MessageBubble 
+              key={message.id} 
+              message={message} 
+              isGenerating={isGenerating}
+              isLastMessage={index === messages.length - 1}
+            />
           ))}
 
           {isGenerating && <LoadingIndicator />}
