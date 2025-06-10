@@ -10,9 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";
 import { Alert, AlertDescription } from "../../../ui/alert";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
 import { Copy, Check, Loader2, Clock, RefreshCw } from "lucide-react";
 import type { IMessage } from "../../../../lib/db";
 import { useTheme } from "../../../../providers/ThemeProvider";
+import { useWebLLM } from "../../../../providers/WebLLMProvider";
 import { toast } from "sonner";
 
 interface MessageBubbleProps {
@@ -38,6 +40,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 }) => {
   const isUser = message.role === "user";
   const { theme } = useTheme();
+  const { isLoading: isEngineLoading, status } = useWebLLM();
   const [copiedStates, setCopiedStates] = React.useState<
     Record<string, boolean>
   >({});
@@ -46,9 +49,32 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   const isDark = theme === "dark";
   const isAiGenerating = !isUser && isGenerating && isLastMessage;
+  const isModelReady = status === "Ready" && !isEngineLoading;
 
   // Parse thinking tags from message content
   const parseMessage = (content: string): ParsedMessage => {
+    // Check if message starts with <think>
+    if (content.startsWith("<think>")) {
+      const thinkEndMatch = content.match(/<\/think>/);
+
+      if (thinkEndMatch) {
+        // Complete thinking block found
+        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+        if (thinkMatch) {
+          const thinking = thinkMatch[1].trim();
+          const remainingContent = content
+            .replace(/<think>[\s\S]*?<\/think>/, "")
+            .trim();
+          return { thinking, content: remainingContent };
+        }
+      } else {
+        // Incomplete thinking block - still generating
+        const thinking = content.replace(/^<think>/, "").trim();
+        return { thinking, content: "" };
+      }
+    }
+
+    // Check for complete thinking blocks anywhere in content (original logic)
     const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
     if (thinkMatch) {
       const thinking = thinkMatch[1].trim();
@@ -57,6 +83,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         .trim();
       return { thinking, content: remainingContent };
     }
+
     return { content };
   };
 
@@ -287,16 +314,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               )}
             </Button>
 
-            {onRegenerate && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={onRegenerate}
-              >
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Regenerate
-              </Button>
+            {/* Show regenerate button always for last AI message, but disable if model not ready */}
+            {!isUser && isLastMessage && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={onRegenerate}
+                    disabled={!onRegenerate || !isModelReady}
+                  >
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Regenerate
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {!isModelReady ? "Model is not ready" : "Regenerate response"}
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         )}

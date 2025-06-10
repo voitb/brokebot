@@ -5,6 +5,7 @@ import { useConversationId } from "../../../hooks/useConversationId";
 import { useScrollPosition } from "../../../hooks/useScrollPosition";
 import { useAutoScroll } from "../../../hooks/useAutoScroll";
 import { useChatInput } from "../input/hooks";
+import { useWebLLM } from "../../../providers/WebLLMProvider";
 import { MessageBubble, EmptyState, ScrollToBottomButton } from "./components";
 
 interface ChatMessagesProps {
@@ -19,6 +20,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
   const { regenerateLastResponse } = useChatInput();
+  const { isLoading: isEngineLoading, status } = useWebLLM();
+
+  // Check if model is ready
+  const isModelReady = status === "Ready" && !isEngineLoading;
 
   const { scrollAreaRef, isNearBottom, shouldAutoScroll, setShouldAutoScroll } =
     useScrollPosition(30);
@@ -54,7 +59,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               isGenerating={isGenerating}
               isLastMessage={index === messages.length - 1}
               onRegenerate={
-                message.role === "assistant" && index === messages.length - 1
+                message.role === "assistant" &&
+                index === messages.length - 1 &&
+                isModelReady
                   ? regenerateLastResponse
                   : undefined
               }

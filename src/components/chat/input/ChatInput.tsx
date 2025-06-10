@@ -5,7 +5,15 @@ import { useChatInput } from "./hooks";
 import type { QualityLevel } from "../../../types";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Paperclip, X, FileText, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  Send,
+  Paperclip,
+  X,
+  FileText,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 import { ModelSelector } from "../ModelSelector";
 import { Alert, AlertDescription } from "../../ui/alert";
 import { toast } from "sonner";
@@ -18,25 +26,35 @@ interface AttachedFile {
   id: string;
   file: File;
   preview?: string;
-  type: 'image' | 'text' | 'other';
+  type: "image" | "text" | "other";
 }
 
 /**
  * Main chat input component with message form and options bar
  */
 export const ChatInput: React.FC<ChatInputProps> = () => {
-  const { isLoading: isEngineLoading, selectedModel, status, loadModel } = useWebLLM();
-  const { isLoading, handleMessageSubmit, message, setMessage } = useChatInput();
+  const {
+    isLoading: isEngineLoading,
+    selectedModel,
+    status,
+    loadModel,
+  } = useWebLLM();
+  const { isLoading, handleMessageSubmit, message, setMessage } =
+    useChatInput();
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Check if current model supports images (VLM)
-  const supportsImages = selectedModel.modelType === 'VLM' || selectedModel.supportsImages;
+  const supportsImages =
+    selectedModel.modelType === "VLM" || selectedModel.supportsImages;
 
   // Check for model errors
-  const isModelError = status.includes("error") || status.includes("Error") || status.includes("failed");
+  const isModelError =
+    status.includes("error") ||
+    status.includes("Error") ||
+    status.includes("failed");
   const isModelReady = status === "Ready" && !isEngineLoading;
 
   // Auto-resize textarea
@@ -44,28 +62,39 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     const textarea = textareaRef.current;
     if (textarea) {
       // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = 'auto';
+      textarea.style.height = "auto";
+      textarea.style.overflowY = "hidden";
+
       // Set height to scrollHeight, with min and max constraints
       const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 200);
       textarea.style.height = `${newHeight}px`;
+
+      // Add scroll if content exceeds max height
+      if (textarea.scrollHeight > 200) {
+        textarea.style.overflowY = "auto";
+      }
     }
   }, [message]);
 
   const processFile = async (file: File): Promise<AttachedFile> => {
     const id = Math.random().toString(36).substr(2, 9);
-    let type: AttachedFile['type'] = 'other';
+    let type: AttachedFile["type"] = "other";
     let preview: string | undefined;
 
-    if (file.type.startsWith('image/')) {
-      type = 'image';
+    if (file.type.startsWith("image/")) {
+      type = "image";
       // Create preview for images
       preview = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target?.result as string);
         reader.readAsDataURL(file);
       });
-    } else if (file.type === 'text/plain' || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
-      type = 'text';
+    } else if (
+      file.type === "text/plain" ||
+      file.name.endsWith(".txt") ||
+      file.name.endsWith(".md")
+    ) {
+      type = "text";
     }
 
     return { id, file, preview, type };
@@ -73,10 +102,10 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
 
   const handleFileSelect = async (files: FileList) => {
     const newFiles: AttachedFile[] = [];
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
+
       // Check file size (limit to 10MB)
       if (file.size > 10 * 1024 * 1024) {
         toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
@@ -84,8 +113,10 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
       }
 
       // For images, check if model supports them
-      if (file.type.startsWith('image/') && !supportsImages) {
-        toast.error(`Images are only supported by vision models. Current model: ${selectedModel.name}`);
+      if (file.type.startsWith("image/") && !supportsImages) {
+        toast.error(
+          `Images are only supported by vision models. Current model: ${selectedModel.name}`
+        );
         continue;
       }
 
@@ -93,13 +124,13 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
       newFiles.push(processedFile);
     }
 
-    setAttachedFiles(prev => [...prev, ...newFiles]);
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       await handleFileSelect(files);
@@ -117,17 +148,19 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
   };
 
   const removeFile = (fileId: string) => {
-    setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
-  const handleFileInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (files) {
       await handleFileSelect(files);
     }
     // Reset input
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -138,13 +171,15 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
       toast.success("Model reloaded successfully", { id: "retry-model" });
     } catch (error) {
       console.error("Failed to reload model:", error);
-      toast.error("Failed to reload model. Try selecting a different model.", { id: "retry-model" });
+      toast.error("Failed to reload model. Try selecting a different model.", {
+        id: "retry-model",
+      });
     }
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!message.trim() && attachedFiles.length === 0) return;
     if (!isModelReady) {
       toast.error("Model is not ready. Please wait or try reloading.");
@@ -162,18 +197,20 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     // For now, we'll just include file information in the message
     // In a real implementation, you'd send files to the API
     let fullMessage = messageToSend;
-    
+
     if (filesToSend.length > 0) {
-      const fileDescriptions = filesToSend.map(f => {
-        if (f.type === 'image') {
-          return `[Image: ${f.file.name}]`;
-        } else if (f.type === 'text') {
-          return `[Text file: ${f.file.name}]`;
-        } else {
-          return `[File: ${f.file.name}]`;
-        }
-      }).join(' ');
-      
+      const fileDescriptions = filesToSend
+        .map((f) => {
+          if (f.type === "image") {
+            return `[Image: ${f.file.name}]`;
+          } else if (f.type === "text") {
+            return `[Text file: ${f.file.name}]`;
+          } else {
+            return `[File: ${f.file.name}]`;
+          }
+        })
+        .join(" ");
+
       fullMessage = `${messageToSend}\n\n${fileDescriptions}`;
     }
 
@@ -236,7 +273,11 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
                 disabled={isEngineLoading}
                 className="ml-4"
               >
-                <RefreshCw className={`w-3 h-3 mr-1 ${isEngineLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-3 h-3 mr-1 ${
+                    isEngineLoading ? "animate-spin" : ""
+                  }`}
+                />
                 Retry
               </Button>
             </AlertDescription>
@@ -266,18 +307,18 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
                 key={file.id}
                 className="relative bg-muted rounded-lg p-2 flex items-center gap-2 max-w-xs"
               >
-                {file.type === 'image' && file.preview ? (
+                {file.type === "image" && file.preview ? (
                   <img
                     src={file.preview}
                     alt={file.file.name}
                     className="w-12 h-12 object-cover rounded"
                   />
-                ) : file.type === 'text' ? (
+                ) : file.type === "text" ? (
                   <FileText className="w-8 h-8 text-blue-500" />
                 ) : (
                   <Paperclip className="w-8 h-8 text-gray-500" />
                 )}
-                
+
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">
                     {file.file.name}
@@ -286,7 +327,7 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
                     {(file.file.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
-                
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -313,12 +354,16 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isModelReady ? `Message ${selectedModel.name}...` : "Model loading..."}
+              placeholder={
+                isModelReady
+                  ? `Message ${selectedModel.name}...`
+                  : "Model loading..."
+              }
               className="min-h-[60px] max-h-[200px] resize-none pr-20 overflow-hidden"
               disabled={isLoading || isEngineLoading || isModelError}
-              style={{ height: '60px' }}
+              style={{ height: "60px" }}
             />
-            
+
             {/* File Attachment Button */}
             <div className="absolute bottom-2 right-12">
               <input
@@ -347,7 +392,12 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
               type="submit"
               size="sm"
               className="absolute bottom-2 right-2 h-8 w-8 p-0"
-              disabled={isLoading || isEngineLoading || isModelError || (!message.trim() && attachedFiles.length === 0)}
+              disabled={
+                isLoading ||
+                isEngineLoading ||
+                isModelError ||
+                (!message.trim() && attachedFiles.length === 0)
+              }
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -361,14 +411,16 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <ModelSelector disabled={isLoading || isEngineLoading} />
-              
+
               {/* Model Status */}
               <div className="flex items-center gap-1">
-                {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-                {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}
-                <span className={getStatusColor()}>
-                  {getStatusMessage()}
-                </span>
+                {isEngineLoading && (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                )}
+                {isModelError && (
+                  <AlertCircle className="w-3 h-3 text-destructive" />
+                )}
+                <span className={getStatusColor()}>{getStatusMessage()}</span>
               </div>
 
               {supportsImages && isModelReady && (
