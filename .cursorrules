@@ -2,24 +2,43 @@
 
 # Klon ChatGPT działający w przeglądarce z WebLLM i IndexedDB
 
-## OPIS PROJEKTU
+## PROJECT DESCRIPTION
 
 Local-GPT to aplikacja webowa będąca klonem ChatGPT, która działa w 100% lokalnie w przeglądarce.
 Wykorzystuje WebLLM dla modelu AI i IndexedDB dla trwałej pamięci, zapewniając prywatność,
 darmowe użytkowanie i pracę offline.
 
+## CRITICAL RULES - ABSOLUTELY MUST FOLLOW
+
+### CSS/Styling Rules - NEVER BREAK THESE
+
+- **DO NOT MODIFY** padding, margin, width, height, border styles unless EXPLICITLY requested
+- **DO NOT "FIX"** layout styles on your own initiative
+- **DO NOT CHANGE** existing CSS classes without specific user request
+- **DO NOT ADJUST** spacing, sizing, or positioning unless user asks for it
+- **ONLY TOUCH** styles when user specifically mentions styling issues
+- **ASK FIRST** before making any visual/layout changes
+- **FOCUS ONLY** on the exact problem user describes
+
+### General Development Rules
+
+- **DO ONLY** what user explicitly requests
+- **DO NOT** make assumptions about improvements needed
+- **DO NOT** proactively refactor unless asked
+- **ASK QUESTIONS** instead of guessing user intent
+
 ## SENIOR-LEVEL DEVELOPMENT PRACTICES
 
-### Architektura Komponentów
+### Component Architecture
 
-- **Single Responsibility Principle** - każdy komponent ma jedną odpowiedzialność
-- **Composition over Inheritance** - komponenty składane z mniejszych części
-- **Container/Presentational Pattern** - separacja logiki od UI
-- **Custom Hooks** - wydzielenie logiki biznesowej do hooków
-- **Proper Error Boundaries** - obsługa błędów na odpowiednim poziomie
-- **Performance Optimization** - React.memo, useMemo, useCallback gdzie potrzeba
+- **Single Responsibility Principle** - each component has one responsibility
+- **Composition over Inheritance** - components composed of smaller parts
+- **Container/Presentational Pattern** - separate logic from UI
+- **Custom Hooks** - extract business logic to hooks
+- **Proper Error Boundaries** - error handling at appropriate levels
+- **Performance Optimization** - React.memo, useMemo, useCallback where needed
 
-### Struktura Folderów
+### Folder Structure
 
 ```
 src/components/
@@ -38,83 +57,83 @@ src/components/
 │   └── index.ts
 ```
 
-### Konwencje Komponentów
+### Component Conventions
 
-- **Max 150 linii na komponent** - większe dzielić na mniejsze
-- **Props interface nad typem inline** - czytelność i reużywalność
-- **Default props przez destructuring** - `{ prop = defaultValue }`
+- **Max 150 lines per component** - split larger ones into smaller pieces
+- **Props interface over inline type** - readability and reusability
+- **Default props through destructuring** - `{ prop = defaultValue }`
 - **Event handlers prefixed** - `handleSomething`, `onSomething`
 - **Boolean props prefixed** - `isLoading`, `hasError`, `canEdit`
 - **Render functions suffixed** - `renderHeader`, `renderContent`
 
 ### Custom Hooks Guidelines
 
-- **Prefix z `use`** - konsystentne nazewnictwo
-- **Single concern** - jeden hook = jedna odpowiedzialność
-- **Return object dla multiple values** - `{ data, isLoading, error }`
-- **Memoization** - używaj useMemo/useCallback dla performance
-- **Dependencies arrays** - zawsze kompletne i poprawne
+- **Prefix with `use`** - consistent naming
+- **Single concern** - one hook = one responsibility
+- **Return object for multiple values** - `{ data, isLoading, error }`
+- **Memoization** - use useMemo/useCallback for performance
+- **Dependencies arrays** - always complete and correct
 
 ### TypeScript Best Practices
 
-- **Strict mode enabled** - najwyższy poziom typowania
-- **Interface over type** - dla object shapes
+- **Strict mode enabled** - highest level of typing
+- **Interface over type** - for object shapes
 - **Generic constraints** - `<T extends SomeType>`
 - **Utility types** - `Pick`, `Omit`, `Partial`, `Required`
-- **Proper return types** - nie rely na inferencji dla public APIs
-- **No `any`** - zawsze konkretne typy
+- **Proper return types** - don't rely on inference for public APIs
+- **No `any`** - always concrete types
 
-## KONWENCJE KODOWANIA
+## CODING CONVENTIONS
 
-### Język
+### Language
 
-- **TYLKO ANGIELSKI** w kodzie - wszystkie nazwy zmiennych, funkcji, komentarze, stringi
-- Interfejs użytkownika może być po polsku, ale kod tylko po angielsku
-- Konsystentna nomenclatura w całym projekcie
+- **ENGLISH ONLY** in code - all variable names, functions, comments, strings
+- User interface can be in Polish, but code only in English
+- Consistent nomenclature throughout the project
 
 ### React Patterns
 
 - **Functional components only** - no class components
-- **Hooks first** - custom hooks dla logiki biznesowej
-- **Error boundaries** - na poziomie feature i app
-- **Suspense boundaries** - dla lazy loading
-- **Portal usage** - dla modali i tooltipów
-- **Forward refs** - dla reusable input components
+- **Hooks first** - custom hooks for business logic
+- **Error boundaries** - at feature and app level
+- **Suspense boundaries** - for lazy loading
+- **Portal usage** - for modals and tooltips
+- **Forward refs** - for reusable input components
 
 ### State Management
 
 - **Local state first** - useState for component state
-- **Custom hooks** - dla shared state logic
-- **Context sparingly** - tylko dla truly global state
-- **Reducer pattern** - dla complex state logic
-- **Optimistic updates** - dla lepszego UX
+- **Custom hooks** - for shared state logic
+- **Context sparingly** - only for truly global state
+- **Reducer pattern** - for complex state logic
+- **Optimistic updates** - for better UX
 
 ### Performance
 
-- **React.memo** - dla expensive renders
-- **useMemo** - dla expensive calculations
-- **useCallback** - dla stable function references
-- **Lazy loading** - dla route-based code splitting
-- **Virtual scrolling** - dla długich list
+- **React.memo** - for expensive renders
+- **useMemo** - for expensive calculations
+- **useCallback** - for stable function references
+- **Lazy loading** - for route-based code splitting
+- **Virtual scrolling** - for long lists
 - **Image optimization** - proper loading strategies
 
 ### Styling
 
 - **Tailwind CSS classes** - utility-first approach
 - **Shadcn/ui components** - consistent design system
-- **CSS-in-JS sparingly** - tylko gdy Tailwind nie wystarcza
+- **CSS-in-JS sparingly** - only when Tailwind isn't enough
 - **Mobile-first approach** - responsive design pattern
 - **Design tokens** - consistent spacing, colors, typography
 
 ### Testing Strategy
 
-- **Unit tests** - dla utils i pure functions
-- **Integration tests** - dla hook interactions
+- **Unit tests** - for utils and pure functions
+- **Integration tests** - for hook interactions
 - **Component tests** - React Testing Library
-- **E2E tests** - dla critical user flows
-- **Visual regression** - dla UI consistency
+- **E2E tests** - for critical user flows
+- **Visual regression** - for UI consistency
 
-## STRUKTURA PLIKÓW
+## FILE STRUCTURE
 
 ### Component Organization
 
@@ -159,30 +178,30 @@ src/hooks/
 │   └── index.ts
 ```
 
-## STOS TECHNOLOGICZNY
+## TECH STACK
 
 - **Frontend**: Vite + React 18 + TypeScript
 - **UI Library**: Shadcn/ui + Tailwind CSS + Radix UI
 - **Routing**: react-router-dom
 - **State**: React hooks + Context (sparingly)
-- **Lokalne AI**: @mlc-ai/web-llm
-- **Baza Danych**: Dexie.js (wrapper na IndexedDB)
+- **Local AI**: @mlc-ai/web-llm
+- **Database**: Dexie.js (IndexedDB wrapper)
 - **Testing**: Vitest + React Testing Library + Playwright
 - **Linting**: ESLint + Prettier + TypeScript strict
 
-## ARCHITEKTURA BAZY DANYCH (IndexedDB przez Dexie.js)
+## DATABASE ARCHITECTURE (IndexedDB via Dexie.js)
 
-### Tabela: conversations
+### Table: conversations
 
 - id: string (UUID, primary key)
-- title: string (tytuł rozmowy)
+- title: string (conversation title)
 - messages: IMessage[] (embedded documents)
 - pinned: boolean
 - createdAt: Date
 - updatedAt: Date
-- userId?: string (dla zalogowanych użytkowników)
+- userId?: string (for logged users)
 
-### Tabela: documents
+### Table: documents
 
 - id: number (primary key, auto-increment)
 - filename: string
@@ -221,16 +240,16 @@ src/hooks/
 - [ ] Focus management
 - [ ] ARIA labels where needed
 
-## METRYKI SUKCESU MVP
+## MVP SUCCESS METRICS
 
-- [x] Użytkownik może napisać wiadomość i otrzymać odpowiedź
-- [x] Historia rozmów jest zachowana po odświeżeniu
-- [x] Można tworzyć nowe rozmowy
-- [ ] Można załączyć plik .txt/.md i AI odpowiada na jego podstawie
-- [x] UI jest responsywne i profesjonalne
-- [x] Aplikacja działa offline
-- [x] Smooth animations i transitions
-- [x] Chat filtering i search
+- [x] User can write message and receive response
+- [x] Conversation history preserved after refresh
+- [x] Can create new conversations
+- [ ] Can attach .txt/.md files and AI responds based on content
+- [x] UI is responsive and professional
+- [x] Application works offline
+- [x] Smooth animations and transitions
+- [x] Chat filtering and search
 - [x] Chat management (pin, rename, delete)
 
 ## DEVELOPMENT WORKFLOW
@@ -244,7 +263,7 @@ src/hooks/
 7. **Accessibility Testing** - keyboard and screen reader testing
 8. **Code Review** - peer review against quality gates
 
-## UWAGI DLA SENIOR DEVELOPERA
+## SENIOR DEVELOPER NOTES
 
 1. **Composition Pattern** - prefer composition over large monolithic components
 2. **Performance First** - measure before optimizing, but think about it early
@@ -257,4 +276,4 @@ src/hooks/
 9. **Progressive Enhancement** - work offline, sync when online
 10. **User Experience** - every interaction should feel smooth and predictable
 
-Pamiętaj: "Make it work, make it right, make it fast" - w tej kolejności!
+Remember: "Make it work, make it right, make it fast" - in that order!

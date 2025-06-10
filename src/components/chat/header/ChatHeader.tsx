@@ -11,7 +11,7 @@ import {
 } from "./components";
 import { useHeaderActions } from "./hooks/useHeaderActions";
 import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
-import { SettingsDialog } from "../../dialogs/SettingsDialog";
+import { SettingsDialog } from "../../dialogs/settings";
 
 /**
  * Main chat header component with responsive layout
