@@ -2,6 +2,7 @@ import { Label } from "../../../ui/label";
 import { Button } from "../../../ui/button";
 import { Switch } from "../../../ui/switch";
 import { Badge } from "../../../ui/badge";
+import { Input } from "../../../ui/input";
 import {
   Select,
   SelectContent,
@@ -20,16 +21,36 @@ import { useUserConfig } from "../../../../hooks/useUserConfig";
 import {
   useWebLLM,
   AVAILABLE_MODELS,
+  type ModelInfo,
 } from "../../../../providers/WebLLMProvider";
 import { toast } from "sonner";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import { AlertCircle, RefreshCw, Search } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 
 export function ModelsTab() {
   const { config, updateConfig } = useUserConfig();
   const { selectedModel, isLoading, status, setSelectedModel, loadModel } =
     useWebLLM();
   const [storageUsage, setStorageUsage] = useState<string>("Calculating...");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter models based on search query
+  const filteredModels = useMemo(() => {
+    if (!searchQuery.trim()) return AVAILABLE_MODELS;
+    
+    const query = searchQuery.toLowerCase();
+    return AVAILABLE_MODELS.filter(model => {
+      const modelInfo = model as ModelInfo;
+      return (
+        modelInfo.name.toLowerCase().includes(query) ||
+        modelInfo.description.toLowerCase().includes(query) ||
+        modelInfo.specialization?.toLowerCase().includes(query) ||
+        modelInfo.performance.toLowerCase().includes(query) ||
+        modelInfo.category.toLowerCase().includes(query) ||
+        modelInfo.modelType.toLowerCase().includes(query)
+      );
+    });
+  }, [searchQuery]);
 
   // Check storage usage on mount
   useEffect(() => {
@@ -201,6 +222,25 @@ export function ModelsTab() {
           <CardDescription>Current status: {status}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Search Input */}
+          <div>
+            <Label className="text-sm">Search Models</Label>
+            <div className="relative mt-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, performance, specialization..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {searchQuery && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Found {filteredModels.length} model(s) matching "{searchQuery}"
+              </p>
+            )}
+          </div>
+
           <div>
             <Label>Preferred model</Label>
             <Select
@@ -211,17 +251,40 @@ export function ModelsTab() {
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                {AVAILABLE_MODELS.map((model) => (
-                  <SelectItem key={model.id} value={model.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{model.name}</span>
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {model.size}
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                ))}
+              <SelectContent className="max-h-80">
+                {filteredModels.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    No models found matching "{searchQuery}"
+                  </div>
+                ) : (
+                  filteredModels.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="flex flex-col items-start">
+                          <span className="font-medium">{model.name}</span>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {model.size}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {model.performance}
+                            </Badge>
+                            {model.modelType !== 'LLM' && (
+                              <Badge variant="default" className="text-xs">
+                                {model.modelType}
+                              </Badge>
+                            )}
+                                                         {(model as ModelInfo).specialization && (
+                               <Badge variant="destructive" className="text-xs">
+                                 {(model as ModelInfo).specialization}
+                               </Badge>
+                             )}
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">

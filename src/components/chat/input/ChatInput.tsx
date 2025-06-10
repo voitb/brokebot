@@ -1,12 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useWebLLM } from "../../../providers/WebLLMProvider";
 import { useChatInput } from "./hooks";
 import type { QualityLevel } from "../../../types";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Paperclip, X, FileText } from "lucide-react";
+import { Send, Paperclip, X, FileText, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { ModelSelector } from "../ModelSelector";
+import { Alert, AlertDescription } from "../../ui/alert";
+import { toast } from "sonner";
 
 interface ChatInputProps {
   quality?: QualityLevel;
@@ -23,7 +25,7 @@ interface AttachedFile {
  * Main chat input component with message form and options bar
  */
 export const ChatInput: React.FC<ChatInputProps> = () => {
-  const { isLoading: isEngineLoading, selectedModel } = useWebLLM();
+  const { isLoading: isEngineLoading, selectedModel, status, loadModel } = useWebLLM();
   const { isLoading, handleMessageSubmit, message, setMessage } = useChatInput();
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -32,6 +34,22 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
 
   // Check if current model supports images (VLM)
   const supportsImages = selectedModel.modelType === 'VLM' || selectedModel.supportsImages;
+
+  // Check for model errors
+  const isModelError = status.includes("error") || status.includes("Error") || status.includes("failed");
+  const isModelReady = status === "Ready" && !isEngineLoading;
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height to scrollHeight, with min and max constraints
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 200);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [message]);
 
   const processFile = async (file: File): Promise<AttachedFile> => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -61,13 +79,13 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
       
       // Check file size (limit to 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
         continue;
       }
 
       // For images, check if model supports them
       if (file.type.startsWith('image/') && !supportsImages) {
-        alert(`Images are only supported by vision models. Current model: ${selectedModel.name}`);
+        toast.error(`Images are only supported by vision models. Current model: ${selectedModel.name}`);
         continue;
       }
 
@@ -113,17 +131,40 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     }
   };
 
+  const handleRetryModel = async () => {
+    try {
+      toast.loading("Reloading model...", { id: "retry-model" });
+      await loadModel(selectedModel.id);
+      toast.success("Model reloaded successfully", { id: "retry-model" });
+    } catch (error) {
+      console.error("Failed to reload model:", error);
+      toast.error("Failed to reload model. Try selecting a different model.", { id: "retry-model" });
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!message.trim() && attachedFiles.length === 0) return;
+    if (!isModelReady) {
+      toast.error("Model is not ready. Please wait or try reloading.");
+      return;
+    }
+
+    // Store the message content before clearing
+    const messageToSend = message;
+    const filesToSend = [...attachedFiles];
+
+    // Clear input immediately for better UX
+    setMessage("");
+    setAttachedFiles([]);
 
     // For now, we'll just include file information in the message
     // In a real implementation, you'd send files to the API
-    let fullMessage = message;
+    let fullMessage = messageToSend;
     
-    if (attachedFiles.length > 0) {
-      const fileDescriptions = attachedFiles.map(f => {
+    if (filesToSend.length > 0) {
+      const fileDescriptions = filesToSend.map(f => {
         if (f.type === 'image') {
           return `[Image: ${f.file.name}]`;
         } else if (f.type === 'text') {
@@ -133,11 +174,18 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
         }
       }).join(' ');
       
-      fullMessage = `${message}\n\n${fileDescriptions}`;
+      fullMessage = `${messageToSend}\n\n${fileDescriptions}`;
     }
 
-    await handleMessageSubmit(fullMessage);
-    setAttachedFiles([]);
+    try {
+      await handleMessageSubmit(fullMessage);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // Restore the message and files if submission failed
+      setMessage(messageToSend);
+      setAttachedFiles(filesToSend);
+      toast.error("Failed to send message. Please try again.");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -147,9 +195,54 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     }
   };
 
+  const getStatusMessage = () => {
+    if (isModelError) {
+      return "Model failed to load";
+    }
+    if (isEngineLoading) {
+      return `Loading ${selectedModel.name}...`;
+    }
+    if (isModelReady) {
+      return "Ready";
+    }
+    return status;
+  };
+
+  const getStatusColor = () => {
+    if (isModelError) return "text-destructive";
+    if (isEngineLoading) return "text-amber-600 dark:text-amber-400";
+    if (isModelReady) return "text-green-600 dark:text-green-400";
+    return "text-muted-foreground";
+  };
+
   return (
     <TooltipProvider>
       <div className="relative p-1 pb-4 bg-background w-full max-w-[95%] mx-auto">
+        {/* Model Error Alert */}
+        {isModelError && (
+          <Alert className="mb-3 border-destructive/20 bg-destructive/5">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <AlertDescription className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-destructive">Model Error</p>
+                <p className="text-sm text-muted-foreground">
+                  {status}. Try reloading or selecting a different model.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetryModel}
+                disabled={isEngineLoading}
+                className="ml-4"
+              >
+                <RefreshCw className={`w-3 h-3 mr-1 ${isEngineLoading ? 'animate-spin' : ''}`} />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Drag & Drop Overlay */}
         {isDragOver && (
           <div className="absolute inset-0 bg-primary/20 border-2 border-dashed border-primary rounded-lg z-10 flex items-center justify-center">
@@ -220,9 +313,10 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={`Message ${selectedModel.name}...`}
-              className="min-h-[60px] max-h-[200px] resize-none pr-20"
-              disabled={isLoading || isEngineLoading}
+              placeholder={isModelReady ? `Message ${selectedModel.name}...` : "Model loading..."}
+              className="min-h-[60px] max-h-[200px] resize-none pr-20 overflow-hidden"
+              disabled={isLoading || isEngineLoading || isModelError}
+              style={{ height: '60px' }}
             />
             
             {/* File Attachment Button */}
@@ -242,6 +336,7 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
                 className="h-8 w-8 p-0"
                 onClick={() => fileInputRef.current?.click()}
                 title="Attach files"
+                disabled={isEngineLoading || isModelError}
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -252,22 +347,36 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
               type="submit"
               size="sm"
               className="absolute bottom-2 right-2 h-8 w-8 p-0"
-              disabled={isLoading || isEngineLoading || (!message.trim() && attachedFiles.length === 0)}
+              disabled={isLoading || isEngineLoading || isModelError || (!message.trim() && attachedFiles.length === 0)}
             >
-              <Send className="h-4 w-4" />
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
-          {/* Model Info with Selector */}
+          {/* Model Info with Selector and Status */}
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <ModelSelector disabled={isLoading || isEngineLoading} />
-              {supportsImages && (
+              
+              {/* Model Status */}
+              <div className="flex items-center gap-1">
+                {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}
+                <span className={getStatusColor()}>
+                  {getStatusMessage()}
+                </span>
+              </div>
+
+              {supportsImages && isModelReady && (
                 <span className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full text-xs">
                   Vision
                 </span>
               )}
-              {selectedModel.specialization && (
+              {selectedModel.specialization && isModelReady && (
                 <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs capitalize">
                   {selectedModel.specialization}
                 </span>

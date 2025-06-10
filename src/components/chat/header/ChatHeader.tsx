@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { SidebarTrigger } from "../../ui/sidebar";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useSidebarContext } from "../../layout/ResponsiveChatLayout";
@@ -12,6 +12,7 @@ import {
 import { useHeaderActions } from "./hooks/useHeaderActions";
 import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { SettingsDialog } from "../../dialogs/settings";
+import { ShareChatModal } from "../modals/ShareChatModal";
 
 /**
  * Main chat header component with responsive layout
@@ -22,6 +23,7 @@ export const ChatHeader: React.FC = () => {
   const conversationId = useConversationId();
   const { sidebarOpen } = useSidebarContext();
   const { theme, setTheme } = useTheme();
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const {
     shortcutsOpen,
@@ -52,6 +54,11 @@ export const ChatHeader: React.FC = () => {
     setShortcutsOpen(!shortcutsOpen);
   };
 
+  const handleOpenShare = () => {
+    if (!conversationId) return;
+    setShareModalOpen(true);
+  };
+
   return (
     <TooltipProvider>
       <header className="p-4 flex justify-between items-center gap-4">
@@ -71,6 +78,7 @@ export const ChatHeader: React.FC = () => {
               onTogglePinConversation={handleTogglePinConversation}
               onOpenSettings={handleOpenSettings}
               onOpenShortcuts={handleOpenShortcuts}
+              onOpenShare={handleOpenShare}
             />
           </div>
         </div>
@@ -102,6 +110,7 @@ export const ChatHeader: React.FC = () => {
             onTogglePinConversation={handleTogglePinConversation}
             onOpenSettings={handleOpenSettings}
             onOpenShortcuts={handleOpenShortcuts}
+            onOpenShare={handleOpenShare}
           />
         </div>
       </header>
@@ -112,6 +121,11 @@ export const ChatHeader: React.FC = () => {
         onOpenChange={setShortcutsOpen}
       />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <ShareChatModal 
+        open={shareModalOpen} 
+        onOpenChange={setShareModalOpen} 
+        conversationId={conversationId}
+      />
     </TooltipProvider>
   );
 };
