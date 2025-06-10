@@ -29,10 +29,10 @@ export const ChatInterface: React.FC = () => {
   }
 
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-hidden">
       <ChatHeader />
       <ChatMessages isGenerating={isGenerating} />
       <ChatInput />
-    </>
+    </div>
   );
 };
