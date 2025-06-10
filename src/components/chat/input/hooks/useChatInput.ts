@@ -17,7 +17,7 @@ export function useChatInput(): UseChatInputReturn {
   const navigate = useNavigate();
   const { createConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
   const { conversation } = useConversation(conversationId);
-  const { engine } = useWebLLM();
+  const { engine, systemMessage } = useWebLLM();
 
   const handleMessageSubmit = useCallback(async (message: string) => {
     if (!message.trim()) return;
@@ -68,7 +68,10 @@ export function useChatInput(): UseChatInputReturn {
           let accumulatedResponse = "";
 
           const response = await engine.chat.completions.create({
-            messages: [{ role: "user", content: message }],
+            messages: [
+              { role: "system", content: systemMessage },
+              { role: "user", content: message }
+            ],
             temperature: 0.7,
             max_tokens: 1000,
             stream: true,
