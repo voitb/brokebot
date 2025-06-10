@@ -5,8 +5,7 @@ import { SidebarTrigger } from "../ui/sidebar";
 /**
  * Chat sidebar containing conversation list
  */
-export const ChatSidebar: React.FC = () => {
-  console.log("🟢 ChatSidebar");
+export const ChatSidebar: React.FC = () => { 
 
   return (
     <aside className="w-full h-full flex flex-col bg-background">

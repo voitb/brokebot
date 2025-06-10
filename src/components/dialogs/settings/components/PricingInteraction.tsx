@@ -33,6 +33,14 @@ export function PricingInteraction({
   const [starter, setStarter] = React.useState(starterMonth);
   const [pro, setPro] = React.useState(proMonth);
 
+  // Calculate precise position for the active plan border
+  const getActivePlanTransform = () => {
+    const baseHeight = 64; // Base height of each plan item
+    const gap = 12; // Gap between items
+    const offset = active * (baseHeight + gap);
+    return `translateY(${offset}px)`;
+  };
+
   return (
     <div className="border rounded-xl p-4 max-w-sm w-full flex flex-col items-center gap-4 bg-card">
       <div className="rounded-full relative w-full bg-muted p-1 flex items-center">
@@ -52,7 +60,7 @@ export function PricingInteraction({
           className="py-2 px-3 flex items-center justify-center absolute inset-0 w-1/2 z-10"
           style={{
             transform: `translateX(${period * 100}%)`,
-            transition: "transform 0.3s",
+            transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
           <div className="bg-background shadow-sm rounded-full w-full h-full border"></div>
@@ -61,10 +69,10 @@ export function PricingInteraction({
 
       <div className="w-full relative flex flex-col items-center justify-center gap-3">
         <div
-          className="w-full flex justify-between cursor-pointer border p-3 rounded-lg hover:bg-muted/50 transition-colors"
+          className="w-full flex justify-between cursor-pointer border p-3 rounded-lg hover:bg-muted/50 transition-colors h-16"
           onClick={() => handleChangePlan(0)}
         >
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start justify-center">
             <p className="font-semibold text-lg">Free</p>
             <p className="text-muted-foreground text-sm">
               <span className="text-foreground font-medium">$0.00</span>/month
@@ -87,10 +95,10 @@ export function PricingInteraction({
         </div>
 
         <div
-          className="w-full flex justify-between cursor-pointer border p-4 rounded-lg hover:bg-muted/50 transition-colors"
+          className="w-full flex justify-between cursor-pointer border p-3 rounded-lg hover:bg-muted/50 transition-colors h-16"
           onClick={() => handleChangePlan(1)}
         >
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start justify-center">
             <p className="font-semibold text-lg flex items-center gap-2">
               Starter
               <span className="py-0.5 px-2 rounded-md bg-yellow-100 text-yellow-800 text-xs font-medium dark:bg-yellow-900 dark:text-yellow-200">
@@ -121,10 +129,10 @@ export function PricingInteraction({
         </div>
 
         <div
-          className="w-full flex justify-between cursor-pointer border p-4 rounded-lg hover:bg-muted/50 transition-colors"
+          className="w-full flex justify-between cursor-pointer border p-3 rounded-lg hover:bg-muted/50 transition-colors h-16"
           onClick={() => handleChangePlan(2)}
         >
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-start justify-center">
             <p className="font-semibold text-lg">Pro</p>
             <p className="text-muted-foreground text-sm flex">
               <span className="text-foreground font-medium flex items-center">
@@ -150,10 +158,10 @@ export function PricingInteraction({
         </div>
 
         <div
-          className="w-full h-[76px] absolute top-0 border-2 border-primary rounded-lg pointer-events-none"
+          className="w-full h-16 absolute top-0 border-2 border-primary rounded-lg pointer-events-none"
           style={{
-            transform: `translateY(${active * 76 + 12 * active}px)`,
-            transition: "transform 0.3s",
+            transform: getActivePlanTransform(),
+            transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         ></div>
       </div>
