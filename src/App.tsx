@@ -19,7 +19,7 @@ function App() {
                 <Route path="/" element={<WelcomeScreen />} />
                 <Route path="/chat" element={<ChatInterface />} />
                 <Route
-                  path="/chat/:conversationId"
+                  path="/chat/*"
                   element={
                     <ChatGuard>
                       <ChatInterface />

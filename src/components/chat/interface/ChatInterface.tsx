@@ -1,17 +1,17 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header";
 import { ChatMessages } from "../messages";
 import { ChatInput } from "../input";
 import { useConversation } from "../../../hooks/useConversations";
+import { useConversationId } from "../../../hooks/useConversationId";
 import { useChatInput } from "../input/hooks";
 
 /**
  * Main chat interface component combining header, messages, and input
  */
 export const ChatInterface: React.FC = () => {
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
   const { conversation } = useConversation(conversationId);
   // Only get isGenerating for showing loading indicator
   const { isGenerating } = useChatInput();

@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
+import { useConversationId } from "../../../../hooks/useConversationId";
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
 
 interface UseChatInputReturn {
@@ -12,7 +13,7 @@ interface UseChatInputReturn {
 export function useChatInput(): UseChatInputReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
   const navigate = useNavigate();
   const { createConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
   const { conversation } = useConversation(conversationId);

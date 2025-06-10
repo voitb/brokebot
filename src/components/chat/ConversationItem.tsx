@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 import { EditableConversationTitle } from "./EditableConversationTitle";
 import { DeleteConversationDialog } from "./DeleteConversationDialog";
 import { useConversations } from "../../hooks/useConversations";
+import { useConversationId } from "../../hooks/useConversationId";
 import type { IConversation } from "../../lib/db";
 
 interface ConversationItemProps {
@@ -25,9 +26,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
   conversation,
 }) => {
   const navigate = useNavigate();
-  const { conversationId: currentConversationId } = useParams<{
-    conversationId: string;
-  }>();
+  const currentConversationId = useConversationId();
   const { togglePinConversation, updateConversationTitle, deleteConversation } =
     useConversations();
 

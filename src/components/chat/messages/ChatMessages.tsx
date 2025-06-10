@@ -1,7 +1,7 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { ScrollArea } from "../../ui/scroll-area";
 import { useConversation } from "../../../hooks/useConversations";
+import { useConversationId } from "../../../hooks/useConversationId";
 import { MessageBubble, LoadingIndicator, EmptyState } from "./components";
 
 interface ChatMessagesProps {
@@ -16,7 +16,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isLoading = false,
   isGenerating = false,
 }) => {
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
 
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useConversationId } from "../../../../hooks/useConversationId";
 import { useChatGuard } from "../../../../hooks/chat";
 
 interface ChatGuardProps {
@@ -15,7 +15,7 @@ export const ChatGuard: React.FC<ChatGuardProps> = ({
   children,
   fallback = null,
 }) => {
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
   const { isChecking } = useChatGuard({ conversationId });
 
   // Show fallback or nothing while checking

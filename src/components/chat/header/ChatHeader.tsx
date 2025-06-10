@@ -1,9 +1,9 @@
 import React from "react";
-import { useParams } from "react-router-dom";
 import { SidebarTrigger } from "../../ui/sidebar";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useSidebarContext } from "../../layout/ResponsiveChatLayout";
 import { useTheme } from "../../../providers/ThemeProvider";
+import { useConversationId } from "../../../hooks/useConversationId";
 import {
   ActionButtons,
   BreadcrumbNavigation,
@@ -19,7 +19,7 @@ import { SettingsDialog } from "../../dialogs/settings";
  * Desktop: breadcrumbs/new chat button + action buttons
  */
 export const ChatHeader: React.FC = () => {
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
   const { sidebarOpen } = useSidebarContext();
   const { theme, setTheme } = useTheme();
 

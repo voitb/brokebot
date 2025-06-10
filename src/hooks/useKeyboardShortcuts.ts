@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useConversationId } from './useConversationId';
 
 interface UseKeyboardShortcutsProps {
   onToggleSidebar?: () => void;
@@ -21,7 +22,7 @@ export function useKeyboardShortcuts({
   onShowShortcuts,
 }: UseKeyboardShortcutsProps = {}) {
   const navigate = useNavigate();
-  const { conversationId } = useParams<{ conversationId: string }>();
+  const conversationId = useConversationId();
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Ignore shortcuts when typing in input/textarea
