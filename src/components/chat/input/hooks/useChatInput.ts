@@ -5,14 +5,16 @@ import { useWebLLM } from "../../../../providers/WebLLMProvider";
 
 interface UseChatInputReturn {
   isLoading: boolean;
+  isGenerating: boolean;
   handleMessageSubmit: (message: string) => Promise<void>;
 }
 
 export function useChatInput(): UseChatInputReturn {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
-  const { createConversation, addMessage, updateConversationTitle } = useConversations();
+  const { createConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
   const { conversation } = useConversation(conversationId);
   const { engine } = useWebLLM();
 
@@ -49,39 +51,65 @@ export function useChatInput(): UseChatInputReturn {
         }
       }
 
+      setIsLoading(false);
+
       // If AI engine is ready, generate response
       if (engine && currentConversationId) {
+        setIsGenerating(true);
+        
         try {
+          // Add placeholder for AI message that will be streamed
+          const aiMessageId = await addMessage(currentConversationId, {
+            role: "assistant",
+            content: "",
+          });
+
+          let accumulatedResponse = "";
+
           const response = await engine.chat.completions.create({
             messages: [{ role: "user", content: message }],
             temperature: 0.7,
             max_tokens: 1000,
+            stream: true,
           });
 
-          const aiResponse = response.choices[0]?.message?.content ||
-            "Sorry, I couldn't generate a response.";
+          // Stream the response
+          for await (const chunk of response) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              accumulatedResponse += content;
+              
+              // Update the message with accumulated content
+              await updateMessage(currentConversationId, aiMessageId, accumulatedResponse);
+            }
+          }
 
-          await addMessage(currentConversationId, {
-            role: "assistant",
-            content: aiResponse,
-          });
+          // Fallback if no content was streamed
+          if (!accumulatedResponse.trim()) {
+            await updateMessage(currentConversationId, aiMessageId, 
+              "Sorry, I couldn't generate a response."
+            );
+          }
+
         } catch (aiError) {
           console.error("AI response error:", aiError);
           await addMessage(currentConversationId, {
             role: "assistant",
             content: "I'm sorry, I'm having trouble processing your request right now. Please try again later.",
           });
+        } finally {
+          setIsGenerating(false);
         }
       }
     } catch (error) {
       console.error("Error sending message:", error);
-    } finally {
       setIsLoading(false);
     }
   }, [conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine]);
 
   return {
     isLoading,
+    isGenerating,
     handleMessageSubmit,
   };
 } 

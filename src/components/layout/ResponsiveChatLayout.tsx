@@ -31,8 +31,7 @@ export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
   useKeyboardShortcuts({
     onToggleSidebar: () => setSidebarOpen(!sidebarOpen),
     onNewChat: () => {
-      const newConversationId = Date.now();
-      window.location.href = `/chat/${newConversationId}`;
+      window.location.href = "/chat";
     },
     onSearch: () => {
       const searchInput = document.querySelector(

@@ -5,6 +5,7 @@ import { ChatHeader } from "../header";
 import { ChatMessages } from "../messages";
 import { ChatInput } from "../input";
 import { useConversation } from "../../../hooks/useConversations";
+import { useChatInput } from "../input/hooks";
 
 /**
  * Main chat interface component combining header, messages, and input
@@ -12,6 +13,8 @@ import { useConversation } from "../../../hooks/useConversations";
 export const ChatInterface: React.FC = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { conversation } = useConversation(conversationId);
+  // Only get isGenerating for showing loading indicator
+  const { isGenerating } = useChatInput();
 
   // Show loader while conversation is being loaded (only for specific conversation IDs)
   if (conversationId && conversation === undefined) {
@@ -28,7 +31,7 @@ export const ChatInterface: React.FC = () => {
   return (
     <>
       <ChatHeader />
-      <ChatMessages />
+      <ChatMessages isGenerating={isGenerating} />
       <ChatInput />
     </>
   );

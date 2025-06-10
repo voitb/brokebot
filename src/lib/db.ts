@@ -39,6 +39,10 @@ export interface IUserConfig {
   storeConversationsLocally: boolean;
   compactMode: boolean;
   showTimestamps: boolean;
+  // API Keys
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+  googleApiKey?: string;
   createdAt: Date;
   updatedAt: Date;
 }

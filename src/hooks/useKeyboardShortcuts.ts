@@ -37,14 +37,13 @@ export function useKeyboardShortcuts({
     const cmdOrCtrl = ctrlKey || metaKey;
 
     switch (true) {
-      // Ctrl/Cmd + N - New Chat (changed from Ctrl+Shift+N)
+      // Alt + N - New Chat
       case altKey && key === 'n':
         event.preventDefault();
         if (onNewChat) {
           onNewChat();
         } else {
-          const newConversationId = Date.now();
-          navigate(`/chat/${newConversationId}`);
+          navigate('/chat');
         }
         break;
 
@@ -66,14 +65,14 @@ export function useKeyboardShortcuts({
         onPinChat?.();
         break;
 
-      // F2 - Rename current chat
-      case altKey && key === 'F2' && !!conversationId:
+      // Alt + R - Rename current chat  
+      case altKey && key === 'r' && !!conversationId:
         event.preventDefault();
         onRenameChat?.();
         break;
 
-      // Delete - Delete current chat
-      case altKey &&  key === 'Delete' && !!conversationId:
+      // Alt + Delete - Delete current chat
+      case altKey && key === 'Delete' && !!conversationId:
         event.preventDefault();
         onDeleteChat?.();
         break;
@@ -114,8 +113,7 @@ export function useKeyboardShortcuts({
   return {
     // Return functions that components can call
     createNewChat: () => {
-      const newConversationId = Date.now();
-      navigate(`/chat/${newConversationId}`);
+      navigate('/chat');
     },
     navigateHome: () => navigate('/'),
     currentConversationId: conversationId,

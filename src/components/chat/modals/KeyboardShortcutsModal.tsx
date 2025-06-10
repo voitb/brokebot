@@ -72,7 +72,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
                 <div className="flex justify-between items-center">
                   <span>Rename Chat</span>
                   <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+F2
+                    Alt+R
                   </kbd>
                 </div>
                 <div className="flex justify-between items-center">
