@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle } from "lucide-react";
+import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -49,6 +49,8 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         return <HardDrive className="w-3 h-3" />;
       case "heavy":
         return <AlertTriangle className="w-3 h-3" />;
+      case "extreme":
+        return <Shield className="w-3 h-3" />;
       default:
         return <Cpu className="w-3 h-3" />;
     }
@@ -57,29 +59,62 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   const getCategoryLabel = (category: string) => {
     switch (category) {
       case "light":
-        return "Light Models (1-4GB RAM)";
+        return "Light Models (0.5-4GB RAM)";
       case "medium":
         return "Medium Models (3-6GB RAM)";
       case "large":
         return "Large Models (6-10GB RAM)";
       case "heavy":
         return "Heavy Models (8-16GB RAM) - Resource Intensive";
+      case "extreme":
+        return "Extreme Models (16GB+ RAM) - High-End Hardware Only";
       default:
-        return category;
+        return category.charAt(0).toUpperCase() + category.slice(1);
+    }
+  };
+
+  const getModelTypeIcon = (modelType: string) => {
+    switch (modelType) {
+      case "VLM":
+        return <Eye className="w-3 h-3" />;
+      case "embedding":
+        return <Database className="w-3 h-3" />;
+      default:
+        return null;
+    }
+  };
+
+  const getSpecializationIcon = (specialization?: string) => {
+    switch (specialization) {
+      case "coding":
+        return <Code className="w-3 h-3" />;
+      case "math":
+        return <Calculator className="w-3 h-3" />;
+      default:
+        return null;
     }
   };
 
   const getPerformanceBadgeVariant = (performance: string) => {
     switch (performance) {
+      case "Basic":
+        return "outline";
       case "Fast":
+      case "Good":
         return "default";
       case "Balanced":
-        return "secondary";
       case "High Quality":
-        return "outline";
+        return "secondary";
       case "Excellent":
+      case "Premium":
+        return "destructive";
+      case "Ultimate":
         return "destructive";
       case "Reasoning":
+      case "Multimodal":
+      case "Coding":
+      case "Math":
+      case "Embeddings":
         return "secondary";
       default:
         return "default";
@@ -89,17 +124,27 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   const getCategoryTooltip = (category: string) => {
     switch (category) {
       case "light":
-        return "Fast models suitable for most devices";
+        return "Fast, efficient models suitable for most devices including mobile";
       case "medium":
-        return "Balanced performance and resource usage";
+        return "Balanced performance and resource usage - good for laptops";
       case "large":
-        return "High quality models requiring more resources";
+        return "High quality models requiring dedicated graphics or 8GB+ RAM";
       case "heavy":
-        return "Excellent quality but very resource intensive - may slow down your device";
+        return "Excellent quality but very resource intensive - may slow down your device significantly";
+      case "extreme":
+        return "Ultimate performance models requiring high-end hardware with 16GB+ RAM";
       default:
         return "";
     }
   };
+
+  // Sort categories by intensity
+  const categoryOrder = ["light", "medium", "large", "heavy", "extreme"];
+  const sortedCategories = Object.keys(modelsByCategory).sort((a, b) => {
+    const aIndex = categoryOrder.indexOf(a);
+    const bIndex = categoryOrder.indexOf(b);
+    return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+  });
 
   return (
     <DropdownMenu>
@@ -117,56 +162,85 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         <ScrollArea className="h-96">
-          {Object.entries(modelsByCategory).map(([category, models]) => (
-            <div key={category}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-help">
-                    {getCategoryIcon(category)}
-                    {getCategoryLabel(category)}
-                  </DropdownMenuLabel>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{getCategoryTooltip(category)}</p>
-                </TooltipContent>
-              </Tooltip>
-              {models.map((model) => (
-                <DropdownMenuItem
-                  key={model.id}
-                  onClick={() => handleModelSelect(model)}
-                  className="flex flex-col items-start gap-2 p-3 cursor-pointer"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="font-medium text-sm">{model.name}</span>
-                    <div className="flex gap-1">
-                      <Badge 
-                        variant={getPerformanceBadgeVariant(model.performance)} 
-                        className="text-xs"
-                      >
-                        {model.performance}
-                      </Badge>
-                      {selectedModel.id === model.id && (
-                        <Badge variant="default" className="text-xs">
-                          Active
+          {sortedCategories.map((category) => {
+            const models = modelsByCategory[category];
+            return (
+              <div key={category}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground cursor-help">
+                      {getCategoryIcon(category)}
+                      {getCategoryLabel(category)}
+                    </DropdownMenuLabel>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{getCategoryTooltip(category)}</p>
+                  </TooltipContent>
+                </Tooltip>
+                {models.map((model) => (
+                  <DropdownMenuItem
+                    key={model.id}
+                    onClick={() => handleModelSelect(model)}
+                    className="flex flex-col items-start gap-2 p-3 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{model.name}</span>
+                        {getModelTypeIcon(model.modelType)}
+                        {getSpecializationIcon(model.specialization)}
+                      </div>
+                      <div className="flex gap-1">
+                        <Badge 
+                          variant={getPerformanceBadgeVariant(model.performance)} 
+                          className="text-xs"
+                        >
+                          {model.performance}
                         </Badge>
+                        {selectedModel.id === model.id && (
+                          <Badge variant="default" className="text-xs">
+                            Active
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-1 w-full">
+                      <div className="flex items-center gap-1">
+                        {model.description}
+                        {model.warning && (
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <AlertTriangle className="w-3 h-3 text-amber-500" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{model.warning}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Size: {model.size}</span>
+                        <span>Download: {model.downloadSize}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Requirements: {model.ramRequirement}</span>
+                        {model.modelType && model.modelType !== 'LLM' && (
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                            {model.modelType}
+                          </span>
+                        )}
+                      </div>
+                      {model.specialization && (
+                        <div className="text-purple-600 dark:text-purple-400 font-medium">
+                          Specialized: {model.specialization}
+                        </div>
                       )}
                     </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground space-y-1 w-full">
-                    <div>{model.description}</div>
-                    <div className="flex justify-between">
-                      <span>Size: {model.size}</span>
-                      <span>Download: {model.downloadSize}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Requirements: {model.ramRequirement}</span>
-                    </div>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-            </div>
-          ))}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </div>
+            );
+          })}
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>

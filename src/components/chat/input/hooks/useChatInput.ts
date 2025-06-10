@@ -5,12 +5,15 @@ import { useConversationId } from "../../../../hooks/useConversationId";
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
 
 interface UseChatInputReturn {
+  message: string;
+  setMessage: (message: string) => void;
   isLoading: boolean;
   isGenerating: boolean;
-  handleMessageSubmit: (message: string) => Promise<void>;
+  handleMessageSubmit: (message?: string) => Promise<void>;
 }
 
 export function useChatInput(): UseChatInputReturn {
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const conversationId = useConversationId();
@@ -19,18 +22,24 @@ export function useChatInput(): UseChatInputReturn {
   const { conversation } = useConversation(conversationId);
   const { engine, systemMessage } = useWebLLM();
 
-  const handleMessageSubmit = useCallback(async (message: string) => {
-    if (!message.trim()) return;
+  const handleMessageSubmit = useCallback(async (messageToSend?: string) => {
+    const messageContent = messageToSend || message;
+    if (!messageContent.trim()) return;
 
     setIsLoading(true);
+    
+    // Clear input after submission
+    if (!messageToSend) {
+      setMessage("");
+    }
 
     try {
       let currentConversationId = conversationId;
 
       // If no conversation ID, create new conversation
       if (!currentConversationId) {
-        const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
-        const newConversationId = await createConversation(title, message);
+        const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
+        const newConversationId = await createConversation(title, messageContent);
 
         if (newConversationId) {
           currentConversationId = newConversationId;
@@ -42,12 +51,12 @@ export function useChatInput(): UseChatInputReturn {
         // Add user message to existing conversation (may be empty)
         await addMessage(currentConversationId, {
           role: "user",
-          content: message,
+          content: messageContent,
         });
 
         // If this is first message in empty conversation, update title
         if (conversation && conversation.messages.length === 0) {
-          const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
+          const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
           await updateConversationTitle(currentConversationId, title);
         }
       }
@@ -70,7 +79,7 @@ export function useChatInput(): UseChatInputReturn {
           const response = await engine.chat.completions.create({
             messages: [
               { role: "system", content: systemMessage },
-              { role: "user", content: message }
+              { role: "user", content: messageContent }
             ],
             temperature: 0.7,
             max_tokens: 1000,
@@ -109,9 +118,11 @@ export function useChatInput(): UseChatInputReturn {
       console.error("Error sending message:", error);
       setIsLoading(false);
     }
-  }, [conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine]);
+  }, [message, conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine, systemMessage]);
 
   return {
+    message,
+    setMessage,
     isLoading,
     isGenerating,
     handleMessageSubmit,

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
@@ -35,7 +36,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     }
   };
 
-  const CodeBlock = ({ inline, className, children, ...props }: any) => {
+  const CodeBlock: Components['code'] = ({ inline, className, children, ...props }) => {
     const match = /language-(\w+)/.exec(className || "");
     const language = match ? match[1] : "";
     const code = String(children).replace(/\n$/, "");
