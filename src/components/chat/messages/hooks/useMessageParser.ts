@@ -10,35 +10,31 @@ interface ParsedMessage {
  */
 export function useMessageParser(content: string): ParsedMessage {
   return useMemo(() => {
-    // Check if message starts with <think>
-    if (content.startsWith("<think>")) {
-      const thinkEndMatch = content.match(/<\/think>/);
-
-      if (thinkEndMatch) {
-        // Complete thinking block found
-        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
-        if (thinkMatch) {
-          const thinking = thinkMatch[1].trim();
-          const remainingContent = content
-            .replace(/<think>[\s\S]*?<\/think>/, "")
-            .trim();
-          return { thinking, content: remainingContent };
-        }
-      } else {
-        // Incomplete thinking block - still generating
-        const thinking = content.replace(/^<think>/, "").trim();
-        return { thinking, content: "" };
-      }
-    }
-
-    // Check for complete thinking blocks anywhere in content (original logic)
-    const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
-    if (thinkMatch) {
-      const thinking = thinkMatch[1].trim();
+    // First check for complete thinking blocks anywhere in content
+    const completeThinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+    if (completeThinkMatch) {
+      const thinking = completeThinkMatch[1].trim();
       const remainingContent = content
-        .replace(/<think>[\s\S]*?<\/think>/, "")
+        .replace(/<think>[\s\S]*?<\/think>/g, "")
         .trim();
       return { thinking, content: remainingContent };
+    }
+
+    // Check if message starts with <think> but has no closing tag (still generating)
+    if (content.startsWith("<think>")) {
+      const thinking = content.replace(/^<think>/, "").trim();
+      return { thinking, content: "" };
+    }
+
+    // Check if content only contains </think> (end of thinking, no content yet)
+    if (content.trim() === "</think>") {
+      return { content: "" };
+    }
+
+    // Check if content starts with </think> (thinking ended, now content starts)
+    if (content.startsWith("</think>")) {
+      const remainingContent = content.replace(/^<\/think>/, "").trim();
+      return { content: remainingContent };
     }
 
     return { content };

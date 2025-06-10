@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
@@ -11,25 +11,40 @@ interface UseChatInputReturn {
   isGenerating: boolean;
   handleMessageSubmit: (message?: string) => Promise<void>;
   regenerateLastResponse: () => Promise<void>;
+  stopGeneration: () => void;
 }
 
 export function useChatInput(): UseChatInputReturn {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const conversationId = useConversationId();
   const navigate = useNavigate();
   const { createConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
   const { conversation, messages } = useConversation(conversationId);
   const { engine, systemMessage } = useWebLLM();
 
+  const stopGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsGenerating(false);
+  }, []);
+
   const generateAIResponse = useCallback(async (userMessage: string, aiMessageId: string, conversationId: string) => {
     if (!engine) return;
 
+    // Create new abort controller for this generation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setIsGenerating(true);
     
+    let accumulatedResponse = "";
+    
     try {
-      let accumulatedResponse = "";
 
       const response = await engine.chat.completions.create({
         messages: [
@@ -43,6 +58,12 @@ export function useChatInput(): UseChatInputReturn {
 
       // Stream the response
       for await (const chunk of response) {
+        // Check if generation was aborted
+        if (abortController.signal.aborted) {
+          console.log("Generation aborted by user");
+          return;
+        }
+
         const content = chunk.choices[0]?.delta?.content || "";
         if (content) {
           accumulatedResponse += content;
@@ -59,19 +80,35 @@ export function useChatInput(): UseChatInputReturn {
         );
       }
 
-    } catch (aiError) {
-      console.error("AI response error:", aiError);
-      await updateMessage(conversationId, aiMessageId,
-        "I'm sorry, I'm having trouble processing your request right now. Please try again later."
-      );
+    } catch (aiError: unknown) {
+      if ((aiError as Error).name === 'AbortError' || abortController.signal.aborted) {
+        console.log("Generation was aborted");
+        // Optionally add a message indicating generation was stopped
+        if (accumulatedResponse) {
+          await updateMessage(conversationId, aiMessageId, accumulatedResponse + "\n\n*Generation stopped*");
+        }
+      } else {
+        console.error("AI response error:", aiError);
+        await updateMessage(conversationId, aiMessageId,
+          "I'm sorry, I'm having trouble processing your request right now. Please try again later."
+        );
+      }
     } finally {
       setIsGenerating(false);
+      abortControllerRef.current = null;
     }
   }, [engine, systemMessage, updateMessage]);
 
   const handleMessageSubmit = useCallback(async (messageToSend?: string) => {
     const messageContent = messageToSend || message;
     if (!messageContent.trim()) return;
+
+    // If already generating, stop previous generation
+    if (isGenerating) {
+      stopGeneration();
+      // Wait a bit for the abort to take effect
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
     setIsLoading(true);
     
@@ -124,10 +161,17 @@ export function useChatInput(): UseChatInputReturn {
       console.error("Error sending message:", error);
       setIsLoading(false);
     }
-  }, [message, conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine, generateAIResponse]);
+  }, [message, conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine, generateAIResponse, isGenerating, stopGeneration]);
 
   const regenerateLastResponse = useCallback(async () => {
     if (!conversationId || !messages || messages.length < 2) return;
+
+    // If already generating, stop previous generation
+    if (isGenerating) {
+      stopGeneration();
+      // Wait a bit for the abort to take effect
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
     // Find the last user message and AI response
     const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user");
@@ -138,7 +182,7 @@ export function useChatInput(): UseChatInputReturn {
     // Clear the AI response and regenerate
     await updateMessage(conversationId, lastAiMessage.id, "");
     await generateAIResponse(lastUserMessage.content, lastAiMessage.id, conversationId);
-  }, [conversationId, messages, updateMessage, generateAIResponse]);
+  }, [conversationId, messages, updateMessage, generateAIResponse, isGenerating, stopGeneration]);
 
   return {
     message,
@@ -147,5 +191,6 @@ export function useChatInput(): UseChatInputReturn {
     isGenerating,
     handleMessageSubmit,
     regenerateLastResponse,
+    stopGeneration,
   };
 } 

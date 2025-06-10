@@ -19,7 +19,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 }) => {
   const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
-  const { regenerateLastResponse } = useChatInput();
+  const { regenerateLastResponse, stopGeneration } = useChatInput();
   const { isLoading: isEngineLoading, status } = useWebLLM();
 
   // Check if model is ready
@@ -63,6 +63,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 index === messages.length - 1 &&
                 isModelReady
                   ? regenerateLastResponse
+                  : undefined
+              }
+              onStopGeneration={
+                message.role === "assistant" &&
+                index === messages.length - 1 &&
+                isGenerating
+                  ? stopGeneration
                   : undefined
               }
             />
