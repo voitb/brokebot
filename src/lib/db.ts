@@ -16,6 +16,7 @@ export interface IConversation {
   title: string;
   messages: IMessage[];
   pinned: boolean;
+  shareId?: string; // Optional share ID for public sharing
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +38,7 @@ export interface IUserConfig {
   selectedModelId: string;
   autoLoadModel: boolean;
   storeConversationsLocally: boolean;
+  storeConversationsInCloud: boolean;
   compactMode: boolean;
   showTimestamps: boolean;
   // API Keys
@@ -57,6 +59,7 @@ export const DEFAULT_USER_CONFIG: IUserConfig = {
   selectedModelId: "Llama-3.1-8B-Instruct-q4f32_1-MLC",
   autoLoadModel: true,
   storeConversationsLocally: true,
+  storeConversationsInCloud: false,
   compactMode: false,
   showTimestamps: false,
   createdAt: new Date(),
@@ -70,8 +73,32 @@ export class LocalGptDB extends Dexie {
 
   constructor() {
     super("LocalGptDB");
+    
+    // Version 2 schema
     this.version(2).stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
+      documents: "++id, filename, fileType, createdAt",
+      userConfig: "id, updatedAt",
+    });
+
+    // Version 3 schema - adds storeConversationsInCloud field
+    this.version(3).stores({
+      conversations: "id, title, pinned, createdAt, updatedAt",
+      documents: "++id, filename, fileType, createdAt",
+      userConfig: "id, updatedAt",
+    }).upgrade(async (tx) => {
+      // Add default value for new field to existing configs
+      const config = await tx.table('userConfig').get('user_config');
+      if (config && config.storeConversationsInCloud === undefined) {
+        await tx.table('userConfig').update('user_config', {
+          storeConversationsInCloud: false
+        });
+      }
+    });
+
+    // Version 4 schema - adds shareId field to conversations
+    this.version(4).stores({
+      conversations: "id, title, pinned, shareId, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
     });
