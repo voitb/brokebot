@@ -10,6 +10,16 @@ interface ApiKeySectionProps {
   provider: keyof ApiKeys;
 }
 
+const providerDetails = {
+  openrouter: { name: "OpenRouter", url: "https://openrouter.ai/keys" },
+  openai: { name: "OpenAI", url: "https://platform.openai.com/api-keys" },
+  google: { name: "Google", url: "https://aistudio.google.com/app/api-keys" },
+  anthropic: {
+    name: "Anthropic",
+    url: "https://console.anthropic.com/settings/keys",
+  },
+};
+
 export const ApiKeySection: React.FC<ApiKeySectionProps> = ({ provider }) => {
   const {
     apiKey,
@@ -22,19 +32,24 @@ export const ApiKeySection: React.FC<ApiKeySectionProps> = ({ provider }) => {
     cancelEditing,
   } = useApiKeyManager(provider);
 
+  const details = providerDetails[provider];
+
   return (
-    <div className="px-4 mb-4 space-y-3">
-      <Label htmlFor="api-key" className="text-sm font-medium">
-        OpenRouter API Key
+    <div className="space-y-3">
+      <Label
+        htmlFor={`api-key-${provider}`}
+        className="text-xs font-light text-muted-foreground"
+      >
+        {details.name} API Key
       </Label>
       <div className="flex gap-2">
         <Input
-          id="api-key"
+          id={`api-key-${provider}`}
           type={isEditing || !hasStoredKey ? "text" : "password"}
           placeholder={
             hasStoredKey
               ? "API key configured"
-              : "Enter your OpenRouter API key"
+              : `Enter your ${details.name} API key`
           }
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
@@ -101,12 +116,12 @@ export const ApiKeySection: React.FC<ApiKeySectionProps> = ({ provider }) => {
         <p className="text-xs text-muted-foreground">
           Get your free API key from{" "}
           <a
-            href="https://openrouter.ai/keys"
+            href={details.url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
           >
-            openrouter.ai/keys
+            {details.url.replace("https://", "")}
           </a>
         </p>
       )}

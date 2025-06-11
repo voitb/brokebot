@@ -25,7 +25,10 @@ interface CodeBlockHeaderProps {
   code: string;
 }
 
-const CodeBlockHeader: React.FC<CodeBlockHeaderProps> = ({ language, code }) => (
+const CodeBlockHeader: React.FC<CodeBlockHeaderProps> = ({
+  language,
+  code,
+}) => (
   <div className="flex items-center justify-between bg-muted px-3 py-2 rounded-t-lg border">
     <span className="text-xs font-medium text-muted-foreground uppercase">
       {language}
@@ -41,35 +44,35 @@ const CodeBlockHeader: React.FC<CodeBlockHeaderProps> = ({ language, code }) => 
 /**
  * Code block component with syntax highlighting and copy functionality
  */
-export const CodeBlock: React.FC<CodeBlockProps> = React.memo(({
-  className,
-  children,
-}) => {
-  const { language, code, isInline, syntaxStyle } = useCodeHighlighting({
-    className,
-    children,
-  });
+export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
+  ({ className, children }) => {
+    const { language, code, isInline, syntaxStyle } = useCodeHighlighting({
+      className,
+      children,
+    });
 
-  if (isInline) {
-    return <InlineCode>{children}</InlineCode>;
+    if (isInline) {
+      return <InlineCode>{children}</InlineCode>;
+    }
+
+    return (
+      <div className="relative group">
+        <CodeBlockHeader language={language} code={code} />
+        <SyntaxHighlighter
+          style={syntaxStyle}
+          language={language}
+          PreTag="div"
+          wrapLines={false}
+          className="!m-0 !rounded-t-none !border-t-0"
+          customStyle={{
+            margin: 0,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }}
+        >
+          {code}
+        </SyntaxHighlighter>
+      </div>
+    );
   }
-
-  return (
-    <div className="relative group">
-      <CodeBlockHeader language={language} code={code} />
-      <SyntaxHighlighter
-        style={syntaxStyle}
-        language={language}
-        PreTag="div"
-        className="!m-0 !rounded-t-none !border-t-0"
-        customStyle={{
-          margin: 0,
-          borderTopLeftRadius: 0,
-          borderTopRightRadius: 0,
-        }}
-      >
-        {code}
-      </SyntaxHighlighter>
-    </div>
-  );
-});
+);

@@ -9,6 +9,7 @@ interface ModelCardProps {
   isSelected: boolean;
   onSelect: (model: OpenRouterModel) => void;
   isFree: boolean;
+  isEnabled: boolean;
 }
 
 const getCategoryIcon = (category: string) => {
@@ -33,13 +34,16 @@ export const ModelCard: React.FC<ModelCardProps> = ({
   isSelected,
   onSelect,
   isFree,
+  isEnabled,
 }) => {
   return (
     <Card
-      className={`cursor-pointer transition-colors hover:bg-accent ${
-        isSelected ? "ring-2 ring-primary" : ""
-      }`}
-      onClick={() => onSelect(model)}
+      className={`transition-colors ${
+        isEnabled
+          ? "cursor-pointer hover:bg-accent"
+          : "opacity-50 cursor-not-allowed"
+      } ${isSelected ? "ring-2 ring-primary" : ""}`}
+      onClick={() => isEnabled && onSelect(model)}
     >
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center justify-between">
