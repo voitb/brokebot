@@ -27,46 +27,28 @@ export default async ({ req, res, log, error }) => {
   
     log(`Forwarding request to model: ${model}`);
   
-    try {
-    //   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    //     method: "POST",
-    //     headers: {
-    //       "Authorization": `Bearer ${apiKey}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       model: model,
-    //       messages: messages,
-    //     }),
-    //   });
-  
-    //   const responseBody = await response.text();
-    //   res.header("Content-Type", response.headers.get("Content-Type"));
-    //   return res.send(responseBody, response.status);
-
-      const mockResponse = {
-        id: "chatcmpl-mock-12345",
-        object: "chat.completion",
-        created: Math.floor(Date.now() / 1000),
-        model: model || "mock-model/debug-v1",
-        choices: [
-          {
-            index: 0,
-            message: {
-              role: "assistant",
-              content: ` '${model}' '${messages[messages.length - 1].content}'`,
-            },
-            finish_reason: "stop",
-          },
-        ],
-        usage: {
-          prompt_tokens: 0,
-          completion_tokens: 0,
-          total_tokens: 0,
+        try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:5173", // Your app URL
+          "X-Title": "Local GPT", // Your app name
         },
-      };
-     
-      return res.json(mockResponse);
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+        }),
+      });
+
+      const responseBody = await response.text();
+      
+      // Set proper content type from OpenRouter response
+      const contentType = response.headers.get("Content-Type") || "application/json";
+      res.header("Content-Type", contentType);
+      
+      return res.send(responseBody, response.status);
     } catch (e) {
       error(`Internal error while communicating with OpenRouter: ${e.message}`);
       return res.json({ error: "Server error occurred." }, 500);
