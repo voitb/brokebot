@@ -492,6 +492,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         modelId,
         {
           initProgressCallback: (report) => {
+            console.log("report", report);
             setEngineState((prev) => ({
               ...prev,
               progress: report.progress,

@@ -4,12 +4,8 @@ import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
 import { useScrollPosition } from "../../../hooks/useScrollPosition";
 import { useAutoScroll } from "../../../hooks/useAutoScroll";
-import {
-  MessageBubble,
-  LoadingIndicator,
-  EmptyState,
-  ScrollToBottomButton,
-} from "./components";
+import { useChatInput } from "../input/hooks";
+import { MessageBubble, EmptyState, ScrollToBottomButton } from "./components";
 
 interface ChatMessagesProps {
   isLoading?: boolean;
@@ -22,6 +18,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 }) => {
   const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
+  const { regenerateLastResponse } = useChatInput();
 
   const { scrollAreaRef, isNearBottom, shouldAutoScroll, setShouldAutoScroll } =
     useScrollPosition(30);
@@ -51,15 +48,20 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           )}
 
           {messages.map((message, index) => (
-            <MessageBubble 
-              key={message.id} 
-              message={message} 
+            <MessageBubble
+              key={message.id}
+              message={message}
               isGenerating={isGenerating}
               isLastMessage={index === messages.length - 1}
+              onRegenerate={
+                message.role === "assistant" && index === messages.length - 1
+                  ? regenerateLastResponse
+                  : undefined
+              }
             />
           ))}
 
-          {isGenerating && <LoadingIndicator />}
+          {/* LoadingIndicator is now handled inside MessageBubble when isGenerating && no content */}
         </div>
       </ScrollArea>
 
