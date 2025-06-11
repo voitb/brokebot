@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header";
 import { ChatMessages } from "../messages";
@@ -6,6 +6,7 @@ import { ChatInput } from "../input";
 import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
 import { useChatInput } from "../input/hooks";
+import { functions } from "@/lib/appwriteClient";
 
 /**
  * Main chat interface component combining header, messages, and input
@@ -15,6 +16,22 @@ export const ChatInterface: React.FC = () => {
   const { conversation } = useConversation(conversationId);
   // Only get isGenerating for showing loading indicator
   const { isGenerating } = useChatInput();
+
+  useEffect(()=>{
+
+    const a = async () => {
+      const result = await functions.createExecution(
+        "proxy-ai",  
+        JSON.stringify({
+          model: "openai/gpt-4o",  
+          messages: [], 
+        }),
+      ); 
+      console.log(result);
+    }
+    a();
+    console.log("a");
+  },[])
 
   // Show loader while conversation is being loaded (only for specific conversation IDs)
   if (conversationId && conversation === undefined) {
