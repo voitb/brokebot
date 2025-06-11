@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { SidebarTrigger } from "../../ui/sidebar";
-import { TooltipProvider } from "../../ui/tooltip";
-import { useSidebarContext } from "../../layout/ResponsiveChatLayout";
+import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
+import { TooltipProvider } from "../../ui/tooltip"; 
 import { useTheme } from "../../../providers/ThemeProvider";
 import { useConversationId } from "../../../hooks/useConversationId";
 import {
@@ -21,7 +20,7 @@ import { ShareChatModal } from "../modals/ShareChatModal";
  */
 export const ChatHeader: React.FC = () => {
   const conversationId = useConversationId();
-  const { sidebarOpen } = useSidebarContext();
+  const { open: sidebarOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
   const [shareModalOpen, setShareModalOpen] = useState(false);
 

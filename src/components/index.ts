@@ -4,9 +4,8 @@ export { ChatSidebar } from './layout/ChatSidebar';
 export { ResponsiveChatLayout } from './layout/ResponsiveChatLayout';
 
 // Chat components
-export { ChatInterface } from './chat/ChatInterface';
-export { ChatHeader } from './chat/ChatHeader';
-export { ChatMessages } from './chat/ChatMessages';
-export { ChatInput } from './chat/ChatInput';
-export { ConversationList } from './chat/ConversationList';
-export { ModelSelector } from './chat/ModelSelector'; 
+export { ChatInterface } from './chat/interface';
+export { ChatHeader } from './chat/header';
+export { ChatMessages } from './chat/messages';
+export { ChatInput } from './chat/input';
+export { ConversationList } from './chat/sidebar'; 

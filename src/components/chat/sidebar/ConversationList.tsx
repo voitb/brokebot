@@ -1,8 +1,8 @@
 import React from "react";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ConversationGroup } from "./components/ConversationGroup";
-import { SearchBar, NewChatButton, UserProfile } from "./components";
-import { useConversationList } from "./hooks";
+import { SearchBar, NewChatButton, UserProfile } from "./components"; 
+import { useConversationList } from "./hooks/useConversationList";
 
 /**
  * Main conversation list component with search and grouping

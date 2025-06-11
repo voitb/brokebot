@@ -8,8 +8,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "../../../ui/breadcrumb";
-import { EditableConversationTitle } from "../../EditableConversationTitle";
+} from "../../../ui/breadcrumb"; 
+import { EditableConversationTitle } from "../../sidebar/components";
 
 interface BreadcrumbNavigationProps {
   conversationTitle?: string;
