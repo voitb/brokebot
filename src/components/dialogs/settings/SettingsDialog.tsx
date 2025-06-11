@@ -54,6 +54,20 @@ type SettingsTab =
 // Mock user state - replace with real auth
 const isUserLoggedIn = false;
 
+// Mock subscription state - replace with real subscription check
+const hasActiveSubscription = false;
+const subscriptionPlan = hasActiveSubscription ? "Pro" : "Free";
+const subscriptionStatus = hasActiveSubscription ? "Active" : "None";
+
+// User info for settings
+const userInfo = {
+  isLoggedIn: isUserLoggedIn,
+  hasActiveSubscription,
+  subscriptionPlan,
+  subscriptionStatus,
+  // Add more user info as needed
+};
+
 const navigationItems = [
   { id: "profile" as const, label: "Profile", icon: User },
   { id: "models" as const, label: "AI Models", icon: Bot },
@@ -77,12 +91,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       case "models":
         return <ModelsTab />;
       case "integrations":
-        return <IntegrationsTab />;
+        return <IntegrationsTab userInfo={userInfo} />;
       case "privacy":
-        return <PrivacyTab />;
+        return <PrivacyTab userInfo={userInfo} />;
       case "billing":
         return isUserLoggedIn ? (
-          <LoggedUserBillingTab />
+          <LoggedUserBillingTab userInfo={userInfo} />
         ) : (
           <LocalUserBillingTab />
         );
@@ -93,7 +107,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[90vh] w-[90vw] p-0 overflow-hidden md:max-h-[720px] md:w-[98vw] md:max-w-7xl">
+      <DialogContent className="h-[90vh] w-[90vw] p-0 overflow-hidden md:max-h-[720px] md:w-[98vw] md:max-w-5xl">
         <DialogTitle className="sr-only">Settings</DialogTitle>
         <DialogDescription className="sr-only">
           Customize your Local-GPT settings here.

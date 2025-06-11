@@ -10,21 +10,35 @@ import {
 } from "../../../ui/card";
 // import { Progress } from "../../../ui/progress";
 
-export function LoggedUserBillingTab() {
+interface UserInfo {
+  isLoggedIn: boolean;
+  hasActiveSubscription: boolean;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+}
+
+interface LoggedUserBillingTabProps {
+  userInfo?: UserInfo;
+}
+
+export function LoggedUserBillingTab({ userInfo }: LoggedUserBillingTabProps) {
+  const planName = userInfo?.subscriptionPlan || "Pro";
+  const planStatus = userInfo?.subscriptionStatus || "Active";
+
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
         <Label className="text-base font-medium">Current Subscription</Label>
         <p className="text-sm text-muted-foreground">
-          Manage your Local-GPT Pro subscription
+          Manage your Local-GPT {planName} subscription
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            Pro Plan
-            <Badge>Active</Badge>
+            {planName} Plan
+            <Badge>{planStatus}</Badge>
           </CardTitle>
           <CardDescription>
             Next billing: December 15, 2024 • $19.00/month
@@ -37,7 +51,7 @@ export function LoggedUserBillingTab() {
               variant="secondary"
               className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
             >
-              Active
+              {planStatus}
             </Badge>
           </div>
           <div className="flex justify-between items-center">

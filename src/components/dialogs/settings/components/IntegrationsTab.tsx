@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "../../../ui/label";
 import { Input } from "../../../ui/input";
 import {
@@ -9,8 +9,10 @@ import {
   CardTitle,
 } from "../../../ui/card";
 import { Button } from "../../../ui/button";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Cloud, HardDrive, Crown } from "lucide-react";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
+import { Badge } from "../../../ui/badge";
+import { toast } from "sonner";
 
 interface ApiKeysState {
   openai: string;
@@ -18,8 +20,42 @@ interface ApiKeysState {
   google: string;
 }
 
-export function IntegrationsTab() {
+interface UserInfo {
+  isLoggedIn: boolean;
+  hasActiveSubscription: boolean;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+}
+
+interface IntegrationsTabProps {
+  userInfo?: UserInfo;
+}
+
+/**
+ * Hook to check privacy settings and determine storage method
+ */
+function usePrivacySettings(userInfo?: UserInfo) {
+  const { config } = useUserConfig();
+
+  // Use subscription status from props or fallback to mock
+  const hasActiveSubscription = userInfo?.hasActiveSubscription ?? false;
+
+  const shouldStoreInCloud =
+    config.storeConversationsInCloud && hasActiveSubscription;
+  const shouldStoreLocally = config.storeConversationsLocally;
+
+  return {
+    shouldStoreInCloud,
+    shouldStoreLocally,
+    hasActiveSubscription,
+    isCloudStorageEnabled: config.storeConversationsInCloud,
+  };
+}
+
+export function IntegrationsTab({ userInfo }: IntegrationsTabProps) {
   const { config, updateConfig } = useUserConfig();
+  const { shouldStoreInCloud, shouldStoreLocally, hasActiveSubscription } =
+    usePrivacySettings(userInfo);
 
   // Initialize with config values
   const [apiKeys, setApiKeys] = useState<ApiKeysState>({
@@ -34,15 +70,60 @@ export function IntegrationsTab() {
     google: false,
   });
 
-  const handleApiKeyChange = (provider: keyof ApiKeysState, value: string) => {
+  // Update state when config changes
+  useEffect(() => {
+    setApiKeys({
+      openai: config.openaiApiKey || "",
+      anthropic: config.anthropicApiKey || "",
+      google: config.googleApiKey || "",
+    });
+  }, [config]);
+
+  const handleApiKeyChange = async (
+    provider: keyof ApiKeysState,
+    value: string
+  ) => {
     const newKeys = { ...apiKeys, [provider]: value };
     setApiKeys(newKeys);
 
-    // Update config with new key
-    const updateField = `${provider}ApiKey` as keyof typeof config;
-    updateConfig({
-      [updateField]: value,
-    });
+    try {
+      // Update config - encryption happens automatically in useUserConfig
+      const updateField = `${provider}ApiKey` as keyof typeof config;
+      await updateConfig({
+        [updateField]: value,
+      });
+
+      if (value) {
+        if (shouldStoreInCloud) {
+          toast.success(
+            `${provider.toUpperCase()} API key encrypted and saved to cloud`,
+            {
+              description:
+                "Your key is securely stored and synced across devices",
+            }
+          );
+        } else if (shouldStoreLocally) {
+          toast.success(
+            `${provider.toUpperCase()} API key encrypted and saved locally`,
+            {
+              description: "Your key is securely stored in your browser",
+            }
+          );
+        }
+      } else {
+        toast.success(`${provider.toUpperCase()} API key removed`);
+      }
+    } catch (error) {
+      console.error("Error saving API key:", error);
+      toast.error("Failed to save API key. Please try again.");
+
+      // Revert the change
+      setApiKeys((prev) => ({
+        ...prev,
+        [provider]:
+          (config[`${provider}ApiKey` as keyof typeof config] as string) || "",
+      }));
+    }
   };
 
   const toggleShowKey = (provider: keyof typeof showKeys) => {
@@ -70,6 +151,33 @@ export function IntegrationsTab() {
     },
   ];
 
+  const getStorageInfo = () => {
+    if (shouldStoreInCloud) {
+      return {
+        icon: <Cloud className="h-3 w-3" />,
+        text: "Cloud Storage",
+        description: "Keys are encrypted and synced across devices",
+        variant: "default" as const,
+      };
+    } else if (shouldStoreLocally) {
+      return {
+        icon: <HardDrive className="h-3 w-3" />,
+        text: "Local Storage",
+        description: "Keys are encrypted and stored in your browser",
+        variant: "secondary" as const,
+      };
+    } else {
+      return {
+        icon: <HardDrive className="h-3 w-3" />,
+        text: "No Storage",
+        description: "Keys will not be saved",
+        variant: "destructive" as const,
+      };
+    }
+  };
+
+  const storageInfo = getStorageInfo();
+
   return (
     <div className="space-y-6">
       <div>
@@ -78,6 +186,30 @@ export function IntegrationsTab() {
           Connect external AI providers to access more models
         </p>
       </div>
+
+      {/* Storage Status Card */}
+      <Card className="bg-muted/30">
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <Badge
+              variant={storageInfo.variant}
+              className="flex items-center gap-1"
+            >
+              {storageInfo.icon}
+              {storageInfo.text}
+            </Badge>
+            {shouldStoreInCloud && hasActiveSubscription && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Crown className="h-3 w-3 text-amber-500" />
+                Premium
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {storageInfo.description}
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {integrations.map((integration) => (
@@ -114,18 +246,35 @@ export function IntegrationsTab() {
                     )}
                   </Button>
                 </div>
+                {integration.apiKey && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    <span className="text-xs text-muted-foreground">
+                      API key configured and encrypted
+                    </span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="text-xs text-muted-foreground">
+      <div className="text-xs text-muted-foreground space-y-2">
         <p>
-          API keys are stored locally in your browser and are only sent to the
-          respective AI providers. Your keys are never shared with us or third
-          parties.
+          🔒 All API keys are automatically encrypted before storage using
+          AES-256-GCM encryption.
         </p>
+        <p>
+          API keys are only sent to their respective AI providers during API
+          calls. Your keys are never shared with us or third parties.
+        </p>
+        {!shouldStoreLocally && !shouldStoreInCloud && (
+          <p className="text-amber-600 dark:text-amber-400">
+            ⚠️ Storage is disabled in Privacy settings. Your API keys will not
+            be saved.
+          </p>
+        )}
       </div>
     </div>
   );

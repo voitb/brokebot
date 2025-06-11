@@ -2,14 +2,6 @@ import { Label } from "../../../ui/label";
 import { Button } from "../../../ui/button";
 import { Switch } from "../../../ui/switch";
 import { Badge } from "../../../ui/badge";
-import { Input } from "../../../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../ui/select";
 import {
   Card,
   CardContent,
@@ -17,6 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../ui/card";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../../../ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
 import {
   useWebLLM,
@@ -24,33 +25,17 @@ import {
   type ModelInfo,
 } from "../../../../providers/WebLLMProvider";
 import { toast } from "sonner";
-import { AlertCircle, RefreshCw, Search } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { AlertCircle, RefreshCw, Check, ChevronsUpDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { cn } from "../../../../lib/utils";
 
 export function ModelsTab() {
   const { config, updateConfig } = useUserConfig();
   const { selectedModel, isLoading, status, setSelectedModel, loadModel } =
     useWebLLM();
   const [storageUsage, setStorageUsage] = useState<string>("Calculating...");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filter models based on search query
-  const filteredModels = useMemo(() => {
-    if (!searchQuery.trim()) return AVAILABLE_MODELS;
-    
-    const query = searchQuery.toLowerCase();
-    return AVAILABLE_MODELS.filter(model => {
-      const modelInfo = model as ModelInfo;
-      return (
-        modelInfo.name.toLowerCase().includes(query) ||
-        modelInfo.description.toLowerCase().includes(query) ||
-        modelInfo.specialization?.toLowerCase().includes(query) ||
-        modelInfo.performance.toLowerCase().includes(query) ||
-        modelInfo.category.toLowerCase().includes(query) ||
-        modelInfo.modelType.toLowerCase().includes(query)
-      );
-    });
-  }, [searchQuery]);
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   // Check storage usage on mount
   useEffect(() => {
@@ -76,6 +61,7 @@ export function ModelsTab() {
     if (model) {
       setSelectedModel(model);
       await updateConfig({ selectedModelId: modelId });
+      setOpen(false);
     }
   };
 
@@ -222,71 +208,84 @@ export function ModelsTab() {
           <CardDescription>Current status: {status}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Search Input */}
-          <div>
-            <Label className="text-sm">Search Models</Label>
-            <div className="relative mt-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, performance, specialization..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            {searchQuery && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Found {filteredModels.length} model(s) matching "{searchQuery}"
-              </p>
-            )}
-          </div>
-
           <div>
             <Label>Preferred model</Label>
-            <Select
-              value={selectedModel.id}
-              onValueChange={handleModelChange}
-              disabled={isLoading}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="max-h-80">
-                {filteredModels.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    No models found matching "{searchQuery}"
-                  </div>
-                ) : (
-                  filteredModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      <div className="flex items-center justify-between w-full pr-4">
-                        <div className="flex flex-col items-start">
-                          <span className="font-medium">{model.name}</span>
-                          <div className="flex gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {model.size}
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {model.performance}
-                            </Badge>
-                            {model.modelType !== 'LLM' && (
-                              <Badge variant="default" className="text-xs">
-                                {model.modelType}
+            <Popover open={open} onOpenChange={setOpen} modal={true}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between mt-1"
+                  disabled={isLoading}
+                >
+                  {selectedModel.name}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0" align="start">
+                <Command>
+                  <CommandInput
+                    placeholder="Search models..."
+                    value={searchValue}
+                    onValueChange={setSearchValue}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No model found.</CommandEmpty>
+                    <CommandGroup>
+                      {AVAILABLE_MODELS.map((model) => (
+                        <CommandItem
+                          key={model.id}
+                          value={`${model.name} ${model.description} ${
+                            (model as ModelInfo).specialization || ""
+                          } ${model.performance} ${model.category} ${
+                            model.modelType
+                          }`}
+                          onSelect={() => handleModelChange(model.id)}
+                          className="flex items-center justify-between p-3"
+                        >
+                          <div className="flex flex-col items-start">
+                            <span className="font-medium">{model.name}</span>
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {model.description}
+                            </p>
+                            <div className="flex gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {model.size}
                               </Badge>
-                            )}
-                                                         {(model as ModelInfo).specialization && (
-                               <Badge variant="destructive" className="text-xs">
-                                 {(model as ModelInfo).specialization}
-                               </Badge>
-                             )}
+                              <Badge variant="secondary" className="text-xs">
+                                {model.performance}
+                              </Badge>
+                              {model.modelType !== "LLM" && (
+                                <Badge variant="default" className="text-xs">
+                                  {model.modelType}
+                                </Badge>
+                              )}
+                              {(model as ModelInfo).specialization && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  {(model as ModelInfo).specialization}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+                          <Check
+                            className={cn(
+                              "ml-2 h-4 w-4 shrink-0",
+                              selectedModel.id === model.id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <p className="text-xs text-muted-foreground mt-1">
               {selectedModel.description}
             </p>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type IUserConfig, DEFAULT_USER_CONFIG } from "../lib/db";
+import { db, type IUserConfig, type IConversation, type IMessage, DEFAULT_USER_CONFIG } from "../lib/db";
 import { encryptValue, decryptValue } from "../lib/encryption";
 
 export function useUserConfig() {
@@ -99,11 +99,44 @@ export function useUserConfig() {
     }
   };
 
+  const importConversations = async (conversations: IConversation[]): Promise<number> => {
+    try {
+      // Add conversations to database
+      let importedCount = 0;
+      
+      for (const conversation of conversations) {
+        // Check if conversation already exists
+        const existing = await db.conversations.get(conversation.id);
+        if (!existing) {
+          // Ensure the conversation has proper date objects
+          const normalizedConversation: IConversation = {
+            ...conversation,
+            createdAt: new Date(conversation.createdAt),
+            updatedAt: new Date(conversation.updatedAt),
+            messages: conversation.messages.map((msg: IMessage) => ({
+              ...msg,
+              createdAt: new Date(msg.createdAt),
+            })),
+          };
+          
+          await db.conversations.add(normalizedConversation);
+          importedCount++;
+        }
+      }
+      
+      return importedCount;
+    } catch (error) {
+      console.error("Error importing conversations:", error);
+      throw error;
+    }
+  };
+
   return {
     config: config || DEFAULT_USER_CONFIG,
     updateConfig,
     resetConfig,
     clearAllData,
     exportConversations,
+    importConversations,
   };
 } 

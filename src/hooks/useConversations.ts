@@ -128,6 +128,17 @@ export function useConversations() {
     }
   };
 
+  // 7. Aktualizacja pól rozmowy (UPDATE)
+  const updateConversation = async (id: string, updates: Partial<Omit<IConversation, "id" | "createdAt">>) => {
+    try {
+      await db.conversations.where("id").equals(id).modify(convo => {
+        Object.assign(convo, updates);
+      });
+    } catch (error) {
+      console.error("Błąd przy aktualizacji rozmowy:", error);
+    }
+  };
+
   return {
     conversations,
     createConversation,
@@ -137,6 +148,7 @@ export function useConversations() {
     deleteConversation,
     togglePinConversation,
     updateConversationTitle,
+    updateConversation,
   };
 }
 
