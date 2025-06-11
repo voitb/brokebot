@@ -1,284 +1,113 @@
-# 🤖 Local-GPT - Privacy-First AI Assistant
+# 🤖 Local-GPT - Privacy-First, Browser-Powered AI Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Appwrite](https://img.shields.io/badge/Appwrite-F02E65?style=flat&logo=appwrite&logoColor=white)](https://appwrite.io/)
 
-A privacy-focused ChatGPT clone that runs **100% locally** in your browser using WebLLM and IndexedDB. No data leaves your device, no API keys required for local models, completely free to use.
+A privacy-focused ChatGPT clone that runs **100% locally in your browser** using WebLLM. It also supports connecting to external API providers like OpenAI, Google, and Anthropic. All data and keys are stored securely on your device.
 
-## ✨ Features
+## ✨ Core Features
 
-- 🔒 **Complete Privacy** - All data stays on your device
-- 🌐 **Works Offline** - No internet required after initial load
-- 🤖 **120+ AI Models** - From 135M to 70B parameters
-- 💾 **Persistent Storage** - Conversations saved locally with IndexedDB
-- 🎨 **Modern UI** - Beautiful interface built with Shadcn/ui
-- 📱 **Responsive** - Works on desktop, tablet, and mobile
-- 🔍 **Smart Search** - Find conversations and filter models easily
-- 🎯 **Vision Models** - Upload and analyze images with VLM models
-- 📎 **File Uploads** - Attach text files and images to conversations
-- 🔗 **Share Conversations** - Export and share chats with others
-- ⛓️ **NFT Minting** - Mint conversations as NFTs (Premium feature)
-- 🔐 **Encrypted API Keys** - Secure storage with AES-256 encryption
+- 🔒 **Complete Privacy**: All local processing and storage stay on your device. API keys are encrypted and never leave your browser.
+- 🌐 **Works Offline**: Use local WebLLM models without an internet connection after the initial download.
+- 🤖 **Hybrid Model Support**:
+  - **Local Models**: Run 120+ WebLLM models directly in your browser.
+  - **Online Models**: Connect your own API keys for OpenAI (GPT-4o), Google (Gemini), Anthropic (Claude 3.5), and any OpenRouter compatible model.
+- 💾 **Secure, Persistent Storage**: Conversations and encrypted API keys are saved locally with IndexedDB.
+- 🎨 **Modern UI**: A beautiful, responsive interface built with Shadcn/ui and Tailwind CSS.
+- 🔍 **Smart Search & Filtering**: Easily find conversations and models.
+- 📎 **File Uploads**: Attach and discuss text files and images (coming soon).
+- 🔗 **Share & Export**: Export conversations to JSON or markdown.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ and pnpm
-- Modern browser with WebGPU support (Chrome 113+, Firefox 110+)
-- At least 4GB RAM (8GB+ recommended for larger models)
+- Node.js 18+ and `pnpm`
+- A modern browser with WebGPU support (e.g., Chrome 113+, Edge 113+).
+- At least 4GB of RAM (8GB+ recommended for larger local models).
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/local-gpt.git
+# 1. Clone the repository
+git clone https://github.com/your-username/local-gpt.git
 cd local-gpt
 
-# Install dependencies
+# 2. Install dependencies
 pnpm install
 
-# Start development server
+# 3. Start the development server
 pnpm dev
 ```
 
-Visit `http://localhost:5173` and start chatting with AI models that run entirely in your browser!
-
-### Environment Variables (Optional)
-
-```bash
-# .env
-VITE_ENCRYPTION_KEY=your-32-character-encryption-key-here
-VITE_APPWRITE_ENDPOINT=https://your-appwrite-instance.com/v1
-VITE_APPWRITE_PROJECT_ID=your-project-id
-```
+Visit `http://localhost:5173` to start chatting!
 
 ## 🏗️ How It Works
 
-### Local AI Processing
-- **WebLLM**: Uses WebAssembly and WebGPU for running LLM models in browser
-- **Model Storage**: Models are cached in IndexedDB after first download
-- **Streaming**: Real-time response generation with token streaming
-- **Memory Management**: Automatic cleanup and optimization for performance
+### Local-First Architecture
 
-### Data Storage
-- **IndexedDB**: All conversations and settings stored locally
-- **Dexie.js**: Modern wrapper for IndexedDB with TypeScript support
-- **Encryption**: API keys encrypted with Web Crypto API (AES-GCM 256-bit)
-- **No Tracking**: Zero telemetry, analytics, or data collection
+- **WebLLM**: Utilizes WebAssembly and WebGPU to run large language models directly in the browser. Models are downloaded and cached in IndexedDB for offline use.
+- **IndexedDB & Dexie.js**: All conversations and application settings are stored client-side.
+- **Web Crypto API**: API keys for online providers are encrypted using strong, native browser encryption (AES-256) before being stored in IndexedDB. They are decrypted only in memory when needed for an API call.
 
-### Backend Services (Appwrite)
-For optional cloud features, we use [Appwrite](https://appwrite.io/) as our backend-as-a-service:
+### Optional Backend Services (Appwrite)
 
-- **User Authentication** - Secure user accounts and sessions
-- **Cloud Sync** - Sync conversations across devices (opt-in)
-- **Share Links** - Public conversation sharing with access control
-- **NFT Minting** - Blockchain integration for conversation ownership
-- **File Storage** - Secure cloud storage for uploaded files
-- **Real-time Updates** - Live collaboration features
+For cloud-based features like cross-device sync or conversation sharing, Local-GPT uses [Appwrite](https://appwrite.io/), an open-source backend-as-a-service.
 
-All cloud features are **optional** - the app works fully offline without any backend.
+- **User Authentication**: Secure accounts for cloud features.
+- **Cloud Sync**: Sync conversations and settings across devices (opt-in Pro feature).
+- **Secure Server-Side Functions**: For handling integrations like payment processing (e.g., RevenueCat).
 
-### Model Support
-- **Text Models**: GPT-style models from 135M to 70B parameters
-- **Vision Models**: Multimodal models that can analyze images
-- **Code Models**: Specialized models for programming tasks
-- **Math Models**: Models optimized for mathematical reasoning
-- **Embedding Models**: For semantic search and similarity
-
-## 🎮 Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Alt + N` | New chat |
-| `Alt + B` | Toggle sidebar |
-| `Alt + J` | Search conversations |
-| `Alt + P` | Pin current chat |
-| `Alt + S` | Share conversation |
-| `Alt + R` | Rename chat |
-| `Alt + Delete` | Delete chat |
-| `?` | Show all shortcuts |
-| `Enter` | Send message |
-| `Shift + Enter` | New line |
+**All cloud features are optional.** The application is fully functional for local and online models without ever connecting to a backend.
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **[Vite](https://vitejs.dev/)** - Lightning fast build tool
-- **[React 18](https://reactjs.org/)** - UI library with latest features
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety and better DX
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[Shadcn/ui](https://ui.shadcn.com/)** - Beautiful component library
-- **[Radix UI](https://www.radix-ui.com/)** - Accessible primitives
+
+- **Framework**: Vite + React 18 + TypeScript
+- **UI**: Tailwind CSS, Shadcn/ui, Radix UI
+- **State Management**: React Hooks & Context
+- **Routing**: `react-router-dom` (for future multi-page layouts)
 
 ### AI & Storage
-- **[@mlc-ai/web-llm](https://github.com/mlc-ai/web-llm)** - Local LLM inference
-- **[Dexie.js](https://dexie.org/)** - IndexedDB wrapper
-- **[React Router](https://reactrouter.com/)** - Client-side routing
 
-### Backend (Optional)
-- **[Appwrite](https://appwrite.io/)** - Open source backend server
-- **[Docker](https://www.docker.com/)** - Containerized deployment
-- **[PostgreSQL](https://www.postgresql.org/)** - Database for cloud features
+- **Local AI**: `@mlc-ai/web-llm`
+- **Database**: Dexie.js (IndexedDB Wrapper)
+- **Encryption**: Native Web Crypto API (AES-256)
 
 ### Development
-- **[ESLint](https://eslint.org/)** - Code linting
-- **[Prettier](https://prettier.io/)** - Code formatting
-- **[Vitest](https://vitest.dev/)** - Unit testing
-- **[Playwright](https://playwright.dev/)** - E2E testing
+
+- **Testing**: Vitest, React Testing Library
+- **Linting & Formatting**: ESLint, Prettier
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── ui/             # Base UI components (Shadcn/ui)
-│   ├── chat/           # Chat-specific components
-│   ├── dialogs/        # Modal dialogs
-│   └── layout/         # Layout components
-├── hooks/              # Custom React hooks
-├── lib/                # Utility libraries
-│   ├── db.ts          # IndexedDB schema and operations
-│   ├── encryption.ts  # Crypto utilities
-│   └── utils.ts       # Helper functions
-├── pages/              # Route components
-├── providers/          # React context providers
-├── types/              # TypeScript type definitions
-└── worker.ts           # WebLLM worker thread
+├── components/    # UI components (chat, dialogs, layout, etc.)
+├── hooks/         # Custom React hooks (e.g., useUserConfig, useSmartAutoScroll)
+├── lib/           # Core libraries (db.ts, encryption.ts, openrouter.ts)
+├── providers/     # React Context providers (e.g., WebLLMProvider)
+└── main.tsx       # App entry point
 ```
-
-### Key Architecture Decisions
-
-**Custom URL Parsing**: We use pathname parsing instead of React Router params for better control:
-```typescript
-// ❌ Traditional approach
-const { conversationId } = useParams<{ conversationId: string }>();
-
-// ✅ Our approach
-const conversationId = useConversationId(); // Parses window.location.pathname
-```
-
-**Component Composition**: Following single responsibility principle:
-- Each component has one clear purpose
-- Composition over inheritance
-- Custom hooks for business logic
-- Container/presentational pattern
 
 ## 🤝 Contributing
 
-We love contributions! Here's how you can help make Local-GPT better:
-
-### 🐛 Bug Reports
-
-Found a bug? Please create an issue with:
-- Clear description of the problem
-- Steps to reproduce
-- Browser and OS information
-- Console logs (if applicable)
-
-### 💡 Feature Requests
-
-Have an idea? Open an issue with:
-- Detailed description of the feature
-- Use case and benefits
-- Possible implementation approach
-
-### 🔧 Development
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Make your changes** following our coding standards
-4. **Add tests** for new functionality
-5. **Run the test suite**: `pnpm test`
-6. **Commit your changes**: `git commit -m 'Add amazing feature'`
-7. **Push to your branch**: `git push origin feature/amazing-feature`
-8. **Open a Pull Request**
+We welcome contributions! Please follow the standard fork-and-pull-request workflow.
 
 ### 📋 Coding Standards
 
-- **TypeScript**: Strict mode enabled, no `any` types
-- **React**: Functional components with hooks
-- **Styling**: Tailwind CSS with Shadcn/ui components
-- **Testing**: Unit tests for utilities, integration tests for components
-- **Documentation**: JSDoc comments for public APIs
-
-### 🧪 Testing
-
-```bash
-# Run unit tests
-pnpm test
-
-# Run E2E tests
-pnpm test:e2e
-
-# Run type checking
-pnpm type-check
-
-# Run linting
-pnpm lint
-```
-
-## 🚀 Deployment
-
-### Static Hosting
-Deploy to any static hosting service:
-
-```bash
-# Build for production
-pnpm build
-
-# Preview production build
-pnpm preview
-```
-
-Recommended platforms:
-- **[Vercel](https://vercel.com/)** - Zero-config deployment
-- **[Netlify](https://netlify.com/)** - JAMstack platform
-- **[GitHub Pages](https://pages.github.com/)** - Free hosting for public repos
-
-### Self-Hosting with Appwrite
-
-For full-featured deployment with backend:
-
-```bash
-# Clone and setup Appwrite
-git clone https://github.com/appwrite/appwrite.git
-cd appwrite
-docker-compose up -d
-
-# Configure your Local-GPT instance
-# Update .env with your Appwrite endpoint and project ID
-```
-
-## 📊 Performance
-
-### Recommended Hardware
-- **Minimum**: 4GB RAM, integrated graphics
-- **Recommended**: 8GB+ RAM, dedicated GPU
-- **Optimal**: 16GB+ RAM, RTX 3060 or better
-
-### Model Performance Guide
-- **Ultra Light (0.5-1GB)**: Works on mobile devices
-- **Light (1-3GB)**: Good for laptops and tablets
-- **Medium (3-6GB)**: Requires decent hardware
-- **Large (6-10GB)**: High-end devices only
-- **Heavy (8-16GB)**: Workstation-class hardware
-- **Extreme (16GB+)**: Server or high-end gaming PCs
-
-## 🔐 Security
-
-- **Local Processing**: All AI inference happens locally
-- **Encrypted Storage**: API keys encrypted with AES-256-GCM
-- **No Telemetry**: Zero tracking or analytics
-- **Open Source**: Full transparency, audit the code yourself
-- **CSP Headers**: Content Security Policy for XSS protection
-- **Secure Headers**: HSTS, X-Frame-Options, etc.
+- **Language**: English only in code and UI.
+- **Architecture**: Strive for Single Responsibility Principle. Extract complex logic into custom hooks.
+- **Styling**: Use Tailwind CSS utility classes. Avoid custom CSS where possible.
+- **Types**: Use TypeScript strict mode. No `any` types.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
@@ -303,4 +132,4 @@ If you like this project, please consider giving it a star! It helps us understa
 
 <div align="center">
   <strong>Built with vibes and ❤️ for privacy and open source</strong> 
-</div> 
+</div>
