@@ -25,9 +25,15 @@ export default async ({ req, res, log, error }) => {
       );
     }
   
-    log(`Forwarding request to model: ${model}`);
+    log(`Forwarding request to model: ${model} with ${messages.length} messages`);
+    log(`Messages preview: ${JSON.stringify(messages.slice(0, 2))}...`);
   
-        try {
+    try {
+      log(`Making request to OpenRouter with API key: ${apiKey ? 'SET' : 'NOT SET'}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
+      
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -40,7 +46,10 @@ export default async ({ req, res, log, error }) => {
           model: model,
           messages: messages,
         }),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const responseData = await response.json();

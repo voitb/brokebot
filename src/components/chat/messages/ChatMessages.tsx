@@ -26,12 +26,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const isModelReady = status === "Ready" && !isEngineLoading;
 
   const { scrollAreaRef, isNearBottom, shouldAutoScroll, setShouldAutoScroll } =
-    useScrollPosition(40);
+    useScrollPosition(3); // Bardzo mały threshold - dokładnie na dole
 
   const { scrollToBottom, resetInitialLoad } = useAutoScroll(
     scrollAreaRef,
     shouldAutoScroll,
-    [messages, isGenerating]
+    [messages, isGenerating] // Auto-scroll przy nowych wiadomościach i zmianach generowania
   );
 
   useEffect(() => {
@@ -40,8 +40,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   }, [conversationId, resetInitialLoad, setShouldAutoScroll]);
 
   const handleScrollToBottom = () => {
-    scrollToBottom(true);
+    // Włącz auto-scroll przed scrollowaniem
     setShouldAutoScroll(true);
+    // Scrolluj na dół z animacją
+    scrollToBottom(true);
   };
 
   return (

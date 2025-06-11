@@ -3,9 +3,10 @@ import { useCallback, useEffect, useRef } from "react";
 export const useAutoScroll = (
   scrollAreaRef: React.RefObject<HTMLDivElement | null>,
   shouldAutoScroll: boolean,
-  dependencies: any[]
+  dependencies: unknown[]
 ) => {
   const isInitialLoadRef = useRef(true);
+  const previousDepsRef = useRef<unknown[]>([]);
 
   const scrollToBottom = useCallback((smooth = true) => {
     if (scrollAreaRef?.current) {
@@ -26,16 +27,26 @@ export const useAutoScroll = (
   }, [scrollAreaRef]);
 
   useEffect(() => {
-    if (shouldAutoScroll) {
-      // Pierwszym razem scrolluj bez animacji
-      const smooth = !isInitialLoadRef.current;
-      setTimeout(() => scrollToBottom(smooth), 0);
+    // Sprawdź czy zmieniły się dependencies (nowe wiadomości lub zmiany w treści)
+    const depsChanged = dependencies.some((dep, index) => 
+      dep !== previousDepsRef.current[index]
+    ) || dependencies.length !== previousDepsRef.current.length;
+    
+    if (depsChanged) {
+      previousDepsRef.current = [...dependencies];
       
-      if (isInitialLoadRef.current) {
-        isInitialLoadRef.current = false;
+      // Jeśli auto-scroll jest włączony lub to pierwsze ładowanie
+      if (shouldAutoScroll || isInitialLoadRef.current) {
+        // Pierwszym razem scrolluj bez animacji, potem z animacją
+        const smooth = !isInitialLoadRef.current;
+        setTimeout(() => scrollToBottom(smooth), 0);
+        
+        if (isInitialLoadRef.current) {
+          isInitialLoadRef.current = false;
+        }
       }
     }
-  }, [...dependencies, shouldAutoScroll]);
+  }, [dependencies, shouldAutoScroll, scrollToBottom]);
 
   // Reset przy zmianie konwersacji
   const resetInitialLoad = useCallback(() => {

@@ -7,6 +7,46 @@ import { COMPLETE_AI_RULES } from "../../../../lib/aiRules";
 import type { OpenRouterMessage } from "../../../../lib/openrouter";
 import { toast } from "sonner";
 
+// Funkcja do skracania długich konwersacji
+const summarizeConversation = (messages: OpenRouterMessage[], maxMessages: number = 10): OpenRouterMessage[] => {
+  if (messages.length <= maxMessages) {
+    return messages;
+  }
+
+  const systemMessages = messages.filter(msg => msg.role === 'system');
+  const userAssistantMessages = messages.filter(msg => msg.role !== 'system');
+  
+  // Weź ostatnie maxMessages wiadomości user/assistant
+  const recentMessages = userAssistantMessages.slice(-maxMessages);
+  
+  // Jeśli mamy więcej wiadomości, stwórz podsumowanie wcześniejszych
+  const olderMessages = userAssistantMessages.slice(0, -maxMessages);
+  
+  if (olderMessages.length > 0) {
+    // Grupuj wiadomości w pary user-assistant
+    const conversationPairs = [];
+    for (let i = 0; i < olderMessages.length; i += 2) {
+      const userMsg = olderMessages[i];
+      const assistantMsg = olderMessages[i + 1];
+      if (userMsg && assistantMsg) {
+        conversationPairs.push(`User: ${userMsg.content}\nAssistant: ${assistantMsg.content}`);
+      } else if (userMsg) {
+        conversationPairs.push(`User: ${userMsg.content}`);
+      }
+    }
+    
+    const summary = conversationPairs.join('\n\n');
+    const summaryMessage: OpenRouterMessage = {
+      role: 'system',
+      content: `Previous conversation summary:\n${summary}\n\nContinue the conversation based on this context.`
+    };
+    
+    return [...systemMessages, summaryMessage, ...recentMessages];
+  }
+  
+  return [...systemMessages, ...recentMessages];
+};
+
 interface UseChatInputReturn {
   message: string;
   setMessage: (message: string) => void;
@@ -82,7 +122,7 @@ export function useChatInput(): UseChatInputReturn {
         console.log(`Generating response with model: ${currentModel.name} (${currentModel.type})`);
         
         // Prepare messages for AI including system message
-        const conversationMessages: OpenRouterMessage[] = [
+        const allMessages: OpenRouterMessage[] = [
           { role: "system", content: COMPLETE_AI_RULES },
           ...messages.map(msg => ({
             role: msg.role as "user" | "assistant",
@@ -91,6 +131,10 @@ export function useChatInput(): UseChatInputReturn {
           { role: "user", content: messageContent },
         ];
 
+        // Skróć konwersację jeśli jest za długa (max 12 ostatnich wiadomości + system + podsumowanie)
+        const conversationMessages = summarizeConversation(allMessages, 12);
+
+        console.log(`Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
         console.log('Messages being sent:', conversationMessages);
 
         abortControllerRef.current = new AbortController();
@@ -178,13 +222,16 @@ export function useChatInput(): UseChatInputReturn {
 
       // Generate response with existing messages
       if (currentModel) {
-        const conversationMessages: OpenRouterMessage[] = [
+        const allMessages: OpenRouterMessage[] = [
           { role: "system", content: COMPLETE_AI_RULES },
           ...messages.slice(0, -1).map(msg => ({
             role: msg.role as "user" | "assistant",
             content: msg.content,
           })),
         ];
+
+        // Skróć konwersację jeśli jest za długa
+        const conversationMessages = summarizeConversation(allMessages, 12);
 
         setIsGenerating(true);
         abortControllerRef.current = new AbortController();
