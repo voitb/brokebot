@@ -18,7 +18,7 @@ import {
   CommandList,
 } from "../../../ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../ui/popover";
-import { useUserConfig } from "../../../../hooks/useUserConfig";
+import { useSettingsContext } from "../SettingsDialog";
 import {
   useWebLLM,
   AVAILABLE_MODELS,
@@ -30,7 +30,7 @@ import { useState, useEffect } from "react";
 import { cn } from "../../../../lib/utils";
 
 export function ModelsTab() {
-  const { config, updateConfig } = useUserConfig();
+  const { tempConfig, setTempConfig } = useSettingsContext();
   const { selectedModel, isLoading, status, setSelectedModel, loadModel } =
     useWebLLM();
   const [storageUsage, setStorageUsage] = useState<string>("Calculating...");
@@ -56,18 +56,20 @@ export function ModelsTab() {
     checkStorageUsage();
   }, []);
 
-  const handleModelChange = async (modelId: string) => {
+  const handleModelChange = (modelId: string) => {
     const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
     if (model) {
       setSelectedModel(model);
-      await updateConfig({ selectedModelId: modelId });
+      setTempConfig({ selectedModelId: modelId });
       setOpen(false);
     }
   };
 
-  const handleAutoLoadToggle = async (checked: boolean) => {
-    await updateConfig({ autoLoadModel: checked });
-    toast.success(checked ? "Auto-load enabled" : "Auto-load disabled");
+  const handleAutoLoadToggle = (checked: boolean) => {
+    setTempConfig({ autoLoadModel: checked });
+    toast.info(
+      `Auto-load ${checked ? "enabled" : "disabled"}. Save changes to apply.`
+    );
   };
 
   const handleClearCache = async () => {
@@ -114,7 +116,7 @@ export function ModelsTab() {
 
         toast.success("Model cache cleared");
       } catch {
-        toast.success("Model cache cleared");
+        toast.error("Failed to clear cache for all databases.");
       }
     }
   };
@@ -133,9 +135,12 @@ export function ModelsTab() {
   return (
     <div className="space-y-6">
       <div>
-        <Label className="text-base font-medium">Local AI Models</Label>
+        <Label className="text-base font-medium">
+          Local (In-Browser) Model Settings
+        </Label>
         <p className="text-sm text-muted-foreground">
-          Manage WebLLM models running locally in your browser
+          Manage the default model that runs locally in your browser via WebLLM,
+          and control its cache.
         </p>
       </div>
 
@@ -219,7 +224,9 @@ export function ModelsTab() {
                   className="w-full justify-between mt-1"
                   disabled={isLoading}
                 >
-                  {selectedModel.name}
+                  {AVAILABLE_MODELS.find(
+                    (m) => m.id === tempConfig.selectedModelId
+                  )?.name || "Select a model"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -274,7 +281,7 @@ export function ModelsTab() {
                           <Check
                             className={cn(
                               "ml-2 h-4 w-4 shrink-0",
-                              selectedModel.id === model.id
+                              tempConfig.selectedModelId === model.id
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
@@ -287,7 +294,8 @@ export function ModelsTab() {
               </PopoverContent>
             </Popover>
             <p className="text-xs text-muted-foreground mt-1">
-              {selectedModel.description}
+              {AVAILABLE_MODELS.find((m) => m.id === tempConfig.selectedModelId)
+                ?.description || ""}
             </p>
           </div>
           <div className="flex items-center justify-between">
@@ -298,7 +306,7 @@ export function ModelsTab() {
               </p>
             </div>
             <Switch
-              checked={config.autoLoadModel}
+              checked={tempConfig.autoLoadModel}
               onCheckedChange={handleAutoLoadToggle}
             />
           </div>

@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { ScrollArea } from "../../ui/scroll-area";
 import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
-import { useScrollPosition } from "../../../hooks/useScrollPosition";
-import { useAutoScroll } from "../../../hooks/useAutoScroll";
+import { useSmartAutoScroll } from "../../../hooks/useSmartAutoScroll";
 import { useChatInput } from "../input/hooks";
 import { useWebLLM } from "../../../providers/WebLLMProvider";
 import { MessageBubble, EmptyState, ScrollToBottomButton } from "./components";
@@ -21,30 +20,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const { messages, conversation } = useConversation(conversationId);
   const { regenerateLastResponse, stopGeneration } = useChatInput();
   const { isLoading: isEngineLoading, status } = useWebLLM();
+  const { scrollAreaRef, isAtBottom, handleScrollToBottomClick } =
+    useSmartAutoScroll([messages, isGenerating, conversationId]);
 
   // Check if model is ready
   const isModelReady = status === "Ready" && !isEngineLoading;
-
-  const { scrollAreaRef, isNearBottom, shouldAutoScroll, setShouldAutoScroll } =
-    useScrollPosition(3); // Bardzo mały threshold - dokładnie na dole
-
-  const { scrollToBottom, resetInitialLoad } = useAutoScroll(
-    scrollAreaRef,
-    shouldAutoScroll,
-    [messages, isGenerating] // Auto-scroll przy nowych wiadomościach i zmianach generowania
-  );
-
-  useEffect(() => {
-    resetInitialLoad();
-    setShouldAutoScroll(true);
-  }, [conversationId, resetInitialLoad, setShouldAutoScroll]);
-
-  const handleScrollToBottom = () => {
-    // Włącz auto-scroll przed scrollowaniem
-    setShouldAutoScroll(true);
-    // Scrolluj na dół z animacją
-    scrollToBottom(true);
-  };
 
   return (
     <div className="flex-1 overflow-hidden relative">
@@ -76,14 +56,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               }
             />
           ))}
-
-          {/* LoadingIndicator is now handled inside MessageBubble when isGenerating && no content */}
         </div>
       </ScrollArea>
 
       <ScrollToBottomButton
-        show={!isNearBottom}
-        onClick={handleScrollToBottom}
+        show={!isAtBottom}
+        onClick={handleScrollToBottomClick}
       />
     </div>
   );

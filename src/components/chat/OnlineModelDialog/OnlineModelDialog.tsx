@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import { ApiKeysTab } from "./components/ApiKeysTab";
 import { ModelList } from "./components/ModelList";
+import { ScrollArea } from "@/components/ui";
 
 interface OnlineModelDialogProps {
   onModelSelect: (
@@ -114,7 +115,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto">
+          <ScrollArea className="h-[calc(80vh-98px)]">
             <TabsContent value="api-keys">
               <ApiKeysTab />
             </TabsContent>
@@ -149,7 +150,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
                 availableKeys={storedKeys}
               />
             </TabsContent>
-          </div>
+          </ScrollArea>
         </Tabs>
       </DialogContent>
     </Dialog>
