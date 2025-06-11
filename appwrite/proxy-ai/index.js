@@ -3,20 +3,21 @@ export default async ({ req, res, log, error }) => {
       return res.send("Method Not Allowed", 405);
     }
   
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) {
-      error("API key 'OPENROUTER_API_KEY' not set in function variables!");
-      return res.json({ error: "Server configuration error." }, 500);
-    }
-  
-    let body;
+        let body;
     try {
       body = JSON.parse(req.body);
     } catch (e) {
       return res.json({ error: "Invalid JSON format." }, 400);
     }
-  
-    const { model, messages } = body;
+
+    const { model, messages, api_key } = body;
+
+    // Get API key from request (passed from client) or fallback to environment
+    const apiKey = api_key || process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      error("OpenRouter API key not provided");
+      return res.json({ error: "OpenRouter API key not provided. Please configure your API key." }, 400);
+    }
   
     if (!model || !Array.isArray(messages) || messages.length === 0) {
       return res.json(

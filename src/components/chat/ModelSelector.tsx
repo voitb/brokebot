@@ -14,8 +14,10 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useWebLLM, type ModelInfo } from "../../providers/WebLLMProvider";
+import { useModel, createLocalModel, createOnlineModel } from "../../providers/ModelProvider";
 import { OnlineModelDialog } from "./OnlineModelDialog";
 import { type OpenRouterModel, OpenRouterClient } from "../../lib/openrouter";
+import { hasApiKey } from "../../lib/apiKeys";
 
 interface ModelSelectorProps {
   disabled?: boolean;

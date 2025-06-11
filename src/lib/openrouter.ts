@@ -114,6 +114,14 @@ export class OpenRouterClient {
     onProgress?: (content: string) => void
   ): AsyncGenerator<StreamResponse, void, unknown> {
     try {
+      // Get API key from local storage
+      const { getStoredApiKeys } = await import('./apiKeys');
+      const keys = getStoredApiKeys();
+      
+      if (!keys.openrouter) {
+        throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
+      }
+
       // Since Appwrite Functions don't support streaming, we'll use chunked polling approach
       const result = await this.functions.createExecution(
         'proxy-ai',
@@ -121,6 +129,7 @@ export class OpenRouterClient {
           model,
           messages,
           stream: true, // We'll handle this in the function
+          api_key: keys.openrouter
         })
       );
 
@@ -191,11 +200,20 @@ export class OpenRouterClient {
     messages: OpenRouterMessage[]
   ): Promise<string> {
     try {
+      // Get API key from local storage
+      const { getStoredApiKeys } = await import('./apiKeys');
+      const keys = getStoredApiKeys();
+      
+      if (!keys.openrouter) {
+        throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
+      }
+
       const result = await this.functions.createExecution(
         'proxy-ai',
         JSON.stringify({
           model,
           messages,
+          api_key: keys.openrouter // Pass API key to Appwrite Function
         })
       );
 
