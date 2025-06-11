@@ -8,6 +8,7 @@ interface DataManagementSectionProps {
   onExportConversations: () => void;
   onImportClick: () => void;
   onFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  hasConversations?: boolean;
 }
 
 export const DataManagementSection: React.FC<DataManagementSectionProps> = ({
@@ -15,6 +16,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = ({
   onExportConversations,
   onImportClick,
   onFileImport,
+  hasConversations = false,
 }) => {
   return (
     <div>
@@ -27,6 +29,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = ({
           variant="outline"
           className="w-full"
           onClick={onExportConversations}
+          disabled={!hasConversations}
         >
           Export conversations as JSON
         </Button>

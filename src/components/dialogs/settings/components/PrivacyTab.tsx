@@ -18,16 +18,21 @@ interface UserInfo {
 
 interface PrivacyTabProps {
   userInfo?: UserInfo;
+  hasConversations?: boolean;
 }
 
 /**
  * Privacy settings tab with data storage, import/export, and danger zone
  */
-export function PrivacyTab({ userInfo }: PrivacyTabProps) {
+export function PrivacyTab({
+  userInfo,
+  hasConversations = false,
+}: PrivacyTabProps) {
   const {
     // State
     config,
     hasActiveSubscription,
+    hasConversations: hasConversationsFromHook,
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,
@@ -44,7 +49,7 @@ export function PrivacyTab({ userInfo }: PrivacyTabProps) {
     // Dialog controls
     setShowClearDataDialog,
     setShowResetSettingsDialog,
-  } = usePrivacySettings(userInfo);
+  } = usePrivacySettings(userInfo, hasConversations);
 
   return (
     <>
@@ -68,11 +73,13 @@ export function PrivacyTab({ userInfo }: PrivacyTabProps) {
           onExportConversations={handleExportConversations}
           onImportClick={handleImportClick}
           onFileImport={handleFileImport}
+          hasConversations={hasConversationsFromHook}
         />
 
         <DangerZoneSection
           onClearAllDataClick={() => setShowClearDataDialog(true)}
           onResetSettingsClick={() => setShowResetSettingsDialog(true)}
+          hasConversations={hasConversationsFromHook}
         />
       </div>
 

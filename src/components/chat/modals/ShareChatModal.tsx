@@ -21,10 +21,8 @@ import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { Alert, AlertDescription } from "../../ui/alert";
 import { ScrollArea } from "../../ui/scroll-area";
-import {
-  useConversation,
-  useConversations,
-} from "../../../hooks/useConversations";
+import { useConversation } from "../../../hooks/useConversations";
+import { useSharedLinks } from "../../../hooks/useSharedLinks";
 import { useUserConfig } from "../../../hooks/useUserConfig";
 import { toast } from "sonner";
 
@@ -43,14 +41,17 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
   conversationId,
 }) => {
   const { conversation, messages } = useConversation(conversationId);
-  const { updateConversation } = useConversations();
+  const { createSharedLink } = useSharedLinks();
   const { config } = useUserConfig();
 
   const [shareOptions, setShareOptions] = useState({
+    allowDownload: true,
+    showSharedBy: false,
     anonymizeMessages: false,
-    publicShare: false,
+    publicDiscovery: false,
   });
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [shareId, setShareId] = useState<string | null>(null);
 
   // Check subscription for premium features
   const hasActiveSubscription = false; // Mock - replace with real subscription check
@@ -69,16 +70,19 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
     setIsGeneratingLink(true);
 
     try {
-      // Generate unique share ID
-      const shareId = Math.random().toString(36).substr(2, 12);
+      // Create shared link with options
+      const newShareId = await createSharedLink(
+        conversation.id,
+        conversation.title,
+        shareOptions
+      );
 
-      // Update conversation with shareId in database
-      await updateConversation(conversation.id, {
-        shareId: shareId,
-        updatedAt: new Date(),
-      });
-
-      toast.success("Share link generated successfully!");
+      if (newShareId) {
+        setShareId(newShareId);
+        toast.success("Share link generated successfully!");
+      } else {
+        toast.error("Failed to generate share link");
+      }
     } catch (error) {
       console.error("Failed to generate share link:", error);
       toast.error("Failed to generate share link");
@@ -88,9 +92,9 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
   };
 
   const handleCopyLink = async () => {
-    if (!conversation?.shareId) return;
+    if (!shareId) return;
 
-    const shareLink = `${window.location.origin}/share/${conversation.shareId}`;
+    const shareLink = `${window.location.origin}/share/${shareId}`;
 
     try {
       await navigator.clipboard.writeText(shareLink);
@@ -102,8 +106,8 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
   };
 
   const getShareLink = () => {
-    if (!conversation?.shareId) return "";
-    return `${window.location.origin}/share/${conversation.shareId}`;
+    if (!shareId) return "";
+    return `${window.location.origin}/share/${shareId}`;
   };
 
   if (!conversation) {
@@ -226,6 +230,46 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-sm font-medium">
+                      Allow download
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Allow viewers to download this conversation
+                    </p>
+                  </div>
+                  <Switch
+                    checked={shareOptions.allowDownload}
+                    onCheckedChange={(checked) =>
+                      setShareOptions((prev) => ({
+                        ...prev,
+                        allowDownload: checked,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium">
+                      Show shared by
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Display who shared this conversation
+                    </p>
+                  </div>
+                  <Switch
+                    checked={shareOptions.showSharedBy}
+                    onCheckedChange={(checked) =>
+                      setShareOptions((prev) => ({
+                        ...prev,
+                        showSharedBy: checked,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium">
                       Anonymize messages
                     </Label>
                     <p className="text-xs text-muted-foreground">
@@ -254,11 +298,11 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = ({
                     </p>
                   </div>
                   <Switch
-                    checked={shareOptions.publicShare}
+                    checked={shareOptions.publicDiscovery}
                     onCheckedChange={(checked) =>
                       setShareOptions((prev) => ({
                         ...prev,
-                        publicShare: checked,
+                        publicDiscovery: checked,
                       }))
                     }
                     disabled={!canPublicShare}

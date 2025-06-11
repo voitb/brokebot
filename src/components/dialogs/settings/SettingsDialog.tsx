@@ -38,6 +38,7 @@ import {
   LocalUserBillingTab,
   LoggedUserBillingTab,
 } from "./components";
+import { useConversations } from "../../../hooks/useConversations";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -78,6 +79,10 @@ const navigationItems = [
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [activeTab, setActiveTab] = React.useState<SettingsTab>("profile");
+  const { conversations } = useConversations();
+
+  // Check if user has any conversations for disabling certain options
+  const hasConversations = conversations && conversations.length > 0;
 
   const getTabDisplayName = (tabId: SettingsTab) => {
     const tab = navigationItems.find((item) => item.id === tabId);
@@ -93,7 +98,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       case "integrations":
         return <IntegrationsTab userInfo={userInfo} />;
       case "privacy":
-        return <PrivacyTab userInfo={userInfo} />;
+        return (
+          <PrivacyTab userInfo={userInfo} hasConversations={hasConversations} />
+        );
       case "billing":
         return isUserLoggedIn ? (
           <LoggedUserBillingTab userInfo={userInfo} />

@@ -3,16 +3,17 @@ import { useParams, Navigate } from "react-router-dom";
 import { SharedChatLayout } from "../components/chat/shared/SharedChatLayout";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { db, type IConversation, type IMessage } from "../lib/db";
+import {
+  db,
+  type IConversation,
+  type IMessage,
+  type ISharedLink,
+} from "../lib/db";
 
 interface SharedChatData {
   conversation: IConversation;
   messages: IMessage[];
-  shareId: string;
-  viewCount: number;
-  isPublic: boolean;
-  sharedBy: string;
-  sharedAt: Date;
+  sharedLink: ISharedLink;
 }
 
 /**
@@ -36,31 +37,47 @@ export const SharedChatPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // Find conversation by shareId in database
-        const conversations = await db.conversations.toArray();
-        const sharedConversation = conversations.find(
-          (conv) => conv.shareId === shareId
-        );
+        // Find shared link in database
+        const sharedLink = await db.sharedLinks.get(shareId);
 
-        if (!sharedConversation) {
+        if (!sharedLink) {
           setError("Shared conversation not found or link may have expired");
           setLoading(false);
           return;
         }
 
-        // Create shared chat data
-        const sharedData: SharedChatData = {
-          conversation: sharedConversation,
-          messages: sharedConversation.messages,
-          shareId,
-          viewCount: Math.floor(Math.random() * 100) + 10, // Mock view count
-          isPublic: Math.random() > 0.5, // Mock public status
-          sharedBy: "User", // Mock shared by
-          sharedAt: sharedConversation.updatedAt,
+        // Find the conversation
+        const conversation = await db.conversations.get(
+          sharedLink.conversationId
+        );
+
+        if (!conversation) {
+          setError("Original conversation not found");
+          setLoading(false);
+          return;
+        }
+
+        // Increment view count
+        await db.sharedLinks
+          .where("id")
+          .equals(shareId)
+          .modify((link) => {
+            link.viewCount += 1;
+            link.updatedAt = new Date();
+          });
+
+        // Update local data with incremented view count
+        const updatedSharedLink = {
+          ...sharedLink,
+          viewCount: sharedLink.viewCount + 1,
         };
 
-        // Increment mock view count
-        sharedData.viewCount += 1;
+        // Create shared chat data
+        const sharedData: SharedChatData = {
+          conversation,
+          messages: conversation.messages,
+          sharedLink: updatedSharedLink,
+        };
 
         setData(sharedData);
       } catch (err) {
@@ -123,7 +140,10 @@ export const SharedChatPage: React.FC = () => {
               Try again
             </button>
             <span className="mx-2 text-muted-foreground">or</span>
-            <a href="/" className="text-primary hover:underline">
+            <a
+              href={import.meta.env.VITE_FRONTEND_URL || window.location.origin}
+              className="text-primary hover:underline"
+            >
               Go to Local-GPT
             </a>
           </div>
@@ -137,11 +157,7 @@ export const SharedChatPage: React.FC = () => {
     <SharedChatLayout
       conversation={data.conversation}
       messages={data.messages}
-      shareId={data.shareId}
-      viewCount={data.viewCount}
-      isPublic={data.isPublic}
-      sharedBy={data.sharedBy}
-      sharedAt={data.sharedAt}
+      sharedLink={data.sharedLink}
     />
   );
 };
