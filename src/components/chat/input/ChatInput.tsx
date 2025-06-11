@@ -160,7 +160,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
             />
 
             {/* File Attachment Button */}
-            <div className="absolute bottom-2 right-12">
+            <div className="absolute bottom-2 right-14">
               <FileUpload
                 supportsImages={supportsImages}
                 selectedModelName={currentModel?.name || "Model"}
@@ -173,7 +173,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
             <Button
               type="submit"
               size="sm"
-              className="absolute bottom-2 right-2 h-8 w-8 p-0"
+              className="absolute bottom-2 right-4 h-8 w-8 p-0"
               disabled={
                 isLoading ||
                 isModelLoading ||

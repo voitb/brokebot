@@ -18,6 +18,9 @@ function simpleDecrypt(encrypted: string): string {
 
 export interface ApiKeys {
   openrouter?: string;
+  openai?: string;
+  google?: string;
+  anthropic?: string;
 }
 
 export function getStoredApiKeys(): ApiKeys {
@@ -25,11 +28,14 @@ export function getStoredApiKeys(): ApiKeys {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return {};
     
-    const encrypted = JSON.parse(stored);
+    const encrypted = JSON.parse(stored) as Record<keyof ApiKeys, string>;
     const decrypted: ApiKeys = {};
     
-    if (encrypted.openrouter) {
-      decrypted.openrouter = simpleDecrypt(encrypted.openrouter);
+    for (const key in encrypted) {
+      const provider = key as keyof ApiKeys;
+      if (encrypted[provider]) {
+        decrypted[provider] = simpleDecrypt(encrypted[provider]);
+      }
     }
     
     return decrypted;
@@ -65,9 +71,9 @@ export function removeApiKey(provider: keyof ApiKeys) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(encrypted));
 }
 
-export function hasApiKey(provider: keyof ApiKeys): boolean {
-  const keys = getStoredApiKeys();
-  return !!(keys[provider] && keys[provider].length > 0);
+export function hasApiKey(provider: keyof ApiKeys, keys?: ApiKeys): boolean {
+  const storedKeys = keys || getStoredApiKeys();
+  return !!(storedKeys[provider] && storedKeys[provider]!.length > 0);
 }
 
 export function maskApiKey(key: string): string {
