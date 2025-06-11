@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useWebLLM } from "../../../providers/WebLLMProvider";
-import { useChatInput, useDragDrop } from "./hooks";
+import { useChatInput, useDragDrop, type AttachedFile } from "./hooks";
+import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
 import { Send, Loader2 } from "lucide-react";
@@ -12,7 +13,6 @@ import {
   DragDropOverlay,
   ModelError,
   ModelStatus,
-  type AttachedFile,
 } from "./components";
 import type { QualityLevel } from "../../../types";
 
@@ -23,20 +23,26 @@ interface ChatInputProps {
 /**
  * Main chat input component with message form and options bar
  */
-export const ChatInput: React.FC<ChatInputProps> = () => {
+export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
   const {
     isLoading: isEngineLoading,
     selectedModel,
     status,
     loadModel,
   } = useWebLLM();
-  const { isLoading, handleMessageSubmit, message, setMessage } =
-    useChatInput();
-  const { isDragOver, handleDrop, handleDragOver, handleDragLeave } =
-    useDragDrop();
+  const { isLoading, handleMessageSubmit, message, setMessage } = useChatInput();
+  const { isDragOver, handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useTextareaAutoResize({
+    textareaRef,
+    message,
+    minHeight: 60,
+    maxHeight: 200,
+  });
 
   // Check if current model supports images (VLM)
   const supportsImages =
@@ -48,25 +54,6 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     status.includes("Error") ||
     status.includes("failed");
   const isModelReady = status === "Ready" && !isEngineLoading;
-
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
-      textarea.style.height = "auto";
-      textarea.style.overflowY = "hidden";
-
-      // Set height to scrollHeight, with min and max constraints
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 60), 200);
-      textarea.style.height = `${newHeight}px`;
-
-      // Add scroll if content exceeds max height
-      if (textarea.scrollHeight > 200) {
-        textarea.style.overflowY = "auto";
-      }
-    }
-  }, [message]);
 
   const handleRetryModel = async () => {
     try {
@@ -81,54 +68,9 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
     }
   };
 
-  const handleFilesSelected = async (files: FileList) => {
-    const newFiles: AttachedFile[] = [];
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      // Check file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
-        continue;
-      }
-
-      // For images, check if model supports them
-      if (file.type.startsWith("image/") && !supportsImages) {
-        toast.error(
-          `Images are only supported by vision models. Current model: ${selectedModel.name}`
-        );
-        continue;
-      }
-
-      const processedFile = await processFile(file);
-      newFiles.push(processedFile);
-    }
-
-    setAttachedFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const processFile = async (file: File): Promise<AttachedFile> => {
-    const id = Math.random().toString(36).substr(2, 9);
-    let type: AttachedFile["type"] = "other";
-    let preview: string | undefined;
-
-    if (file.type.startsWith("image/")) {
-      type = "image";
-      preview = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.readAsDataURL(file);
-      });
-    } else if (
-      file.type === "text/plain" ||
-      file.name.endsWith(".txt") ||
-      file.name.endsWith(".md")
-    ) {
-      type = "text";
-    }
-
-    return { id, file, preview, type };
+  const handleFilesSelected = () => {
+    // This will be handled by the FileUpload component
+    // We just need to listen for file changes via onFilesChanged
   };
 
   const removeFile = (fileId: string) => {
@@ -238,12 +180,10 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
             {/* File Attachment Button */}
             <div className="absolute bottom-2 right-12">
               <FileUpload
-                attachedFiles={attachedFiles}
-                onFilesAttached={setAttachedFiles}
-                onFileRemoved={removeFile}
                 supportsImages={supportsImages}
                 selectedModelName={selectedModel.name}
                 disabled={isEngineLoading || isModelError}
+                onFilesChanged={setAttachedFiles}
               />
             </div>
 
@@ -282,4 +222,4 @@ export const ChatInput: React.FC<ChatInputProps> = () => {
       </div>
     </TooltipProvider>
   );
-};
+});

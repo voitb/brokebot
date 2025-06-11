@@ -6,6 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../ui/dialog";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { ShortcutGroup } from "./components";
 
 interface KeyboardShortcutsModalProps {
   open: boolean;
@@ -15,10 +17,12 @@ interface KeyboardShortcutsModalProps {
 /**
  * Modal showing keyboard shortcuts for the app
  */
-export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
+export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = React.memo(({
   open,
   onOpenChange,
 }) => {
+  const shortcutGroups = useKeyboardShortcuts();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
@@ -31,67 +35,12 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium mb-3">General</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span>New Chat</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+N
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Toggle Sidebar</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+B
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Search</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+J
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Show Shortcuts</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    ?
-                  </kbd>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium mb-3">Chat Actions</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span>Pin Chat</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+P
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Rename Chat</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+R
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Delete Chat</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Alt+Del
-                  </kbd>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span>Close Modal</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">
-                    Esc
-                  </kbd>
-                </div>
-              </div>
-            </div>
+            {shortcutGroups.map((group) => (
+              <ShortcutGroup key={group.title} group={group} />
+            ))}
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+});
