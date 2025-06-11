@@ -9,33 +9,42 @@ interface MessageAvatarProps {
 }
 
 /**
+ * Avatar content based on user type and state
+ */
+const AvatarContent: React.FC<{ isUser: boolean; isGenerating: boolean }> = React.memo(({ 
+  isUser, 
+  isGenerating 
+}) => {
+  if (isUser) {
+    return <>💸</>;
+  }
+
+  if (isGenerating) {
+    return <Loader2 className="w-4 h-4 animate-spin" />;
+  }
+
+  return <>🤖</>;
+});
+
+/**
  * Avatar component for messages
  */
-export const MessageAvatar: React.FC<MessageAvatarProps> = ({
+export const MessageAvatar: React.FC<MessageAvatarProps> = React.memo(({
   isUser,
   isGenerating = false,
   position,
 }) => {
   const className = `w-8 h-8 mt-1 ${position === "left" ? "mr-3" : "ml-3"}`;
+  const fallbackClassName = isUser
+    ? "bg-primary text-primary-foreground text-xs"
+    : "bg-muted text-muted-foreground text-xs";
 
   return (
     <Avatar className={className}>
       <AvatarImage src="" />
-      <AvatarFallback
-        className={
-          isUser
-            ? "bg-primary text-primary-foreground text-xs"
-            : "bg-muted text-muted-foreground text-xs"
-        }
-      >
-        {isUser ? (
-          "💸"
-        ) : isGenerating ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          "🤖"
-        )}
+      <AvatarFallback className={fallbackClassName}>
+        <AvatarContent isUser={isUser} isGenerating={isGenerating} />
       </AvatarFallback>
     </Avatar>
   );
-};
+});

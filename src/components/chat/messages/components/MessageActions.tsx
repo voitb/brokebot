@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "../../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { Copy, Check, RefreshCw, Square } from "lucide-react";
-import { toast } from "sonner";
+import { CopyButton } from "../../../ui";
+import { RefreshCw, Square } from "lucide-react";
 
 interface MessageActionsProps {
   content: string;
@@ -14,9 +14,64 @@ interface MessageActionsProps {
 }
 
 /**
+ * Stop generation button component
+ */
+interface StopButtonProps {
+  onStop?: () => void;
+}
+
+const StopButton: React.FC<StopButtonProps> = React.memo(({ onStop }) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+        onClick={onStop}
+      >
+        <Square className="w-3 h-3 mr-1" />
+        Stop
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>Stop generation</TooltipContent>
+  </Tooltip>
+));
+
+/**
+ * Regenerate button component
+ */
+interface RegenerateButtonProps {
+  onRegenerate?: () => void;
+  isModelReady: boolean;
+}
+
+const RegenerateButton: React.FC<RegenerateButtonProps> = React.memo(({ 
+  onRegenerate, 
+  isModelReady 
+}) => (
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 px-2 text-xs"
+        onClick={onRegenerate}
+        disabled={!onRegenerate || !isModelReady}
+      >
+        <RefreshCw className="w-3 h-3 mr-1" />
+        Regenerate
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>
+      {!isModelReady ? "Model is not ready" : "Regenerate response"}
+    </TooltipContent>
+  </Tooltip>
+));
+
+/**
  * Message actions component (copy, regenerate, stop)
  */
-export const MessageActions: React.FC<MessageActionsProps> = ({
+export const MessageActions: React.FC<MessageActionsProps> = React.memo(({
   content,
   isLastMessage,
   isModelReady,
@@ -24,85 +79,31 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   onRegenerate,
   onStopGeneration,
 }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyMessage = async () => {
-    try {
-      await navigator.clipboard.writeText(content);
-      setCopied(true);
-      toast.success("Message copied to clipboard");
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (error) {
-      console.error("Failed to copy message:", error);
-      toast.error("Failed to copy message");
-    }
-  };
-
   return (
     <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
       {/* Copy button - always available for AI messages with content */}
-      <Button
-        variant="ghost"
+      <CopyButton
+        value={content}
         size="sm"
         className="h-7 px-2 text-xs"
-        onClick={handleCopyMessage}
+        showTooltip={true}
       >
-        {copied ? (
-          <>
-            <Check className="w-3 h-3 mr-1 text-green-600" />
-            Copied
-          </>
-        ) : (
-          <>
-            <Copy className="w-3 h-3 mr-1" />
-            Copy
-          </>
-        )}
-      </Button>
+        <span className="ml-1">Copy</span>
+      </CopyButton>
 
       {/* Regenerate/Stop button for last AI message */}
       {isLastMessage && (
         <>
           {isGenerating ? (
-            // Stop generation button
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-                  onClick={onStopGeneration}
-                >
-                  <Square className="w-3 h-3 mr-1" />
-                  Stop
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Stop generation</TooltipContent>
-            </Tooltip>
+            <StopButton onStop={onStopGeneration} />
           ) : (
-            // Regenerate button
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={onRegenerate}
-                  disabled={!onRegenerate || !isModelReady}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" />
-                  Regenerate
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {!isModelReady ? "Model is not ready" : "Regenerate response"}
-              </TooltipContent>
-            </Tooltip>
+            <RegenerateButton 
+              onRegenerate={onRegenerate} 
+              isModelReady={isModelReady} 
+            />
           )}
         </>
       )}
     </div>
   );
-};
+});
