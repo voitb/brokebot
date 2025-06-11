@@ -9,13 +9,11 @@ interface ModelStatusProps {
     supportsImages?: boolean;
     specialization?: string;
   };
-  status: string;
   isEngineLoading: boolean;
   isModelError: boolean;
   isModelReady: boolean;
   supportsImages: boolean;
   disabled?: boolean;
-  messageLength: number;
 }
 
 /**
@@ -23,33 +21,27 @@ interface ModelStatusProps {
  */
 export const ModelStatus: React.FC<ModelStatusProps> = ({
   selectedModel,
-  status,
   isEngineLoading,
   isModelError,
   isModelReady,
   supportsImages,
   disabled = false,
-  messageLength,
 }) => {
-  const getStatusMessage = () => {
-    if (isModelError) {
-      return "Model failed to load";
-    }
-    if (isEngineLoading) {
-      return `Loading ${selectedModel.name}...`;
-    }
-    if (isModelReady) {
-      return "Ready";
-    }
-    return status;
-  };
+  const statusColor = isModelError
+    ? "text-destructive"
+    : isEngineLoading
+    ? "text-amber-600 dark:text-amber-400"
+    : isModelReady
+    ? "text-green-600 dark:text-green-400"
+    : "text-muted-foreground";
 
-  const getStatusColor = () => {
-    if (isModelError) return "text-destructive";
-    if (isEngineLoading) return "text-amber-600 dark:text-amber-400";
-    if (isModelReady) return "text-green-600 dark:text-green-400";
-    return "text-muted-foreground";
-  };
+  const displayedStatus = isModelError
+    ? "Error"
+    : isEngineLoading
+    ? "Loading Model..."
+    : isModelReady
+    ? "Ready"
+    : "Initializing...";
 
   return (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -60,7 +52,7 @@ export const ModelStatus: React.FC<ModelStatusProps> = ({
         <div className="flex items-center gap-1">
           {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
           {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}
-          <span className={getStatusColor()}>{getStatusMessage()}</span>
+          <span className={statusColor}>{displayedStatus}</span>
         </div>
 
         {supportsImages && isModelReady && (
@@ -68,13 +60,12 @@ export const ModelStatus: React.FC<ModelStatusProps> = ({
             Vision
           </span>
         )}
-        {(selectedModel.specialization ?? false) && isModelReady && (
+        {selectedModel.specialization && isModelReady && (
           <span className="bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs capitalize">
             {selectedModel.specialization}
           </span>
         )}
       </div>
-      <span>{messageLength}/4000</span>
     </div>
   );
 };
