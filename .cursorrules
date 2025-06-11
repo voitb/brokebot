@@ -196,11 +196,12 @@ src/hooks/
 
 - id: string (UUID, primary key)
 - title: string (conversation title)
-- messages: IMessage[] (embedded documents)
+- messages: Message[] (embedded documents)
 - pinned: boolean
 - createdAt: Date
 - updatedAt: Date
 - userId?: string (for logged users)
+- modelId?: string (which model was used)
 
 ### Table: documents
 
@@ -209,6 +210,20 @@ src/hooks/
 - content: string
 - createdAt: Date
 - fileType: 'txt' | 'md' | 'pdf'
+
+### Table: userConfig
+
+- id: "user_config" (singleton key)
+- username: string
+- avatarUrl?: string
+- selectedModelId: string
+- autoLoadModel: boolean
+- openaiApiKey?: string (encrypted)
+- anthropicApiKey?: string (encrypted)
+- googleApiKey?: string (encrypted)
+- theme: "light" | "dark" | "system"
+- createdAt: Date
+- updatedAt: Date
 
 ## QUALITY GATES
 

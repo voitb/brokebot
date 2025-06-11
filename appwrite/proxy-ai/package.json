@@ -1,11 +1,21 @@
 {
-    "name": "ai-proxy",
+    "name": "proxy-ai",
     "version": "1.0.0",
-    "description": "Appwrite function to proxy requests to OpenRouter.ai",
-    "main": "index.js",
+    "description": "Appwrite function to securely proxy requests to an AI provider like OpenAI.",
+    "main": "dist/index.js",
     "scripts": {
+      "build": "tsc",
       "test": "echo \"Error: no test specified\" && exit 1"
     },
+    "keywords": [
+      "appwrite",
+      "function",
+      "proxy",
+      "ai"
+    ],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+      "typescript": "^5.0.0"
+    }
   }
