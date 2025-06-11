@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield, Search } from "lucide-react";
+import { ChevronDown, Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield, Search, Cloud } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -14,9 +14,12 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useWebLLM, type ModelInfo } from "../../providers/WebLLMProvider";
+import { OnlineModelDialog } from "./OnlineModelDialog";
+import { type OpenRouterModel, OpenRouterClient } from "../../lib/openrouter";
 
 interface ModelSelectorProps {
   disabled?: boolean;
+  onOnlineModelSelect?: (model: OpenRouterModel, client: OpenRouterClient | null) => void;
 }
 
 /**
@@ -24,12 +27,22 @@ interface ModelSelectorProps {
  */
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   disabled = false,
+  onOnlineModelSelect,
 }) => {
   const { selectedModel, availableModels, setSelectedModel } = useWebLLM();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOnlineModel, setSelectedOnlineModel] = useState<OpenRouterModel | null>(null);
 
   const handleModelSelect = (model: ModelInfo) => {
     setSelectedModel(model);
+    setSelectedOnlineModel(null); // Clear online model selection when local model is selected
+  };
+
+  const handleOnlineModelSelect = (model: OpenRouterModel, client: OpenRouterClient | null) => {
+    setSelectedOnlineModel(model);
+    if (onOnlineModelSelect) {
+      onOnlineModelSelect(model, client);
+    }
   };
 
   // Filter models based on search query
@@ -40,7 +53,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     return availableModels.filter(model => 
       model.name.toLowerCase().includes(query) ||
       model.description.toLowerCase().includes(query) ||
-      model.specialization?.toLowerCase().includes(query) ||
+      (model as ModelInfo & { specialization?: string }).specialization?.toLowerCase().includes(query) ||
       model.performance.toLowerCase().includes(query) ||
       model.category.toLowerCase().includes(query) ||
       model.modelType.toLowerCase().includes(query)
@@ -48,13 +61,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   }, [availableModels, searchQuery]);
 
   // Group filtered models by category
-  const modelsByCategory = filteredModels.reduce((acc, model) => {
-    if (!acc[model.category]) {
-      acc[model.category] = [];
-    }
-    acc[model.category].push(model);
-    return acc;
-  }, {} as Record<string, ModelInfo[]>);
+  const modelsByCategory = useMemo(() => {
+    return filteredModels.reduce((acc, model) => {
+      const category = model.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(model);
+      return acc;
+    }, {} as Record<string, ModelInfo[]>);
+  }, [filteredModels]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -164,19 +180,22 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={disabled}
-          className="text-xs h-6 px-2 text-muted-foreground hover:text-foreground gap-1"
-        >
-          <Cpu className="w-3 h-3" />
-          <span className="hidden sm:inline">{selectedModel.name}</span>
-          <ChevronDown className="w-3 h-3" />
-        </Button>
-      </DropdownMenuTrigger>
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            className="text-xs h-6 px-2 text-muted-foreground hover:text-foreground gap-1"
+          >
+            <Cpu className="w-3 h-3" />
+            <span className="hidden sm:inline">
+              {selectedOnlineModel ? selectedOnlineModel.name : selectedModel.name}
+            </span>
+            <ChevronDown className="w-3 h-3" />
+          </Button>
+        </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80">
         {/* Search Input */}
         <div className="p-2 border-b">
@@ -198,7 +217,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             </div>
           ) : (
             sortedCategories.map((category) => {
-              const models = modelsByCategory[category];
+              const models = modelsByCategory[category] || [];
               return (
                 <div key={category}>
                   <Tooltip>
@@ -215,7 +234,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
                       <p>{getCategoryTooltip(category)}</p>
                     </TooltipContent>
                   </Tooltip>
-                  {models.map((model) => (
+                  {models.map((model: ModelInfo) => (
                     <DropdownMenuItem
                       key={model.id}
                       onClick={() => handleModelSelect(model)}
@@ -283,5 +302,11 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
         </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
+    
+    <OnlineModelDialog 
+      onModelSelect={handleOnlineModelSelect}
+      selectedModel={selectedOnlineModel}
+    />
+  </div>
   );
 };
