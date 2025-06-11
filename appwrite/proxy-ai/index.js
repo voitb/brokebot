@@ -42,13 +42,14 @@ export default async ({ req, res, log, error }) => {
         }),
       });
 
-      const responseBody = await response.text();
-      
-      // Set proper content type from OpenRouter response
-      const contentType = response.headers.get("Content-Type") || "application/json";
-      res.header("Content-Type", contentType);
-      
-      return res.send(responseBody, response.status);
+      if (response.ok) {
+        const responseData = await response.json();
+        return res.json(responseData, response.status);
+      } else {
+        const errorText = await response.text();
+        error(`OpenRouter API error: ${response.status} - ${errorText}`);
+        return res.json({ error: "External API error." }, response.status);
+      }
     } catch (e) {
       error(`Internal error while communicating with OpenRouter: ${e.message}`);
       return res.json({ error: "Server error occurred." }, 500);
