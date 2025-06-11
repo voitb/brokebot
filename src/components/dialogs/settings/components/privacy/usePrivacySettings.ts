@@ -10,7 +10,7 @@ interface UserInfo {
   subscriptionStatus: string;
 }
 
-export const usePrivacySettings = (userInfo?: UserInfo) => {
+export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false) => {
   const {
     config,
     updateConfig,
@@ -110,6 +110,7 @@ export const usePrivacySettings = (userInfo?: UserInfo) => {
     // State
     config,
     hasActiveSubscription,
+    hasConversations,
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,

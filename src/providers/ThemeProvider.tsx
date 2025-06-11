@@ -6,25 +6,22 @@ import React, {
   type ReactNode,
 } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "dark" | "light" | "system";
 
-type ThemeProviderState = {
+type ThemeProviderContextType = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
 };
 
-const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
-};
+const ThemeProviderContext = createContext<
+  ThemeProviderContextType | undefined
+>(undefined);
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
-
-type ThemeProviderProps = {
+interface ThemeProviderProps {
   children: ReactNode;
   defaultTheme?: Theme;
   storageKey?: string;
-};
+}
 
 export function ThemeProvider({
   children,

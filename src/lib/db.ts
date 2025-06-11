@@ -29,6 +29,19 @@ export interface IDocument {
   fileType: "txt" | "md" | "pdf";
 }
 
+export interface ISharedLink {
+  id: string; // Unique share ID
+  conversationId: string; // FK to conversations
+  title: string; // Conversation title at time of sharing
+  allowDownload: boolean;
+  showSharedBy: boolean;
+  anonymizeMessages: boolean;
+  publicDiscovery: boolean;
+  viewCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUserConfig {
   id: "user_config"; // Always same ID for singleton
   fullName: string;
@@ -69,6 +82,7 @@ export const DEFAULT_USER_CONFIG: IUserConfig = {
 export class LocalGptDB extends Dexie {
   conversations!: EntityTable<IConversation, "id">;
   documents!: EntityTable<IDocument, "id">;
+  sharedLinks!: EntityTable<ISharedLink, "id">;
   userConfig!: EntityTable<IUserConfig, "id">;
 
   constructor() {
@@ -101,6 +115,40 @@ export class LocalGptDB extends Dexie {
       conversations: "id, title, pinned, shareId, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
+    });
+
+    // Version 5 schema - adds sharedLinks table and removes shareId from conversations
+    this.version(5).stores({
+      conversations: "id, title, pinned, createdAt, updatedAt",
+      documents: "++id, filename, fileType, createdAt",
+      sharedLinks: "id, conversationId, createdAt, updatedAt",
+      userConfig: "id, updatedAt",
+    }).upgrade(async (tx) => {
+      // Migrate existing shareId data to new sharedLinks table
+      const conversations = await tx.table('conversations').toArray();
+      const sharedLinks = conversations
+        .filter(conv => conv.shareId)
+        .map(conv => ({
+          id: conv.shareId,
+          conversationId: conv.id,
+          title: conv.title,
+          allowDownload: true, // Default values for existing shares
+          showSharedBy: false,
+          anonymizeMessages: false,
+          publicDiscovery: false,
+          viewCount: 0,
+          createdAt: conv.updatedAt,
+          updatedAt: conv.updatedAt,
+        }));
+      
+      if (sharedLinks.length > 0) {
+        await tx.table('sharedLinks').bulkAdd(sharedLinks);
+      }
+      
+      // Remove shareId field from conversations
+      await tx.table('conversations').toCollection().modify(conv => {
+        delete conv.shareId;
+      });
     });
 
     // Initialize default config on first run

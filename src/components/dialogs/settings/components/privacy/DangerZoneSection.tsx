@@ -6,11 +6,13 @@ import { Card, CardContent } from "../../../../ui/card";
 interface DangerZoneSectionProps {
   onClearAllDataClick: () => void;
   onResetSettingsClick: () => void;
+  hasConversations?: boolean;
 }
 
 export const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
   onClearAllDataClick,
   onResetSettingsClick,
+  hasConversations = false,
 }) => {
   return (
     <div>
@@ -30,6 +32,7 @@ export const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
                 size="sm"
                 className="mt-2"
                 onClick={onClearAllDataClick}
+                disabled={!hasConversations}
               >
                 Clear all data
               </Button>
