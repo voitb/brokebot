@@ -71,4 +71,4 @@ export const EditableConversationTitle: React.FC<
       placeholder="Enter to save, Esc to cancel"
     />
   );
-};
+}; 

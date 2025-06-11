@@ -1,10 +1,10 @@
 import React from "react";
 import { ConversationItem } from "./ConversationItem";
-import type { IConversation } from "../../lib/db";
+import type { Conversation } from "../../../../lib/db";
 
 interface ConversationGroupProps {
   title: string;
-  conversations: IConversation[];
+  conversations: Conversation[];
 }
 
 /**
@@ -30,4 +30,4 @@ export const ConversationGroup: React.FC<ConversationGroupProps> = ({
       </div>
     </div>
   );
-};
+}; 

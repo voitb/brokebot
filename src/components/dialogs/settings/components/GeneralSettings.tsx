@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { type UserConfig } from "@/lib/db";
 
-interface ProfileTabProps {
+interface GeneralSettingsProps {
   settings: Partial<UserConfig>;
   onFieldChange: <K extends keyof UserConfig>(
     field: K,
@@ -18,7 +18,7 @@ interface ProfileTabProps {
   ) => void;
 }
 
-export const ProfileTab: React.FC<ProfileTabProps> = ({
+export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
   settings,
   onFieldChange,
 }) => {
@@ -53,4 +53,4 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
       </div>
     </div>
   );
-};
+}; 
