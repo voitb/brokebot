@@ -8,7 +8,7 @@ import {
   type IConversation,
   type IMessage,
   type ISharedLink,
-} from "../lib/db";
+} from "../lib/db"; 
 
 interface SharedChatData {
   conversation: IConversation;
@@ -90,7 +90,7 @@ export const SharedChatPage: React.FC = () => {
       }
     };
 
-    fetchSharedChat();
+    fetchSharedChat(); 
   }, [shareId]);
 
   // Invalid share ID

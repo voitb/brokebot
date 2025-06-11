@@ -491,8 +491,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         new WebLLMWorker(),
         modelId,
         {
-          initProgressCallback: (report) => {
-            console.log("report", report);
+          initProgressCallback: (report) => { 
             setEngineState((prev) => ({
               ...prev,
               progress: report.progress,
