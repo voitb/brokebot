@@ -19,13 +19,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
+import { useUserConfig } from "@/hooks/business/useUserConfig";
 
 const UserProfileMenu: React.FC = () => {
   const { user, logout } = useAuth();
+  const { config: localUserConfig } = useUserConfig();
 
-  if (!user) return null;
+  if (!localUserConfig) {
+    return null;
+  }
 
-  const initials = (user.name || "User")
+  const displayName = user?.name || localUserConfig.username;
+  const displaySubtext = user?.email || "Local Profile";
+  const avatarUrl = localUserConfig.avatarUrl;
+
+  const initials = (displayName || "User")
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -41,15 +49,15 @@ const UserProfileMenu: React.FC = () => {
             className="w-full justify-start text-left h-auto px-2 py-2"
           >
             <Avatar className="w-8 h-8 mr-2">
-              <AvatarImage src="" /> {/* TODO: Add avatar from prefs */}
+              <AvatarImage src={avatarUrl} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user.name}</p>
+              <p className="text-sm font-medium truncate">{displayName}</p>
               <p className="text-xs text-muted-foreground truncate">
-                {user.email}
+                {displaySubtext}
               </p>
             </div>
             <ChevronsUpDown className="w-4 h-4 text-muted-foreground ml-2" />
@@ -58,9 +66,9 @@ const UserProfileMenu: React.FC = () => {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
+              <p className="text-sm font-medium leading-none">{displayName}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
+                {displaySubtext}
               </p>
             </div>
           </DropdownMenuLabel>
@@ -76,28 +84,30 @@ const UserProfileMenu: React.FC = () => {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={logout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
+          {user ? (
+            <DropdownMenuItem onClick={logout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem asChild>
+              <Link to="/login">
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Login or Sign Up</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
 };
 
-const LoginButton: React.FC = () => (
-  <div className="p-4">
-    <Button asChild className="w-full">
-      <Link to="/login">
-        <UserIcon className="mr-2 h-4 w-4" /> Login or Sign Up
-      </Link>
-    </Button>
-  </div>
-);
-
 export const UserProfile: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { isLoading: isAuthLoading } = useAuth();
+  const { isLoading: isConfigLoading } = useUserConfig();
+
+  const isLoading = isAuthLoading || isConfigLoading;
 
   if (isLoading) {
     return (
@@ -107,5 +117,5 @@ export const UserProfile: React.FC = () => {
     );
   }
 
-  return user ? <UserProfileMenu /> : <LoginButton />;
+  return <UserProfileMenu />;
 };

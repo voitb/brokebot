@@ -4,22 +4,14 @@ import { useAuth } from "@/providers/AuthProvider";
 import { Loader2 } from "lucide-react";
 
 export function AuthCallbackPage() {
-  const { getCurrentUser, user, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleAuthCallback = async () => {
-      // This page is hit on redirect from OAuth provider.
-      // We need to call getCurrentUser to ensure the session is correctly handled
-      // and the user state is updated.
-      await getCurrentUser();
-    };
-
-    handleAuthCallback();
-  }, [getCurrentUser]);
-
-  useEffect(() => {
     // Wait for the loading to be false
+    console.log("isLoading", isLoading);
+    console.log("user", user);
+    console.log("navigate", navigate);
     if (!isLoading) {
       if (user) {
         // If user is successfully fetched, redirect to chat
@@ -44,4 +36,4 @@ export function AuthCallbackPage() {
       </div>
     </div>
   );
-} 
+}

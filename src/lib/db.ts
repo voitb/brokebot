@@ -57,26 +57,6 @@ export interface ISharedLink {
   updatedAt: Date;
 }
 
-export interface IUserConfig {
-  id: "user_config"; // Always same ID for singleton
-  fullName: string;
-  nickname: string;
-  workFunction: string;
-  preferences: string;
-  selectedModelId: string;
-  autoLoadModel: boolean;
-  storeConversationsLocally: boolean;
-  storeConversationsInCloud: boolean;
-  compactMode: boolean;
-  showTimestamps: boolean;
-  // API Keys
-  openaiApiKey?: string;
-  anthropicApiKey?: string;
-  googleApiKey?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // Default configuration
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",

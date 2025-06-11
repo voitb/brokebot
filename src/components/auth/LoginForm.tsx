@@ -33,7 +33,7 @@ export function LoginForm({ className }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
@@ -42,8 +42,10 @@ export function LoginForm({ className }: React.ComponentProps<"div">) {
         description:
           "Something went wrong during the authentication process. Please try again.",
       });
+      searchParams.delete("error");
+      setSearchParams(searchParams);
     }
-  }, [searchParams]);
+  }, [searchParams, setSearchParams]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -144,4 +146,4 @@ export function LoginForm({ className }: React.ComponentProps<"div">) {
       </div>
     </div>
   );
-} 
+}
