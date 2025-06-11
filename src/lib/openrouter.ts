@@ -125,10 +125,18 @@ export class OpenRouterClient {
       );
 
       if (result.responseStatusCode !== 200) {
-        throw new Error(`Function execution failed: ${result.responseBody}`);
+        const errorMsg = result.responseBody || 'Unknown function error';
+        console.error('Appwrite function error:', result);
+        throw new Error(`Function execution failed (${result.responseStatusCode}): ${errorMsg}`);
       }
 
-      const response = JSON.parse(result.responseBody);
+      let response;
+      try {
+        response = JSON.parse(result.responseBody);
+      } catch {
+        console.error('Response parsing error:', result.responseBody);
+        throw new Error('Invalid response format from proxy function');
+      }
       
       if (response.error) {
         throw new Error(response.error);
