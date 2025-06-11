@@ -37,7 +37,7 @@ export function LoginForm({ className }: React.ComponentProps<"div">) {
 
   useEffect(() => {
     const oauthError = searchParams.get("error");
-    if (oauthError === "oauth_failed") {
+    if (oauthError === "auth_failed") {
       toast.error("Authentication Failed", {
         description:
           "Something went wrong during the authentication process. Please try again.",
