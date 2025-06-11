@@ -1,27 +1,42 @@
 // src/lib/db.ts
 import Dexie, { type EntityTable } from "dexie";
 // Import will be used in hooks
+import { AVAILABLE_MODELS } from "../providers/WebLLMProvider";
 
-// Definicja interfejsu dla pojedynczej wiadomości
-export interface IMessage {
-  id: string; // Unikalne ID dla każdej wiadomości
+// Define interfaces for database tables
+export interface Message {
+  id: string; // uuid
   role: "user" | "assistant";
   content: string;
   createdAt: Date;
 }
 
-// Definicja interfejsu dla całej konwersacji
-export interface IConversation {
-  id: string;
+export interface Conversation {
+  id: string; // uuid
   title: string;
-  messages: IMessage[];
+  messages: Message[];
   pinned: boolean;
-  shareId?: string; // Optional share ID for public sharing
+  createdAt: Date;
+  updatedAt: Date;
+  userId?: string;
+  modelId?: string; // To track which model was used
+}
+
+export interface UserConfig {
+  id: "user_config";
+  username: string;
+  avatarUrl?: string;
+  selectedModelId: string;
+  autoLoadModel: boolean;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+  googleApiKey?: string;
+  theme: "light" | "dark" | "system";
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface IDocument {
+export interface Document {
   id?: number;
   filename: string;
   content: string;
@@ -63,27 +78,21 @@ export interface IUserConfig {
 }
 
 // Default configuration
-export const DEFAULT_USER_CONFIG: IUserConfig = {
+export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
-  fullName: "User",
-  nickname: "User", 
-  workFunction: "",
-  preferences: "",
-  selectedModelId: "Llama-3.1-8B-Instruct-q4f32_1-MLC",
+  username: "User",
+  selectedModelId: AVAILABLE_MODELS[0].id,
   autoLoadModel: true,
-  storeConversationsLocally: true,
-  storeConversationsInCloud: false,
-  compactMode: false,
-  showTimestamps: false,
+  theme: "system",
   createdAt: new Date(),
   updatedAt: new Date(),
 };
 
 export class LocalGptDB extends Dexie {
-  conversations!: EntityTable<IConversation, "id">;
-  documents!: EntityTable<IDocument, "id">;
+  conversations!: EntityTable<Conversation, "id">;
+  documents!: EntityTable<Document, "id">;
   sharedLinks!: EntityTable<ISharedLink, "id">;
-  userConfig!: EntityTable<IUserConfig, "id">;
+  userConfig!: EntityTable<UserConfig, "id">;
 
   constructor() {
     super("LocalGptDB");

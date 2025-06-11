@@ -1,6 +1,6 @@
 import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type IUserConfig, type IConversation, type IMessage, DEFAULT_USER_CONFIG } from "../lib/db";
+import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "../lib/db";
 import { encryptValue, decryptValue } from "../lib/encryption";
 
 export function useUserConfig() {
@@ -11,7 +11,7 @@ export function useUserConfig() {
   );
 
   // Decrypt API keys when reading from database
-  const [config, setConfig] = React.useState<IUserConfig>(DEFAULT_USER_CONFIG);
+  const [config, setConfig] = React.useState<UserConfig>(DEFAULT_USER_CONFIG);
 
   React.useEffect(() => {
     const decryptConfig = async () => {
@@ -35,7 +35,7 @@ export function useUserConfig() {
     decryptConfig();
   }, [rawConfig]);
 
-  const updateConfig = async (updates: Partial<Omit<IUserConfig, "id" | "createdAt" | "updatedAt">>) => {
+  const updateConfig = async (updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>) => {
     try {
       // Encrypt API keys before saving
       const encryptedUpdates = { ...updates };
@@ -99,7 +99,7 @@ export function useUserConfig() {
     }
   };
 
-  const importConversations = async (conversations: IConversation[]): Promise<number> => {
+  const importConversations = async (conversations: Conversation[]): Promise<number> => {
     try {
       // Add conversations to database
       let importedCount = 0;
@@ -109,11 +109,11 @@ export function useUserConfig() {
         const existing = await db.conversations.get(conversation.id);
         if (!existing) {
           // Ensure the conversation has proper date objects
-          const normalizedConversation: IConversation = {
+          const normalizedConversation: Conversation = {
             ...conversation,
             createdAt: new Date(conversation.createdAt),
             updatedAt: new Date(conversation.updatedAt),
-            messages: conversation.messages.map((msg: IMessage) => ({
+            messages: conversation.messages.map((msg: Message) => ({
               ...msg,
               createdAt: new Date(msg.createdAt),
             })),
