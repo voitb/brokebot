@@ -5,6 +5,7 @@ import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
 import { COMPLETE_AI_RULES } from "../../../../lib/aiRules";
 import type { OpenRouterMessage } from "../../../../lib/openrouter";
+import { toast } from "sonner";
 
 interface UseChatInputReturn {
   message: string;
@@ -42,8 +43,10 @@ export function useChatInput(): UseChatInputReturn {
     setIsLoading(true);
     setMessage("");
 
+    let currentConversationId = conversationId;
+    let aiMessageId: string | undefined;
+
     try {
-      let currentConversationId = conversationId;
 
       // Create new conversation if needed
       if (!currentConversationId) {
@@ -63,7 +66,7 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       // Create placeholder AI message
-      const aiMessageId = await addMessage(currentConversationId, {
+      aiMessageId = await addMessage(currentConversationId, {
         role: "assistant",
         content: "",
       });
@@ -124,6 +127,22 @@ export function useChatInput(): UseChatInputReturn {
       }
     } catch (error) {
       console.error("Error generating response:", error);
+      
+      // Show error notification
+      toast.error("Failed to generate response. Please try again.", {
+        action: {
+          label: "Regenerate",
+          onClick: () => {
+            // Try regenerating the last response
+            regenerateLastResponse();
+          }
+        }
+      });
+
+      // Clean up empty AI message if it exists
+      if (currentConversationId && aiMessageId) {
+        updateMessage(currentConversationId, aiMessageId, "⚠️ Error generating response. Please try regenerating.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -196,6 +215,12 @@ export function useChatInput(): UseChatInputReturn {
       }
     } catch (error) {
       console.error("Error regenerating response:", error);
+      
+      // Show error notification
+      toast.error("Failed to regenerate response. Please try again.");
+      
+      // Set error message in the AI message
+      updateMessage(conversationId, lastAiMessage.id, "⚠️ Error regenerating response. Please try again.");
     }
   }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage]);
 

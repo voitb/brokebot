@@ -26,7 +26,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const isModelReady = status === "Ready" && !isEngineLoading;
 
   const { scrollAreaRef, isNearBottom, shouldAutoScroll, setShouldAutoScroll } =
-    useScrollPosition(30);
+    useScrollPosition(40);
 
   const { scrollToBottom, resetInitialLoad } = useAutoScroll(
     scrollAreaRef,
