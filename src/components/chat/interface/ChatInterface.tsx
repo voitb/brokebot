@@ -13,27 +13,9 @@ import { functions } from "@/lib/appwriteClient";
  */
 export const ChatInterface: React.FC = () => {
   const conversationId = useConversationId();
-  const { conversation } = useConversation(conversationId);
-  // Only get isGenerating for showing loading indicator
-  const { isGenerating } = useChatInput();
-
-  useEffect(()=>{
-
-    const a = async () => {
-      const result = await functions.createExecution(
-        "proxy-ai",  
-        JSON.stringify({
-          model: "openai/gpt-4o",  
-          messages: [], 
-        }),
-      ); 
-      console.log(result);
-    }
-    a();
-    console.log("a");
-  },[])
-
-  // Show loader while conversation is being loaded (only for specific conversation IDs)
+  const { conversation } = useConversation(conversationId); 
+  const { isGenerating } = useChatInput(); 
+ 
   if (conversationId && conversation === undefined) {
     return (
       <div className="flex-1 flex items-center justify-center">
