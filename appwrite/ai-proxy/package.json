@@ -1,0 +1,11 @@
+{
+    "name": "ai-proxy",
+    "version": "1.0.0",
+    "description": "Appwrite function to proxy requests to OpenRouter.ai",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
+  }
