@@ -38,7 +38,9 @@ export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const isOnlineModel = currentModel?.type === "online";
-  const displayName = isOnlineModel
+  const displayName = !currentModel
+    ? "Initializing..."
+    : isOnlineModel
     ? currentModel.onlineModel?.name || "Online Model"
     : webllmModel.name;
 

@@ -452,16 +452,25 @@ type WebLLMProviderProps = {
 export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
   // Load selected model from localStorage
   const [selectedModel, setSelectedModelState] = useState<ModelInfo>(() => {
-    const stored = localStorage.getItem("selectedModel");
+    const stored = localStorage.getItem("unifiedModel"); // Key used by ModelProvider
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        const found = AVAILABLE_MODELS.find((m) => m.id === parsed.id);
-        return found || AVAILABLE_MODELS[0];
+        // Check if it's a local model.
+        // We don't import UnifiedModel type here to avoid circular dependencies.
+        if (parsed && parsed.type === "local" && parsed.localModel?.id) {
+          const found = AVAILABLE_MODELS.find(
+            (m) => m.id === parsed.localModel.id
+          );
+          if (found) {
+            return found;
+          }
+        }
       } catch {
-        return AVAILABLE_MODELS[0];
+        // Fallback to default if JSON is malformed
       }
     }
+    // Default to the first model if nothing is stored, or if it's an online model
     return AVAILABLE_MODELS[0];
   });
 
@@ -491,7 +500,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         new WebLLMWorker(),
         modelId,
         {
-          initProgressCallback: (report) => { 
+          initProgressCallback: (report) => {
             setEngineState((prev) => ({
               ...prev,
               progress: report.progress,
@@ -520,7 +529,6 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
   const setSelectedModel = useCallback(
     (model: ModelInfo) => {
       setSelectedModelState(model);
-      localStorage.setItem("selectedModel", JSON.stringify(model));
       // Load the new model
       loadModel(model.id);
     },

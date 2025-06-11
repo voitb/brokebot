@@ -24,9 +24,11 @@ interface ChatInputProps {
  * Main chat input component with message form and options bar
  */
 export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
-  const { currentModel } = useModel();
-  const { isLoading, handleMessageSubmit, message, setMessage } = useChatInput();
-  const { isDragOver, handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
+  const { currentModel, isModelLoading, modelStatus } = useModel();
+  const { isLoading, handleMessageSubmit, message, setMessage } =
+    useChatInput();
+  const { isDragOver, handleDrop, handleDragOver, handleDragLeave } =
+    useDragDrop();
 
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -41,9 +43,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
 
   // For now, assume models don't support images unless we implement VLM support
   const supportsImages = false;
-  const isModelError = false;
-  const isModelReady = !!currentModel;
-  const isEngineLoading = false;
+  const isModelError = modelStatus.toLowerCase().includes("error");
+  const isModelReady = !!currentModel && !isModelLoading;
 
   const handleRetryModel = async () => {
     toast.info("Model retry is not yet implemented for unified models");
@@ -118,8 +119,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
         {/* Model Error Alert */}
         <ModelError
           isModelError={isModelError}
-          status={"Ready"}
-          isEngineLoading={isEngineLoading}
+          status={modelStatus}
+          isEngineLoading={isModelLoading}
           onRetry={handleRetryModel}
         />
 
@@ -151,10 +152,10 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               placeholder={
                 isModelReady && currentModel
                   ? `Message ${currentModel.name}...`
-                  : "Model loading..."
+                  : modelStatus
               }
               className="min-h-[60px] max-h-[200px] resize-none pr-20 overflow-hidden"
-              disabled={isLoading || isEngineLoading || isModelError}
+              disabled={isLoading || isModelLoading || isModelError}
               style={{ height: "60px" }}
             />
 
@@ -163,7 +164,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               <FileUpload
                 supportsImages={supportsImages}
                 selectedModelName={currentModel?.name || "Model"}
-                disabled={isEngineLoading || isModelError}
+                disabled={isModelLoading || isModelError}
                 onFilesChanged={setAttachedFiles}
               />
             </div>
@@ -175,7 +176,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               className="absolute bottom-2 right-2 h-8 w-8 p-0"
               disabled={
                 isLoading ||
-                isEngineLoading ||
+                isModelLoading ||
                 isModelError ||
                 (!message.trim() && attachedFiles.length === 0)
               }
@@ -190,22 +191,28 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
 
           {/* Model Status Bar */}
           <ModelStatus
-            selectedModel={currentModel ? {
-              name: currentModel.name,
-              modelType: currentModel.type === 'online' ? 'Online' : 'Local',
-              supportsImages: false
-            } : {
-              name: "No Model",
-              modelType: "None",
-              supportsImages: false
-            }}
-            status={"Ready"}
-            isEngineLoading={isEngineLoading}
+            selectedModel={
+              currentModel
+                ? {
+                    name: currentModel.name,
+                    modelType:
+                      currentModel.type === "online" ? "Online" : "Local",
+                    supportsImages: false,
+                    specialization:
+                      currentModel.localModel?.specialization ||
+                      currentModel.onlineModel?.category,
+                  }
+                : {
+                    name: "Initializing...",
+                    modelType: "None",
+                    supportsImages: false,
+                  }
+            }
+            isEngineLoading={isModelLoading}
             isModelError={isModelError}
             isModelReady={isModelReady}
             supportsImages={supportsImages}
-            disabled={isLoading || isEngineLoading}
-            messageLength={message.length}
+            disabled={isLoading || isModelLoading}
           />
         </form>
       </div>
