@@ -2,7 +2,9 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
-import { useWebLLM } from "../../../../providers/WebLLMProvider";
+import { useModel } from "../../../../providers/ModelProvider";
+import { COMPLETE_AI_RULES } from "../../../../lib/aiRules";
+import type { OpenRouterMessage } from "../../../../lib/openrouter";
 
 interface UseChatInputReturn {
   message: string;
@@ -21,9 +23,9 @@ export function useChatInput(): UseChatInputReturn {
   const abortControllerRef = useRef<AbortController | null>(null);
   const conversationId = useConversationId();
   const navigate = useNavigate();
-  const { createConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
-  const { conversation, messages } = useConversation(conversationId);
-  const { engine, systemMessage } = useWebLLM();
+  const { createEmptyConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
+  const { messages } = useConversation(conversationId);
+  const { currentModel, streamMessage } = useModel();
 
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
@@ -33,156 +35,169 @@ export function useChatInput(): UseChatInputReturn {
     setIsGenerating(false);
   }, []);
 
-  const generateAIResponse = useCallback(async (userMessage: string, aiMessageId: string, conversationId: string) => {
-    if (!engine) return;
-
-    // Create new abort controller for this generation
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    setIsGenerating(true);
-    
-    let accumulatedResponse = "";
-    
-    try {
-
-      const response = await engine.chat.completions.create({
-        messages: [
-          { role: "system", content: systemMessage },
-          { role: "user", content: userMessage }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-        stream: true,
-      });
-
-      // Stream the response
-      for await (const chunk of response) {
-        // Check if generation was aborted
-        if (abortController.signal.aborted) {
-          console.log("Generation aborted by user");
-          return;
-        }
-
-        const content = chunk.choices[0]?.delta?.content || "";
-        if (content) {
-          accumulatedResponse += content;
-          
-          // Update the message with accumulated content
-          await updateMessage(conversationId, aiMessageId, accumulatedResponse);
-        }
-      }
-
-      // Fallback if no content was streamed
-      if (!accumulatedResponse.trim()) {
-        await updateMessage(conversationId, aiMessageId, 
-          "Sorry, I couldn't generate a response."
-        );
-      }
-
-    } catch (aiError: unknown) {
-      if ((aiError as Error).name === 'AbortError' || abortController.signal.aborted) {
-        console.log("Generation was aborted");
-        // Optionally add a message indicating generation was stopped
-        if (accumulatedResponse) {
-          await updateMessage(conversationId, aiMessageId, accumulatedResponse + "\n\n*Generation stopped*");
-        }
-      } else {
-        console.error("AI response error:", aiError);
-        await updateMessage(conversationId, aiMessageId,
-          "I'm sorry, I'm having trouble processing your request right now. Please try again later."
-        );
-      }
-    } finally {
-      setIsGenerating(false);
-      abortControllerRef.current = null;
-    }
-  }, [engine, systemMessage, updateMessage]);
-
-  const handleMessageSubmit = useCallback(async (messageToSend?: string) => {
-    const messageContent = messageToSend || message;
-    if (!messageContent.trim()) return;
-
-    // If already generating, stop previous generation
-    if (isGenerating) {
-      stopGeneration();
-      // Wait a bit for the abort to take effect
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
+  const handleMessageSubmit = useCallback(async (customMessage?: string) => {
+    const messageContent = (customMessage || message).trim();
+    if (!messageContent || isLoading || isGenerating) return;
 
     setIsLoading(true);
-    
-    // Clear input after submission
-    if (!messageToSend) {
-      setMessage("");
-    }
+    setMessage("");
 
     try {
       let currentConversationId = conversationId;
 
-      // If no conversation ID, create new conversation
+      // Create new conversation if needed
       if (!currentConversationId) {
-        const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
-        const newConversationId = await createConversation(title, messageContent);
-
+        const newConversationId = await createEmptyConversation();
         if (newConversationId) {
           currentConversationId = newConversationId;
-          navigate(`/chat/${newConversationId}`);
+          navigate(`/conversation/${newConversationId}`);
         } else {
           throw new Error("Failed to create conversation");
         }
-      } else {
-        // Add user message to existing conversation (may be empty)
-        await addMessage(currentConversationId, {
-          role: "user",
-          content: messageContent,
-        });
+      }
 
-        // If this is first message in empty conversation, update title
-        if (conversation && conversation.messages.length === 0) {
-          const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
-          await updateConversationTitle(currentConversationId, title);
+      // Add user message
+      await addMessage(currentConversationId, {
+        role: "user",
+        content: messageContent,
+      });
+
+      // Create placeholder AI message
+      const aiMessageId = await addMessage(currentConversationId, {
+        role: "assistant",
+        content: "",
+      });
+
+      // Update conversation title if it's the first message
+      if (messages.length === 0) {
+        const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
+        await updateConversationTitle(currentConversationId, title);
+      }
+
+      // Generate AI response
+      if (currentModel) {
+        console.log(`Generating response with model: ${currentModel.name} (${currentModel.type})`);
+        
+        // Prepare messages for AI including system message
+        const conversationMessages: OpenRouterMessage[] = [
+          { role: "system", content: COMPLETE_AI_RULES },
+          ...messages.map(msg => ({
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+          })),
+          { role: "user", content: messageContent },
+        ];
+
+        console.log('Messages being sent:', conversationMessages);
+
+        abortControllerRef.current = new AbortController();
+        setIsGenerating(true);
+
+        try {
+          let accumulatedContent = '';
+          
+          for await (const chunk of streamMessage(conversationMessages)) {
+            // Check if generation was aborted
+            if (abortControllerRef.current?.signal.aborted) {
+              break;
+            }
+
+            if (chunk.error) {
+              throw new Error(chunk.error);
+            }
+
+            accumulatedContent = chunk.content;
+            
+            // Update message with current content
+            updateMessage(currentConversationId, aiMessageId, accumulatedContent);
+
+            if (chunk.isComplete) {
+              break;
+            }
+          }
+
+          console.log('Response generated:', accumulatedContent);
+        } finally {
+          setIsGenerating(false);
+          abortControllerRef.current = null;
         }
       }
-
-      setIsLoading(false);
-
-      // If AI engine is ready, generate response
-      if (engine && currentConversationId) {
-        // Add placeholder for AI message that will be streamed
-        const aiMessageId = await addMessage(currentConversationId, {
-          role: "assistant",
-          content: "",
-        });
-
-        await generateAIResponse(messageContent, aiMessageId, currentConversationId);
-      }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error generating response:", error);
+    } finally {
       setIsLoading(false);
     }
-  }, [message, conversationId, navigate, createConversation, addMessage, updateConversationTitle, conversation, engine, generateAIResponse, isGenerating, stopGeneration]);
+  }, [
+    message,
+    isLoading,
+    isGenerating,
+    conversationId,
+    createEmptyConversation,
+    navigate,
+    addMessage,
+    messages,
+    updateConversationTitle,
+    currentModel,
+    streamMessage,
+    updateMessage,
+  ]);
 
   const regenerateLastResponse = useCallback(async () => {
-    if (!conversationId || !messages || messages.length < 2) return;
+    if (!conversationId || messages.length < 2 || isLoading || isGenerating) return;
 
-    // If already generating, stop previous generation
-    if (isGenerating) {
-      stopGeneration();
-      // Wait a bit for the abort to take effect
-      await new Promise(resolve => setTimeout(resolve, 100));
+    // Find the last AI message
+    const lastAiMessage = messages.slice().reverse().find(msg => msg.role === "assistant");
+    if (!lastAiMessage) return;
+
+    try {
+      // Clear the last AI message content
+      updateMessage(conversationId, lastAiMessage.id, "");
+
+      // Get messages up to the last user message
+      const lastUserMessage = messages.slice().reverse().find(msg => msg.role === "user");
+      if (!lastUserMessage) return;
+
+      // Generate response with existing messages
+      if (currentModel) {
+        const conversationMessages: OpenRouterMessage[] = [
+          { role: "system", content: COMPLETE_AI_RULES },
+          ...messages.slice(0, -1).map(msg => ({
+            role: msg.role as "user" | "assistant",
+            content: msg.content,
+          })),
+        ];
+
+        setIsGenerating(true);
+        abortControllerRef.current = new AbortController();
+
+        try {
+          let accumulatedContent = '';
+          
+          for await (const chunk of streamMessage(conversationMessages)) {
+            if (abortControllerRef.current?.signal.aborted) {
+              break;
+            }
+
+            if (chunk.error) {
+              throw new Error(chunk.error);
+            }
+
+            accumulatedContent = chunk.content;
+            updateMessage(conversationId, lastAiMessage.id, accumulatedContent);
+
+            if (chunk.isComplete) {
+              break;
+            }
+          }
+        } finally {
+          setIsGenerating(false);
+          abortControllerRef.current = null;
+        }
+      }
+    } catch (error) {
+      console.error("Error regenerating response:", error);
     }
-
-    // Find the last user message and AI response
-    const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user");
-    const lastAiMessage = [...messages].reverse().find(msg => msg.role === "assistant");
-
-    if (!lastUserMessage || !lastAiMessage) return;
-
-    // Clear the AI response and regenerate
-    await updateMessage(conversationId, lastAiMessage.id, "");
-    await generateAIResponse(lastUserMessage.content, lastAiMessage.id, conversationId);
-  }, [conversationId, messages, updateMessage, generateAIResponse, isGenerating, stopGeneration]);
+  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage]);
 
   return {
     message,

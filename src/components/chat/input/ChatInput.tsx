@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { TooltipProvider } from "../../ui/tooltip";
-import { useWebLLM } from "../../../providers/WebLLMProvider";
+import { useModel } from "../../../providers/ModelProvider";
 import { useChatInput, useDragDrop, type AttachedFile } from "./hooks";
 import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
@@ -24,12 +24,7 @@ interface ChatInputProps {
  * Main chat input component with message form and options bar
  */
 export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
-  const {
-    isLoading: isEngineLoading,
-    selectedModel,
-    status,
-    loadModel,
-  } = useWebLLM();
+  const { currentModel } = useModel();
   const { isLoading, handleMessageSubmit, message, setMessage } = useChatInput();
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
@@ -44,28 +39,14 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     maxHeight: 200,
   });
 
-  // Check if current model supports images (VLM)
-  const supportsImages =
-    selectedModel.modelType === "VLM" || selectedModel.supportsImages || false;
-
-  // Check for model errors
-  const isModelError =
-    status.includes("error") ||
-    status.includes("Error") ||
-    status.includes("failed");
-  const isModelReady = status === "Ready" && !isEngineLoading;
+  // For now, assume models don't support images unless we implement VLM support
+  const supportsImages = false;
+  const isModelError = false;
+  const isModelReady = !!currentModel;
+  const isEngineLoading = false;
 
   const handleRetryModel = async () => {
-    try {
-      toast.loading("Reloading model...", { id: "retry-model" });
-      await loadModel(selectedModel.id);
-      toast.success("Model reloaded successfully", { id: "retry-model" });
-    } catch (error) {
-      console.error("Failed to reload model:", error);
-      toast.error("Failed to reload model. Try selecting a different model.", {
-        id: "retry-model",
-      });
-    }
+    toast.info("Model retry is not yet implemented for unified models");
   };
 
   const handleFilesSelected = () => {
@@ -137,7 +118,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
         {/* Model Error Alert */}
         <ModelError
           isModelError={isModelError}
-          status={status}
+          status={"Ready"}
           isEngineLoading={isEngineLoading}
           onRetry={handleRetryModel}
         />
@@ -168,8 +149,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={
-                isModelReady
-                  ? `Message ${selectedModel.name}...`
+                isModelReady && currentModel
+                  ? `Message ${currentModel.name}...`
                   : "Model loading..."
               }
               className="min-h-[60px] max-h-[200px] resize-none pr-20 overflow-hidden"
@@ -181,7 +162,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
             <div className="absolute bottom-2 right-12">
               <FileUpload
                 supportsImages={supportsImages}
-                selectedModelName={selectedModel.name}
+                selectedModelName={currentModel?.name || "Model"}
                 disabled={isEngineLoading || isModelError}
                 onFilesChanged={setAttachedFiles}
               />
@@ -209,8 +190,16 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
 
           {/* Model Status Bar */}
           <ModelStatus
-            selectedModel={selectedModel}
-            status={status}
+            selectedModel={currentModel ? {
+              name: currentModel.name,
+              modelType: currentModel.type === 'online' ? 'Online' : 'Local',
+              supportsImages: false
+            } : {
+              name: "No Model",
+              modelType: "None",
+              supportsImages: false
+            }}
+            status={"Ready"}
             isEngineLoading={isEngineLoading}
             isModelError={isModelError}
             isModelReady={isModelReady}

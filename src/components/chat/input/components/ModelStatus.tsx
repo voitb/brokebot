@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { ModelSelector } from "../../ModelSelector";
+import { UnifiedModelSelector } from "../../UnifiedModelSelector";
 
 interface ModelStatusProps {
   selectedModel: {
@@ -54,7 +54,7 @@ export const ModelStatus: React.FC<ModelStatusProps> = ({
   return (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
       <div className="flex items-center gap-2">
-        <ModelSelector disabled={disabled} />
+        <UnifiedModelSelector disabled={disabled} />
 
         {/* Model Status */}
         <div className="flex items-center gap-1">
