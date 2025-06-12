@@ -5,14 +5,14 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import {
   db,
-  type IConversation,
-  type IMessage,
+  type Conversation,
+  type Message,
   type ISharedLink,
-} from "../lib/db"; 
+} from "../lib/db";
 
 interface SharedChatData {
-  conversation: IConversation;
-  messages: IMessage[];
+  conversation: Conversation;
+  messages: Message[];
   sharedLink: ISharedLink;
 }
 
@@ -90,7 +90,7 @@ export const SharedChatPage: React.FC = () => {
       }
     };
 
-    fetchSharedChat(); 
+    fetchSharedChat();
   }, [shareId]);
 
   // Invalid share ID
