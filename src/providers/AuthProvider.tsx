@@ -44,9 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getCurrentUser = async () => {
     try {
-      console.log("getCurrentUser", account);
       const currentUser = await account.get();
-      console.log("currentUser", currentUser);
       setUser(currentUser);
     } catch (e) {
       if (e instanceof AppwriteException && e.code !== 401) throw e;

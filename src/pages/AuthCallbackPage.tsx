@@ -9,9 +9,6 @@ export function AuthCallbackPage() {
 
   useEffect(() => {
     // Wait for the loading to be false
-    console.log("isLoading", isLoading);
-    console.log("user", user);
-    console.log("navigate", navigate);
     if (!isLoading) {
       if (user) {
         // If user is successfully fetched, redirect to chat
