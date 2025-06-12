@@ -7,6 +7,7 @@ import {
   Keyboard,
   Share2,
   Download,
+  Upload,
 } from "lucide-react";
 import { Button } from "../../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
@@ -22,6 +23,7 @@ interface ActionButtonsProps {
   onOpenShortcuts: () => void;
   onOpenShare: () => void;
   onExportConversation: () => void;
+  onImportConversation: () => void;
 }
 
 /**
@@ -39,6 +41,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onOpenShortcuts,
   onOpenShare,
   onExportConversation,
+  onImportConversation,
 }) => {
   return (
     <>
@@ -68,6 +71,20 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           </TooltipTrigger>
           <TooltipContent>
             <p>Export conversation</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
+
+      {/* Import Button (conditional) */}
+      {conversationId && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={onImportConversation}>
+              <Upload className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Import conversation</p>
           </TooltipContent>
         </Tooltip>
       )}

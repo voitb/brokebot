@@ -12,6 +12,7 @@ import { useHeaderActions } from "./hooks/useHeaderActions";
 import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { SettingsDialog } from "../../dialogs/settings";
 import { ShareChatModal } from "../modals/ShareChatModal";
+import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
 
 /**
  * Main chat header component with responsive layout
@@ -39,6 +40,13 @@ export const ChatHeader: React.FC = () => {
     handleCancelTitleEdit,
     handleTogglePinConversation,
     handleExportConversation,
+    handleImportConversation,
+    handleFileImport,
+    importDialogOpen,
+    setImportDialogOpen,
+    handleOverwrite,
+    handleAppend,
+    fileInputRef,
   } = useHeaderActions({ conversationId });
 
   // Action button handlers
@@ -80,6 +88,7 @@ export const ChatHeader: React.FC = () => {
               onOpenShortcuts={handleOpenShortcuts}
               onOpenShare={handleOpenShare}
               onExportConversation={handleExportConversation}
+              onImportConversation={handleImportConversation}
             />
           </div>
         </div>
@@ -113,9 +122,19 @@ export const ChatHeader: React.FC = () => {
             onOpenShortcuts={handleOpenShortcuts}
             onOpenShare={handleOpenShare}
             onExportConversation={handleExportConversation}
+            onImportConversation={handleImportConversation}
           />
         </div>
       </header>
+
+      {/* File input for import */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileImport}
+        className="hidden"
+        accept="application/json"
+      />
 
       {/* Modals */}
       <KeyboardShortcutsModal
@@ -127,6 +146,12 @@ export const ChatHeader: React.FC = () => {
         open={shareModalOpen}
         onOpenChange={setShareModalOpen}
         conversationId={conversationId}
+      />
+      <ImportConfirmationDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onAppend={handleAppend}
+        onOverwrite={handleOverwrite}
       />
     </TooltipProvider>
   );

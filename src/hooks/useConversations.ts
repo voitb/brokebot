@@ -1,6 +1,6 @@
 // src/hooks/useConversations.ts
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type IConversation, type IMessage } from "../lib/db";
+import { db, type Conversation, type Message } from "../lib/db";
 import { v4 as uuidv4 } from "uuid";
 
 export function useConversations() {
@@ -16,7 +16,7 @@ export function useConversations() {
     firstMessageContent: string
   ): Promise<string | null> => {
     try {
-      const newConversation: IConversation = {
+      const newConversation: Conversation = {
         id: uuidv4(),
         title,
         messages: [
@@ -41,7 +41,7 @@ export function useConversations() {
 
   const createEmptyConversation = async (title: string = "New Conversation"): Promise<string | null> => {
     try {
-      const newConversation: IConversation = {
+      const newConversation: Conversation = {
         id: uuidv4(),
         title,
         messages: [], // Pusta tablica wiadomości
@@ -59,10 +59,10 @@ export function useConversations() {
 
   const addMessage = async (
     conversationId: string,
-    message: Omit<IMessage, "id" | "createdAt">
+    message: Omit<Message, "id" | "createdAt">
   ): Promise<string> => {
     try {
-      const newMessage: IMessage = {
+      const newMessage: Message = {
         ...message,
         id: uuidv4(),
         createdAt: new Date(),
@@ -129,13 +129,35 @@ export function useConversations() {
   };
 
   // 7. Aktualizacja pól rozmowy (UPDATE)
-  const updateConversation = async (id: string, updates: Partial<Omit<IConversation, "id" | "createdAt">>) => {
+  const updateConversation = async (id: string, updates: Partial<Omit<Conversation, "id" | "createdAt">>) => {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
         Object.assign(convo, updates);
       });
     } catch (error) {
       console.error("Błąd przy aktualizacji rozmowy:", error);
+    }
+  };
+
+  const overwriteMessages = async (id: string, newMessages: Message[]) => {
+    try {
+      await db.conversations.where("id").equals(id).modify(convo => {
+        convo.messages = newMessages;
+        convo.updatedAt = new Date();
+      });
+    } catch (error) {
+      console.error("Błąd przy nadpisywaniu wiadomości:", error);
+    }
+  };
+
+  const appendMessages = async (id: string, newMessages: Message[]) => {
+    try {
+      await db.conversations.where("id").equals(id).modify(convo => {
+        convo.messages.push(...newMessages);
+        convo.updatedAt = new Date();
+      });
+    } catch (error) {
+      console.error("Błąd przy dołączaniu wiadomości:", error);
     }
   };
 
@@ -149,6 +171,8 @@ export function useConversations() {
     togglePinConversation,
     updateConversationTitle,
     updateConversation,
+    overwriteMessages,
+    appendMessages,
   };
 }
 

@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
+import { type Conversation, type Message } from "../../../../lib/db";
+import { toast } from "sonner";
 
 interface UseHeaderActionsOptions {
   conversationId?: string;
@@ -14,17 +16,26 @@ interface UseHeaderActionsReturn {
   conversationTitle?: string;
   isLoadingConversation: boolean;
   isConversationPinned: boolean;
+  importDialogOpen: boolean;
   
   // Actions
   setShortcutsOpen: (open: boolean) => void;
   setSettingsOpen: (open: boolean) => void;
+  setImportDialogOpen: (open: boolean) => void;
   handleNewChat: () => Promise<void>;
   handleTitleClick: () => void;
   handleSaveTitle: (newTitle: string) => Promise<void>;
   handleCancelTitleEdit: () => void;
   handleTogglePinConversation: () => Promise<void>;
   handleExportConversation: () => void;
+  handleImportConversation: () => void;
+  handleFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleOverwrite: () => void;
+  handleAppend: () => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
+
+type JsonMessage = Omit<Message, "createdAt"> & { createdAt: string };
 
 export function useHeaderActions({ 
   conversationId 
@@ -35,13 +46,18 @@ export function useHeaderActions({
     togglePinConversation,
     updateConversationTitle,
     createEmptyConversation,
+    overwriteMessages,
+    appendMessages,
   } = useConversations();
   const { conversation } = useConversation(conversationId);
   
   // Local state
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
 
   // Derived state
   const currentConversation = conversations?.find(c => c.id === conversationId);
@@ -119,6 +135,70 @@ export function useHeaderActions({
     }
   }, [conversation]);
 
+  const handleImportConversation = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !conversationId) return;
+
+    if (file.type !== "application/json") {
+      toast.error("Please select a valid JSON file.");
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const importedConv = JSON.parse(text) as Conversation;
+
+      if (!importedConv.messages || !Array.isArray(importedConv.messages)) {
+        toast.error("Invalid conversation file format. Missing 'messages' array.");
+        return;
+      }
+
+      const normalizedMessages: Message[] = (
+        importedConv.messages as unknown as JsonMessage[]
+      ).map((msg) => ({
+        ...msg,
+        createdAt: new Date(msg.createdAt),
+      }));
+
+      if (currentConversation && currentConversation.messages.length > 0) {
+        setPendingMessages(normalizedMessages);
+        setImportDialogOpen(true);
+      } else {
+        await overwriteMessages(conversationId, normalizedMessages);
+        toast.success("Conversation imported successfully.");
+      }
+    } catch (e) {
+      console.error("Failed to import conversation:", e);
+      toast.error("Failed to parse or import conversation file.");
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+  
+  const handleOverwrite = async () => {
+    if (conversationId && pendingMessages) {
+      await overwriteMessages(conversationId, pendingMessages);
+      toast.success("Conversation overwritten successfully.");
+    }
+    setImportDialogOpen(false);
+    setPendingMessages(null);
+  };
+
+  const handleAppend = async () => {
+    if (conversationId && pendingMessages) {
+      await appendMessages(conversationId, pendingMessages);
+      toast.success("Messages appended successfully.");
+    }
+    setImportDialogOpen(false);
+    setPendingMessages(null);
+  };
+
   return {
     // State
     shortcutsOpen,
@@ -127,15 +207,22 @@ export function useHeaderActions({
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
+    importDialogOpen,
     
     // Actions
     setShortcutsOpen,
     setSettingsOpen,
+    setImportDialogOpen,
     handleNewChat,
     handleTitleClick,
     handleSaveTitle,
     handleCancelTitleEdit,
     handleTogglePinConversation,
     handleExportConversation,
+    handleImportConversation,
+    handleFileImport,
+    handleOverwrite,
+    handleAppend,
+    fileInputRef,
   };
 } 
