@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate, createSearchParams } from "react-router-dom";
 import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useTheme } from "../../../providers/ThemeProvider";
@@ -9,8 +10,6 @@ import {
   NewChatButton,
 } from "./components";
 import { useHeaderActions } from "./hooks/useHeaderActions";
-import { SettingsDialog } from "../../dialogs/settings";
-import { ShareChatModal } from "../modals/ShareChatModal";
 import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
 
 /**
@@ -19,18 +18,16 @@ import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
  * Desktop: breadcrumbs/new chat button + action buttons
  */
 export const ChatHeader: React.FC = () => {
+  const navigate = useNavigate();
   const conversationId = useConversationId();
   const { open: sidebarOpen } = useSidebar();
   const { theme, setTheme } = useTheme();
-  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const {
-    settingsOpen,
     isEditingTitle,
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
-    setSettingsOpen,
     handleNewChat,
     handleTitleClick,
     handleSaveTitle,
@@ -52,12 +49,21 @@ export const ChatHeader: React.FC = () => {
   };
 
   const handleOpenSettings = () => {
-    setSettingsOpen(true);
+    navigate({ search: createSearchParams({ modal: "settings" }).toString() });
+  };
+
+  const handleOpenShortcuts = () => {
+    navigate({ search: createSearchParams({ modal: "shortcuts" }).toString() });
   };
 
   const handleOpenShare = () => {
     if (!conversationId) return;
-    setShareModalOpen(true);
+    navigate({
+      search: createSearchParams({
+        modal: "share",
+        conversationId,
+      }).toString(),
+    });
   };
 
   return (
@@ -78,7 +84,7 @@ export const ChatHeader: React.FC = () => {
               onToggleTheme={handleToggleTheme}
               onTogglePinConversation={handleTogglePinConversation}
               onOpenSettings={handleOpenSettings}
-              onOpenShortcuts={() => {}}
+              onOpenShortcuts={handleOpenShortcuts}
               onOpenShare={handleOpenShare}
               onExportConversation={handleExportConversation}
               onImportConversation={handleImportConversation}
@@ -112,7 +118,7 @@ export const ChatHeader: React.FC = () => {
             onToggleTheme={handleToggleTheme}
             onTogglePinConversation={handleTogglePinConversation}
             onOpenSettings={handleOpenSettings}
-            onOpenShortcuts={() => {}}
+            onOpenShortcuts={handleOpenShortcuts}
             onOpenShare={handleOpenShare}
             onExportConversation={handleExportConversation}
             onImportConversation={handleImportConversation}
@@ -130,12 +136,6 @@ export const ChatHeader: React.FC = () => {
       />
 
       {/* Modals */}
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <ShareChatModal
-        open={shareModalOpen}
-        onOpenChange={setShareModalOpen}
-        conversationId={conversationId}
-      />
       <ImportConfirmationDialog
         open={importDialogOpen}
         onOpenChange={setImportDialogOpen}

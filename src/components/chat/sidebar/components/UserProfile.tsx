@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, createSearchParams } from "react-router-dom";
 import {
   LogOut,
   User as UserIcon,
@@ -24,7 +24,8 @@ import { useUserConfig } from "@/hooks/business/useUserConfig";
 
 const UserProfileMenu: React.FC = () => {
   const { user, logout } = useAuth();
-  const { config: localUserConfig } = useUserConfig();  
+  const { config: localUserConfig } = useUserConfig();
+  const navigate = useNavigate();
 
   if (!localUserConfig) {
     return null;
@@ -42,8 +43,8 @@ const UserProfileMenu: React.FC = () => {
     .slice(0, 2);
 
   const openShortcutsModal = () => {
-    console.log("openShortcutsModal");
-  }
+    navigate({ search: createSearchParams({ modal: "shortcuts" }).toString() });
+  };
 
   return (
     <div className="p-2">
