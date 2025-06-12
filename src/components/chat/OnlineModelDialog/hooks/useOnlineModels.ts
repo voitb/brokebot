@@ -1,15 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import {
   OpenRouterClient,
   type OpenRouterModel,
 } from "@/lib/openrouter";
 import { functions } from "@/lib/appwriteClient";
-import {
-  getStoredApiKeys,
-  hasApiKey,
-  type ApiKeys,
-} from "@/lib/apiKeys";
+import { useUserConfig } from "@/hooks/useUserConfig";
 
 export const useOnlineModels = (
   open: boolean | undefined,
@@ -19,24 +15,22 @@ export const useOnlineModels = (
   ) => void,
   onOpenChange?: (open: boolean) => void
 ) => {
-  const [storedKeys, setStoredKeys] = useState<ApiKeys>(getStoredApiKeys());
-  const hasOpenRouterKey = !!storedKeys.openrouter;
-  const hasPaidKey = !!(
-    storedKeys.openai ||
-    storedKeys.google ||
-    storedKeys.anthropic
-  );
+  const { config } = useUserConfig();
 
-  useEffect(() => {
-    if (open) {
-      setStoredKeys(getStoredApiKeys());
-    }
-  }, [open]);
+  const hasOpenRouterKey = !!config?.openrouterApiKey;
+  const hasPaidKey = !!(
+    config?.openaiApiKey ||
+    config?.googleApiKey ||
+    config?.anthropicApiKey
+  );
 
   const handleModelSelect = useCallback(
     (model: OpenRouterModel) => {
-      if (!hasApiKey(model.provider as keyof ApiKeys)) {
-        toast.error(`Please add your ${model.provider} API key first`);
+      // @ts-expect-error - `requiresApiKey` exists on paid models
+      const providerKey = model.requiresApiKey ? `${model.requiresApiKey}ApiKey` : 'openrouterApiKey';
+      // @ts-expect-error - `providerKey` is a valid key of config
+      if (!config || !config[providerKey]) {
+        toast.error(`Please add your ${model.provider} API key first in Settings -> General.`);
         return;
       }
 
@@ -44,26 +38,31 @@ export const useOnlineModels = (
         functions,
         siteUrl: window.location.origin,
         siteName: "Local GPT",
+        keys: {
+          openrouterApiKey: config?.openrouterApiKey,
+        },
       });
 
       onModelSelect(model, client);
       onOpenChange?.(false);
     },
-    [onModelSelect, onOpenChange]
+    [config, onModelSelect, onOpenChange]
   );
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
-      if (isOpen) {
-        setStoredKeys(getStoredApiKeys());
-      }
       onOpenChange?.(isOpen);
     },
     [onOpenChange]
   );
 
   return {
-    storedKeys,
+    storedKeys: {
+      openrouter: config?.openrouterApiKey,
+      openai: config?.openaiApiKey,
+      google: config?.googleApiKey,
+      anthropic: config?.anthropicApiKey,
+    },
     hasOpenRouterKey,
     hasPaidKey,
     handleModelSelect,

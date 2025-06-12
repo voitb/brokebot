@@ -1,16 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  User,
-  Shield,
-  CreditCard,
-  Plug,
-  Bot,
-  X,
-  Check,
-  Loader2,
-} from "lucide-react";
+import { Shield, CreditCard, X, Check, Loader2, Settings } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -44,9 +35,7 @@ import {
   TooltipTrigger,
 } from "../../ui/tooltip";
 import {
-  ProfileTab,
-  ModelsTab,
-  IntegrationsTab,
+  GeneralTab,
   PrivacyTab,
   LocalUserBillingTab,
   LoggedUserBillingTab,
@@ -60,9 +49,7 @@ interface SettingsDialogProps {
 }
 
 const navigationItems = [
-  { id: "profile" as const, label: "Profile", icon: User },
-  { id: "models" as const, label: "Local Models", icon: Bot },
-  { id: "integrations" as const, label: "Integrations", icon: Plug },
+  { id: "general" as const, label: "General", icon: Settings },
   { id: "privacy" as const, label: "Privacy", icon: Shield },
   { id: "billing" as const, label: "Billing", icon: CreditCard },
 ];
@@ -101,12 +88,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const renderTabContent = () => {
     const commonProps = { settings, onFieldChange: handleFieldChange };
     switch (activeTab) {
-      case "profile":
-        return <ProfileTab {...commonProps} />;
-      case "models":
-        return <ModelsTab {...commonProps} />;
-      case "integrations":
-        return <IntegrationsTab {...commonProps} userInfo={userInfo} />;
+      case "general":
+        return <GeneralTab {...commonProps} />;
       case "privacy":
         return (
           <PrivacyTab

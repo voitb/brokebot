@@ -4,10 +4,9 @@ import { useApiKeyManager } from "../hooks/useApiKeyManager";
 import { Button } from "../../../ui/button";
 import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
-import { type ApiKeys } from "../../../../lib/apiKeys";
 
 interface ApiKeySectionProps {
-  provider: keyof ApiKeys;
+  provider: "openrouter" | "openai" | "google" | "anthropic";
 }
 
 const providerDetails = {

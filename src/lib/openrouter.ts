@@ -1,9 +1,15 @@
 import { Functions } from 'appwrite';
 
+export interface ApiKeyConfig {
+  openrouterApiKey?: string;
+  // Add other keys here if the proxy needs them
+}
+
 export interface OpenRouterConfig {
   functions: Functions;
   siteUrl?: string;
   siteName?: string;
+  keys: ApiKeyConfig;
 }
 
 export interface OpenRouterMessage {
@@ -102,10 +108,12 @@ export type OpenRouterModel = typeof FREE_LEARNING_MODELS[number] | typeof PAID_
 export class OpenRouterClient {
   private functions: Functions;
   private config: OpenRouterConfig;
+  private keys: ApiKeyConfig;
 
   constructor(config: OpenRouterConfig) {
     this.config = config;
     this.functions = config.functions;
+    this.keys = config.keys;
   }
 
   async *streamCompletion(
@@ -114,11 +122,7 @@ export class OpenRouterClient {
     onProgress?: (content: string) => void
   ): AsyncGenerator<StreamResponse, void, unknown> {
     try {
-      // Get API key from local storage
-      const { getStoredApiKeys } = await import('./apiKeys');
-      const keys = getStoredApiKeys();
-      
-      if (!keys.openrouter) {
+      if (!this.keys.openrouterApiKey) {
         throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
       }
 
@@ -129,7 +133,7 @@ export class OpenRouterClient {
           model,
           messages,
           stream: true, // We'll handle this in the function
-          api_key: keys.openrouter
+          api_key: this.keys.openrouterApiKey
         })
       );
 
@@ -200,11 +204,7 @@ export class OpenRouterClient {
     messages: OpenRouterMessage[]
   ): Promise<string> {
     try {
-      // Get API key from local storage
-      const { getStoredApiKeys } = await import('./apiKeys');
-      const keys = getStoredApiKeys();
-      
-      if (!keys.openrouter) {
+      if (!this.keys.openrouterApiKey) {
         throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
       }
 
@@ -213,7 +213,7 @@ export class OpenRouterClient {
         JSON.stringify({
           model,
           messages,
-          api_key: keys.openrouter // Pass API key to Appwrite Function
+          api_key: this.keys.openrouterApiKey // Pass API key to Appwrite Function
         })
       );
 

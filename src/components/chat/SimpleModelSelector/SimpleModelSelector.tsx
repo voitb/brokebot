@@ -21,9 +21,9 @@ import {
   type OpenRouterModel,
   OpenRouterClient,
 } from "../../../lib/openrouter";
-import { hasApiKey } from "../../../lib/apiKeys";
 import { toast } from "sonner";
 import { LocalModelList } from "./components/LocalModelList";
+import { useUserConfig } from "../../../hooks/useUserConfig";
 
 interface SimpleModelSelectorProps {
   disabled?: boolean;
@@ -34,6 +34,7 @@ export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
 }) => {
   const { selectedModel: webllmModel, availableModels } = useWebLLM();
   const { currentModel, setCurrentModel } = useModel();
+  const { config } = useUserConfig();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -43,6 +44,8 @@ export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
     : isOnlineModel
     ? currentModel.onlineModel?.name || "Online Model"
     : webllmModel.name;
+
+  const isOpenRouterKeyAvailable = !!config?.openrouterApiKey;
 
   const handleLocalModelSelect = (model: ModelInfo) => {
     const localModel = createLocalModel(model);
@@ -101,7 +104,7 @@ export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
               <Cloud className="w-3 h-3" />
               Online Models
             </div>
-            {hasApiKey("openrouter") ? (
+            {isOpenRouterKeyAvailable ? (
               <Badge variant="default" className="text-xs">
                 API Ready
               </Badge>

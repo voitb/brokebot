@@ -30,6 +30,7 @@ export interface UserConfig {
   autoLoadModel: boolean;
   storeConversationsLocally: boolean;
   storeConversationsInCloud?: boolean;
+  openrouterApiKey?: string;
   openaiApiKey?: string;
   anthropicApiKey?: string;
   googleApiKey?: string;
