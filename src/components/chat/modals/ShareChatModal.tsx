@@ -72,7 +72,7 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = React.memo(
           </DialogHeader>
 
           {/* Scrollable Content */}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="h-[calc(80vh-183px)]">
             <div className="space-y-6 px-6 py-4">
               {/* Storage Info */}
               {!hasCloudStorage && (
