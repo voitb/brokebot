@@ -60,8 +60,7 @@ export function LocalUserBillingTab() {
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>✓ Everything in Local Free</li>
-                <li>✓ Cloud backup & sync</li>
-                <li>✓ Cross-device access</li>
+                <li>✓ Cross-device sync (manual)</li>
                 <li>✓ Advanced export options</li>
                 <li>✓ Priority support</li>
               </ul>
@@ -75,6 +74,7 @@ export function LocalUserBillingTab() {
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>✓ Everything in Starter</li>
+                <li>✓ Automatic cloud backup</li>
                 <li>✓ API access to GPT-4, Claude</li>
                 <li>✓ Custom AI personas</li>
                 <li>✓ Advanced model settings</li>

@@ -4,6 +4,7 @@ import {
   LegalSection,
   DataManagementSection,
   DangerZoneSection,
+  ManualSyncSection,
   ClearAllDataDialog,
   ResetSettingsDialog,
   usePrivacySettings,
@@ -74,6 +75,16 @@ export function PrivacyTab({
           onImportClick={handleImportClick}
           onFileImport={handleFileImport}
           hasConversations={hasConversationsFromHook}
+        />
+
+        <Separator />
+
+        <ManualSyncSection
+          isSyncEnabled={hasActiveSubscription}
+          onSync={() => {
+            // TODO: Implement sync logic
+            console.log("Sync button clicked");
+          }}
         />
 
         <DangerZoneSection

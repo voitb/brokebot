@@ -23,6 +23,7 @@ interface UseHeaderActionsReturn {
   handleSaveTitle: (newTitle: string) => Promise<void>;
   handleCancelTitleEdit: () => void;
   handleTogglePinConversation: () => Promise<void>;
+  handleExportConversation: () => void;
 }
 
 export function useHeaderActions({ 
@@ -98,6 +99,26 @@ export function useHeaderActions({
     }
   }, [conversationId, togglePinConversation]);
 
+  const handleExportConversation = useCallback(() => {
+    if (!conversation) return;
+
+    try {
+      const dataStr = JSON.stringify(conversation, null, 2);
+      const dataUri =
+        "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `conversation-${conversation.id}.json`;
+
+      const linkElement = document.createElement("a");
+      linkElement.setAttribute("href", dataUri);
+      linkElement.setAttribute("download", exportFileDefaultName);
+      linkElement.click();
+    } catch (error) {
+      console.error("Error exporting conversation:", error);
+      // You might want to show a toast notification here
+    }
+  }, [conversation]);
+
   return {
     // State
     shortcutsOpen,
@@ -115,5 +136,6 @@ export function useHeaderActions({
     handleSaveTitle,
     handleCancelTitleEdit,
     handleTogglePinConversation,
+    handleExportConversation,
   };
 } 
