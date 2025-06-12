@@ -3,18 +3,13 @@ import { useUserConfig } from "@/hooks/useUserConfig";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
 
-export type SettingsTab =
-  | "profile"
-  | "privacy"
-  | "integrations"
-  | "models"
-  | "billing";
+export type SettingsTab = "general" | "privacy" | "billing";
 
 export const useSettings = () => {
   const { config, updateConfig } = useUserConfig();
   const [settings, setSettings] = useState<Partial<UserConfig>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("general");
 
   useEffect(() => {
     if (config) {

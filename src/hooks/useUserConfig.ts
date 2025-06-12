@@ -18,6 +18,9 @@ export function useUserConfig() {
       if (rawConfig) {
         const decryptedConfig = { ...rawConfig };
         
+        if (rawConfig.openrouterApiKey) {
+          decryptedConfig.openrouterApiKey = await decryptValue(rawConfig.openrouterApiKey);
+        }
         if (rawConfig.openaiApiKey) {
           decryptedConfig.openaiApiKey = await decryptValue(rawConfig.openaiApiKey);
         }
@@ -40,6 +43,9 @@ export function useUserConfig() {
       // Encrypt API keys before saving
       const encryptedUpdates = { ...updates };
       
+      if (updates.openrouterApiKey) {
+        encryptedUpdates.openrouterApiKey = await encryptValue(updates.openrouterApiKey);
+      }
       if (updates.openaiApiKey) {
         encryptedUpdates.openaiApiKey = await encryptValue(updates.openaiApiKey);
       }

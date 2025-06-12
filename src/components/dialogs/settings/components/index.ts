@@ -1,6 +1,4 @@
-export { ProfileTab } from './ProfileTab';
-export { ModelsTab } from './ModelsTab';
-export { IntegrationsTab } from './IntegrationsTab';
+export { GeneralTab } from './GeneralTab';
 export { PrivacyTab } from './PrivacyTab';
 export { BillingTab } from './BillingTab';
 export { PricingInteraction } from './PricingInteraction';

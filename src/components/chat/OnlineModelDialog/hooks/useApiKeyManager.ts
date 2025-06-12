@@ -1,61 +1,75 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import {
-  getStoredApiKeys,
-  storeApiKey,
-  removeApiKey,
-  hasApiKey,
-  maskApiKey,
-  type ApiKeys,
-} from "../../../../lib/apiKeys";
+import { useUserConfig } from "../../../../hooks/useUserConfig";
+import { type UserConfig } from "../../../../lib/db";
 
-export const useApiKeyManager = (provider: keyof ApiKeys) => {
+// This function is local now as it's small and only used here.
+function maskApiKey(key: string): string {
+  if (!key || key.length < 8) return "";
+  return key.slice(0, 4) + "••••••••" + key.slice(-4);
+}
+
+// Map provider keys to UserConfig keys
+const providerToConfigKey: Record<string, keyof UserConfig> = {
+  openrouter: "openrouterApiKey",
+  openai: "openaiApiKey",
+  google: "googleApiKey",
+  anthropic: "anthropicApiKey",
+};
+
+export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => {
+  const { config, updateConfig } = useUserConfig();
+  const configKey = providerToConfigKey[provider];
+
   const [apiKey, setApiKey] = useState("");
   const [hasStoredKey, setHasStoredKey] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const keys = getStoredApiKeys();
-    const keyExists = hasApiKey(provider);
-    setHasStoredKey(keyExists);
-    if (keyExists && keys[provider]) {
-      setApiKey(maskApiKey(keys[provider]!));
-    } else {
-      setApiKey("");
+    if (config && configKey) {
+      const keyExists = !!config[configKey];
+      setHasStoredKey(keyExists);
+      if (keyExists) {
+        setApiKey(maskApiKey(config[configKey] as string));
+      } else {
+        setApiKey("");
+      }
     }
-  }, [provider]);
+  }, [config, configKey]);
 
-  const handleApiKeySave = () => {
+  const handleApiKeySave = async () => {
     if (!apiKey.trim() || apiKey.includes("••••")) {
       toast.error("Please enter a valid API key");
       return;
     }
 
-    storeApiKey(provider, apiKey);
+    await updateConfig({ [configKey]: apiKey });
     setHasStoredKey(true);
     setApiKey(maskApiKey(apiKey));
     setIsEditing(false);
     toast.success("API key saved successfully");
   };
 
-  const handleApiKeyRemove = () => {
-    removeApiKey(provider);
+  const handleApiKeyRemove = async () => {
+    await updateConfig({ [configKey]: "" });
     setHasStoredKey(false);
     setApiKey("");
     setIsEditing(false);
     toast.success("API key removed");
   };
-  
+
   const startEditing = () => {
-    const keys = getStoredApiKeys();
-    setApiKey(keys[provider] || "");
+    if (config && configKey) {
+      setApiKey((config[configKey] as string) || "");
+    }
     setIsEditing(true);
   };
 
   const cancelEditing = () => {
-    const keys = getStoredApiKeys();
-    const currentKey = keys[provider];
-    setApiKey(currentKey ? maskApiKey(currentKey) : "");
+    if (config && configKey) {
+      const currentKey = config[configKey] as string;
+      setApiKey(currentKey ? maskApiKey(currentKey) : "");
+    }
     setIsEditing(false);
   };
 
