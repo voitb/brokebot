@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,14 +23,43 @@ const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
 });
 
-export function ForgotPasswordForm({
-  className,
-}: React.ComponentProps<"div">) {
+type FormValues = z.infer<typeof formSchema>;
+type State = {
+  error: string;
+  success: boolean;
+  submittedEmail: string;
+};
+
+export function ForgotPasswordForm({ className }: React.ComponentProps<"div">) {
   const { sendPasswordReset } = useAuth();
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [submittedEmail, setSubmittedEmail] = useState("");
+
+  const sendPasswordResetAction = async (
+    state: State,
+    values: FormValues
+  ): Promise<State> => {
+    try {
+      await sendPasswordReset(values.email);
+      return { success: true, error: "", submittedEmail: values.email };
+    } catch (err) {
+      if (err instanceof Error) {
+        return { success: false, error: err.message, submittedEmail: "" };
+      }
+      return {
+        success: false,
+        error: "An unexpected error occurred.",
+        submittedEmail: "",
+      };
+    }
+  };
+
+  const [state, formAction, isPending] = useActionState(
+    sendPasswordResetAction,
+    {
+      error: "",
+      success: false,
+      submittedEmail: "",
+    }
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,33 +68,18 @@ export function ForgotPasswordForm({
     },
   });
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setError("");
-    setIsLoading(true);
-    setIsSuccess(false);
-    try {
-      await sendPasswordReset(values.email);
-      setSubmittedEmail(values.email);
-      setIsSuccess(true);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    formAction(values);
   };
 
-  if (isSuccess) {
+  if (state.success) {
     return (
       <div className="flex flex-col items-center gap-4 text-center">
         <h1 className="text-xl font-bold">Check your inbox</h1>
         <p className="text-muted-foreground">
           We've sent a password reset link to{" "}
-          <strong>{submittedEmail}</strong>. Please follow the instructions in
-          the email to reset your password.
+          <strong>{state.submittedEmail}</strong>. Please follow the
+          instructions in the email to reset your password.
         </p>
         <Button asChild>
           <Link to="/login">Back to Login</Link>
@@ -100,19 +114,27 @@ export function ForgotPasswordForm({
                   <Input
                     placeholder="m@example.com"
                     {...field}
-                    disabled={isLoading}
+                    disabled={isPending}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Send Reset Link"}
+          {state.error && <p className="text-sm text-red-500">{state.error}</p>}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Sending..." : "Send Reset Link"}
           </Button>
         </form>
       </Form>
+      <div className="text-center text-sm">
+        <Link
+          to="/login"
+          className="underline underline-offset-4 hover:text-primary"
+        >
+          Back to Login
+        </Link>
+      </div>
     </div>
   );
-} 
+}
