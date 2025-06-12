@@ -7,18 +7,25 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { ArrowLeft, Shield, Database, Zap, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function TermsOfService() {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => window.history.back()}
-            className="mb-4"
-          >
+          <Button variant="ghost" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>

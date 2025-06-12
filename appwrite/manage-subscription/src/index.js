@@ -1,26 +1,7 @@
-// This would be the entry point for your Appwrite function.
-// It assumes you have a similar folder structure:
-// /appwrite/manage-subscription/src/index.ts
-
-// Basic, simplified types to satisfy the linter locally.
-// The actual types are provided by the Appwrite runtime.
-interface AppwriteRequest {
-  body: string;
-}
-
-interface AppwriteResponse {
-  json: (data: Record<string, unknown>, statusCode?: number) => void;
-  redirect: (url: string, statusCode?: number) => void;
-}
-
-interface AppwriteContext {
-  req: AppwriteRequest;
-  res: AppwriteResponse;
-  log: (...args: unknown[]) => void;
-  error: (...args: unknown[]) => void;
-}
-
-export default async function (context: AppwriteContext): Promise<void> {
+/**
+ * @param {AppwriteContext} context
+ */
+export default async function (context) {
   try {
     const { userId, planId } = JSON.parse(context.req.body || '{}');
     const REVENUECAT_APP_ID = process.env.REVENUECAT_APP_ID;
@@ -51,8 +32,7 @@ export default async function (context: AppwriteContext): Promise<void> {
     // Redirect the user to the portal
     context.res.redirect(portalUrl.toString(), 303);
   } catch (e) {
-    const error = e as Error;
-    context.error('Failed to process subscription management request:', error.message);
+    context.error('Failed to process subscription management request:', e.message);
     context.res.json({ success: false, error: 'Bad Request. Invalid JSON in body.' }, 400);
   }
 } 

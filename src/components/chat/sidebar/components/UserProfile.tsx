@@ -1,11 +1,12 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LogOut,
   User as UserIcon,
   ChevronsUpDown,
   LifeBuoy,
   FileText,
+  Keyboard,
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "../../../ui/button";
@@ -23,7 +24,7 @@ import { useUserConfig } from "@/hooks/business/useUserConfig";
 
 const UserProfileMenu: React.FC = () => {
   const { user, logout } = useAuth();
-  const { config: localUserConfig } = useUserConfig();
+  const { config: localUserConfig } = useUserConfig();  
 
   if (!localUserConfig) {
     return null;
@@ -39,6 +40,10 @@ const UserProfileMenu: React.FC = () => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  const openShortcutsModal = () => {
+    console.log("openShortcutsModal");
+  }
 
   return (
     <div className="p-2">
@@ -74,9 +79,15 @@ const UserProfileMenu: React.FC = () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <FileText className="mr-2 h-4 w-4" />
-              <span>Terms of Service</span>
+            <DropdownMenuItem onClick={openShortcutsModal}>
+              <Keyboard className="mr-2 h-4 w-4" />
+              <span>Shortcuts</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/terms" target="_blank">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Terms of Service</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <LifeBuoy className="mr-2 h-4 w-4" />

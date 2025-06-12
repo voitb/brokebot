@@ -1,32 +1,4 @@
-// This would be the entry point for your Appwrite function.
-// It assumes you have a similar folder structure:
-// /appwrite/get-free-models/src/index.ts
-
-// Basic, simplified types to satisfy the linter locally.
-// The actual types are provided by the Appwrite runtime.
-interface AppwriteRequest {
-  body: string;
-}
-
-interface AppwriteResponse {
-  json: (data: Record<string, unknown>, statusCode?: number) => void;
-}
-
-interface AppwriteContext {
-  req: AppwriteRequest;
-  res: AppwriteResponse;
-  log: (...args: unknown[]) => void;
-  error: (...args: unknown[]) => void;
-}
-
-interface FreeModel {
-  id: string;
-  name: string;
-  provider: string;
-  contextLength: string;
-}
-
-const FREE_OPENROUTER_MODELS: FreeModel[] = [
+const FREE_OPENROUTER_MODELS = [
     { id: 'meta-llama/llama-3.2-3b-instruct', name: 'Meta: Llama 3.2 3B Instruct', provider: 'meta-llama', contextLength: '20K' },
     { id: 'meta-llama/llama-3.2-1b-instruct', name: 'Meta: Llama 3.2 1B Instruct', provider: 'meta-llama', contextLength: '131K' },
     { id: 'meta-llama/llama-3.2-11b-vision-instruct', name: 'Meta: Llama 3.2 11B Vision Instruct', provider: 'meta-llama', contextLength: '131K' },
@@ -39,7 +11,10 @@ const FREE_OPENROUTER_MODELS: FreeModel[] = [
     { id: 'mistralai/mistral-7b-instruct', name: 'Mistral: Mistral 7B Instruct', provider: 'mistralai', contextLength: '33K' },
 ];
 
-export default async function (context: AppwriteContext): Promise<void> {
+/**
+ * @param {AppwriteContext} context
+ */
+export default async function (context) {
   try {
     context.log('Fetching free models list...');
     
