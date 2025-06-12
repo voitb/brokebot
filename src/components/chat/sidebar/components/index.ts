@@ -1,3 +1,14 @@
-export { SearchBar } from './SearchBar';
-export { NewChatButton } from './NewChatButton';
-export { UserProfile } from './UserProfile'; 
+export * from './ConversationGroup';
+export * from './ConversationItem';
+export * from './EditableConversationTitle';
+export * from './DeleteConversationDialog';
+
+// Existing components (based on imports)
+export * from './SearchBar';
+export * from './NewChatButton';
+export * from './UserProfile';
+
+// Assuming SearchBar, NewChatButton, UserProfile are here
+// export * from './SearchBar';
+// export * from './NewChatButton';
+// export * from './UserProfile'; 

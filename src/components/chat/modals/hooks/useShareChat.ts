@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useSharedLinks } from "../../../../hooks/useSharedLinks";
 import { toast } from "sonner";
 
@@ -19,8 +19,11 @@ interface UseShareChatReturn {
   setShareOptions: React.Dispatch<React.SetStateAction<ShareOptions>>;
   shareId: string | null;
   isGeneratingLink: boolean;
+  hasActiveSubscription: boolean;
+  hasCloudStorage: boolean;
   generateShareLink: () => Promise<void>;
   copyShareLink: () => Promise<void>;
+  handlePreviewShare: () => void;
 }
 
 /**
@@ -31,7 +34,7 @@ export const useShareChat = ({
   conversationTitle,
 }: UseShareChatProps): UseShareChatReturn => {
   const { createSharedLink } = useSharedLinks();
-  
+
   const [shareOptions, setShareOptions] = useState<ShareOptions>({
     allowDownload: true,
     showSharedBy: false,
@@ -41,6 +44,9 @@ export const useShareChat = ({
   
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
+
+  const hasActiveSubscription = useMemo(() => false, []);
+  const hasCloudStorage = useMemo(() => false, []);
 
   const generateShareLink = useCallback(async () => {
     if (!conversationId || !conversationTitle) {
@@ -85,6 +91,13 @@ export const useShareChat = ({
     }
   }, [shareId]);
 
+  const handlePreviewShare = useCallback(() => {
+    if (shareId) {
+      const shareLink = `${window.location.origin}/share/${shareId}`;
+      window.open(shareLink, "_blank");
+    }
+  }, [shareId]);
+
   return {
     shareOptions,
     setShareOptions,
@@ -92,5 +105,8 @@ export const useShareChat = ({
     isGeneratingLink,
     generateShareLink,
     copyShareLink,
+    hasActiveSubscription,
+    hasCloudStorage,
+    handlePreviewShare,
   };
 }; 

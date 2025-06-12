@@ -1,15 +1,11 @@
 // Main chat components
-export { ChatInterface } from './interface';
-export { ChatHeader } from './header';
-export { ChatMessages } from './messages';
-export { ChatInput } from './input';
+export { ChatInput } from './input/ChatInput';
+export { ChatMessages } from './messages/ChatMessages';
+export { ChatHeader } from './header/ChatHeader';
+export { ChatInterface } from './interface/ChatInterface';
 
 // Sidebar components
-export { ConversationList } from './ConversationList';
-export { ConversationGroup } from './ConversationGroup';
-export { ConversationItem } from './ConversationItem';
+export { ConversationList } from './sidebar';
 
 // Utility components
-export { ModelSelector } from './ModelSelector';
-export { EditableConversationTitle } from './EditableConversationTitle';
-export { DeleteConversationDialog } from './DeleteConversationDialog'; 
+export { ModelSelector } from './model-selector'; 

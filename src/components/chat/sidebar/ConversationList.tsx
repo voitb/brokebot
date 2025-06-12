@@ -1,8 +1,8 @@
 import React from "react";
-import { ScrollArea } from "../ui/scroll-area";
-import { ConversationGroup } from "./ConversationGroup";
-import { SearchBar, NewChatButton, UserProfile } from "./sidebar/components";
-import { useConversationList } from "./sidebar/hooks";
+import { ScrollArea } from "../../ui/scroll-area";
+import { ConversationGroup } from "./components/ConversationGroup";
+import { SearchBar, NewChatButton, UserProfile } from "./components";
+import { useConversationList } from "./hooks";
 
 /**
  * Main conversation list component with search and grouping
@@ -73,4 +73,4 @@ export const ConversationList: React.FC = () => {
       </div>
     </div>
   );
-};
+}; 

@@ -1,105 +1,40 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../../ui/dropdown-menu";
 import { EditableConversationTitle } from "./EditableConversationTitle";
 import { DeleteConversationDialog } from "./DeleteConversationDialog";
-import { useConversations } from "../../hooks/useConversations";
-import { useConversationId } from "../../hooks/useConversationId";
-import type { IConversation } from "../../lib/db";
+import { useConversationItem } from "../hooks/useConversationItem";
+import type { Conversation } from "../../../../lib/db";
 
 interface ConversationItemProps {
-  conversation: IConversation;
+  conversation: Conversation;
 }
 
-/**
- * Individual conversation item with menu actions
- */
 export const ConversationItem: React.FC<ConversationItemProps> = ({
   conversation,
 }) => {
-  const navigate = useNavigate();
-  const currentConversationId = useConversationId();
-  const { togglePinConversation, updateConversationTitle, deleteConversation } =
-    useConversations();
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  // Check if this conversation is currently active
-  const isActive = currentConversationId === conversation.id;
-
-  // Handle conversation click
-  const handleConversationClick = () => {
-    if (!isEditing) {
-      navigate(`/chat/${conversation.id}`);
-    }
-  };
-
-  // Handle pin toggle
-  const handlePinToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await togglePinConversation(conversation.id);
-    setIsMenuOpen(false);
-  };
-
-  // Handle rename
-  const handleRename = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsEditing(true);
-    setIsMenuOpen(false);
-  };
-
-  // Handle save rename
-  const handleSaveRename = async (newTitle: string) => {
-    if (newTitle.trim() !== conversation.title) {
-      await updateConversationTitle(conversation.id, newTitle.trim());
-    }
-    setIsEditing(false);
-  };
-
-  // Handle cancel rename
-  const handleCancelRename = () => {
-    setIsEditing(false);
-  };
-
-  // Handle delete
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDeleteDialogOpen(true);
-    setIsMenuOpen(false);
-  };
-
-  // Handle delete confirm
-  const handleDeleteConfirm = async () => {
-    await deleteConversation(conversation.id);
-    setDeleteDialogOpen(false);
-
-    // If we're deleting the current conversation, navigate to chat home
-    if (isActive) {
-      navigate("/chat");
-    }
-  };
-
-  // Get item styles based on state
-  const getItemStyles = () => {
-    if (isEditing || isActive) {
-      return "bg-primary/10 border-primary text-primary font-medium";
-    } else if (isMenuOpen) {
-      return "bg-muted/70";
-    } else {
-      return "hover:bg-muted/50";
-    }
-  };
+  const {
+    isEditing,
+    isMenuOpen,
+    deleteDialogOpen,
+    setIsMenuOpen,
+    setDeleteDialogOpen,
+    handleConversationClick,
+    handlePinToggle,
+    handleRename,
+    handleSaveRename,
+    handleCancelRename,
+    handleDelete,
+    handleDeleteConfirm,
+    getItemStyles,
+  } = useConversationItem(conversation);
 
   return (
     <>
@@ -174,4 +109,4 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
       />
     </>
   );
-};
+}; 

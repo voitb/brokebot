@@ -1,0 +1,53 @@
+import { useState, useCallback, useEffect } from "react";
+import { useUserConfig } from "@/hooks/useUserConfig";
+import { toast } from "sonner";
+import { type UserConfig } from "@/lib/db";
+
+export type SettingsTab =
+  | "profile"
+  | "privacy"
+  | "integrations"
+  | "models"
+  | "billing";
+
+export const useSettings = () => {
+  const { config, updateConfig } = useUserConfig();
+  const [settings, setSettings] = useState<Partial<UserConfig>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+
+  useEffect(() => {
+    if (config) {
+      setSettings(config);
+    }
+  }, [config]);
+
+  const handleFieldChange = useCallback(
+    <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
+      setSettings((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  const handleSaveChanges = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      await updateConfig(settings);
+      toast.success("Settings saved successfully!");
+    } catch (error) {
+      toast.error("Failed to save settings.");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [settings, updateConfig]);
+
+  return {
+    settings,
+    isSaving,
+    activeTab,
+    setActiveTab,
+    handleFieldChange,
+    handleSaveChanges,
+  };
+}; 

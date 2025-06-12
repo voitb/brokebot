@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Cloud, Key, AlertTriangle, TestTube, Settings } from "lucide-react";
 import {
   Dialog,
@@ -11,19 +11,13 @@ import { Alert, AlertDescription } from "../../ui/alert";
 import {
   FREE_LEARNING_MODELS,
   PAID_API_MODELS,
-  OpenRouterClient,
   type OpenRouterModel,
+  type OpenRouterClient,
 } from "../../../lib/openrouter";
-import { functions } from "../../../lib/appwriteClient";
-import {
-  getStoredApiKeys,
-  hasApiKey,
-  type ApiKeys,
-} from "../../../lib/apiKeys";
-import { toast } from "sonner";
 import { ApiKeysTab } from "./components/ApiKeysTab";
 import { ModelList } from "./components/ModelList";
 import { ScrollArea } from "@/components/ui";
+import { useOnlineModels } from "./hooks/useOnlineModels";
 
 interface OnlineModelDialogProps {
   onModelSelect: (
@@ -44,42 +38,13 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  const [storedKeys, setStoredKeys] = useState<ApiKeys>(getStoredApiKeys());
-  const hasOpenRouterKey = !!storedKeys.openrouter;
-  const hasPaidKey = !!(
-    storedKeys.openai ||
-    storedKeys.google ||
-    storedKeys.anthropic
-  );
-
-  useEffect(() => {
-    if (open) {
-      setStoredKeys(getStoredApiKeys());
-    }
-  }, [open]);
-
-  const handleModelSelect = (model: OpenRouterModel) => {
-    if (!hasApiKey(model.provider as keyof ApiKeys)) {
-      toast.error(`Please add your ${model.provider} API key first`);
-      return;
-    }
-
-    const client = new OpenRouterClient({
-      functions,
-      siteUrl: window.location.origin,
-      siteName: "Local GPT",
-    });
-
-    onModelSelect(model, client);
-    onOpenChange?.(false);
-  };
-
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      setStoredKeys(getStoredApiKeys());
-    }
-    onOpenChange?.(isOpen);
-  };
+  const {
+    storedKeys,
+    hasOpenRouterKey,
+    hasPaidKey,
+    handleModelSelect,
+    handleOpenChange,
+  } = useOnlineModels(open, onModelSelect, onOpenChange);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
