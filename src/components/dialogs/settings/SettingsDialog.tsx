@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield, CreditCard, X, Check, Loader2, Settings } from "lucide-react";
+import { Shield, CreditCard, X, Check, Loader2, Settings, LogIn, LogOut } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,6 +42,8 @@ import {
 } from "./components";
 import { useSettings, type SettingsTab } from "./hooks/useSettings";
 import { useConversations } from "@/hooks/useConversations";
+import { useAuth } from "@/providers/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -67,6 +69,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     handleSaveChanges,
   } = useSettings();
   const { conversations } = useConversations();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleSaveAndClose = async () => {
     await handleSaveChanges();
@@ -142,39 +146,64 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <ScrollArea className="flex-1">
               <div className="p-4">{renderTabContent()}</div>
             </ScrollArea>
-            <div className="shrink-0 p-4 bg-muted/20 flex flex-row justify-end gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    size="icon"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Cancel</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={handleSaveAndClose}
-                    disabled={isSaving}
-                    size="icon"
-                  >
-                    {isSaving ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{isSaving ? "Saving..." : "Save Changes"}</p>
-                </TooltipContent>
-              </Tooltip>
+            <div className="shrink-0 p-4 bg-muted/20 flex flex-row justify-between gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (user) {
+                    logout();
+                  } else {
+                    navigate('/login');
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                {user ? (
+                  <>
+                    <LogOut className="h-4 w-4" />
+                    <span>Logout</span>
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="h-4 w-4" />
+                    <span>Login</span>
+                  </>
+                )}
+              </Button>
+              <div className="flex gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => onOpenChange(false)}
+                      size="icon"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Cancel</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={handleSaveAndClose}
+                      disabled={isSaving}
+                      size="icon"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isSaving ? "Saving..." : "Save Changes"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
 
@@ -221,6 +250,29 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   </Breadcrumb>
                 </div>
                 <div className="ml-auto flex items-center gap-2 px-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      if (user) {
+                        logout();
+                      } else {
+                        navigate('/login');
+                      }
+                    }}
+                    className="flex items-center gap-2 mr-2"
+                  >
+                    {user ? (
+                      <>
+                        <LogOut className="h-4 w-4" />
+                        <span>Logout</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="h-4 w-4" />
+                        <span>Login</span>
+                      </>
+                    )}
+                  </Button>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button

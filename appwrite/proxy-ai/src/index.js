@@ -1,4 +1,4 @@
- async function handleRequest(context)   {
+async function handleRequest(context)   {
   const { req, res, log, error } = context;
 
   if (req.headers['x-appwrite-user-id']) {
@@ -33,9 +33,10 @@
       }
       res.send(new TextDecoder().decode(value));
     }
+    return res.empty();
   } catch (err) { 
     error(err.message);
-    res.json({ error: 'Failed to proxy request' }, 500);
+    return res.json({ error: 'Failed to proxy request' }, 500);
   }
 }
 
