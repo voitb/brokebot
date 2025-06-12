@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type UserConfig } from "@/lib/db";
+import { useTheme } from "@/providers/ThemeProvider";
 
 interface ProfileTabProps {
   settings: Partial<UserConfig>;
@@ -22,6 +23,13 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
   settings,
   onFieldChange,
 }) => {
+  const { setTheme } = useTheme();
+
+  const handleThemeChange = (theme: "light" | "dark" | "system") => {
+    onFieldChange("theme", theme);
+    setTheme(theme);
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -38,7 +46,7 @@ export const ProfileTab: React.FC<ProfileTabProps> = ({
         <Select
           value={settings.theme || "system"}
           onValueChange={(value: "light" | "dark" | "system") =>
-            onFieldChange("theme", value)
+            handleThemeChange(value)
           }
         >
           <SelectTrigger id="theme">

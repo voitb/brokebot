@@ -40,6 +40,28 @@ export function BillingTab() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Plus Plan
+            <Badge variant="secondary">Coming Soon</Badge>
+          </CardTitle>
+          <CardDescription>Enhanced features for power users</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm">
+            <li>✓ Everything in Free</li>
+            <li>✓ Manual sync between devices</li>
+            <li>✓ Advanced model settings</li>
+            <li>✓ Priority model downloads</li>
+            <li>✓ Custom AI personas</li>
+          </ul>
+          <Button className="w-full mt-4" disabled>
+            Coming Soon
+          </Button>
+        </CardContent>
+      </Card>
+
       <Card className="border-primary">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -50,11 +72,8 @@ export function BillingTab() {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm">
-            <li>✓ Everything in Free</li>
-            <li>✓ Cloud backup & sync</li>
-            <li>✓ Advanced model settings</li>
-            <li>✓ Priority model downloads</li>
-            <li>✓ Custom AI personas</li>
+            <li>✓ Everything in Plus</li>
+            <li>✓ Automatic cloud backup & sync</li>
             <li>✓ Team collaboration</li>
           </ul>
           <Button className="w-full mt-4" disabled>

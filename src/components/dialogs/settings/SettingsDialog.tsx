@@ -1,7 +1,16 @@
 "use client";
 
 import React from "react";
-import { User, Shield, CreditCard, Plug, Bot } from "lucide-react";
+import {
+  User,
+  Shield,
+  CreditCard,
+  Plug,
+  Bot,
+  X,
+  Check,
+  Loader2,
+} from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,6 +37,12 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "../../ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../ui/tooltip";
 import {
   ProfileTab,
   ModelsTab,
@@ -116,104 +131,153 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="h-[90vh] w-[90vw] p-0 overflow-hidden md:max-h-[720px] md:w-[98vw] md:max-w-5xl">
-        <DialogTitle className="sr-only">Settings</DialogTitle>
-        <DialogDescription className="sr-only">
-          Customize your Local-GPT settings here.
-        </DialogDescription>
+        <TooltipProvider>
+          <DialogTitle className="sr-only">Settings</DialogTitle>
+          <DialogDescription className="sr-only">
+            Customize your Local-GPT settings here.
+          </DialogDescription>
 
-        {/* Mobile Layout */}
-        <div className="flex md:hidden flex-col h-full">
-          <div className="shrink-0 p-4 space-y-4 bg-background">
-            <h2 className="text-lg font-semibold">Settings</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {navigationItems.map(({ id, label, icon: Icon }) => (
-                <Button
-                  key={id}
-                  variant={activeTab === id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveTab(id)}
-                  className="flex items-center gap-2 justify-start"
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-xs">{label}</span>
-                </Button>
-              ))}
+          {/* Mobile Layout */}
+          <div className="flex md:hidden flex-col h-full">
+            <div className="shrink-0 p-4 space-y-4 bg-background">
+              <h2 className="text-lg font-semibold">Settings</h2>
+              <div className="grid grid-cols-2 gap-2">
+                {navigationItems.map(({ id, label, icon: Icon }) => (
+                  <Button
+                    key={id}
+                    variant={activeTab === id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveTab(id)}
+                    className="flex items-center gap-2 justify-start"
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-xs">{label}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <ScrollArea className="flex-1">
+              <div className="p-4">{renderTabContent()}</div>
+            </ScrollArea>
+            <div className="shrink-0 p-4 bg-muted/20 flex flex-row justify-end gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    size="icon"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Cancel</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={handleSaveAndClose}
+                    disabled={isSaving}
+                    size="icon"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isSaving ? "Saving..." : "Save Changes"}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
-          <ScrollArea className="flex-1">
-            <div className="p-4">{renderTabContent()}</div>
-          </ScrollArea>
-          <div className="shrink-0 p-4 bg-muted/20 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveAndClose}
-              disabled={isSaving}
-              className="w-full sm:w-auto"
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </div>
 
-        {/* Desktop Layout */}
-        <SidebarProvider className="items-start h-full min-h-0 hidden md:flex">
-          <Sidebar collapsible="none" className="flex">
-            <SidebarContent>
-              <SidebarGroup>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {navigationItems.map(({ id, label, icon: Icon }) => (
-                      <SidebarMenuItem key={id}>
-                        <SidebarMenuButton asChild isActive={activeTab === id}>
-                          <button onClick={() => setActiveTab(id)}>
-                            <Icon />
-                            <span>{label}</span>
-                          </button>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
-            </SidebarContent>
-          </Sidebar>
-          <main className="flex h-full flex-1 flex-col">
-            <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-              <div className="flex items-center gap-2 px-4">
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink>Settings</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>
-                        {getTabDisplayName(activeTab)}
-                      </BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
-              <div className="ml-auto flex items-center gap-2 px-4">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveAndClose} disabled={isSaving}>
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            </header>
-            <ScrollArea className="h-full">
-              <div className="p-6">{renderTabContent()}</div>
-            </ScrollArea>
-          </main>
-        </SidebarProvider>
+          {/* Desktop Layout */}
+          <SidebarProvider className="items-start h-full min-h-0 hidden md:flex">
+            <Sidebar collapsible="none" className="flex">
+              <SidebarContent>
+                <SidebarGroup>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {navigationItems.map(({ id, label, icon: Icon }) => (
+                        <SidebarMenuItem key={id}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={activeTab === id}
+                          >
+                            <button onClick={() => setActiveTab(id)}>
+                              <Icon />
+                              <span>{label}</span>
+                            </button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              </SidebarContent>
+            </Sidebar>
+            <main className="flex h-full flex-1 flex-col">
+              <header className="flex h-16 shrink-0 items-center gap-2 border-b">
+                <div className="flex items-center gap-2 px-4">
+                  <Breadcrumb>
+                    <BreadcrumbList>
+                      <BreadcrumbItem>
+                        <BreadcrumbLink>Settings</BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>
+                          {getTabDisplayName(activeTab)}
+                        </BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+                <div className="ml-auto flex items-center gap-2 px-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        size="icon"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Cancel</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleSaveAndClose}
+                        disabled={isSaving}
+                        size="icon"
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isSaving ? "Saving..." : "Save Changes"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </header>
+              <ScrollArea className="h-[calc(100%-64px)]">
+                <div className="p-6">{renderTabContent()}</div>
+              </ScrollArea>
+            </main>
+          </SidebarProvider>
+        </TooltipProvider>
       </DialogContent>
     </Dialog>
   );

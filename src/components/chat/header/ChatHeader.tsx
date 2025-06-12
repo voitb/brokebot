@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
-import { TooltipProvider } from "../../ui/tooltip"; 
+import { TooltipProvider } from "../../ui/tooltip";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { useConversationId } from "../../../hooks/useConversationId";
 import {
@@ -38,6 +38,7 @@ export const ChatHeader: React.FC = () => {
     handleSaveTitle,
     handleCancelTitleEdit,
     handleTogglePinConversation,
+    handleExportConversation,
   } = useHeaderActions({ conversationId });
 
   // Action button handlers
@@ -78,6 +79,7 @@ export const ChatHeader: React.FC = () => {
               onOpenSettings={handleOpenSettings}
               onOpenShortcuts={handleOpenShortcuts}
               onOpenShare={handleOpenShare}
+              onExportConversation={handleExportConversation}
             />
           </div>
         </div>
@@ -110,6 +112,7 @@ export const ChatHeader: React.FC = () => {
             onOpenSettings={handleOpenSettings}
             onOpenShortcuts={handleOpenShortcuts}
             onOpenShare={handleOpenShare}
+            onExportConversation={handleExportConversation}
           />
         </div>
       </header>
@@ -120,9 +123,9 @@ export const ChatHeader: React.FC = () => {
         onOpenChange={setShortcutsOpen}
       />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <ShareChatModal 
-        open={shareModalOpen} 
-        onOpenChange={setShareModalOpen} 
+      <ShareChatModal
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
         conversationId={conversationId}
       />
     </TooltipProvider>

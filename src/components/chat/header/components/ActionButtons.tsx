@@ -1,5 +1,13 @@
 import React from "react";
-import { Star, Sun, Moon, Settings, Keyboard, Share2 } from "lucide-react";
+import {
+  Star,
+  Sun,
+  Moon,
+  Settings,
+  Keyboard,
+  Share2,
+  Download,
+} from "lucide-react";
 import { Button } from "../../../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
 
@@ -13,6 +21,7 @@ interface ActionButtonsProps {
   onOpenSettings: () => void;
   onOpenShortcuts: () => void;
   onOpenShare: () => void;
+  onExportConversation: () => void;
 }
 
 /**
@@ -29,6 +38,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onOpenSettings,
   onOpenShortcuts,
   onOpenShare,
+  onExportConversation,
 }) => {
   return (
     <>
@@ -47,6 +57,20 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           <p>Toggle theme</p>
         </TooltipContent>
       </Tooltip>
+
+      {/* Export Button (conditional) */}
+      {conversationId && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={onExportConversation}>
+              <Download className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export conversation</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Share Button (conditional) */}
       {conversationId && (
