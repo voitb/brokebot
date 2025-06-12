@@ -1,6 +1,6 @@
-import React from "react";
-import { ConversationList } from "../chat/ConversationList";
+import React from "react"; 
 import { SidebarTrigger } from "../ui/sidebar";
+import { ConversationList } from "..";
 
 /**
  * Chat sidebar containing conversation list

@@ -1,13 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header";
 import { ChatMessages } from "../messages";
 import { ChatInput } from "../input";
 import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
-import { useChatInput } from "../input/hooks";
-import { functions } from "@/lib/appwriteClient";
-
+import { useChatInput } from "../input/hooks"; 
 /**
  * Main chat interface component combining header, messages, and input
  */

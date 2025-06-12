@@ -1,19 +1,28 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import { AuthProvider } from "./providers/AuthProvider";
+import { WebLLMProvider } from "./providers/WebLLMProvider";
+import { ModelProvider } from "./providers/ModelProvider";
 import "./index.css";
-import App from "./App.tsx";
-import { WebLLMProvider } from "./providers/WebLLMProvider.tsx";
-import { ModelProvider } from "./providers/ModelProvider.tsx";
-import { ThemeProvider } from "./providers/ThemeProvider.tsx";
+import { Toaster } from "sonner";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="theme">
-      <WebLLMProvider>
-        <ModelProvider>
-          <App />
-        </ModelProvider>
-      </WebLLMProvider>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <TooltipProvider>
+        <WebLLMProvider>
+          <ModelProvider>
+            <AuthProvider>
+              <RouterProvider router={router} />
+              <Toaster />
+            </AuthProvider>
+          </ModelProvider>
+        </WebLLMProvider>
+      </TooltipProvider>
     </ThemeProvider>
-  </StrictMode>
+  </React.StrictMode>
 );
