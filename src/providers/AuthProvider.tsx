@@ -50,7 +50,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const getCurrentUser = useCallback(async () => {
     try {
+        console.log("getCurrentUser", account)
       const currentUser = await account.get();
+      console.log("currentUser", currentUser)
       setUser(currentUser);
     } catch (e) {
       if (e instanceof AppwriteException && e.code !== 401) throw e;
@@ -82,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const createOAuth2Session = (provider: OAuthProvider) => {
     const successUrl = `${window.location.origin}/auth/callback`;
     const failureUrl = `${window.location.origin}/login?error=oauth_failed`;
-    account.createOAuth2Session(provider, successUrl, failureUrl);
+    account.createOAuth2Session(provider, successUrl, failureUrl, ['repo', 'user'] );
   };
 
   const loginWithGoogle = async () => createOAuth2Session(OAuthProvider.Google);
