@@ -9,7 +9,6 @@ import {
   NewChatButton,
 } from "./components";
 import { useHeaderActions } from "./hooks/useHeaderActions";
-import { KeyboardShortcutsModal } from "../modals/KeyboardShortcutsModal";
 import { SettingsDialog } from "../../dialogs/settings";
 import { ShareChatModal } from "../modals/ShareChatModal";
 import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
@@ -26,13 +25,11 @@ export const ChatHeader: React.FC = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const {
-    shortcutsOpen,
     settingsOpen,
     isEditingTitle,
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
-    setShortcutsOpen,
     setSettingsOpen,
     handleNewChat,
     handleTitleClick,
@@ -58,10 +55,6 @@ export const ChatHeader: React.FC = () => {
     setSettingsOpen(true);
   };
 
-  const handleOpenShortcuts = () => {
-    setShortcutsOpen(!shortcutsOpen);
-  };
-
   const handleOpenShare = () => {
     if (!conversationId) return;
     setShareModalOpen(true);
@@ -85,7 +78,7 @@ export const ChatHeader: React.FC = () => {
               onToggleTheme={handleToggleTheme}
               onTogglePinConversation={handleTogglePinConversation}
               onOpenSettings={handleOpenSettings}
-              onOpenShortcuts={handleOpenShortcuts}
+              onOpenShortcuts={() => {}}
               onOpenShare={handleOpenShare}
               onExportConversation={handleExportConversation}
               onImportConversation={handleImportConversation}
@@ -115,11 +108,11 @@ export const ChatHeader: React.FC = () => {
             theme={theme}
             conversationId={conversationId}
             isConversationPinned={isConversationPinned}
-            showShortcuts={true}
+            showShortcuts={false}
             onToggleTheme={handleToggleTheme}
             onTogglePinConversation={handleTogglePinConversation}
             onOpenSettings={handleOpenSettings}
-            onOpenShortcuts={handleOpenShortcuts}
+            onOpenShortcuts={() => {}}
             onOpenShare={handleOpenShare}
             onExportConversation={handleExportConversation}
             onImportConversation={handleImportConversation}
@@ -137,10 +130,6 @@ export const ChatHeader: React.FC = () => {
       />
 
       {/* Modals */}
-      <KeyboardShortcutsModal
-        open={shortcutsOpen}
-        onOpenChange={setShortcutsOpen}
-      />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <ShareChatModal
         open={shareModalOpen}

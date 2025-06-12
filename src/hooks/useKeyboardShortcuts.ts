@@ -118,5 +118,6 @@ export function useKeyboardShortcuts({
     },
     navigateHome: () => navigate('/'),
     currentConversationId: conversationId,
+    onShowShortcuts,
   };
 } 

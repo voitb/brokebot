@@ -1,24 +1,4 @@
-// Basic, simplified types to satisfy the linter locally.
-// The actual types are provided by the Appwrite runtime.
-interface AppwriteRequest {
-  body: string;
-  headers: Record<string, string>;
-}
-
-interface AppwriteResponse {
-  send: (body: string, statusCode?: number) => void;
-  json: (data: Record<string, unknown>, statusCode?: number) => void;
-}
-
-interface AppwriteContext {
-  req: AppwriteRequest;
-  res: AppwriteResponse;
-  log: (...args: unknown[]) => void;
-  error: (...args: unknown[]) => void;
-}
-
-// Main function logic
-async function handleRequest(context: AppwriteContext): Promise<void> {
+ async function handleRequest(context)   {
   const { req, res, log, error } = context;
 
   if (req.headers['x-appwrite-user-id']) {
@@ -53,8 +33,7 @@ async function handleRequest(context: AppwriteContext): Promise<void> {
       }
       res.send(new TextDecoder().decode(value));
     }
-  } catch (e) {
-    const err = e as Error;
+  } catch (err) { 
     error(err.message);
     res.json({ error: 'Failed to proxy request' }, 500);
   }
