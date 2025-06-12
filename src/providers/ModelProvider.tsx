@@ -12,8 +12,10 @@ import {
   type OpenRouterModel,
   type OpenRouterMessage,
   type StreamResponse,
+  type ApiKeyConfig,
 } from "../lib/openrouter";
 import { functions } from "../lib/appwriteClient";
+import { useUserConfig } from "../hooks/useUserConfig";
 
 export type ModelType = "local" | "online";
 
@@ -48,6 +50,7 @@ interface ModelProviderProps {
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const webLLM = useWebLLM();
+  const { config } = useUserConfig();
   const [currentModel, setCurrentModelState] = useState<UnifiedModel | null>(
     null
   );
@@ -58,9 +61,13 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     if (storedModel) {
       try {
         const parsed = JSON.parse(storedModel) as UnifiedModel;
-        if (parsed.type === "online" && parsed.onlineModel) {
+        if (parsed.type === "online" && parsed.onlineModel && config) {
           // For online models, we need to recreate the client
-          setCurrentModel(createOnlineModel(parsed.onlineModel));
+          setCurrentModelState(
+            createOnlineModel(parsed.onlineModel, undefined, {
+              openrouterApiKey: config.openrouterApiKey,
+            })
+          );
           return;
         }
       } catch {
@@ -72,7 +79,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     if (webLLM.selectedModel) {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
-  }, [webLLM.selectedModel]);
+  }, [webLLM.selectedModel, config]);
 
   const setCurrentModel = useCallback(
     (model: UnifiedModel) => {
@@ -242,7 +249,8 @@ export const createLocalModel = (localModel: ModelInfo): UnifiedModel => ({
 
 export const createOnlineModel = (
   onlineModel: OpenRouterModel,
-  client?: OpenRouterClient
+  client?: OpenRouterClient,
+  keys?: ApiKeyConfig
 ): UnifiedModel => {
   // If no client provided, create one with Appwrite Functions
   const finalClient =
@@ -251,6 +259,7 @@ export const createOnlineModel = (
       functions,
       siteUrl: window.location.origin,
       siteName: "Local GPT",
+      keys: keys || {},
     });
 
   return {
