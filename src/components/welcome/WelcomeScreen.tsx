@@ -4,7 +4,12 @@ import { Button } from "../ui";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../hooks/useConversations";
 import { ChatHeader } from "../chat/header";
-import { GettingStarted, WelcomeHeader, FeatureGrid } from "./components";
+import {
+  GettingStarted,
+  WelcomeHeader,
+  FeatureGrid,
+  PrivacyNotice,
+} from "./components";
 
 export const WelcomeScreen: React.FC = () => {
   const { open } = useSidebar();
@@ -37,8 +42,9 @@ export const WelcomeScreen: React.FC = () => {
           <WelcomeHeader />
           <FeatureGrid />
           <GettingStarted />
+          <PrivacyNotice />
         </div>
       </div>
     </div>
   );
-}; 
+};
