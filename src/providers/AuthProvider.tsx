@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { OAuthProvider, type Models } from "appwrite";
 import { account } from "@/lib/appwriteClient";
 import { AppwriteException } from "appwrite";
@@ -48,11 +42,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  const getCurrentUser = useCallback(async () => {
+  const getCurrentUser = async () => {
     try {
-        console.log("getCurrentUser", account)
+      console.log("getCurrentUser", account);
       const currentUser = await account.get();
-      console.log("currentUser", currentUser)
+      console.log("currentUser", currentUser);
       setUser(currentUser);
     } catch (e) {
       if (e instanceof AppwriteException && e.code !== 401) throw e;
@@ -60,11 +54,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     getCurrentUser();
-  }, [getCurrentUser]);
+  }, []);
 
   const login = async (email: string, pass: string) => {
     await account.createEmailPasswordSession(email, pass);
@@ -84,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const createOAuth2Session = (provider: OAuthProvider) => {
     const successUrl = `${window.location.origin}/auth/callback`;
     const failureUrl = `${window.location.origin}/login?error=oauth_failed`;
-    account.createOAuth2Session(provider, successUrl, failureUrl, ['repo', 'user'] );
+    account.createOAuth2Session(provider, successUrl, failureUrl);
   };
 
   const loginWithGoogle = async () => createOAuth2Session(OAuthProvider.Google);
@@ -117,4 +111,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+};
