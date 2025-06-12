@@ -8,32 +8,35 @@ async function handleRequest(context)   {
   }
 
   try {
-    const targetUrl = 'https://api.openai.com/v1/chat/completions';
-    const body = JSON.parse(req.body || '{}');
+    // Odczyt danych przesłanych z frontu
+    const { model, messages, stream, api_key } = JSON.parse(req.body || '{}');
+
+    // Używamy OpenRouter zamiast OpenAI.  Jeśli klucz nie został wysłany w body,
+    // próbujemy pobrać go z ENV (ułatwia lokalne testy).
+    const routerApiKey = api_key || process.env.OPENROUTER_API_KEY;
+    if (!routerApiKey) {
+      throw new Error('OpenRouter API key not provided.');
+    }
+
+    const targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${routerApiKey}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ model, messages, stream: !!stream }),
     });
-    
-    if (!response.body) {
-        throw new Error('Response body is null');
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`OpenRouter error ${response.status}: ${errorBody}`);
     }
 
-    // Stream the response back to the client
-    const reader = response.body.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      res.send(new TextDecoder().decode(value));
-    }
-    return res.empty();
+    // Otrzymujemy pełne body - nie streamujemy, aby Appwrite mógł zwrócić JSON (200)
+    const data = await response.json();
+    return res.json(data, 200);
   } catch (err) { 
     error(err.message);
     return res.json({ error: 'Failed to proxy request' }, 500);
