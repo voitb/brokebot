@@ -18,22 +18,34 @@ export function LocalUserBillingTab() {
           You're using Local-GPT in offline mode
         </p>
       </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Local Free Plan
             <Badge>Current</Badge>
           </CardTitle>
-          <CardDescription>100% local AI with complete privacy</CardDescription>
+          <CardDescription>
+            100% local AI with complete privacy using local models or your own
+            API keys.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm">
             <li>✓ Unlimited local AI conversations</li>
-            <li>✓ 5+ WebLLM models</li>
-            <li>✓ Complete privacy (no data sent to servers)</li>
+            <li>✓ Local LLM models (no API key required)</li>
+            <li>
+              ✓ Bring your own API keys (ChatGPT, Claude, Gemini, etc.)
+            </li>
+            <li>
+              ✓ OpenRouter API free models (API key required)
+              <p className="pl-4 text-xs text-muted-foreground/80">
+                Note: Free models may require enabling data sharing for model
+                training, which is not privacy-friendly.
+              </p>
+            </li>
+            <li>✓ Complete privacy with local models and your own keys</li>
             <li>✓ Works offline</li>
-            <li>✓ Export conversations</li>
+            <li>✓ Offline chat sharing</li>
             <li>✓ No usage limits</li>
           </ul>
         </CardContent>
@@ -62,6 +74,9 @@ export function LocalUserBillingTab() {
                 <li>✓ Everything in Local Free</li>
                 <li>✓ Cross-device sync (manual)</li>
                 <li>✓ Advanced export options</li>
+                <li>✓ Online shared chat</li>
+                <li>✓ Speech-to-text functionality</li>
+                <li>✓ File uploads (Coming Soon)</li>
                 <li>✓ Priority support</li>
               </ul>
             </CardContent>
@@ -74,12 +89,8 @@ export function LocalUserBillingTab() {
             <CardContent>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>✓ Everything in Starter</li>
-                <li>✓ Automatic cloud backup</li>
-                <li>✓ API access to GPT-4, Claude</li>
-                <li>✓ Custom AI personas</li>
-                <li>✓ Advanced model settings</li>
-                <li>✓ Team collaboration</li>
-                <li>✓ Analytics & insights</li>
+                <li>✓ Automatic cloud backup</li>   
+                <li>✓ Mint conversations as NFTs</li>
               </ul>
             </CardContent>
           </Card>
@@ -87,10 +98,10 @@ export function LocalUserBillingTab() {
       </div>
 
       <Card className="bg-muted/20">
-        <CardContent>
+        <CardContent className="p-4">
           <p className="text-sm text-muted-foreground text-center">
             💡 <strong>Why upgrade?</strong> Keep your local privacy while
-            gaining cloud features and API access to the latest models
+            gaining cloud features and API access to the latest models.
           </p>
         </CardContent>
       </Card>

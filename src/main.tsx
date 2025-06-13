@@ -13,16 +13,16 @@ import { Toaster } from "sonner";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <TooltipProvider>
-        <WebLLMProvider>
-          <ModelProvider>
-            <AuthProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WebLLMProvider>
+            <ModelProvider>
               <RouterProvider router={router} />
               <Toaster />
-            </AuthProvider>
-          </ModelProvider>
-        </WebLLMProvider>
-      </TooltipProvider>
+            </ModelProvider>
+          </WebLLMProvider>
+        </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

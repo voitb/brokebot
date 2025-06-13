@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { OAuthProvider, type Models } from "appwrite";
 import { account } from "@/lib/appwriteClient";
-import { AppwriteException } from "appwrite";
+import { AppwriteException } from "appwrite"; 
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -25,7 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext);  
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); 
 
   const getCurrentUser = async () => {
     try {
