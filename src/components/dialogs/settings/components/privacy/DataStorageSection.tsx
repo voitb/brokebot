@@ -19,6 +19,10 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
   onToggleLocalStorage,
   onToggleCloudStorage,
 }) => {
+  // Logic to prevent disabling both storage options
+  const isLocalSwitchDisabled = !storeConversationsInCloud;
+  const isCloudSwitchDisabled = !storeConversationsLocally || !hasActiveSubscription;
+  
   return (
     <>
       <div>
@@ -58,6 +62,7 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
           <Switch
             checked={storeConversationsLocally}
             onCheckedChange={onToggleLocalStorage}
+            disabled={isLocalSwitchDisabled}
           />
         </div>
 
@@ -76,9 +81,15 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
           <Switch
             checked={storeConversationsInCloud || false}
             onCheckedChange={onToggleCloudStorage}
-            disabled={!hasActiveSubscription}
+            // disabled={isCloudSwitchDisabled}
           />
         </div>
+
+        {isLocalSwitchDisabled && hasActiveSubscription && (
+           <p className="text-xs text-amber-600 dark:text-amber-400">
+            Cannot disable local storage while cloud storage is also disabled. At least one storage option must be active.
+          </p>
+        )}
 
         {!hasActiveSubscription && (
           <p className="text-xs text-amber-600 dark:text-amber-400">

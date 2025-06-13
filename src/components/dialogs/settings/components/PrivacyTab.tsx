@@ -4,12 +4,10 @@ import {
   LegalSection,
   DataManagementSection,
   DangerZoneSection,
-  ManualSyncSection,
   ClearAllDataDialog,
   ResetSettingsDialog,
   usePrivacySettings,
 } from "./privacy";
-import { useManualSync } from "../../../../hooks/business/useManualSync";
 
 interface UserInfo {
   isLoggedIn: boolean;
@@ -53,8 +51,6 @@ export function PrivacyTab({
     setShowResetSettingsDialog,
   } = usePrivacySettings(userInfo, hasConversations);
 
-  const { isUploading, isDownloading, handleUpload, handleDownload } = useManualSync();
-
   return (
     <>
       <div className="space-y-6">
@@ -81,14 +77,6 @@ export function PrivacyTab({
         />
 
         <Separator />
-
-        <ManualSyncSection
-          isSyncEnabled={hasActiveSubscription}
-          isUploading={isUploading}
-          isDownloading={isDownloading}
-          onUpload={handleUpload}
-          onDownload={handleDownload}
-        />
 
         <DangerZoneSection
           onClearAllDataClick={() => setShowClearDataDialog(true)}

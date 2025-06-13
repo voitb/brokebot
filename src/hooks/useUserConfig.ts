@@ -2,64 +2,130 @@ import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "../lib/db";
 import { encryptValue, decryptValue } from "../lib/encryption";
+import { useAuth } from "@/providers/AuthProvider";
+import {
+  getCloudUserConfig,
+  createCloudUserConfig,
+  updateCloudUserConfig,
+} from "../lib/appwrite/database";
+import { toast } from "sonner";
 
 export function useUserConfig() {
+  const { user } = useAuth();
+
   const rawConfig = useLiveQuery(
     () => db.userConfig.get("user_config"),
     [],
     DEFAULT_USER_CONFIG
   );
 
-  // Decrypt API keys when reading from database
   const [config, setConfig] = React.useState<UserConfig>(DEFAULT_USER_CONFIG);
+  const [isSynced, setIsSynced] = React.useState(false);
 
+  // Decrypt local config keys initially
   React.useEffect(() => {
     const decryptConfig = async () => {
       if (rawConfig) {
         const decryptedConfig = { ...rawConfig };
+        const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
         
-        if (rawConfig.openrouterApiKey) {
-          decryptedConfig.openrouterApiKey = await decryptValue(rawConfig.openrouterApiKey);
+        for (const key of keysToDecrypt) {
+            const value = rawConfig[key] as string | undefined;
+            if (value) {
+                try {
+                    (decryptedConfig as any)[key] = await decryptValue(value);
+                } catch (e) {
+                    console.warn(`Could not decrypt key: ${key}. It might be unencrypted.`);
+                    (decryptedConfig as any)[key] = value;
+                }
+            }
         }
-        if (rawConfig.openaiApiKey) {
-          decryptedConfig.openaiApiKey = await decryptValue(rawConfig.openaiApiKey);
-        }
-        if (rawConfig.anthropicApiKey) {
-          decryptedConfig.anthropicApiKey = await decryptValue(rawConfig.anthropicApiKey);
-        }
-        if (rawConfig.googleApiKey) {
-          decryptedConfig.googleApiKey = await decryptValue(rawConfig.googleApiKey);
-        }
-        
         setConfig(decryptedConfig);
       }
     };
-
     decryptConfig();
   }, [rawConfig]);
 
-  const updateConfig = async (updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>) => {
+  // Sync with cloud
+  React.useEffect(() => {
+    const syncConfig = async () => {
+      if (user && !isSynced) {
+        try {
+          const cloudConfigDoc = await getCloudUserConfig(user.$id);
+          
+          if (cloudConfigDoc) {
+            // Cloud config exists, use it as the source of truth
+            const { $id, $collectionId, $databaseId, $createdAt, $updatedAt, ...cloudData } = cloudConfigDoc;
+            const cloudConfig = { ...cloudData, id: 'user_config' } as unknown as UserConfig;
+            
+            // We need to decrypt keys from the cloud
+            const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
+            for (const key of keysToDecrypt) {
+                const value = cloudConfig[key] as string | undefined;
+                if (value) {
+                    (cloudConfig as any)[key] = await decryptValue(value);
+                }
+            }
+            
+            await db.userConfig.put(cloudConfig); // Update local DB
+            setConfig(cloudConfig);
+            toast.info("User settings synced from cloud.");
+          } else if (config) {
+            // No cloud config, so upload local one
+            const { id, ...localConfig } = config;
+            await updateConfig(localConfig, true); // Create in cloud
+          }
+        } catch (error) {
+          console.error("Failed to sync user config:", error);
+          toast.error("Failed to sync user settings.");
+        } finally {
+          setIsSynced(true);
+        }
+      }
+    };
+
+    if(config.storeConversationsInCloud) {
+        syncConfig();
+    } else {
+        setIsSynced(true); // Sync is not enabled, so we consider it "synced"
+    }
+
+  }, [user, isSynced, config.storeConversationsInCloud]);
+
+  const updateConfig = async (
+    updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>,
+    createInCloud: boolean = false
+    ) => {
     try {
-      // Encrypt API keys before saving
-      const encryptedUpdates = { ...updates };
-      
-      if (updates.openrouterApiKey) {
-        encryptedUpdates.openrouterApiKey = await encryptValue(updates.openrouterApiKey);
-      }
-      if (updates.openaiApiKey) {
-        encryptedUpdates.openaiApiKey = await encryptValue(updates.openaiApiKey);
-      }
-      if (updates.anthropicApiKey) {
-        encryptedUpdates.anthropicApiKey = await encryptValue(updates.anthropicApiKey);
-      }
-      if (updates.googleApiKey) {
-        encryptedUpdates.googleApiKey = await encryptValue(updates.googleApiKey);
+      const encryptedUpdates: Partial<UserConfig> = { ...updates };
+      const keysToEncrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
+
+      for (const key of keysToEncrypt) {
+        const value = updates[key as keyof typeof updates] as string | undefined;
+        if (value) {
+          (encryptedUpdates as any)[key] = await encryptValue(value);
+        }
       }
 
+      const newUpdatedAt = new Date();
       await db.userConfig.update("user_config", {
         ...encryptedUpdates,
-        updatedAt: new Date(),
+        updatedAt: newUpdatedAt,
       });
+
+      // Also update cloud if user is logged in and sync is enabled
+      if (user && (config.storeConversationsInCloud || updates.storeConversationsInCloud)) {
+        // Remove non-appwrite fields before sending
+        const { id, createdAt, updatedAt, selectedModelId, ...cloudData } = encryptedUpdates;
+        
+        const payload: any = { ...cloudData };
+        if (createInCloud) {
+             payload.userId = user.$id;
+             await createCloudUserConfig(user.$id, payload);
+        } else {
+             await updateCloudUserConfig(user.$id, payload);
+        }
+      }
     } catch (error) {
       console.error("Error updating user config:", error);
     }
