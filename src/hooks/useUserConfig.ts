@@ -37,7 +37,7 @@ export function useUserConfig() {
                 } catch (e) {
                     console.warn(`Could not decrypt key: ${key}. It might be unencrypted.`);
                     (decryptedConfig as any)[key] = value;
-                }
+        }
             }
         }
         setConfig(decryptedConfig);
