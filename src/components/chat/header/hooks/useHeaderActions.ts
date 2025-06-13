@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { type Conversation, type Message } from "../../../../lib/db";
 import { toast } from "sonner";
@@ -10,8 +10,6 @@ interface UseHeaderActionsOptions {
 
 interface UseHeaderActionsReturn {
   // State
-  shortcutsOpen: boolean;
-  settingsOpen: boolean;
   isEditingTitle: boolean;
   conversationTitle?: string;
   isLoadingConversation: boolean;
@@ -19,8 +17,6 @@ interface UseHeaderActionsReturn {
   importDialogOpen: boolean;
   
   // Actions
-  setShortcutsOpen: (open: boolean) => void;
-  setSettingsOpen: (open: boolean) => void;
   setImportDialogOpen: (open: boolean) => void;
   handleNewChat: () => Promise<void>;
   handleTitleClick: () => void;
@@ -41,6 +37,7 @@ export function useHeaderActions({
   conversationId 
 }: UseHeaderActionsOptions): UseHeaderActionsReturn {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     conversations,
     togglePinConversation,
@@ -53,8 +50,6 @@ export function useHeaderActions({
   
   // Local state
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
@@ -75,14 +70,25 @@ export function useHeaderActions({
           !(e.target instanceof HTMLTextAreaElement)
         ) {
           e.preventDefault();
-          setShortcutsOpen(prev => !prev);
+          const modal = searchParams.get("modal");
+          if (modal === "shortcuts") {
+            // This is a bit of a hack, but it works for now
+            // We are creating a new search param object and deleting the modal
+            // to close it.
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.delete("modal");
+            navigate({ search: newSearchParams.toString() }, { replace: true });
+
+          } else {
+            navigate({ search: "?modal=shortcuts" }, { replace: true });
+          }
         }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [searchParams, navigate]);
 
   // Actions
   const handleNewChat = useCallback(async () => {
@@ -201,8 +207,6 @@ export function useHeaderActions({
 
   return {
     // State
-    shortcutsOpen,
-    settingsOpen,
     isEditingTitle,
     conversationTitle,
     isLoadingConversation,
@@ -210,8 +214,6 @@ export function useHeaderActions({
     importDialogOpen,
     
     // Actions
-    setShortcutsOpen,
-    setSettingsOpen,
     setImportDialogOpen,
     handleNewChat,
     handleTitleClick,
