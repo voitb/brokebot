@@ -9,6 +9,7 @@ import {
   ResetSettingsDialog,
   usePrivacySettings,
 } from "./privacy";
+import { useManualSync } from "../../../../hooks/business/useManualSync";
 
 interface UserInfo {
   isLoggedIn: boolean;
@@ -52,6 +53,8 @@ export function PrivacyTab({
     setShowResetSettingsDialog,
   } = usePrivacySettings(userInfo, hasConversations);
 
+  const { isUploading, isDownloading, handleUpload, handleDownload } = useManualSync();
+
   return (
     <>
       <div className="space-y-6">
@@ -81,10 +84,10 @@ export function PrivacyTab({
 
         <ManualSyncSection
           isSyncEnabled={hasActiveSubscription}
-          onSync={() => {
-            // TODO: Implement sync logic
-            console.log("Sync button clicked");
-          }}
+          isUploading={isUploading}
+          isDownloading={isDownloading}
+          onUpload={handleUpload}
+          onDownload={handleDownload}
         />
 
         <DangerZoneSection
