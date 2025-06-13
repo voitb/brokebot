@@ -474,4 +474,21 @@ export async function updateCloudUserConfig(
     console.error("Failed to update user config in cloud:", error);
     throw new Error("Failed to update user config in cloud.");
   }
+}
+
+export async function updateMessageInCloud(
+  messageId: string,
+  updates: Partial<{ content: string }>
+) {
+  try {
+    return await databases.updateDocument(
+      APPWRITE_DATABASE_ID,
+      MESSAGES_COLLECTION_ID,
+      messageId,
+      updates
+    );
+  } catch (error) {
+    console.error("Failed to update message in cloud:", error);
+    throw new Error("Failed to update message in cloud.");
+  }
 } 

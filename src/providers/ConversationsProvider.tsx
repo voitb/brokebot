@@ -17,6 +17,7 @@ import {
   addMessageToCloud,
   deleteConversationFromCloud,
   updateConversationInCloud,
+  updateMessageInCloud,
 } from "../lib/appwrite/database";
 import { useAuth } from "@/providers/AuthProvider";
 import { toast } from "sonner";
@@ -41,6 +42,10 @@ interface ConversationsContextType {
   deleteConversation: (id: string) => Promise<void>;
   togglePinConversation: (id: string) => Promise<void>;
   updateConversationTitle: (id: string, newTitle: string) => Promise<void>;
+  updateCompleteAIMessage: (
+    messageId: string,
+    newContent: string
+  ) => Promise<void>;
 }
 
 const ConversationsContext = createContext<ConversationsContextType | undefined>(
@@ -241,6 +246,20 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     }
   }, [getCloudSync]);
 
+  const updateCompleteAIMessage = useCallback(
+    async (messageId: string, newContent: string) => {
+      if (getCloudSync()) {
+        try {
+          await updateMessageInCloud(messageId, { content: newContent });
+        } catch (error) {
+          console.error("Failed to sync final AI message:", error);
+          toast.error("Failed to save final AI response to the cloud.");
+        }
+      }
+    },
+    [getCloudSync]
+  );
+
   const value = useMemo(() => ({
     conversations: conversations || [],
     createConversation,
@@ -250,6 +269,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     deleteConversation,
     togglePinConversation,
     updateConversationTitle,
+    updateCompleteAIMessage,
   }), [
       conversations,
       createConversation,
@@ -258,7 +278,8 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       updateMessage,
       deleteConversation,
       togglePinConversation,
-      updateConversationTitle
+      updateConversationTitle,
+      updateCompleteAIMessage,
   ]);
 
   return (
