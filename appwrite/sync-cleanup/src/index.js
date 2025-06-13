@@ -7,7 +7,7 @@ const HTTP_STATUS = {
 };
 
 const ERROR_MESSAGES = {
-  MISSING_ENV_VARS: "Database ID or Collection ID is not configured in function environment variables.",
+  MISSING_ENV_VARS: "One or more environment variables are missing or empty.",
   SERVER_ERROR: "An internal server error occurred during cleanup.",
 };
 
@@ -15,6 +15,9 @@ const ERROR_MESSAGES = {
 const CONFIG = {
   DATABASE_ID: process.env.APPWRITE_DATABASE_ID,
   COLLECTION_ID: process.env.APPWRITE_COLLECTION_ID,
+  API_KEY: process.env.APPWRITE_API_KEY,
+  ENDPOINT: process.env.APPWRITE_FUNCTION_ENDPOINT,
+  PROJECT_ID: process.env.APPWRITE_FUNCTION_PROJECT_ID,
   TTL_HOURS: parseInt(process.env.SYNC_TTL_HOURS, 10) || 24, // Time-to-Live in hours
   BATCH_SIZE: 100, // Number of documents to process in one go
 };
@@ -36,9 +39,9 @@ const sendError = (res, message, statusCode, logError, internalLogMessage) => {
 
 const getDatabaseClient = () => {
   const client = new Client()
-    .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
-    .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-    .setKey(process.env.APPWRITE_API_KEY); // Use a powerful API key for cleanup
+    .setEndpoint(CONFIG.ENDPOINT)
+    .setProject(CONFIG.PROJECT_ID)
+    .setKey(CONFIG.API_KEY); // Use a powerful API key for cleanup
   return new Databases(client);
 };
 
@@ -96,8 +99,9 @@ export default async ({ req, res, log, error }) => {
     return sendResponse(res, { success: true, message: "Manual trigger acknowledged. No action taken." });
   }
 
-  if (!CONFIG.DATABASE_ID || !CONFIG.COLLECTION_ID) {
-    return sendError(res, ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR, error, ERROR_MESSAGES.MISSING_ENV_VARS);
+  const missingVars = Object.entries(CONFIG).filter(([key, val]) => key !== 'SYNC_TTL_HOURS' && !val).map(([key]) => key);
+  if (missingVars.length > 0) {
+    return sendError(res, ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR, error, `${ERROR_MESSAGES.MISSING_ENV_VARS} Missing: ${missingVars.join(', ')}`);
   }
 
   try {
