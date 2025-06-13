@@ -36,9 +36,7 @@ export function PrivacyTab({
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,
-
-    // Actions
-    handleToggleLocalStorage,
+ 
     handleToggleCloudStorage,
     handleClearAllDataConfirm,
     handleResetSettingsConfirm,
@@ -54,11 +52,9 @@ export function PrivacyTab({
   return (
     <>
       <div className="space-y-6">
-        <DataStorageSection
-          storeConversationsLocally={config.storeConversationsLocally}
+        <DataStorageSection 
           storeConversationsInCloud={config.storeConversationsInCloud || false}
-          hasActiveSubscription={hasActiveSubscription}
-          onToggleLocalStorage={handleToggleLocalStorage}
+          hasActiveSubscription={hasActiveSubscription} 
           onToggleCloudStorage={handleToggleCloudStorage}
         />
 
