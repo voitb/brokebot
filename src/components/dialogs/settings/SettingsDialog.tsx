@@ -125,7 +125,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </DialogDescription>
 
           {/* Mobile Layout */}
-          <div className="flex md:hidden flex-col h-full">
+          <div className="flex md:hidden flex-col h-[90vh]">
             <div className="shrink-0 p-4 space-y-4 bg-background">
               <h2 className="text-lg font-semibold">Settings</h2>
               <div className="grid grid-cols-2 gap-2">
@@ -143,7 +143,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 ))}
               </div>
             </div>
-            <ScrollArea className="flex-1">
+            <ScrollArea className="h-[calc(100%-150px)]">
               <div className="p-4">{renderTabContent()}</div>
             </ScrollArea>
             <div className="shrink-0 p-4 bg-muted/20 flex flex-row justify-between gap-2">
