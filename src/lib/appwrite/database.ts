@@ -189,21 +189,21 @@ export const getCloudConversations = async (): Promise<Conversation[]> => {
 };
 
 export async function createConversationInCloud(
-  conversation: Omit<Conversation, 'messages'>,
+  conversationId: string,
+  data: Omit<Conversation, "id" | "messages">,
   userId: string
-): Promise<string> {
+) {
   try {
-    const document = await databases.createDocument(
+    // Appwrite manages createdAt and updatedAt via system fields ($createdAt, $updatedAt).
+    // We should not send them in the payload, so we destructure them out.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, updatedAt, ...payload } = data;
+    return await databases.createDocument(
       APPWRITE_DATABASE_ID,
       CONVERSATIONS_COLLECTION_ID,
-      conversation.id, // Use local ID as the document ID
-      {
-        title: conversation.title,
-        pinned: conversation.pinned,
-        userId: userId,
-      }
+      conversationId,
+      { ...payload, userId }
     );
-    return document.$id;
   } catch (error) {
     console.error("Failed to create conversation in cloud:", error);
     throw new Error("Failed to create conversation in cloud.");
@@ -213,22 +213,16 @@ export async function createConversationInCloud(
 export async function addMessageToCloud(
   message: Message,
   conversationId: string
-): Promise<string> {
+) {
   try {
-    // Appwrite doesn't store nested objects, so we use a reference.
-    // The `createdAt` is converted to ISO string format for Appwrite.
-    const document = await databases.createDocument(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...messageData } = message;
+    return await databases.createDocument(
       APPWRITE_DATABASE_ID,
       MESSAGES_COLLECTION_ID,
-      message.id, // Use local ID as the document ID
-      {
-        role: message.role,
-        content: message.content,
-        createdAt: message.createdAt.toISOString(),
-        conversationId: conversationId,
-      }
+      id, // Use local message ID as the document ID in Appwrite
+      { ...messageData, conversationId }
     );
-    return document.$id;
   } catch (error) {
     console.error("Failed to add message to cloud:", error);
     throw new Error("Failed to add message to cloud.");
@@ -237,14 +231,18 @@ export async function addMessageToCloud(
 
 export async function updateConversationInCloud(
   conversationId: string,
-  changes: Partial<Omit<Conversation, 'id' | 'messages' | 'createdAt' | 'updatedAt'>>
+  data: Partial<Omit<Conversation, "id" | "messages">>
 ): Promise<void> {
   try {
+    // Appwrite manages createdAt and updatedAt via system fields ($createdAt, $updatedAt).
+    // We should not send them in the payload, so we destructure them out.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, updatedAt, ...payload } = data;
     await databases.updateDocument(
       APPWRITE_DATABASE_ID,
       CONVERSATIONS_COLLECTION_ID,
       conversationId,
-      changes
+      payload
     );
   } catch (error) {
     console.error("Failed to update conversation in cloud:", error);
@@ -338,7 +336,182 @@ export async function clearAllCloudData(userId: string): Promise<void> {
   }
 }
 
-export async function syncCloudToLocal(userId: string): Promise<void> {
+/**
+ * Fetches all conversations and their nested messages for a given user from Appwrite.
+ */
+export async function getAllConversationsFromCloud(
+  userId: string
+): Promise<Conversation[]> {
+  try {
+    const response = await databases.listDocuments(
+      APPWRITE_DATABASE_ID,
+      CONVERSATIONS_COLLECTION_ID,
+      [Query.equal("userId", userId), Query.limit(100)] // Adjust limit as needed
+    );
+
+    const conversations = response.documents as unknown as AppwriteConversation[];
+
+    const hydratedConversations = await Promise.all(
+      conversations.map(async (convo) => {
+        const messagesResponse = await databases.listDocuments(
+          APPWRITE_DATABASE_ID,
+          MESSAGES_COLLECTION_ID,
+          [
+            Query.equal("conversationId", convo.$id),
+            Query.orderAsc("createdAt"),
+            Query.limit(500), // Adjust limit as needed
+          ]
+        );
+        const messages = messagesResponse.documents as unknown as AppwriteMessage[];
+        
+        return {
+          id: convo.$id,
+          title: convo.title,
+          pinned: convo.pinned,
+          createdAt: new Date(convo.$createdAt),
+          updatedAt: new Date(convo.$updatedAt),
+          messages: messages.map((msg) => ({
+            id: msg.$id,
+            role: msg.role,
+            content: msg.content,
+            createdAt: new Date(msg.createdAt),
+          })),
+        };
+      })
+    );
+
+    return hydratedConversations;
+  } catch (error) {
+    console.error("Failed to get all conversations from cloud:", error);
+    throw new Error("Failed to get all conversations from cloud.");
+  }
+}
+
+/**
+ * Converts a cloud conversation (with string dates) to a local Conversation (with Date objects).
+ */
+function rehydrateConversation(cloudConvo: Conversation): Conversation {
+  return {
+    ...cloudConvo,
+    createdAt: new Date(cloudConvo.createdAt),
+    updatedAt: new Date(cloudConvo.updatedAt),
+    messages: cloudConvo.messages.map((msg) => ({
+      ...msg,
+      createdAt: new Date(msg.createdAt),
+    })),
+  };
+}
+
+// --- Full Sync Logic ---
+
+/**
+ * Performs a two-way sync between the local Dexie database and the Appwrite cloud.
+ * This function handles the initial sync and subsequent syncs, merging data intelligently.
+ * 1. Fetches all data from both cloud and local DB.
+ * 2. Creates maps for quick lookups.
+ * 3. Iterates through cloud conversations to update/add to local DB.
+ * 4. Iterates through local conversations to update/add to cloud.
+ * 5. All local changes are performed in a single transaction for atomicity.
+ */
+export async function syncCloudAndLocal(userId: string) {
+  try {
+    // 1. Fetch all data from both sources concurrently
+    const [cloudConversations, localConversations] = await Promise.all([
+      getAllConversationsFromCloud(userId),
+      db.conversations.toArray(),
+    ]);
+
+    // 2. Create maps for efficient lookups
+    const cloudConvoMap = new Map(
+      cloudConversations.map((c: Conversation) => [c.id, c])
+    );
+    const localConvoMap = new Map(
+      localConversations.map((c: Conversation) => [c.id, c])
+    );
+
+    const localUpdates: Conversation[] = [];
+    const cloudCreates: Promise<any>[] = [];
+    const cloudUpdates: Promise<any>[] = [];
+
+    // 3. Compare Cloud to Local
+    for (const cloudConvo of cloudConversations) {
+      const localConvo = localConvoMap.get(cloudConvo.id);
+      const cloudUpdatedAt = new Date(cloudConvo.updatedAt);
+
+      if (!localConvo) {
+        // Conversation exists in cloud but not locally -> add it locally
+        console.log(`Sync: Adding cloud convo "${cloudConvo.title}" to local.`);
+        localUpdates.push(rehydrateConversation(cloudConvo));
+      } else {
+        const localUpdatedAt = new Date(localConvo.updatedAt);
+        if (cloudUpdatedAt > localUpdatedAt) {
+          // Cloud version is newer -> update local version
+          console.log(`Sync: Updating local convo "${cloudConvo.title}" from cloud.`);
+          localUpdates.push(rehydrateConversation(cloudConvo));
+        }
+      }
+    }
+
+    // 4. Compare Local to Cloud
+    for (const localConvo of localConversations) {
+      const cloudConvo = cloudConvoMap.get(localConvo.id);
+      const localUpdatedAt = new Date(localConvo.updatedAt);
+
+      if (!cloudConvo) {
+        // Conversation exists locally but not in cloud -> create it in cloud
+        console.log(`Sync: Creating local convo "${localConvo.title}" in cloud.`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { messages, id, ...convoDetails } = localConvo;
+        cloudCreates.push(createConversationInCloud(id, convoDetails, userId));
+        // Also add all its messages to the cloud
+        localConvo.messages.forEach((msg: Message) => {
+          cloudCreates.push(addMessageToCloud(msg, localConvo.id));
+        });
+      } else {
+        const cloudUpdatedAt = new Date(cloudConvo.updatedAt);
+        if (localUpdatedAt > cloudUpdatedAt) {
+          // Local version is newer -> update cloud version
+          console.log(`Sync: Updating cloud convo "${localConvo.title}" from local.`);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { messages, id, ...convoDetails } = localConvo;
+          cloudUpdates.push(
+            updateConversationInCloud(localConvo.id, convoDetails)
+          );
+          // Note: This simple sync doesn't handle individual message updates from local -> cloud
+          // after initial creation. A more robust implementation would be needed for that.
+        }
+      }
+    }
+
+    // 5. Execute all database operations
+    if (localUpdates.length > 0) {
+      await db.transaction("rw", db.conversations, async () => {
+        await db.conversations.bulkPut(localUpdates);
+      });
+      console.log(`Sync: Applied ${localUpdates.length} updates/additions to local DB.`);
+    }
+
+    if (cloudCreates.length > 0 || cloudUpdates.length > 0) {
+      await Promise.all([...cloudCreates, ...cloudUpdates]);
+      console.log(`Sync: Sent ${cloudCreates.length} creations and ${cloudUpdates.length} updates to cloud.`);
+    }
+
+    console.log("Sync completed successfully.");
+
+  } catch (error) {
+    console.error("An error occurred during sync:", error);
+    throw new Error("Failed to sync conversations with the cloud.");
+  }
+}
+
+// --- Deprecated Sync Logic ---
+
+/**
+ * @deprecated Use syncCloudAndLocal instead. This function is destructive.
+ * Syncs conversations from the cloud to the local Dexie database.
+ * This is a one-way, destructive sync.
+ */
+export async function syncCloudToLocal(userId: string) {
   try {
     // 1. Fetch all conversation documents for the user in one go.
     const conversationsResponse = await databases.listDocuments(
@@ -444,14 +617,15 @@ export async function getCloudUserConfig(userId: string) {
 
 export async function createCloudUserConfig(
   userId: string,
-  config: Partial<UserConfig>
+  config: Partial<Omit<UserConfig, "id">>
 ) {
   try {
+    const { createdAt, updatedAt, ...payload } = config;
     return await databases.createDocument(
       APPWRITE_DATABASE_ID,
       USER_CONFIG_COLLECTION_ID,
       userId, // Document ID is the user's ID
-      config
+      { ...payload, userId } // Also include userId as a required attribute in the document body
     );
   } catch (error) {
     console.error("Failed to create user config in cloud:", error);
@@ -461,14 +635,15 @@ export async function createCloudUserConfig(
 
 export async function updateCloudUserConfig(
   userId: string,
-  config: Partial<UserConfig>
+  config: Partial<Omit<UserConfig, "id">>
 ) {
   try {
+    const { createdAt, updatedAt, ...payload } = config;
     return await databases.updateDocument(
       APPWRITE_DATABASE_ID,
       USER_CONFIG_COLLECTION_ID,
       userId, // Document ID is the user's ID
-      config
+      payload
     );
   } catch (error) {
     console.error("Failed to update user config in cloud:", error);

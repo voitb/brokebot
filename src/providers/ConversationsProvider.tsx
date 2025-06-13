@@ -12,7 +12,7 @@ import { db, type Conversation, type Message } from "../lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { useUserConfig } from "../hooks/useUserConfig";
 import {
-  syncCloudToLocal,
+  syncCloudAndLocal,
   createConversationInCloud,
   addMessageToCloud,
   deleteConversationFromCloud,
@@ -70,7 +70,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
         const toastId = toast.loading("Syncing conversations from cloud...");
         try {
-          await syncCloudToLocal(user.$id);
+          await syncCloudAndLocal(user.$id);
           toast.success("Conversations synced successfully.", { id: toastId });
         } catch (error) {
           console.error("Failed to sync from cloud:", error);
@@ -128,8 +128,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       if (getCloudSync()) {
-        const { messages, ...convoDetails } = newConversation;
-        await createConversationInCloud(convoDetails, user!.$id);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { messages, id, ...convoDetails } = newConversation;
+        await createConversationInCloud(id, convoDetails, user!.$id);
         await addMessageToCloud(messages[0], newConversation.id);
       }
       return newConversation.id;
@@ -153,8 +154,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       if (getCloudSync()) {
-        const { messages, ...convoDetails } = newConversation;
-        await createConversationInCloud(convoDetails, user!.$id);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { messages, id, ...convoDetails } = newConversation;
+        await createConversationInCloud(id, convoDetails, user!.$id);
       }
       return newConversation.id;
     } catch (error) {
