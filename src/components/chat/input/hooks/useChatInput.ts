@@ -64,7 +64,13 @@ export function useChatInput(): UseChatInputReturn {
   const abortControllerRef = useRef<AbortController | null>(null);
   const conversationId = useConversationId();
   const navigate = useNavigate();
-  const { createEmptyConversation, addMessage, updateMessage, updateConversationTitle } = useConversations();
+  const {
+    createEmptyConversation,
+    addMessage,
+    updateMessage,
+    updateConversationTitle,
+    updateCompleteAIMessage,
+  } = useConversations();
   const { messages } = useConversation(conversationId);
   const { currentModel, streamMessage } = useModel();
 
@@ -164,6 +170,9 @@ export function useChatInput(): UseChatInputReturn {
           }
 
           console.log('Response generated:', accumulatedContent);
+          if (aiMessageId) {
+            await updateCompleteAIMessage(aiMessageId, accumulatedContent);
+          }
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
@@ -203,6 +212,7 @@ export function useChatInput(): UseChatInputReturn {
     currentModel,
     streamMessage,
     updateMessage,
+    updateCompleteAIMessage,
   ]);
 
   const regenerateLastResponse = useCallback(async () => {
@@ -255,6 +265,7 @@ export function useChatInput(): UseChatInputReturn {
               break;
             }
           }
+          await updateCompleteAIMessage(lastAiMessage.id, accumulatedContent);
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
@@ -269,7 +280,7 @@ export function useChatInput(): UseChatInputReturn {
       // Set error message in the AI message
       updateMessage(conversationId, lastAiMessage.id, "⚠️ Error regenerating response. Please try again.");
     }
-  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage]);
+  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage, updateCompleteAIMessage]);
 
   return {
     message,
