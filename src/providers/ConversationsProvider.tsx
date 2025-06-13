@@ -61,22 +61,29 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
   // Initial sync from cloud to local, runs only once
   useEffect(() => {
     const syncOnLoad = async () => {
+      // The sync is initiated only if a user is logged in, cloud storage is enabled in settings,
+      // and the sync has not already been completed in this session.
       if (user && storeInCloud && !isSynced) {
+        // Set sync status to true immediately to prevent duplicate runs
+        // caused by re-renders or StrictMode while the async operation is in progress.
+        setIsSynced(true);
+
         const toastId = toast.loading("Syncing conversations from cloud...");
         try {
           await syncCloudToLocal(user.$id);
           toast.success("Conversations synced successfully.", { id: toastId });
-          setIsSynced(true); // Mark as synced to prevent re-sync
         } catch (error) {
           console.error("Failed to sync from cloud:", error);
           toast.error("Failed to sync conversations. Check the console.", {
             id: toastId,
           });
+          // On failure, reset the flag. This allows a re-sync attempt if dependencies change.
+          setIsSynced(false);
         }
       }
     };
     syncOnLoad();
-    // Intentionally run only on user/storeInCloud change, guarded by isSynced
+    // The isSynced flag in the dependency array is crucial to prevent re-runs.
   }, [user, storeInCloud, isSynced]);
 
   const rawConversations = useLiveQuery(
