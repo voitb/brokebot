@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserConfig } from "../../../../../hooks/useUserConfig";
+import { useConversations } from "@/hooks/useConversations";
 import { toast } from "sonner";
 
 interface UserInfo {
@@ -19,6 +20,7 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
     exportConversations,
     importConversations,
   } = useUserConfig();
+  const { triggerSync } = useConversations();
 
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +45,12 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
 
     await updateConfig({ storeConversationsInCloud: checked });
     toast.success(checked ? "Cloud storage enabled" : "Cloud storage disabled");
+
+    if (checked) {
+      // Pass the new state directly to ensure the check inside triggerSync passes,
+      // bypassing any potential state propagation delay.
+      triggerSync({ cloudStorageEnabled: true });
+    }
   };
 
   const handleClearAllDataConfirm = async () => {

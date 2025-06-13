@@ -46,6 +46,7 @@ interface ConversationsContextType {
     messageId: string,
     newContent: string
   ) => Promise<void>;
+  triggerSync: (options?: { cloudStorageEnabled: boolean }) => Promise<void>;
 }
 
 const ConversationsContext = createContext<ConversationsContextType | undefined>(
@@ -55,36 +56,41 @@ const ConversationsContext = createContext<ConversationsContextType | undefined>
 export function ConversationsProvider({ children }: { children: ReactNode }) {
   const { config } = useUserConfig();
   const { user } = useAuth();
-  const [isSynced, setIsSynced] = useState(false);
+  const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const storeInCloud = config.storeConversationsInCloud;
 
-  // Initial sync from cloud to local, runs only once
-  useEffect(() => {
-    const syncOnLoad = async () => {
-      // The sync is initiated only if a user is logged in, cloud storage is enabled in settings,
-      // and the sync has not already been completed in this session.
-      if (user && storeInCloud && !isSynced) {
-        // Set sync status to true immediately to prevent duplicate runs
-        // caused by re-renders or StrictMode while the async operation is in progress.
-        setIsSynced(true);
+  const triggerSync = useCallback(async (options?: { cloudStorageEnabled: boolean }) => {
+    // Use the override if provided, otherwise default to the config state.
+    // This solves the race condition when toggling the switch.
+    const shouldSync = options?.cloudStorageEnabled ?? storeInCloud;
 
-        const toastId = toast.loading("Syncing conversations from cloud...");
-        try {
-          await syncCloudAndLocal(user.$id);
-          toast.success("Conversations synced successfully.", { id: toastId });
-        } catch (error) {
-          console.error("Failed to sync from cloud:", error);
-          toast.error("Failed to sync conversations. Check the console.", {
-            id: toastId,
-          });
-          // On failure, reset the flag. This allows a re-sync attempt if dependencies change.
-          setIsSynced(false);
-        }
-      }
-    };
-    syncOnLoad();
-    // The isSynced flag in the dependency array is crucial to prevent re-runs.
-  }, [user, storeInCloud, isSynced]);
+    if (!user || !shouldSync || isSyncing) {
+      return;
+    }
+
+    setIsSyncing(true);
+    const toastId = toast.loading("Syncing conversations with cloud...");
+    try {
+      await syncCloudAndLocal(user.$id);
+      toast.success("Conversations synced successfully.", { id: toastId });
+    } catch (error) {
+      console.error("Failed to sync from cloud:", error);
+      toast.error("Failed to sync conversations. Check the console.", {
+        id: toastId,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [user, storeInCloud, isSyncing]);
+
+  // Effect for the very first sync when the app loads
+  useEffect(() => {
+    if (user && storeInCloud && !isInitialSyncDone) {
+      triggerSync();
+      setIsInitialSyncDone(true); // Mark initial sync as done for the session
+    }
+  }, [user, storeInCloud, isInitialSyncDone, triggerSync]);
 
   const rawConversations = useLiveQuery(
     () => db.conversations.orderBy("updatedAt").reverse().toArray(),
@@ -279,6 +285,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     togglePinConversation,
     updateConversationTitle,
     updateCompleteAIMessage,
+    triggerSync,
   }), [
       conversations,
       createConversation,
@@ -289,6 +296,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       togglePinConversation,
       updateConversationTitle,
       updateCompleteAIMessage,
+      triggerSync,
   ]);
 
   return (
