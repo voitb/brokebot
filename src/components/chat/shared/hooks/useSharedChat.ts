@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { Conversation, Message, ISharedLink } from "../../../../lib/db";
 
@@ -20,7 +20,7 @@ export const useSharedChat = (
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
-  const handleCopyLink = useCallback(async () => {
+  const handleCopyLink = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
@@ -28,9 +28,9 @@ export const useSharedChat = (
     } catch {
       toast.error("Failed to copy link");
     }
-  }, []);
+  };
 
-  const handleDownloadChat = useCallback(() => {
+  const handleDownloadChat = () => {
     if (!sharedLink.allowDownload) {
       toast.error("Download is not allowed for this conversation");
       return;
@@ -66,17 +66,17 @@ export const useSharedChat = (
     URL.revokeObjectURL(url);
 
     toast.success("Chat downloaded successfully!");
-  }, [conversation.title, messages, sharedLink]);
+  };
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     setTheme(currentTheme => currentTheme === "dark" ? "light" : "dark");
-  }, []);
+  };
 
-  const handleLogoClick = useCallback(() => {
+  const handleLogoClick = () => {
     const frontendUrl =
       import.meta.env.VITE_FRONTEND_URL || window.location.origin;
     window.open(frontendUrl, "_blank");
-  }, []);
+  };
 
   return {
     theme,

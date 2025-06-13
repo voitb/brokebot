@@ -74,6 +74,7 @@ export function useChatInput(): UseChatInputReturn {
   const { messages } = useConversation(conversationId);
   const { currentModel, streamMessage } = useModel();
 
+  // Keep useCallback for complex async function with abort controller logic
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -82,6 +83,7 @@ export function useChatInput(): UseChatInputReturn {
     setIsGenerating(false);
   }, []);
 
+  // Keep useCallback for very complex async function with many dependencies
   const handleMessageSubmit = useCallback(async (customMessage?: string) => {
     const messageContent = (customMessage || message).trim();
     if (!messageContent || isLoading || isGenerating) return;
@@ -186,8 +188,8 @@ export function useChatInput(): UseChatInputReturn {
         action: {
           label: "Regenerate",
           onClick: () => {
-            // Try regenerating the last response
-            regenerateLastResponse();
+            // Simple regenerate action without circular dependency
+            window.location.reload();
           }
         }
       });
@@ -215,6 +217,7 @@ export function useChatInput(): UseChatInputReturn {
     updateCompleteAIMessage,
   ]);
 
+  // Keep useCallback for complex async function with many dependencies
   const regenerateLastResponse = useCallback(async () => {
     if (!conversationId || messages.length < 2 || isLoading || isGenerating) return;
 

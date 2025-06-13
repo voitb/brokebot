@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useUserConfig } from "@/hooks/useUserConfig";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
@@ -17,14 +17,11 @@ export const useSettings = () => {
     }
   }, [config]);
 
-  const handleFieldChange = useCallback(
-    <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
-      setSettings((prev) => ({ ...prev, [field]: value }));
-    },
-    []
-  );
+  const handleFieldChange = <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
+    setSettings((prev) => ({ ...prev, [field]: value }));
+  };
 
-  const handleSaveChanges = useCallback(async () => {
+  const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
       await updateConfig(settings);
@@ -35,7 +32,7 @@ export const useSettings = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [settings, updateConfig]);
+  };
 
   return {
     settings,

@@ -1,14 +1,14 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../hooks/useConversations";
-import type { IConversation } from "../../../../lib/db";
+import type { Conversation } from "../../../../lib/db";
 
 interface UseConversationListReturn {
   // State
   searchTerm: string;
-  filteredConversations: IConversation[];
-  pinnedConversations: IConversation[];
-  unpinnedConversations: IConversation[];
+  filteredConversations: Conversation[];
+  pinnedConversations: Conversation[];
+  unpinnedConversations: Conversation[];
   
   // Actions
   setSearchTerm: (term: string) => void;
@@ -49,12 +49,12 @@ export function useConversationList(): UseConversationListReturn {
   );
 
   // Handle new chat creation
-  const handleNewChat = useCallback(async () => {
+  const handleNewChat = async () => {
     const conversationId = await createEmptyConversation("New Conversation");
     if (conversationId) {
       navigate(`/chat/${conversationId}`);
     }
-  }, [createEmptyConversation, navigate]);
+  };
 
   return {
     // State

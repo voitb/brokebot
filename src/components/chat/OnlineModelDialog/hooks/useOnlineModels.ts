@@ -49,12 +49,9 @@ export const useOnlineModels = (
     [config, onModelSelect, onOpenChange]
   );
 
-  const handleOpenChange = useCallback(
-    (isOpen: boolean) => {
-      onOpenChange?.(isOpen);
-    },
-    [onOpenChange]
-  );
+  const handleOpenChange = (isOpen: boolean) => {
+    onOpenChange?.(isOpen);
+  };
 
   return {
     storedKeys: {

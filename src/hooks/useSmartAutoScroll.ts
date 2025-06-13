@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, type DependencyList } from "react";
+import { useState, useRef, useEffect, type DependencyList } from "react";
 
 export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   dependencies: DependencyList = []
@@ -7,14 +7,14 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
-  const scrollToBottom = useCallback((instant = false) => {
+  const scrollToBottom =  (instant = false) => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({
         top: scrollAreaRef.current.scrollHeight,
         behavior: instant ? "instant" : "smooth",
       });
     }
-  }, []);
+  } ;
 
   // Effect to scroll to bottom when new messages arrive, if not interrupted by user
   useEffect(() => {

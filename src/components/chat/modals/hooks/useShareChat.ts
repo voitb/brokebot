@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useSharedLinks } from "../../../../hooks/useSharedLinks";
 import { toast } from "sonner";
 
@@ -48,7 +48,7 @@ export const useShareChat = ({
   const hasActiveSubscription = useMemo(() => false, []);
   const hasCloudStorage = useMemo(() => false, []);
 
-  const generateShareLink = useCallback(async () => {
+  const generateShareLink = async () => {
     if (!conversationId || !conversationTitle) {
       toast.error("No conversation to share");
       return;
@@ -75,9 +75,9 @@ export const useShareChat = ({
     } finally {
       setIsGeneratingLink(false);
     }
-  }, [conversationId, conversationTitle, shareOptions, createSharedLink]);
+  };
 
-  const copyShareLink = useCallback(async () => {
+  const copyShareLink = async () => {
     if (!shareId) return;
 
     const shareLink = `${window.location.origin}/share/${shareId}`;
@@ -89,14 +89,14 @@ export const useShareChat = ({
       console.error("Failed to copy link:", error);
       toast.error("Failed to copy link");
     }
-  }, [shareId]);
+  };
 
-  const handlePreviewShare = useCallback(() => {
+  const handlePreviewShare = () => {
     if (shareId) {
       const shareLink = `${window.location.origin}/share/${shareId}`;
       window.open(shareLink, "_blank");
     }
-  }, [shareId]);
+  };
 
   return {
     shareOptions,

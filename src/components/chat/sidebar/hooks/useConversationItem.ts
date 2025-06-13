@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
@@ -16,51 +16,51 @@ export const useConversationItem = (conversation: Conversation) => {
 
   const isActive = currentConversationId === conversation.id;
 
-  const handleConversationClick = useCallback(() => {
+  const handleConversationClick = () => {
     if (!isEditing) {
       navigate(`/chat/${conversation.id}`);
     }
-  }, [isEditing, navigate, conversation.id]);
+  };
 
-  const handlePinToggle = useCallback(async (e: React.MouseEvent) => {
+  const handlePinToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await togglePinConversation(conversation.id);
     setIsMenuOpen(false);
-  }, [conversation.id, togglePinConversation]);
+  };
 
-  const handleRename = useCallback((e: React.MouseEvent) => {
+  const handleRename = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     setIsEditing(true);
     setIsMenuOpen(false);
-  }, []);
+  };
 
-  const handleSaveRename = useCallback(async (newTitle: string) => {
+  const handleSaveRename = async (newTitle: string) => {
     if (newTitle.trim() && newTitle.trim() !== conversation.title) {
       await updateConversationTitle(conversation.id, newTitle.trim());
     }
     setIsEditing(false);
-  }, [conversation.id, conversation.title, updateConversationTitle]);
+  };
 
-  const handleCancelRename = useCallback(() => {
+  const handleCancelRename = () => {
     setIsEditing(false);
-  }, []);
+  };
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDeleteDialogOpen(true);
     setIsMenuOpen(false);
-  }, []);
+  };
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleDeleteConfirm = async () => {
     await deleteConversation(conversation.id);
     setDeleteDialogOpen(false);
     if (isActive) {
       navigate("/chat");
     }
-  }, [conversation.id, deleteConversation, isActive, navigate]);
+  };
 
-  const getItemStyles = useCallback(() => {
+  const getItemStyles = () => {
     if (isEditing || isActive) {
       return "bg-primary/10 border-primary text-primary font-medium";
     } else if (isMenuOpen) {
@@ -68,7 +68,7 @@ export const useConversationItem = (conversation: Conversation) => {
     } else {
       return "hover:bg-muted/50";
     }
-  }, [isEditing, isActive, isMenuOpen]);
+  };
 
   return {
     isEditing,
