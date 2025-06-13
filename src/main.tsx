@@ -7,6 +7,7 @@ import { ThemeProvider } from "./providers/ThemeProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { WebLLMProvider } from "./providers/WebLLMProvider";
 import { ModelProvider } from "./providers/ModelProvider";
+import { ConversationsProvider } from "./providers/ConversationsProvider";
 import "./index.css";
 import { Toaster } from "sonner";
 
@@ -17,8 +18,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <TooltipProvider>
           <WebLLMProvider>
             <ModelProvider>
-              <RouterProvider router={router} />
-              <Toaster />
+              <ConversationsProvider>
+                <RouterProvider router={router} />
+                <Toaster />
+              </ConversationsProvider>
             </ModelProvider>
           </WebLLMProvider>
         </TooltipProvider>
