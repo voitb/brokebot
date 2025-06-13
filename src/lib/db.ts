@@ -28,7 +28,6 @@ export interface UserConfig {
   avatarUrl?: string;
   selectedModelId: string;
   autoLoadModel: boolean;
-  storeConversationsLocally: boolean;
   storeConversationsInCloud?: boolean;
   openrouterApiKey?: string;
   openaiApiKey?: string;
@@ -66,7 +65,6 @@ export const DEFAULT_USER_CONFIG: UserConfig = {
   username: "User",
   selectedModelId: AVAILABLE_MODELS[0].id,
   autoLoadModel: true,
-  storeConversationsLocally: true,
   storeConversationsInCloud: false,
   theme: "system",
   createdAt: new Date(),
@@ -144,21 +142,6 @@ export class LocalGptDB extends Dexie {
         delete conv.shareId;
       });
     });
-
-    // Version 6 schema - adds storeConversationsLocally field
-    this.version(6)
-      .stores({})
-      .upgrade(async (tx) => {
-        // Add default value for new field to existing configs
-        return tx
-          .table("userConfig")
-          .toCollection()
-          .modify((config) => {
-            if (config.storeConversationsLocally === undefined) {
-              config.storeConversationsLocally = true;
-            }
-          });
-      });
 
     // Initialize default config on first run
     this.on("ready", async () => {

@@ -32,11 +32,6 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
   // Use subscription status from props or fallback to mock
   const hasActiveSubscription = userInfo?.hasActiveSubscription ?? false;
 
-  const handleToggleLocalStorage = async (checked: boolean) => {
-    await updateConfig({ storeConversationsLocally: checked });
-    toast.success(checked ? "Local storage enabled" : "Local storage disabled");
-  };
-
   const handleToggleCloudStorage = async (checked: boolean) => {
     // if (!hasActiveSubscription) {
     //   toast.error("Cloud storage is only available with a paid subscription");
@@ -124,7 +119,6 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
     fileInputRef,
 
     // Actions
-    handleToggleLocalStorage,
     handleToggleCloudStorage,
     handleClearAllDataConfirm,
     handleResetSettingsConfirm,
