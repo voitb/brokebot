@@ -73,7 +73,7 @@ export function useUserConfig() {
           } else if (config) {
             // No cloud config, so upload local one
             const { id, ...localConfig } = config;
-            await updateConfig(localConfig, true); // Create in cloud
+            await updateConfig(localConfig); // Create in cloud
           }
         } catch (error) {
           console.error("Failed to sync user config:", error);
@@ -93,12 +93,16 @@ export function useUserConfig() {
   }, [user, isSynced, config.storeConversationsInCloud]);
 
   const updateConfig = async (
-    updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>,
-    createInCloud: boolean = false
-    ) => {
+    updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>
+  ) => {
     try {
       const encryptedUpdates: Partial<UserConfig> = { ...updates };
-      const keysToEncrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
+      const keysToEncrypt: (keyof UserConfig)[] = [
+        "openrouterApiKey",
+        "openaiApiKey",
+        "anthropicApiKey",
+        "googleApiKey",
+      ];
 
       for (const key of keysToEncrypt) {
         const value = updates[key as keyof typeof updates] as string | undefined;
@@ -114,20 +118,74 @@ export function useUserConfig() {
       });
 
       // Also update cloud if user is logged in and sync is enabled
-      if (user && (config.storeConversationsInCloud || updates.storeConversationsInCloud)) {
-        // Remove non-appwrite fields before sending
-        const { id, createdAt, updatedAt, selectedModelId, ...cloudData } = encryptedUpdates;
-        
-        const payload: any = { ...cloudData };
-        if (createInCloud) {
-             payload.userId = user.$id;
-             await createCloudUserConfig(user.$id, payload);
+      if (
+        user &&
+        (config.storeConversationsInCloud || updates.storeConversationsInCloud)
+      ) {
+        // Define the exact set of keys that are allowed in the Appwrite userConfig collection.
+        // This acts as a safelist to prevent sending local-only fields to the cloud.
+        const CLOUD_CONFIG_KEYS = [
+          "userId",
+          "username",
+          "avatarUrl",
+          "theme",
+          "autoLoadModel",
+          "openaiApiKey",
+          "anthropicApiKey",
+          "googleApiKey",
+          "openrouterApiKey",
+          "storeConversationsLocally",
+          "storeConversationsInCloud",
+        ];
+
+        // "Upsert" logic: check if config exists, then create or update.
+        const existingCloudConfig = await getCloudUserConfig(user.$id);
+
+        if (existingCloudConfig) {
+          // UPDATE: Config exists, send only the filtered, encrypted partial updates.
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, createdAt, updatedAt, ...updatesForCloud } = encryptedUpdates;
+
+          const payload = Object.fromEntries(
+            Object.entries(updatesForCloud).filter(([key]) =>
+              CLOUD_CONFIG_KEYS.includes(key)
+            )
+          );
+
+          if (Object.keys(payload).length > 0) {
+            await updateCloudUserConfig(user.$id, payload);
+          }
         } else {
-             await updateCloudUserConfig(user.$id, payload);
+          // CREATE: Config does not exist, send the full, filtered config.
+          const fullConfigForCloud = { ...config, ...updates };
+
+          const keysToReEncrypt: (keyof UserConfig)[] = [
+            "openrouterApiKey", "openaiApiKey", "anthropicApiKey", "googleApiKey",
+          ];
+          const fullEncryptedPayload = { ...fullConfigForCloud };
+          for (const key of keysToReEncrypt) {
+            const value = fullConfigForCloud[key as keyof typeof fullConfigForCloud] as string | undefined;
+            if (value) {
+              (fullEncryptedPayload as any)[key] = await encryptValue(value);
+            }
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, createdAt, updatedAt, ...fullPayload } = fullEncryptedPayload;
+          (fullPayload as any).userId = user.$id;
+
+          const payload = Object.fromEntries(
+            Object.entries(fullPayload).filter(([key]) =>
+              CLOUD_CONFIG_KEYS.includes(key)
+            )
+          );
+
+          await createCloudUserConfig(user.$id, payload);
         }
       }
     } catch (error) {
       console.error("Error updating user config:", error);
+      toast.error("Failed to save settings to the cloud.");
     }
   };
 
