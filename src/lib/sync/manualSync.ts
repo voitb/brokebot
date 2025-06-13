@@ -59,6 +59,24 @@ export async function uploadConversations(): Promise<Models.Execution> {
 }
 
 /**
+ * Converts date strings in a conversation object back to Date objects.
+ * This is necessary after data is deserialized from JSON.
+ * @param conv The conversation object with date strings.
+ * @returns The conversation object with proper Date objects.
+ */
+const rehydrateConversation = (conv: any): Conversation => {
+  return {
+    ...conv,
+    createdAt: new Date(conv.createdAt),
+    updatedAt: new Date(conv.updatedAt),
+    messages: conv.messages.map((msg: any) => ({
+      ...msg,
+      createdAt: new Date(msg.createdAt),
+    })),
+  };
+};
+
+/**
  * Downloads conversations from the Appwrite backend and merges them into the local IndexedDB.
  * It calls an Appwrite function to get the data.
  * @returns {Promise<void>}
@@ -75,26 +93,29 @@ export async function downloadAndMergeConversations(): Promise<void> {
       throw new Error(`Function execution failed: ${execution.errors}`);
     }
 
-    const remoteConversations: Conversation[] = JSON.parse(execution.responseBody);
+    const remoteConversations: any[] = JSON.parse(execution.responseBody);
 
     if (!remoteConversations || remoteConversations.length === 0) {
       console.log("No remote conversations to download.");
       return;
     }
 
+    // Rehydrate dates from strings to Date objects before saving
+    const rehydratedConversations = remoteConversations.map(rehydrateConversation);
+
     // A simple merge strategy: add new, update existing
     await db.transaction("rw", db.conversations, async () => {
-      for (const conv of remoteConversations) {
+      for (const conv of rehydratedConversations) {
         const existing = await db.conversations.get(conv.id);
         if (existing) {
           // Merge messages to avoid duplicates
           const existingMessageIds = new Set(existing.messages.map((m) => m.id));
           const newMessages = conv.messages.filter((m) => !existingMessageIds.has(m.id));
           
-          if(newMessages.length > 0 || new Date(conv.updatedAt) > new Date(existing.updatedAt)) {
+          if(newMessages.length > 0 || conv.updatedAt > existing.updatedAt) {
              await db.conversations.update(conv.id, {
                 ...conv,
-                messages: [...existing.messages, ...newMessages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+                messages: [...existing.messages, ...newMessages].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
                 updatedAt: new Date()
              });
           }
