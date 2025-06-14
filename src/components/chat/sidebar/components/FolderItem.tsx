@@ -12,6 +12,7 @@ import {
 } from "../../../ui/dropdown-menu";
 import { useConversations } from "../../../../providers/ConversationsProvider";
 import { useConversationList } from "../hooks/useConversationList";
+import { InputDialog } from "../../../dialogs/InputDialog";
 
 interface FolderItemProps {
   folder: FolderWithConversations;
@@ -19,6 +20,7 @@ interface FolderItemProps {
 
 export const FolderItem: React.FC<FolderItemProps> = ({ folder }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [isRenameDialogOpen, setRenameDialogOpen] = useState(false);
   const { deleteFolder, updateFolderName } = useConversations();
   const { handleNewChat } = useConversationList();
 
@@ -29,9 +31,7 @@ export const FolderItem: React.FC<FolderItemProps> = ({ folder }) => {
     }
   };
 
-  const handleRename = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newName = prompt("Enter new folder name:", folder.name);
+  const handleRename = (newName: string) => {
     if (newName && newName.trim() !== "") {
       updateFolderName(folder.id, newName);
     }
@@ -68,7 +68,7 @@ export const FolderItem: React.FC<FolderItemProps> = ({ folder }) => {
                   <MessageSquarePlus className="w-4 h-4 mr-2" />
                   New Chat in Folder
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleRename}>
+                <DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
                   <Edit className="w-4 h-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
@@ -93,6 +93,16 @@ export const FolderItem: React.FC<FolderItemProps> = ({ folder }) => {
           <p className="text-xs text-muted-foreground px-2 py-1">No conversations in this folder.</p>
         )}
       </Collapsible.Content>
+       <InputDialog
+        open={isRenameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        title="Rename folder"
+        description={`Enter a new name for the folder "${folder.name}".`}
+        inputLabel="New folder name"
+        initialValue={folder.name}
+        onConfirm={handleRename}
+        confirmText="Rename"
+      />
     </Collapsible.Root>
   );
 }; 
