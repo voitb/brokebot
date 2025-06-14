@@ -45,6 +45,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/business/useSubscription";
+import { BillingTab } from './components/BillingTab';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -100,7 +101,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           />
         );
       case "billing":
-        return user ? <LoggedUserBillingTab /> : <LocalUserBillingTab />;
+        return <BillingTab />;
       default:
         return null;
     }
