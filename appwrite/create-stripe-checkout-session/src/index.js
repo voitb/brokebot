@@ -16,8 +16,6 @@ export default async ({ req, res, log, error }) => {
             'APPWRITE_ENDPOINT',
             'APPWRITE_PROJECT_ID',
             'APPWRITE_API_KEY',
-            'APPWRITE_DATABASE_ID',
-            'APPWRITE_COLLECTION_SUBSCRIPTIONS_ID',
             'STRIPE_SUCCESS_URL',
             'STRIPE_CANCEL_URL',
         ]);
@@ -37,25 +35,22 @@ export default async ({ req, res, log, error }) => {
         .setProject(process.env.APPWRITE_PROJECT_ID)
         .setKey(process.env.APPWRITE_API_KEY);
 
-    const databases = new Databases(client);
+    const users = new Users(client);
 
     try {
         const { priceId } = JSON.parse(req.body);
-        const userJwt = req.headers['x-appwrite-user-jwt'];
 
         if (!priceId) {
             return res.json({ ok: false, message: 'priceId is required' }, 400);
         }
 
-        if (!userJwt) {
-            return res.json({ ok: false, message: 'User not authenticated' }, 401);
+        if (!req.headers['x-appwrite-user-id']) {
+            return res.json({ ok: false, message: 'User not authenticated. Ensure function has "Users" execute permission.' }, 401);
         }
-
-        // Get user info from JWT
-        client.setJWT(userJwt);
-        const users = new Users(client);
-        const user = await users.get('current');
-
+        
+        const userId = req.headers['x-appwrite-user-id'];
+        const user = await users.get(userId);
+        
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -78,7 +73,7 @@ export default async ({ req, res, log, error }) => {
         return res.json({ ok: true, sessionId: session.id });
 
     } catch (e) {
-        error(e.message);
+        error(`Function failed: ${e.message}`);
         return res.json({ ok: false, message: e.message }, 500);
     }
 }; 
