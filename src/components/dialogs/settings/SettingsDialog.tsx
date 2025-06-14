@@ -37,8 +37,6 @@ import {
 import {
   GeneralTab,
   PrivacyTab,
-  LocalUserBillingTab,
-  LoggedUserBillingTab,
 } from "./components";
 import { useSettings, type SettingsTab } from "./hooks/useSettings";
 import { useConversations } from "@/hooks/useConversations";
