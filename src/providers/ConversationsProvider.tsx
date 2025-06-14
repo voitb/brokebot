@@ -221,15 +221,21 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
   const deleteConversation = useCallback(async (id: string) => {
     try {
       await db.conversations.delete(id);
-      if (getCloudSync()) {
-        await deleteConversationFromCloud(id);
+       
+      if (user) {
+        try {
+          await deleteConversationFromCloud(id);
+        } catch (error) {
+           console.log(`Conversation ${id} not found in cloud or already deleted.`);
+        }
       }
+      
       toast.success("Conversation deleted.");
     } catch (error) {
       console.error("Error deleting conversation:", error);
       toast.error("Failed to delete conversation.");
     }
-  }, [getCloudSync]);
+  }, [user]);
 
   const togglePinConversation = useCallback(async (id: string) => {
     try {
@@ -238,28 +244,38 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         convo.pinned = !convo.pinned;
         pinned = convo.pinned;
       });
-      if (getCloudSync() && pinned !== undefined) {
-        await updateConversationInCloud(id, { pinned });
+       
+      if (user && pinned !== undefined) {
+        try {
+          await updateConversationInCloud(id, { pinned });
+        } catch (error) {
+           console.log(`Conversation ${id} not found in cloud for pin update.`);
+        }
       }
     } catch (error) {
       console.error("Error toggling pin:", error);
       toast.error("Failed to update pin status.");
     }
-  }, [getCloudSync]);
+  }, [user]);
 
   const updateConversationTitle = useCallback(async (id: string, newTitle: string) => {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
         convo.title = newTitle;
       });
-      if (getCloudSync()) {
-        await updateConversationInCloud(id, { title: newTitle });
+       
+      if (user) {
+        try {
+          await updateConversationInCloud(id, { title: newTitle });
+        } catch (error) {
+           console.log(`Conversation ${id} not found in cloud for title update.`);
+        }
       }
     } catch (error) {
       console.error("Error updating conversation title:", error);
       toast.error("Failed to update title.");
     }
-  }, [getCloudSync]);
+  }, [user]);
 
   const updateCompleteAIMessage = useCallback(
     async (messageId: string, newContent: string) => {

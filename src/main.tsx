@@ -15,16 +15,16 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <AuthProvider>
-        <TooltipProvider>
-          <WebLLMProvider>
-            <ModelProvider>
+      <TooltipProvider>
+        <WebLLMProvider>
+          <ModelProvider>
               <ConversationsProvider>
-                <RouterProvider router={router} />
-                <Toaster />
+              <RouterProvider router={router} />
+              <Toaster />
               </ConversationsProvider>
-            </ModelProvider>
-          </WebLLMProvider>
-        </TooltipProvider>
+          </ModelProvider>
+        </WebLLMProvider>
+      </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>
