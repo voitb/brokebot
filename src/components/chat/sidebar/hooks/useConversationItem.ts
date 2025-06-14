@@ -19,6 +19,7 @@ export const useConversationItem = (conversation: Conversation) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isCreateFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
 
   const isActive = currentConversationId === conversation.id;
 
@@ -74,13 +75,10 @@ export const useConversationItem = (conversation: Conversation) => {
     [conversation.id, moveConversationToFolder]
   );
 
-  const handleCreateFolderAndMove = useCallback(async () => {
-    const folderName = prompt("Enter new folder name:");
-    if (folderName) {
-      const newFolderId = await createFolder(folderName);
-      if (newFolderId) {
-        await handleMove(newFolderId);
-      }
+  const handleCreateFolderAndMove = useCallback(async (folderName: string) => {
+    const newFolderId = await createFolder(folderName);
+    if (newFolderId) {
+      await handleMove(newFolderId);
     }
   }, [createFolder, handleMove]);
 
@@ -98,10 +96,12 @@ export const useConversationItem = (conversation: Conversation) => {
     isEditing,
     isMenuOpen,
     deleteDialogOpen,
+    isCreateFolderDialogOpen,
     isActive,
     folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
+    setCreateFolderDialogOpen,
     handleConversationClick,
     handlePinToggle,
     handleRename,

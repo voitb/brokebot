@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink } from "lucide-react";
+import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
 import { Button } from "../../../ui/button";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import { EditableConversationTitle } from "./EditableConversationTitle";
 import { DeleteConversationDialog } from "./DeleteConversationDialog";
 import { useConversationItem } from "../hooks/useConversationItem";
 import type { Conversation } from "../../../../lib/db";
+import { InputDialog } from "../../../dialogs/InputDialog";
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -28,9 +29,11 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     isEditing,
     isMenuOpen,
     deleteDialogOpen,
+    isCreateFolderDialogOpen,
     folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
+    setCreateFolderDialogOpen,
     handleConversationClick,
     handlePinToggle,
     handleRename,
@@ -101,7 +104,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="w-48">
-                    <DropdownMenuItem onClick={handleCreateFolderAndMove}>
+                    <DropdownMenuItem onClick={() => setCreateFolderDialogOpen(true)}>
                       <FolderPlus className="w-4 h-4 mr-2" />
                       New folder
                     </DropdownMenuItem>
@@ -119,10 +122,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                     {conversation.folderId && (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleMove(null)}
-                          className="text-destructive focus:text-destructive"
-                        > 
-                          Remove from folder
+                        <DropdownMenuItem
+                          onClick={() => handleMove(null)}
+                          className="focus:bg-destructive/10"
+                        >
+                          <FolderMinus className="w-4 h-4 mr-2 text-destructive" />
+                          <span className="text-destructive">Remove from folder</span>
                         </DropdownMenuItem>
                       </>
                     )}
@@ -132,11 +137,11 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
 
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className="focus:bg-destructive/10"
                 onClick={handleDelete}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                <Trash2 className="w-4 h-4 mr-2 text-destructive" />
+                <span className="text-destructive">Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -148,6 +153,15 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
         conversationTitle={conversation.title}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialogOpen(false)}
+      />
+      <InputDialog
+        open={isCreateFolderDialogOpen}
+        onOpenChange={setCreateFolderDialogOpen}
+        title="Create a new folder and move"
+        description={`Enter a name for the new folder to move "${conversation.title}" into it.`}
+        inputLabel="New folder name"
+        onConfirm={handleCreateFolderAndMove}
+        confirmText="Create & Move"
       />
     </>
   );
