@@ -1,6 +1,6 @@
 import React from "react";
 import { SidebarTrigger, useSidebar } from "../ui/sidebar";
-import { Button } from "../ui";
+import { Button, ScrollArea } from "../ui";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../hooks/useConversations";
 import { ChatHeader } from "../chat/header";
@@ -26,6 +26,8 @@ export const WelcomeScreen: React.FC = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <ChatHeader />
+      <ScrollArea className="h-[calc(100vh-64px)]">
+
       <div className="flex-1 flex items-center justify-center p-6 relative">
         {!open && (
           <div className="absolute top-4 left-4">
@@ -45,6 +47,7 @@ export const WelcomeScreen: React.FC = () => {
           <PrivacyNotice />
         </div>
       </div>
+        </ScrollArea>
     </div>
   );
 };

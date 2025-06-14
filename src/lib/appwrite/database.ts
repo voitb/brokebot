@@ -1,12 +1,15 @@
-import { account, client, APPWRITE_DATABASE_ID } from "../appwriteClient";
+import { 
+  account, 
+  client, 
+  APPWRITE_DATABASE_ID, 
+  APPWRITE_CONVERSATIONS_COLLECTION_ID,
+  APPWRITE_MESSAGES_COLLECTION_ID,
+  APPWRITE_FOLDERS_COLLECTION_ID
+} from "../appwriteClient";
 import { db } from "../db";
 import { Databases, ID, Query } from "appwrite";
-import type { Conversation, Message, UserConfig } from "../db";
+import type { Conversation, Message, UserConfig, Folder } from "../db";
 import type { Models } from "appwrite";
-
-// --- Appwrite Configuration ---
-const CONVERSATIONS_COLLECTION_ID = "conversations";
-const MESSAGES_COLLECTION_ID = "messages";
 
 const databases = new Databases(client);
 
@@ -15,6 +18,7 @@ interface AppwriteConversation {
   title: string;
   pinned: boolean;
   userId: string;
+  folderId?: string;
   $id: string;
   $createdAt: string;
   $updatedAt:string;
@@ -28,6 +32,14 @@ interface AppwriteMessage {
   $id: string;
 }
 
+interface AppwriteFolder {
+  name: string;
+  userId: string;
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+}
+
 /**
  * Converts an Appwrite document for a conversation into the local Dexie format.
  * Messages are handled separately.
@@ -37,12 +49,102 @@ function mapAppwriteConversationToLocal(appwriteDoc: AppwriteConversation): Omit
     id: appwriteDoc.$id,
     title: appwriteDoc.title,
     pinned: appwriteDoc.pinned,
+    folderId: appwriteDoc.folderId,
     createdAt: new Date(appwriteDoc.$createdAt),
     updatedAt: new Date(appwriteDoc.$updatedAt),
   };
 }
 
-// --- Public API for Cloud Sync ---
+// --- FOLDERS ---
+export async function createFolderInCloud(
+  folderId: string,
+  data: Omit<Folder, "id">,
+  userId: string
+) {
+  try {
+    const { createdAt, updatedAt, ...payload } = data;
+    return await databases.createDocument(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_FOLDERS_COLLECTION_ID,
+      folderId,
+      { ...payload, userId }
+    );
+  } catch (error) {
+    console.error("Failed to create folder in cloud:", error);
+    throw new Error("Failed to create folder in cloud.");
+  }
+}
+
+export async function updateFolderInCloud(
+  folderId: string,
+  data: Partial<Omit<Folder, "id">>
+): Promise<void> {
+  try {
+    const { createdAt, updatedAt, ...payload } = data;
+    await databases.updateDocument(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_FOLDERS_COLLECTION_ID,
+      folderId,
+      payload
+    );
+  } catch (error) {
+    console.error("Failed to update folder in cloud:", error);
+    throw new Error("Failed to update folder in cloud.");
+  }
+}
+
+export async function deleteFolderFromCloud(folderId: string): Promise<void> {
+  try {
+    // Before deleting the folder, find all conversations in it and unset their folderId
+    const response = await databases.listDocuments(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
+      [Query.equal("folderId", folderId), Query.limit(100)]
+    );
+
+    const updatePromises = response.documents.map((doc) =>
+      databases.updateDocument(
+        APPWRITE_DATABASE_ID,
+        APPWRITE_CONVERSATIONS_COLLECTION_ID,
+        doc.$id,
+        { folderId: null } // Set to null to clear the relationship
+      )
+    );
+    await Promise.all(updatePromises);
+
+    // Now delete the folder
+    await databases.deleteDocument(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_FOLDERS_COLLECTION_ID,
+      folderId
+    );
+  } catch (error) {
+    console.error(`Failed to delete folder ${folderId} from cloud:`, error);
+    throw new Error("Failed to delete folder from cloud.");
+  }
+}
+
+export async function getAllFoldersFromCloud(userId: string): Promise<Folder[]> {
+  try {
+    const response = await databases.listDocuments(
+      APPWRITE_DATABASE_ID,
+      APPWRITE_FOLDERS_COLLECTION_ID,
+      [Query.equal("userId", userId), Query.limit(100)] // Assuming max 100 folders
+    );
+    return response.documents.map((doc) => ({
+      id: doc.$id,
+      name: doc.name,
+      userId: doc.userId,
+      createdAt: new Date(doc.$createdAt),
+      updatedAt: new Date(doc.$updatedAt),
+    }));
+  } catch (error) {
+    console.error("Failed to get folders from cloud:", error);
+    return [];
+  }
+}
+
+// --- CONVERSATIONS ---
 
 /**
  * Creates a new conversation in the cloud.
@@ -56,7 +158,7 @@ export const createCloudConversation = async (conversation: Conversation) => {
 
         await databases.createDocument(
             APPWRITE_DATABASE_ID,
-            CONVERSATIONS_COLLECTION_ID,
+            APPWRITE_CONVERSATIONS_COLLECTION_ID,
             conversation.id,
             { ...conversationData, userId }
         );
@@ -83,7 +185,7 @@ export const createCloudMessage = async (conversationId: string, message: Messag
     try {
         await databases.createDocument(
             APPWRITE_DATABASE_ID,
-            MESSAGES_COLLECTION_ID,
+            APPWRITE_MESSAGES_COLLECTION_ID,
             message.id,
             { ...message, conversationId }
         );
@@ -101,7 +203,7 @@ export const updateCloudConversation = async (conversationId: string, data: Part
     try {
         await databases.updateDocument(
             APPWRITE_DATABASE_ID,
-            CONVERSATIONS_COLLECTION_ID,
+            APPWRITE_CONVERSATIONS_COLLECTION_ID,
             conversationId,
             data
         );
@@ -122,12 +224,12 @@ export const deleteCloudConversation = async (conversationId: string) => {
         do {
             const response = await databases.listDocuments(
                 APPWRITE_DATABASE_ID,
-                MESSAGES_COLLECTION_ID,
+                APPWRITE_MESSAGES_COLLECTION_ID,
                 [Query.equal("conversationId", conversationId), Query.limit(100), Query.offset(offset)]
             );
             messagesToDelete = response.documents;
             const deletePromises = messagesToDelete.map(doc => 
-                databases.deleteDocument(APPWRITE_DATABASE_ID, MESSAGES_COLLECTION_ID, doc.$id)
+                databases.deleteDocument(APPWRITE_DATABASE_ID, APPWRITE_MESSAGES_COLLECTION_ID, doc.$id)
             );
             await Promise.all(deletePromises);
             offset += messagesToDelete.length;
@@ -136,7 +238,7 @@ export const deleteCloudConversation = async (conversationId: string) => {
         // Then, delete the conversation document itself
         await databases.deleteDocument(
             APPWRITE_DATABASE_ID,
-            CONVERSATIONS_COLLECTION_ID,
+            APPWRITE_CONVERSATIONS_COLLECTION_ID,
             conversationId
         );
     } catch (error) {
@@ -152,7 +254,7 @@ export const getCloudConversations = async (): Promise<Conversation[]> => {
         const userId = (await account.get()).$id;
         const conversationDocs = await databases.listDocuments(
             APPWRITE_DATABASE_ID,
-            CONVERSATIONS_COLLECTION_ID,
+            APPWRITE_CONVERSATIONS_COLLECTION_ID,
             [Query.equal("userId", userId)]
         );
 
@@ -160,7 +262,7 @@ export const getCloudConversations = async (): Promise<Conversation[]> => {
         for (const doc of conversationDocs.documents) {
             const messageDocs = await databases.listDocuments(
                 APPWRITE_DATABASE_ID,
-                MESSAGES_COLLECTION_ID,
+                APPWRITE_MESSAGES_COLLECTION_ID,
                 [Query.equal("conversationId", doc.$id), Query.limit(500)] // Limit to 500 messages per convo for now
             );
             
@@ -168,6 +270,7 @@ export const getCloudConversations = async (): Promise<Conversation[]> => {
                 id: doc.$id,
                 title: doc.title,
                 pinned: doc.pinned,
+                folderId: doc.folderId,
                 createdAt: new Date(doc.createdAt),
                 updatedAt: new Date(doc.updatedAt),
                 modelId: doc.modelId,
@@ -200,7 +303,7 @@ export async function createConversationInCloud(
     const { createdAt, updatedAt, ...payload } = data;
     return await databases.createDocument(
       APPWRITE_DATABASE_ID,
-      CONVERSATIONS_COLLECTION_ID,
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
       conversationId,
       { ...payload, userId }
     );
@@ -219,7 +322,7 @@ export async function addMessageToCloud(
     const { id, ...messageData } = message;
     return await databases.createDocument(
       APPWRITE_DATABASE_ID,
-      MESSAGES_COLLECTION_ID,
+      APPWRITE_MESSAGES_COLLECTION_ID,
       id, // Use local message ID as the document ID in Appwrite
       { ...messageData, conversationId }
     );
@@ -240,7 +343,7 @@ export async function updateConversationInCloud(
     const { createdAt, updatedAt, ...payload } = data;
     await databases.updateDocument(
       APPWRITE_DATABASE_ID,
-      CONVERSATIONS_COLLECTION_ID,
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
       conversationId,
       payload
     );
@@ -262,7 +365,7 @@ export async function deleteConversationFromCloud(
     while (hasMore) {
       const response = await databases.listDocuments(
         APPWRITE_DATABASE_ID,
-        MESSAGES_COLLECTION_ID,
+        APPWRITE_MESSAGES_COLLECTION_ID,
         [
           Query.equal("conversationId", conversationId),
           Query.limit(limit),
@@ -275,7 +378,7 @@ export async function deleteConversationFromCloud(
           response.documents.map((doc) =>
             databases.deleteDocument(
               APPWRITE_DATABASE_ID,
-              MESSAGES_COLLECTION_ID,
+              APPWRITE_MESSAGES_COLLECTION_ID,
               doc.$id
             )
           )
@@ -289,7 +392,7 @@ export async function deleteConversationFromCloud(
     // 2. Delete the conversation document itself
     await databases.deleteDocument(
       APPWRITE_DATABASE_ID,
-      CONVERSATIONS_COLLECTION_ID,
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
       conversationId
     );
   } catch (error) {
@@ -309,7 +412,7 @@ export async function clearAllCloudData(userId: string): Promise<void> {
     while (hasMore) {
         const response = await databases.listDocuments(
             APPWRITE_DATABASE_ID,
-            CONVERSATIONS_COLLECTION_ID,
+            APPWRITE_CONVERSATIONS_COLLECTION_ID,
             [
                 Query.equal("userId", userId),
                 Query.limit(limit),
@@ -342,49 +445,43 @@ export async function clearAllCloudData(userId: string): Promise<void> {
 export async function getAllConversationsFromCloud(
   userId: string
 ): Promise<Conversation[]> {
+  const conversations: Conversation[] = [];
   try {
     const response = await databases.listDocuments(
       APPWRITE_DATABASE_ID,
-      CONVERSATIONS_COLLECTION_ID,
-      [Query.equal("userId", userId), Query.limit(100)] // Adjust limit as needed
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
+      [Query.equal("userId", userId), Query.limit(100)] // max 100 conversations
     );
+    
+    for (const cloudConvo of response.documents as (Models.Document & AppwriteConversation)[]) {
+      const messagesResponse = await databases.listDocuments(
+        APPWRITE_DATABASE_ID,
+        APPWRITE_MESSAGES_COLLECTION_ID,
+        [Query.equal("conversationId", cloudConvo.$id), Query.limit(500)] // max 500 messages
+      );
+      
+      const messages: Message[] = messagesResponse.documents.map(
+        (doc) =>
+          ({
+            id: doc.$id,
+            role: doc.role,
+            content: doc.content,
+            createdAt: new Date(doc.createdAt),
+          } as Message)
+      );
 
-    const conversations = response.documents as unknown as AppwriteConversation[];
-
-    const hydratedConversations = await Promise.all(
-      conversations.map(async (convo) => {
-        const messagesResponse = await databases.listDocuments(
-          APPWRITE_DATABASE_ID,
-          MESSAGES_COLLECTION_ID,
-          [
-            Query.equal("conversationId", convo.$id),
-            Query.orderAsc("createdAt"),
-            Query.limit(500), // Adjust limit as needed
-          ]
-        );
-        const messages = messagesResponse.documents as unknown as AppwriteMessage[];
-        
-        return {
-          id: convo.$id,
-          title: convo.title,
-          pinned: convo.pinned,
-          createdAt: new Date(convo.$createdAt),
-          updatedAt: new Date(convo.$updatedAt),
-          messages: messages.map((msg) => ({
-            id: msg.$id,
-            role: msg.role,
-            content: msg.content,
-            createdAt: new Date(msg.createdAt),
-          })),
-        };
-      })
-    );
-
-    return hydratedConversations;
+      conversations.push(
+        rehydrateConversation({
+          ...cloudConvo,
+          id: cloudConvo.$id,
+          messages,
+        } as unknown as Conversation)
+      );
+    }
   } catch (error) {
-    console.error("Failed to get all conversations from cloud:", error);
-    throw new Error("Failed to get all conversations from cloud.");
+    console.error("Failed to retrieve conversations from cloud:", error);
   }
+  return conversations;
 }
 
 /**
@@ -402,121 +499,100 @@ function rehydrateConversation(cloudConvo: Conversation): Conversation {
   };
 }
 
-// --- Full Sync Logic ---
-
 /**
- * Performs a two-way sync between the local Dexie database and the Appwrite cloud.
- * This function handles the initial sync and subsequent syncs, merging data intelligently.
- * 1. Fetches all data from both cloud and local DB.
- * 2. Creates maps for quick lookups.
- * 3. Iterates through cloud conversations to update/add to local DB.
- * 4. Iterates through local conversations to update/add to cloud.
- * 5. All local changes are performed in a single transaction for atomicity.
+ * Main sync function. Fetches all data from the cloud and merges it with local data.
+ * The strategy is "cloud-first": if a conflict exists, cloud data wins.
+ * Local-only data is pushed to the cloud.
  */
 export async function syncCloudAndLocal(userId: string) {
-  try {
-    // 1. Fetch all data from both sources concurrently
-    const [cloudConversations, localConversations] = await Promise.all([
-      getAllConversationsFromCloud(userId),
-      db.conversations.toArray(),
-    ]);
+  // 1. Fetch all cloud data
+  const [cloudConversations, cloudFolders] = await Promise.all([
+    getAllConversationsFromCloud(userId),
+    getAllFoldersFromCloud(userId),
+  ]);
 
-    // 2. Create maps for efficient lookups
-    const cloudConvoMap = new Map(
-      cloudConversations.map((c: Conversation) => [c.id, c])
+  // 2. Get all local data
+  const localConversations = await db.conversations.toArray();
+  const localFolders = await db.folders.toArray();
+
+  // 3. Sync Folders
+  const folderSyncPromises = [];
+  const cloudFolderIds = new Set(cloudFolders.map((f) => f.id));
+  const localFolderIds = new Set(localFolders.map((f) => f.id));
+
+  // 3a. Update local folders that are also in the cloud (cloud wins)
+  for (const cloudFolder of cloudFolders) {
+    folderSyncPromises.push(
+      db.folders.put(cloudFolder, cloudFolder.id)
     );
-    const localConvoMap = new Map(
-      localConversations.map((c: Conversation) => [c.id, c])
-    );
-
-    const localUpdates: Conversation[] = [];
-    const cloudCreates: Promise<any>[] = [];
-    const cloudUpdates: Promise<any>[] = [];
-
-    // 3. Compare Cloud to Local
-    for (const cloudConvo of cloudConversations) {
-      const localConvo = localConvoMap.get(cloudConvo.id);
-      const cloudUpdatedAt = new Date(cloudConvo.updatedAt);
-
-      if (!localConvo) {
-        // Conversation exists in cloud but not locally -> add it locally
-        console.log(`Sync: Adding cloud convo "${cloudConvo.title}" to local.`);
-        localUpdates.push(rehydrateConversation(cloudConvo));
-      } else {
-        const localUpdatedAt = new Date(localConvo.updatedAt);
-        if (cloudUpdatedAt > localUpdatedAt) {
-          // Cloud version is newer -> update local version
-          console.log(`Sync: Updating local convo "${cloudConvo.title}" from cloud.`);
-          localUpdates.push(rehydrateConversation(cloudConvo));
-        }
-      }
-    }
-
-    // 4. Compare Local to Cloud
-    for (const localConvo of localConversations) {
-      const cloudConvo = cloudConvoMap.get(localConvo.id);
-      const localUpdatedAt = new Date(localConvo.updatedAt);
-
-      if (!cloudConvo) {
-        // Conversation exists locally but not in cloud -> create it in cloud
-        console.log(`Sync: Creating local convo "${localConvo.title}" in cloud.`);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { messages, id, ...convoDetails } = localConvo;
-        cloudCreates.push(createConversationInCloud(id, convoDetails, userId));
-        // Also add all its messages to the cloud
-        localConvo.messages.forEach((msg: Message) => {
-          cloudCreates.push(addMessageToCloud(msg, localConvo.id));
-        });
-      } else {
-        const cloudUpdatedAt = new Date(cloudConvo.updatedAt);
-        if (localUpdatedAt > cloudUpdatedAt) {
-          // Local version is newer -> update cloud version
-          console.log(`Sync: Updating cloud convo "${localConvo.title}" from local.`);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { messages, id, ...convoDetails } = localConvo;
-          cloudUpdates.push(
-            updateConversationInCloud(localConvo.id, convoDetails)
-          );
-          // Note: This simple sync doesn't handle individual message updates from local -> cloud
-          // after initial creation. A more robust implementation would be needed for that.
-        }
-      }
-    }
-
-    // 5. Execute all database operations
-    if (localUpdates.length > 0) {
-      await db.transaction("rw", db.conversations, async () => {
-        await db.conversations.bulkPut(localUpdates);
-      });
-      console.log(`Sync: Applied ${localUpdates.length} updates/additions to local DB.`);
-    }
-
-    if (cloudCreates.length > 0 || cloudUpdates.length > 0) {
-      await Promise.all([...cloudCreates, ...cloudUpdates]);
-      console.log(`Sync: Sent ${cloudCreates.length} creations and ${cloudUpdates.length} updates to cloud.`);
-    }
-
-    console.log("Sync completed successfully.");
-
-  } catch (error) {
-    console.error("An error occurred during sync:", error);
-    throw new Error("Failed to sync conversations with the cloud.");
   }
+
+  // 3b. Add local-only folders to the cloud
+  for (const localFolder of localFolders) {
+    if (!cloudFolderIds.has(localFolder.id)) {
+      const {id, ...data} = localFolder;
+      folderSyncPromises.push(createFolderInCloud(id, data, userId));
+    }
+  }
+
+  // 3c. Delete local folders that are no longer in the cloud
+  for (const localFolder of localFolders) {
+    if (!cloudFolderIds.has(localFolder.id)) {
+      folderSyncPromises.push(db.folders.delete(localFolder.id));
+    }
+  }
+  
+  await Promise.all(folderSyncPromises);
+
+
+  // 4. Sync Conversations (similar logic)
+  const conversationSyncPromises = [];
+  const cloudConversationIds = new Set(cloudConversations.map((c) => c.id));
+  const localConversationIds = new Set(localConversations.map((c) => c.id));
+
+  // 4a. Update local conversations that are also in the cloud (cloud wins)
+  // This is the most complex part because of the nested 'messages'.
+  // We will rehydrate and 'put' which overwrites the local version.
+  for (const cloudConversation of cloudConversations) {
+    const rehydrated = rehydrateConversation(cloudConversation);
+    conversationSyncPromises.push(
+      db.conversations.put(rehydrated, rehydrated.id)
+    );
+  }
+
+  // 4b. Add local-only conversations to the cloud
+  for (const localConversation of localConversations) {
+    if (!cloudConversationIds.has(localConversation.id)) {
+      const { id, messages, ...data } = localConversation;
+      conversationSyncPromises.push(
+        createConversationInCloud(id, data, userId).then(() =>
+          Promise.all(
+            messages.map((msg) => addMessageToCloud(msg, id))
+          )
+        )
+      );
+    }
+  }
+
+  // 4c. Delete local conversations that are no longer in the cloud
+  for (const localId of localConversationIds) {
+    if (!cloudConversationIds.has(localId)) {
+      conversationSyncPromises.push(db.conversations.delete(localId));
+    }
+  }
+
+  await Promise.all(conversationSyncPromises);
 }
 
-// --- Deprecated Sync Logic ---
-
 /**
- * @deprecated Use syncCloudAndLocal instead. This function is destructive.
- * Syncs conversations from the cloud to the local Dexie database.
- * This is a one-way, destructive sync.
+ * @deprecated This function is replaced by syncCloudAndLocal for a more robust two-way sync.
  */
 export async function syncCloudToLocal(userId: string) {
   try {
     // 1. Fetch all conversation documents for the user in one go.
     const conversationsResponse = await databases.listDocuments(
       APPWRITE_DATABASE_ID,
-      CONVERSATIONS_COLLECTION_ID,
+      APPWRITE_CONVERSATIONS_COLLECTION_ID,
       [Query.equal("userId", userId), Query.limit(500)] // Increased limit
     );
 
@@ -536,7 +612,7 @@ export async function syncCloudToLocal(userId: string) {
     while (true) {
       const messagesResponse = await databases.listDocuments(
         APPWRITE_DATABASE_ID,
-        MESSAGES_COLLECTION_ID,
+        APPWRITE_MESSAGES_COLLECTION_ID,
         [
           Query.equal("conversationId", cloudConversationIds),
           Query.limit(BATCH_SIZE),
@@ -574,8 +650,10 @@ export async function syncCloudToLocal(userId: string) {
       id: convo.$id,
       title: convo.title,
       pinned: convo.pinned,
+      folderId: convo.folderId,
       createdAt: new Date(convo.$createdAt),
       updatedAt: new Date(convo.$updatedAt),
+      modelId: convo.modelId,
       messages: messagesByConvo[convo.$id]?.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()) || [],
     }));
 
@@ -658,7 +736,7 @@ export async function updateMessageInCloud(
   try {
     return await databases.updateDocument(
       APPWRITE_DATABASE_ID,
-      MESSAGES_COLLECTION_ID,
+      APPWRITE_MESSAGES_COLLECTION_ID,
       messageId,
       updates
     );

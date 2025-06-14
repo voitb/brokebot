@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal, Star, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink } from "lucide-react";
 import { Button } from "../../../ui/button";
 import {
   DropdownMenu,
@@ -7,6 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "../../../ui/dropdown-menu";
 import { EditableConversationTitle } from "./EditableConversationTitle";
 import { DeleteConversationDialog } from "./DeleteConversationDialog";
@@ -24,6 +28,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     isEditing,
     isMenuOpen,
     deleteDialogOpen,
+    folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
     handleConversationClick,
@@ -33,6 +38,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     handleCancelRename,
     handleDelete,
     handleDeleteConfirm,
+    handleMove,
+    handleCreateFolderAndMove,
     getItemStyles,
   } = useConversationItem(conversation);
 
@@ -59,11 +66,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 transition-opacity bg-muted/90 hover:bg-muted/100 backdrop-blur-sm shrink-0 z-10 ${
-                  isMenuOpen
+                className={`absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 transition-opacity bg-muted/90 hover:bg-muted/100 backdrop-blur-sm shrink-0 z-10 ${isMenuOpen
                     ? "opacity-100"
                     : "opacity-0 group-hover/item:opacity-100"
-                }`}
+                  }`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal className="w-3 h-3" />
@@ -78,9 +84,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
             >
               <DropdownMenuItem onClick={handlePinToggle}>
                 <Star
-                  className={`w-4 h-4 mr-2 ${
-                    conversation.pinned ? "fill-current text-yellow-500" : ""
-                  }`}
+                  className={`w-4 h-4 mr-2 ${conversation.pinned ? "fill-current text-yellow-500" : ""
+                    }`}
                 />
                 {conversation.pinned ? "Remove from" : "Add to"} Favourites
               </DropdownMenuItem>
@@ -88,6 +93,43 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
                 <Edit className="w-4 h-4 mr-2" />
                 Rename
               </DropdownMenuItem>
+
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <FolderSymlink className="w-4 h-4 mr-2" />
+                  <span>Move to folder</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent className="w-48">
+                    <DropdownMenuItem onClick={handleCreateFolderAndMove}>
+                      <FolderPlus className="w-4 h-4 mr-2" />
+                      New folder
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {folders?.map((folder) => (
+                      <DropdownMenuItem
+                        key={folder.id}
+                        onClick={() => handleMove(folder.id)}
+                        disabled={conversation.folderId === folder.id}
+                      >
+                        <Folder className="w-4 h-4 mr-2" />
+                        {folder.name}
+                      </DropdownMenuItem>
+                    ))}
+                    {conversation.folderId && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleMove(null)}
+                          className="text-destructive focus:text-destructive"
+                        > 
+                          Remove from folder
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"

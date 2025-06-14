@@ -4,6 +4,10 @@ const APPWRITE_ENDPOINT = import.meta.env.VITE_APPWRITE_ENDPOINT || 'https://clo
 const APPWRITE_PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID || ''; 
 export const APPWRITE_DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID || '';
 
+export const APPWRITE_CONVERSATIONS_COLLECTION_ID = 'conversations';
+export const APPWRITE_MESSAGES_COLLECTION_ID = 'messages';
+export const APPWRITE_FOLDERS_COLLECTION_ID = 'folders';
+
 export const client = new Client();
 
 client

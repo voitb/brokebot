@@ -2,6 +2,7 @@ export * from './ConversationGroup';
 export * from './ConversationItem';
 export * from './EditableConversationTitle';
 export * from './DeleteConversationDialog';
+export * from './FolderItem';
 
 // Existing components (based on imports)
 export * from './SearchBar';
