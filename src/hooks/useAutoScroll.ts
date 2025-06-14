@@ -48,7 +48,6 @@ export const useAutoScroll = (
     }
   }, [dependencies, shouldAutoScroll, scrollToBottom]);
 
-  // Reset przy zmianie konwersacji
   const resetInitialLoad = useCallback(() => {
     isInitialLoadRef.current = true;
   }, []);

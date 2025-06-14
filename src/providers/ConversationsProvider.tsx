@@ -107,6 +107,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     });
   }, [rawConversations]);
 
+  // Keep useCallback for helper function used in other useCallback dependencies
   const getCloudSync = useCallback(() => {
     return user && storeInCloud;
   }, [user, storeInCloud]);
@@ -134,7 +135,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       if (getCloudSync()) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { messages, id, ...convoDetails } = newConversation;
         await createConversationInCloud(id, convoDetails, user!.$id);
         await addMessageToCloud(messages[0], newConversation.id);
@@ -160,7 +160,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       if (getCloudSync()) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { messages, id, ...convoDetails } = newConversation;
         await createConversationInCloud(id, convoDetails, user!.$id);
       }
@@ -225,7 +224,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (user) {
         try {
           await deleteConversationFromCloud(id);
-        } catch (error) {
+        } catch {
            console.log(`Conversation ${id} not found in cloud or already deleted.`);
         }
       }
@@ -248,7 +247,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (user && pinned !== undefined) {
         try {
           await updateConversationInCloud(id, { pinned });
-        } catch (error) {
+        } catch {
            console.log(`Conversation ${id} not found in cloud for pin update.`);
         }
       }
@@ -267,7 +266,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (user) {
         try {
           await updateConversationInCloud(id, { title: newTitle });
-        } catch (error) {
+        } catch {
            console.log(`Conversation ${id} not found in cloud for title update.`);
         }
       }

@@ -25,25 +25,26 @@ export function useActionButtons({
   const currentConversation = conversations?.find(c => c.id === conversationId);
   const isConversationPinned = currentConversation?.pinned || false;
 
-  const toggleTheme = useCallback(() => {
+  const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
-  }, [theme, setTheme]);
+  };
 
+  // Keep useCallback for async function that depends on external state
   const togglePinConversation = useCallback(async () => {
     if (conversationId) {
       await togglePin(conversationId);
     }
   }, [conversationId, togglePin]);
 
-  const openSettings = useCallback(() => {
+  const openSettings = () => {
     // This will be handled by parent component state
     console.log("Open settings");
-  }, []);
+  };
 
-  const openShortcuts = useCallback(() => {
+  const openShortcuts = () => {
     // This will be handled by parent component state
     console.log("Open shortcuts");
-  }, []);
+  };
 
   return {
     theme,

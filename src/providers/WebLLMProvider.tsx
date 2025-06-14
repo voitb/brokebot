@@ -526,14 +526,14 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     }
   }, []);
 
-  const setSelectedModel = useCallback(
+  const setSelectedModel =  
     (model: ModelInfo) => {
       setSelectedModelState(model);
       // Load the new model
       loadModel(model.id);
-    },
-    [loadModel]
-  );
+    } 
+    
+    ;
 
   useEffect(() => {
     loadModel(selectedModel.id);

@@ -112,8 +112,6 @@ src/components/
 ### Performance
 
 - **React.memo** - for expensive renders
-- **useMemo** - for expensive calculations
-- **useCallback** - for stable function references
 - **Lazy loading** - for route-based code splitting
 - **Virtual scrolling** - for long lists
 - **Image optimization** - proper loading strategies

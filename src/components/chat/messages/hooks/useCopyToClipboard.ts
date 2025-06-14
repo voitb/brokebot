@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState,   } from "react";
 import { toast } from "sonner";
 import type { CopyToClipboardResult } from "../types";
 
@@ -8,7 +8,7 @@ import type { CopyToClipboardResult } from "../types";
 export const useCopyToClipboard = (): CopyToClipboardResult => {
   const [copied, setCopied] = useState(false);
 
-  const copyToClipboard = useCallback(async (text: string) => {
+  const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -22,7 +22,7 @@ export const useCopyToClipboard = (): CopyToClipboardResult => {
       console.error("Failed to copy to clipboard:", error);
       toast.error("Failed to copy to clipboard");
     }
-  }, []);
+  } ;
 
   return {
     copied,

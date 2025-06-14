@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export interface AttachedFile {
@@ -30,7 +30,7 @@ export const useFileUpload = ({
 }: UseFileUploadProps): UseFileUploadReturn => {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
 
-  const processFile = useCallback(async (file: File): Promise<AttachedFile> => {
+  const processFile = async (file: File): Promise<AttachedFile> => {
     const id = Math.random().toString(36).substr(2, 9);
     let type: AttachedFile["type"] = "other";
     let preview: string | undefined;
@@ -51,9 +51,9 @@ export const useFileUpload = ({
     }
 
     return { id, file, preview, type };
-  }, []);
+  };
 
-  const handleFilesSelected = useCallback(async (files: FileList) => {
+  const handleFilesSelected = async (files: FileList) => {
     const newFiles: AttachedFile[] = [];
 
     for (let i = 0; i < files.length; i++) {
@@ -78,11 +78,11 @@ export const useFileUpload = ({
     }
 
     setAttachedFiles((prev) => [...prev, ...newFiles]);
-  }, [supportsImages, selectedModelName, processFile]);
+  };
 
-  const removeFile = useCallback((fileId: string) => {
+  const removeFile = (fileId: string) => {
     setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
-  }, []);
+  };
 
   return {
     attachedFiles,

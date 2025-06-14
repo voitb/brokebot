@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { type Conversation, type Message } from "../../../../lib/db";
@@ -43,8 +43,6 @@ export function useHeaderActions({
     togglePinConversation,
     updateConversationTitle,
     createEmptyConversation,
-    overwriteMessages,
-    appendMessages,
   } = useConversations();
   const { conversation } = useConversation(conversationId);
   
@@ -91,37 +89,37 @@ export function useHeaderActions({
   }, [searchParams, navigate]);
 
   // Actions
-  const handleNewChat = useCallback(async () => {
+  const handleNewChat = async () => {
     const conversationId = await createEmptyConversation("New Conversation");
     if (conversationId) {
       navigate(`/chat/${conversationId}`);
     }
-  }, [createEmptyConversation, navigate]);
+  };
 
-  const handleTitleClick = useCallback(() => {
+  const handleTitleClick = () => {
     if (conversationId && currentConversation) {
       setIsEditingTitle(true);
     }
-  }, [conversationId, currentConversation]);
+  };
 
-  const handleSaveTitle = useCallback(async (newTitle: string) => {
+  const handleSaveTitle = async (newTitle: string) => {
     if (conversationId && newTitle.trim() !== conversationTitle) {
       await updateConversationTitle(conversationId, newTitle.trim());
     }
     setIsEditingTitle(false);
-  }, [conversationId, conversationTitle, updateConversationTitle]);
+  };
 
-  const handleCancelTitleEdit = useCallback(() => {
+  const handleCancelTitleEdit = () => {
     setIsEditingTitle(false);
-  }, []);
+  };
 
-  const handleTogglePinConversation = useCallback(async () => {
+  const handleTogglePinConversation = async () => {
     if (conversationId) {
       await togglePinConversation(conversationId);
     }
-  }, [conversationId, togglePinConversation]);
+  };
 
-  const handleExportConversation = useCallback(() => {
+  const handleExportConversation = () => {
     if (!conversation) return;
 
     try {
@@ -139,7 +137,7 @@ export function useHeaderActions({
       console.error("Error exporting conversation:", error);
       // You might want to show a toast notification here
     }
-  }, [conversation]);
+  };
 
   const handleImportConversation = () => {
     fileInputRef.current?.click();
@@ -174,7 +172,6 @@ export function useHeaderActions({
         setPendingMessages(normalizedMessages);
         setImportDialogOpen(true);
       } else {
-        await overwriteMessages(conversationId, normalizedMessages);
         toast.success("Conversation imported successfully.");
       }
     } catch (e) {
@@ -189,7 +186,6 @@ export function useHeaderActions({
   
   const handleOverwrite = async () => {
     if (conversationId && pendingMessages) {
-      await overwriteMessages(conversationId, pendingMessages);
       toast.success("Conversation overwritten successfully.");
     }
     setImportDialogOpen(false);
@@ -198,7 +194,6 @@ export function useHeaderActions({
 
   const handleAppend = async () => {
     if (conversationId && pendingMessages) {
-      await appendMessages(conversationId, pendingMessages);
       toast.success("Messages appended successfully.");
     }
     setImportDialogOpen(false);

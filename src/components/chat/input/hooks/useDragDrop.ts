@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 interface UseDragDropReturn {
   isDragOver: boolean;
@@ -13,7 +13,7 @@ interface UseDragDropReturn {
 export function useDragDrop(): UseDragDropReturn {
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleDrop = useCallback((e: React.DragEvent, onFilesSelected: (files: FileList) => void) => {
+  const handleDrop =  (e: React.DragEvent, onFilesSelected: (files: FileList) => void) => {
     e.preventDefault();
     setIsDragOver(false);
     
@@ -21,17 +21,17 @@ export function useDragDrop(): UseDragDropReturn {
     if (files.length > 0) {
       onFilesSelected(files);
     }
-  }, []);
+  };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-  }, []);
+  };
 
   return {
     isDragOver,
