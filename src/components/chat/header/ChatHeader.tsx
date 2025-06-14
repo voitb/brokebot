@@ -70,11 +70,8 @@ export const ChatHeader: React.FC = () => {
     <TooltipProvider>
       <header className="p-4 flex justify-between items-center gap-4">
         {/* Mobile layout - sidebar trigger, centered title, action buttons */}
-        <div className="md:hidden flex items-center w-full">
-          <SidebarTrigger />
-          <div className="flex-1 text-center">
-            <span className="text-lg">Local-GPT</span>
-          </div>
+        <div className="md:hidden flex items-center justify-between w-full">
+          <SidebarTrigger /> 
           <div className="flex items-center gap-2">
             <ActionButtons
               theme={theme}
