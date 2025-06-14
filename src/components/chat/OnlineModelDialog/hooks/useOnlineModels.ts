@@ -50,7 +50,7 @@ export const useOnlineModels = (
   );
 
   const handleOpenChange = (isOpen: boolean) => {
-    onOpenChange?.(isOpen);
+      onOpenChange?.(isOpen);
   };
 
   return {

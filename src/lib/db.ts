@@ -160,7 +160,7 @@ export class LocalGptDB extends Dexie {
       sharedLinks: "id, conversationId, createdAt, updatedAt",
       userConfig: "id, updatedAt",
       folders: "id, name, createdAt, updatedAt",
-    });
+      });
 
     // Initialize default config on first run
     this.on("ready", async () => {

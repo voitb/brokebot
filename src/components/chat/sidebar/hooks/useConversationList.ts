@@ -38,10 +38,10 @@ export function useConversationList(): UseConversationListReturn {
     // 1. Initial filtering of conversations
     const filteredConversations = term
       ? conversations.filter(conversation =>
-          conversation.title.toLowerCase().includes(term) ||
-          conversation.messages.some(message =>
-            message.content.toLowerCase().includes(term)
-          )
+      conversation.title.toLowerCase().includes(term) ||
+      conversation.messages.some(message =>
+        message.content.toLowerCase().includes(term)
+      )
         )
       : conversations;
       
