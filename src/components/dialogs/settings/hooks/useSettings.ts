@@ -18,7 +18,7 @@ export const useSettings = () => {
   }, [config]);
 
   const handleFieldChange = <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
-    setSettings((prev) => ({ ...prev, [field]: value }));
+      setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSaveChanges = async () => {

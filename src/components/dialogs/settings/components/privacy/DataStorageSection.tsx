@@ -31,8 +31,8 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
           To ensure a seamless offline experience, your chat history is always
           kept in your browser's local storage. You can clear all data anytime
           in the "Danger Zone".
-        </p>
-      </div>
+              </p>
+            </div>
 
       <div className="space-y-2 pt-4">
         <div className="flex items-center justify-between">

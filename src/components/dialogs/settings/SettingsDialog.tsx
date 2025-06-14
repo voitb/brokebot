@@ -44,6 +44,7 @@ import { useSettings, type SettingsTab } from "./hooks/useSettings";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/providers/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/business/useSubscription";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -55,9 +56,6 @@ const navigationItems = [
   { id: "privacy" as const, label: "Privacy", icon: Shield },
   { id: "billing" as const, label: "Billing", icon: CreditCard },
 ];
-
-// Mock user state - will be moved to a proper auth provider
-const isUserLoggedIn = false;
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const {
@@ -71,23 +69,23 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const { conversations } = useConversations();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { hasActiveSubscription, subscription } = useSubscription();
 
   const handleSaveAndClose = async () => {
     await handleSaveChanges();
     onOpenChange(false);
   };
 
-  const hasConversations = conversations && conversations.length > 0;
-  // This should come from a proper auth context in the future
-  const userInfo = {
-    isLoggedIn: isUserLoggedIn,
-    hasActiveSubscription: false,
-    subscriptionPlan: "Free",
-    subscriptionStatus: "None",
-  };
-
   const getTabDisplayName = (tabId: SettingsTab) =>
     navigationItems.find((item) => item.id === tabId)?.label || tabId;
+
+  const hasConversations = conversations && conversations.length > 0;
+  const userInfo = {
+    isLoggedIn: !!user,
+    hasActiveSubscription: hasActiveSubscription,
+    subscriptionPlan: subscription?.planId ?? "Free",
+    subscriptionStatus: subscription?.status ?? "None",
+  };
 
   const renderTabContent = () => {
     const commonProps = { settings, onFieldChange: handleFieldChange };
@@ -97,23 +95,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       case "privacy":
         return (
           <PrivacyTab
-            {...commonProps}
             userInfo={userInfo}
             hasConversations={hasConversations}
           />
         );
       case "billing":
-        return isUserLoggedIn ? (
-          <LoggedUserBillingTab userInfo={userInfo} />
-        ) : (
-          <LocalUserBillingTab />
-        );
+        return user ? <LoggedUserBillingTab /> : <LocalUserBillingTab />;
       default:
         return null;
     }
   };
 
-  if (!settings) return null; // Or a loading state
+  if (!settings) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
