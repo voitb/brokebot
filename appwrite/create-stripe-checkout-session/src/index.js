@@ -70,7 +70,7 @@ export default async ({ req, res, log, error }) => {
             ],
             mode: 'subscription',
             customer_email: user.email,
-            success_url: `${process.env.STRIPE_SUCCESS_URL}?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${process.env.STRIPE_SUCCESS_URL}&modal=settings&tab=billing&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: process.env.STRIPE_CANCEL_URL,
             metadata: {
                 appwriteUserId: user.$id,

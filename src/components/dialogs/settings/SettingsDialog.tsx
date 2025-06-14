@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Shield, CreditCard, X, Check, Loader2, Settings, LogIn, LogOut } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -41,9 +42,9 @@ import {
 import { useSettings, type SettingsTab } from "./hooks/useSettings";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/providers/AuthProvider";
-import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/business/useSubscription";
 import { BillingTab } from './components/BillingTab';
+import { toast } from "sonner";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -57,18 +58,47 @@ const navigationItems = [
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  
+  // Pobierz aktywny tab z URL, domyślnie "general"
+  const activeTab = (searchParams.get("tab") as SettingsTab) || "general";
+  const status = searchParams.get("status");
+  const sessionId = searchParams.get("session_id");
+  
   const {
     settings,
     isSaving,
-    activeTab,
-    setActiveTab,
     handleFieldChange,
     handleSaveChanges,
   } = useSettings();
   const { conversations } = useConversations();
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const { hasActiveSubscription, subscription } = useSubscription();
+  const { hasActiveSubscription, subscription, checkSubscriptionStatus } = useSubscription();
+
+  // Obsługa sukcesu płatności
+  React.useEffect(() => {
+    if (status === "success" && sessionId) {
+      toast.success("Payment successful! Your subscription is now active.", {
+        duration: 5000,
+      });
+      
+      // Odśwież status subskrypcji
+      checkSubscriptionStatus();
+      
+      // Usuń parametry status i session_id z URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("status");
+      newParams.delete("session_id");
+      setSearchParams(newParams);
+    }
+  }, [status, sessionId, checkSubscriptionStatus, searchParams, setSearchParams]);
+
+  const setActiveTab = (tab: SettingsTab) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("tab", tab);
+    setSearchParams(newParams);
+  };
 
   const handleSaveAndClose = async () => {
     await handleSaveChanges();

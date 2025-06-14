@@ -9,7 +9,6 @@ export const useSettings = () => {
   const { config, updateConfig } = useUserConfig();
   const [settings, setSettings] = useState<Partial<UserConfig>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<SettingsTab>("general");
 
   useEffect(() => {
     if (config) {
@@ -37,8 +36,6 @@ export const useSettings = () => {
   return {
     settings,
     isSaving,
-    activeTab,
-    setActiveTab,
     handleFieldChange,
     handleSaveChanges,
   };

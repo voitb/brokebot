@@ -21,8 +21,20 @@ export function ModalRoot() {
     if (!open) {
       setSearchParams((prev) => {
         prev.delete("modal");
-        // also delete any other params that were passed to the modal
-        Object.keys(props).forEach((key) => prev.delete(key));
+        // Usuń tylko parametry związane z modalem, ale zachowaj inne
+        // Dla settings usuwamy wszystkie parametry modala
+        if (modalType === "settings") {
+          prev.delete("status");
+          prev.delete("session_id");
+          prev.delete("tab");
+        } else {
+          // Dla innych modali usuń wszystkie parametry
+          Object.keys(props).forEach((key) => {
+            if (key !== "modal") {
+              prev.delete(key);
+            }
+          });
+        }
         return prev;
       });
     }

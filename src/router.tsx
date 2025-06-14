@@ -36,6 +36,10 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    path: "/settings",
+    element: <Navigate to="/?modal=settings" replace />,
+  },
+  {
     path: "/login",
     element: <LoginPage />,
   },
