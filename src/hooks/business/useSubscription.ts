@@ -85,7 +85,19 @@ export const useSubscription = () => {
                 false
             );
             
-            const { sessionId } = JSON.parse(result.responseBody);
+            // Sprawdzamy czy funkcja zakończyła się sukcesem
+            if (result.responseStatusCode !== 200) {
+                throw new Error(`Function failed with status ${result.responseStatusCode}: ${result.responseBody}`);
+            }
+
+            const response = JSON.parse(result.responseBody);
+            
+            // Sprawdzamy czy odpowiedź zawiera sessionId
+            if (!response.ok || !response.sessionId) {
+                throw new Error(response.message || "Failed to create checkout session");
+            }
+
+            const { sessionId } = response;
 
             const stripe = await stripePromise;
             if (!stripe) {
@@ -115,7 +127,19 @@ export const useSubscription = () => {
                 false
             );
 
-            const { url } = JSON.parse(result.responseBody);
+            // Sprawdzamy czy funkcja zakończyła się sukcesem
+            if (result.responseStatusCode !== 200) {
+                throw new Error(`Function failed with status ${result.responseStatusCode}: ${result.responseBody}`);
+            }
+
+            const response = JSON.parse(result.responseBody);
+            
+            // Sprawdzamy czy odpowiedź zawiera URL
+            if (!response.ok || !response.url) {
+                throw new Error(response.message || "Could not retrieve customer portal URL");
+            }
+
+            const { url } = response;
             if (url) {
                 window.location.href = url;
             } else {

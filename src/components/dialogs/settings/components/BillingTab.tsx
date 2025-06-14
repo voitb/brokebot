@@ -14,8 +14,8 @@ const SUBSCRIPTION_PLANS: Plan[] = [
         name: 'Plus',
         monthlyPrice: 9,
         yearlyPrice: 7,
-        monthlyPriceId: 'price_1PgzgXJyM1jT1nL9iSgXfY54', 
-        yearlyPriceId: 'price_1PgzgXJyM1jT1nL95pYk0yT9',  
+        monthlyPriceId: 'price_1RZx0MP4jwSv1dGyjJxAy9A2', 
+        yearlyPriceId: 'price_1RZz8rP4jwSv1dGyfDlqHshL',  
         isPopular: true,
     },
     {

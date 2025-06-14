@@ -40,8 +40,15 @@ export default async ({ req, res, log, error }) => {
     try {
         const { priceId } = JSON.parse(req.body);
 
+        log(`Received priceId: ${priceId}`);
+
         if (!priceId) {
             return res.json({ ok: false, message: 'priceId is required' }, 400);
+        }
+
+        // Sprawdzamy czy priceId nie jest placeholder wartością
+        if (priceId.includes('placeholder')) {
+            return res.json({ ok: false, message: `Invalid priceId: ${priceId}. This appears to be a placeholder value. Please configure real Stripe price IDs.` }, 400);
         }
 
         if (!req.headers['x-appwrite-user-id']) {
@@ -50,6 +57,8 @@ export default async ({ req, res, log, error }) => {
         
         const userId = req.headers['x-appwrite-user-id'];
         const user = await users.get(userId);
+        
+        log(`Creating checkout session for user ${user.email} with priceId ${priceId}`);
         
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
