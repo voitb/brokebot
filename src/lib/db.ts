@@ -11,6 +11,14 @@ export interface Message {
   createdAt: Date;
 }
 
+export interface Folder {
+  id: string; // uuid
+  name: string;
+  userId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Conversation {
   id: string; // uuid
   title: string;
@@ -20,6 +28,7 @@ export interface Conversation {
   updatedAt: Date;
   userId?: string;
   modelId?: string; // To track which model was used
+  folderId?: string;
 }
 
 export interface UserConfig {
@@ -73,6 +82,7 @@ export const DEFAULT_USER_CONFIG: UserConfig = {
 
 export class LocalGptDB extends Dexie {
   conversations!: EntityTable<Conversation, "id">;
+  folders!: EntityTable<Folder, "id">;
   documents!: EntityTable<Document, "id">;
   sharedLinks!: EntityTable<ISharedLink, "id">;
   userConfig!: EntityTable<UserConfig, "id">;
@@ -141,6 +151,15 @@ export class LocalGptDB extends Dexie {
       await tx.table('conversations').toCollection().modify(conv => {
         delete conv.shareId;
       });
+    });
+
+    // Version 6 schema - adds folders table and folderId to conversations
+    this.version(6).stores({
+      conversations: "id, title, pinned, folderId, createdAt, updatedAt",
+      documents: "++id, filename, fileType, createdAt",
+      sharedLinks: "id, conversationId, createdAt, updatedAt",
+      userConfig: "id, updatedAt",
+      folders: "id, name, createdAt, updatedAt",
     });
 
     // Initialize default config on first run

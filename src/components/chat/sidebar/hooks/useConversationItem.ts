@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations } from "../../../../hooks/useConversations";
+import { useConversations } from "../../../../providers/ConversationsProvider";
 import { useConversationId } from "../../../../hooks/useConversationId";
 import type { Conversation } from "../../../../lib/db";
 
 export const useConversationItem = (conversation: Conversation) => {
   const navigate = useNavigate();
   const currentConversationId = useConversationId();
-  const { togglePinConversation, updateConversationTitle, deleteConversation } =
-    useConversations();
+  const {
+    togglePinConversation,
+    updateConversationTitle,
+    deleteConversation,
+    moveConversationToFolder,
+    createFolder,
+    folders,
+  } = useConversations();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,6 +66,24 @@ export const useConversationItem = (conversation: Conversation) => {
     }
   };
 
+  const handleMove = useCallback(
+    async (folderId: string | null) => {
+      await moveConversationToFolder(conversation.id, folderId);
+      setIsMenuOpen(false);
+    },
+    [conversation.id, moveConversationToFolder]
+  );
+
+  const handleCreateFolderAndMove = useCallback(async () => {
+    const folderName = prompt("Enter new folder name:");
+    if (folderName) {
+      const newFolderId = await createFolder(folderName);
+      if (newFolderId) {
+        await handleMove(newFolderId);
+      }
+    }
+  }, [createFolder, handleMove]);
+
   const getItemStyles = () => {
     if (isEditing || isActive) {
       return "bg-primary/10 border-primary text-primary font-medium";
@@ -75,6 +99,7 @@ export const useConversationItem = (conversation: Conversation) => {
     isMenuOpen,
     deleteDialogOpen,
     isActive,
+    folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
     handleConversationClick,
@@ -84,6 +109,8 @@ export const useConversationItem = (conversation: Conversation) => {
     handleCancelRename,
     handleDelete,
     handleDeleteConfirm,
+    handleMove,
+    handleCreateFolderAndMove,
     getItemStyles,
   };
 }; 

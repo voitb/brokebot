@@ -8,7 +8,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type Conversation, type Message } from "../lib/db";
+import { db, type Conversation, type Message, type Folder } from "../lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { useUserConfig } from "../hooks/useUserConfig";
 import {
@@ -18,6 +18,10 @@ import {
   deleteConversationFromCloud,
   updateConversationInCloud,
   updateMessageInCloud,
+  createFolderInCloud,
+  deleteFolderFromCloud,
+  updateFolderInCloud,
+  // TODO: Implement folder cloud functions
 } from "../lib/appwrite/database";
 import { useAuth } from "@/providers/AuthProvider";
 import { toast } from "sonner";
@@ -25,11 +29,15 @@ import { toast } from "sonner";
 // Define the shape of the context
 interface ConversationsContextType {
   conversations: Conversation[];
+  folders: Folder[];
   createConversation: (
     title: string,
     firstMessageContent: string
   ) => Promise<string | null>;
-  createEmptyConversation: (title?: string) => Promise<string | null>;
+  createEmptyConversation: (
+    title?: string,
+    folderId?: string
+  ) => Promise<string | null>;
   addMessage: (
     conversationId: string,
     message: Omit<Message, "id" | "createdAt">
@@ -42,11 +50,18 @@ interface ConversationsContextType {
   deleteConversation: (id: string) => Promise<void>;
   togglePinConversation: (id: string) => Promise<void>;
   updateConversationTitle: (id: string, newTitle: string) => Promise<void>;
+  moveConversationToFolder: (
+    conversationId: string,
+    folderId: string | null
+  ) => Promise<void>;
   updateCompleteAIMessage: (
     messageId: string,
     newContent: string
   ) => Promise<void>;
   triggerSync: (options?: { cloudStorageEnabled: boolean }) => Promise<void>;
+  createFolder: (name: string) => Promise<string | null>;
+  deleteFolder: (id: string) => Promise<void>;
+  updateFolderName: (id: string, newName: string) => Promise<void>;
 }
 
 const ConversationsContext = createContext<ConversationsContextType | undefined>(
@@ -94,6 +109,11 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
   const rawConversations = useLiveQuery(
     () => db.conversations.orderBy("updatedAt").reverse().toArray(),
+    []
+  );
+
+  const folders = useLiveQuery(
+    () => db.folders.orderBy("createdAt").reverse().toArray(),
     []
   );
 
@@ -147,7 +167,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     }
   }, [getCloudSync, user]);
 
-  const createEmptyConversation = useCallback(async (title: string = "New Conversation"): Promise<string | null> => {
+  const createEmptyConversation = useCallback(async (title: string = "New Conversation", folderId?: string): Promise<string | null> => {
     const newConversation: Conversation = {
       id: uuidv4(),
       title,
@@ -155,6 +175,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       pinned: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      folderId: folderId,
     };
 
     try {
@@ -261,6 +282,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
         convo.title = newTitle;
+        convo.updatedAt = new Date();
       });
        
       if (user) {
@@ -275,6 +297,91 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to update title.");
     }
   }, [user]);
+
+  const moveConversationToFolder = useCallback(
+    async (conversationId: string, folderId: string | null) => {
+      try {
+        await db.conversations.where("id").equals(conversationId).modify(convo => {
+          convo.folderId = folderId ?? undefined;
+          convo.updatedAt = new Date();
+        });
+        if (user) {
+          await updateConversationInCloud(conversationId, { folderId: folderId ?? undefined });
+        }
+      } catch (error) {
+        console.error("Error moving conversation:", error);
+        toast.error("Failed to move conversation to folder.");
+      }
+    },
+    [user]
+  );
+  
+  const createFolder = useCallback(
+    async (name: string): Promise<string | null> => {
+      const newFolder: Folder = {
+        id: uuidv4(),
+        name,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: user?.$id,
+      };
+      try {
+        await db.folders.add(newFolder);
+        if (user) {
+          const { id, ...folderData } = newFolder;
+          await createFolderInCloud(id, folderData, user.$id);
+        }
+        toast.success(`Folder "${name}" created.`);
+        return newFolder.id;
+      } catch (error) {
+        console.error("Error creating folder:", error);
+        toast.error("Failed to create folder.");
+        return null;
+      }
+    },
+    [user]
+  );
+
+  const deleteFolder = useCallback(
+    async (id: string) => {
+      try {
+        // Un-assign conversations from this folder first
+        await db.conversations.where("folderId").equals(id).modify(convo => {
+          delete convo.folderId;
+        });
+
+        await db.folders.delete(id);
+
+        if (user) {
+          await deleteFolderFromCloud(id);
+        }
+
+        toast.success("Folder deleted.");
+      } catch (error) {
+        console.error("Error deleting folder:", error);
+        toast.error("Failed to delete folder.");
+      }
+    },
+    [user]
+  );
+
+  const updateFolderName = useCallback(
+    async (id: string, newName: string) => {
+      try {
+        await db.folders.where("id").equals(id).modify(folder => {
+          folder.name = newName;
+          folder.updatedAt = new Date();
+        });
+        if (user) {
+          await updateFolderInCloud(id, { name: newName });
+        }
+      } catch (error) {
+        console.error("Error updating folder name:", error);
+        toast.error("Failed to update folder name.");
+      }
+    },
+    [user]
+  );
 
   const updateCompleteAIMessage = useCallback(
     async (messageId: string, newContent: string) => {
@@ -292,6 +399,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(() => ({
     conversations: conversations || [],
+    folders: folders || [],
     createConversation,
     createEmptyConversation,
     addMessage,
@@ -299,10 +407,15 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     deleteConversation,
     togglePinConversation,
     updateConversationTitle,
+    moveConversationToFolder,
     updateCompleteAIMessage,
     triggerSync,
+    createFolder,
+    deleteFolder,
+    updateFolderName,
   }), [
       conversations,
+      folders,
       createConversation,
       createEmptyConversation,
       addMessage,
@@ -310,8 +423,12 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       deleteConversation,
       togglePinConversation,
       updateConversationTitle,
+      moveConversationToFolder,
       updateCompleteAIMessage,
       triggerSync,
+      createFolder,
+      deleteFolder,
+      updateFolderName,
   ]);
 
   return (
