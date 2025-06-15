@@ -12,7 +12,7 @@ export const ChatSidebar: React.FC = () => {
     <aside className="w-full h-full flex flex-col bg-background">
       {/* Header with app name and close button */}
       <div className="p-4 pb-3 flex items-center justify-between border-border">
-        <Logo size="md" className="ml-1" />
+        {/* <div></div> */}
         <SidebarTrigger />
       </div>
 
