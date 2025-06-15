@@ -35,12 +35,6 @@ export const useOnlineModels = (
         return;
       }
 
-      console.log('Creating OpenRouter client with key:', {
-        hasKey: !!config.openrouterApiKey,
-        keyPrefix: config.openrouterApiKey ? `${config.openrouterApiKey.substring(0, 8)}...` : 'NONE',
-        model: model.name
-      });
-
       // Create keys config with only OpenRouter key for now
       const keys = {
         openrouterApiKey: config?.openrouterApiKey,

@@ -112,12 +112,6 @@ export type OpenRouterModel = typeof FREE_LEARNING_MODELS[number] | typeof PAID_
 const validateOpenRouterKey = (key: string): boolean => {
   // OpenRouter keys usually start with "sk-or-" and are long
   const isValidFormat = key.startsWith('sk-or-') && key.length > 20;
-  console.log('OpenRouter key validation:', {
-    hasKey: !!key,
-    keyLength: key?.length || 0,
-    startsCorrectly: key?.startsWith('sk-or-') || false,
-    isValid: isValidFormat
-  });
   return isValidFormat;
 };
 
@@ -130,11 +124,6 @@ export class OpenRouterClient {
     this.config = config;
     this.functions = config.functions;
     this.keys = config.keys;
-    
-    // Log key validation on client creation
-    if (this.keys.openrouterApiKey) {
-      validateOpenRouterKey(this.keys.openrouterApiKey);
-    }
   }
 
   async *streamCompletion(
@@ -145,14 +134,6 @@ export class OpenRouterClient {
     try {
       // For now, always use OpenRouter API key
       const apiKey = this.keys.openrouterApiKey;
-      
-      console.log('OpenRouter Client - Streaming:', {
-        model,
-        hasApiKey: !!apiKey,
-        apiKeyPrefix: apiKey ? `${apiKey.substring(0, 12)}...` : 'NONE',
-        apiKeyValid: apiKey ? validateOpenRouterKey(apiKey) : false,
-        messagesCount: messages.length
-      });
       
       if (!apiKey) {
         throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');
@@ -173,16 +154,9 @@ export class OpenRouterClient {
         })
       );
 
-      console.log('Appwrite function result:', {
-        statusCode: result.responseStatusCode,
-        hasBody: !!result.responseBody,
-        bodyPreview: result.responseBody ? result.responseBody.substring(0, 200) : 'EMPTY',
-        bodyLength: result.responseBody?.length || 0
-      });
-
       if (result.responseStatusCode !== 200) {
         const errorMsg = result.responseBody || 'Unknown function error';
-        console.error('Appwrite function error:', result);
+        console.error('Appwrite function failed with status:', result.responseStatusCode);
         throw new Error(`Function execution failed (${result.responseStatusCode}): ${errorMsg}`);
       }
 
@@ -190,7 +164,7 @@ export class OpenRouterClient {
       try {
         response = JSON.parse(result.responseBody);
       } catch {
-        console.error('Response parsing error:', result.responseBody);
+        console.error('Invalid response format from proxy function');
         throw new Error('Invalid response format from proxy function');
       }
       
@@ -266,13 +240,6 @@ export class OpenRouterClient {
     try {
       const apiKey = this.getApiKeyForModel(model);
       
-      console.log('OpenRouter Client - Send Message:', {
-        model,
-        hasApiKey: !!apiKey,
-        apiKeyPrefix: apiKey ? `${apiKey.substring(0, 12)}...` : 'NONE',
-        apiKeyValid: apiKey ? validateOpenRouterKey(apiKey) : false
-      });
-      
       if (!apiKey) {
         throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');
       }
@@ -289,12 +256,6 @@ export class OpenRouterClient {
           api_key: apiKey
         })
       );
-
-      console.log('Send Message - Appwrite function result:', {
-        statusCode: result.responseStatusCode,
-        hasBody: !!result.responseBody,
-        bodyPreview: result.responseBody ? result.responseBody.substring(0, 200) : 'EMPTY'
-      });
 
       if (result.responseStatusCode !== 200) {
         throw new Error(`Function execution failed: ${result.responseBody}`);
@@ -316,16 +277,12 @@ export class OpenRouterClient {
   // Test API key validity with a simple request
   async testConnection(): Promise<boolean> {
     try {
-      console.log('Testing OpenRouter connection...');
-      
       const apiKey = this.keys.openrouterApiKey;
       if (!apiKey) {
-        console.error('No API key for connection test');
         return false;
       }
       
       if (!validateOpenRouterKey(apiKey)) {
-        console.error('Invalid API key format for connection test');
         return false;
       }
       
@@ -337,12 +294,6 @@ export class OpenRouterClient {
           api_key: apiKey
         })
       );
-      
-      console.log('Connection test result:', {
-        statusCode: result.responseStatusCode,
-        hasBody: !!result.responseBody,
-        bodyPreview: result.responseBody ? result.responseBody.substring(0, 100) : 'EMPTY'
-      });
       
       return result.responseStatusCode === 200;
     } catch (error) {

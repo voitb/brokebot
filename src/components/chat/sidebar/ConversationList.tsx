@@ -20,6 +20,7 @@ import { InputDialog } from "../../dialogs/InputDialog";
 export const ConversationList: React.FC = () => {
   const {
     searchTerm,
+    isSearching,
     pinnedConversations,
     foldersWithConversations,
     unfoldedConversations,
@@ -66,7 +67,8 @@ export const ConversationList: React.FC = () => {
         <SearchBar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          placeholder="Search conversations..."
+          isSearching={isSearching}
+          placeholder="Search conversations and messages..."
         />
       </div>
 
@@ -102,9 +104,14 @@ export const ConversationList: React.FC = () => {
                 <div className="text-center text-muted-foreground py-8">
                   <p className="text-sm">
                     {searchTerm
-                        ? "No items found"
+                        ? "No conversations found matching your search"
                       : "No conversations yet"}
                   </p>
+                  {searchTerm && (
+                    <p className="text-xs mt-1 text-muted-foreground/70">
+                      Try searching with different keywords
+                    </p>
+                  )}
                 </div>
               )}
           </div>

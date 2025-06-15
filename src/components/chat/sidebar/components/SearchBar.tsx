@@ -1,24 +1,30 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { Input } from "../../../ui/input";
 
 interface SearchBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   placeholder?: string;
+  isSearching?: boolean;
 }
 
 /**
- * Search bar for filtering conversations
+ * Search bar for filtering conversations with loading indicator
  */
 export const SearchBar: React.FC<SearchBarProps> = ({
   searchTerm,
   onSearchChange,
   placeholder = "Search conversations...",
+  isSearching = false,
 }) => {
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+      {isSearching ? (
+        <Loader2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 animate-spin" />
+      ) : (
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+      )}
       <Input
         type="search"
         placeholder={placeholder}

@@ -31,8 +31,6 @@ export const ApiKeysTab: React.FC = () => {
     setIsTestingConnection(true);
     
     try {
-      console.log("Testing OpenRouter connection with key:", config.openrouterApiKey.substring(0, 12) + "...");
-      
       const client = new OpenRouterClient({
         functions,
         siteUrl: window.location.origin,

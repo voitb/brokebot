@@ -129,8 +129,6 @@ export function useChatInput(): UseChatInputReturn {
 
       // Generate AI response
       if (currentModel) {
-        console.log(`Generating response with model: ${currentModel.name} (${currentModel.type})`);
-        
         let conversationMessages: OpenRouterMessage[];
         
         if (currentModel.type === "online") {
@@ -155,7 +153,6 @@ ${previousContext}`;
               { role: "user", content: messageContent },
             ];
             
-            console.log(`OpenRouter mode - Combined ${messages.length} previous messages into context`);
           } else {
             // First message - no previous context
             conversationMessages = [
@@ -163,7 +160,6 @@ ${previousContext}`;
               { role: "user", content: messageContent },
             ];
             
-            console.log(`OpenRouter mode - First message, no previous context`);
           }
         } else {
           // For local models, use full message history as before
@@ -179,10 +175,7 @@ ${previousContext}`;
           // Skróć konwersację jeśli jest za długa (max 12 ostatnich wiadomości + system + podsumowanie)
           conversationMessages = summarizeConversation(allMessages, 12);
           
-          console.log(`Local mode - Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
         }
-
-        console.log('Messages being sent:', conversationMessages);
 
         abortControllerRef.current = new AbortController();
         setIsGenerating(true);
@@ -362,7 +355,6 @@ ${previousContext}`;
               { role: "user", content: "Please regenerate your last response based on the conversation context above." },
             ];
             
-            console.log(`Regenerate - OpenRouter mode - Combined ${messagesToProcess.length} previous messages into context`);
           } else {
             // No previous context
             conversationMessages = [
@@ -370,7 +362,6 @@ ${previousContext}`;
               { role: "user", content: "Please provide a response." },
             ];
             
-            console.log(`Regenerate - OpenRouter mode - No previous context`);
           }
         } else {
           // For local models, use full message history as before
@@ -385,7 +376,6 @@ ${previousContext}`;
           // Skróć konwersację jeśli jest za długa
           conversationMessages = summarizeConversation(allMessages, 12);
           
-          console.log(`Regenerate - Local mode - Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
         }
 
         setIsGenerating(true);

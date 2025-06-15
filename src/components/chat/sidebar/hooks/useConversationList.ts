@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../providers/ConversationsProvider";
 import type { Conversation, Folder } from "../../../../lib/db";
@@ -10,6 +10,7 @@ export interface FolderWithConversations extends Folder {
 interface UseConversationListReturn {
   // State
   searchTerm: string;
+  isSearching: boolean;
   pinnedConversations: Conversation[];
   foldersWithConversations: FolderWithConversations[];
   unfoldedConversations: Conversation[];
@@ -23,6 +24,27 @@ export function useConversationList(): UseConversationListReturn {
   const navigate = useNavigate();
   const { conversations, folders, createEmptyConversation } = useConversations();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounce search term
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setDebouncedSearchTerm("");
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 300); // 300ms delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
 
   const processedData = useMemo(() => {
     if (!conversations || !folders) {
@@ -33,21 +55,28 @@ export function useConversationList(): UseConversationListReturn {
       };
     }
 
-    const term = searchTerm.toLowerCase().trim();
+    const term = debouncedSearchTerm.toLowerCase().trim();
     
-    // 1. Initial filtering of conversations
+    // 1. Initial filtering of conversations - enhanced content search
     const filteredConversations = term
-      ? conversations.filter(conversation =>
-      conversation.title.toLowerCase().includes(term) ||
-      conversation.messages.some(message =>
-        message.content.toLowerCase().includes(term)
-      )
-        )
+      ? conversations.filter(conversation => {
+          // Search in title
+          if (conversation.title.toLowerCase().includes(term)) {
+            return true;
+          }
+          
+          // Search in message content
+          const hasMatchingMessage = conversation.messages.some(message => 
+            message.content.toLowerCase().includes(term)
+          );
+          
+          return hasMatchingMessage;
+        })
       : conversations;
       
     const conversationIdsInFilteredFolders = new Set<string>();
 
-    // 2. Filter folders and identify conversations within them
+    // 2. Filter folders by name
     const filteredFolders = term 
       ? folders.filter(folder => folder.name.toLowerCase().includes(term))
       : folders;
@@ -92,6 +121,9 @@ export function useConversationList(): UseConversationListReturn {
       folder.conversations.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
     });
 
+    // Sort unfolded conversations by date
+    unfolded.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+
     const finalFolders = Array.from(folderMap.values()).filter(f => 
       // show folder if it's in the filtered list or if it contains any filtered conversations
       filteredFolders.some(ff => ff.id === f.id) || f.conversations.length > 0
@@ -102,18 +134,19 @@ export function useConversationList(): UseConversationListReturn {
       foldersWithConversations: finalFolders,
       unfolded,
     };
-  }, [conversations, folders, searchTerm]);
+  }, [conversations, folders, debouncedSearchTerm]);
 
   // Handle new chat creation
-  const handleNewChat = async (folderId?: string) => {
+  const handleNewChat = useCallback(async (folderId?: string) => {
     const conversationId = await createEmptyConversation("New Conversation", folderId);
     if (conversationId) {
       navigate(`/chat/${conversationId}`);
     }
-  };
+  }, [createEmptyConversation, navigate]);
 
   return {
     searchTerm,
+    isSearching,
     setSearchTerm,
     handleNewChat,
     pinnedConversations: processedData.pinned,
