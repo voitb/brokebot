@@ -134,6 +134,12 @@ export default async ({ req, res, log, error }) => {
   const apiKey = api_key || process.env.OPENROUTER_API_KEY;
 
   log(`Request received for model: ${model}, API key provided: ${apiKey ? 'YES' : 'NO'}`);
+  log(`Messages count: ${Array.isArray(messages) ? messages.length : 0}`);
+  
+  // Log message structure for debugging rate limits
+  if (Array.isArray(messages)) {
+    log(`Message structure: ${messages.map(m => `${m.role}(${m.content?.length || 0} chars)`).join(', ')}`);
+  }
 
   if (!apiKey) {
     return sendError(res, ERROR_MESSAGES.API_KEY_MISSING, HTTP_STATUS.BAD_REQUEST, error, "OpenRouter API key not provided.");
