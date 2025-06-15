@@ -179,12 +179,15 @@ src/hooks/
 
 ## TECH STACK
 
-- **Frontend**: Vite + React 18 + TypeScript
+- **Frontend**: Vite + React 19 + TypeScript
 - **UI Library**: Shadcn/ui + Tailwind CSS + Radix UI
-- **Routing**: react-router-dom
+- **Routing**: react-router-dom v7
 - **State**: React hooks + Context (sparingly)
 - **Local AI**: @mlc-ai/web-llm
 - **Database**: Dexie.js (IndexedDB wrapper)
+- **File Handling**: Native File API + IndexedDB storage
+- **Backend**: Appwrite (auth, cloud sync, payments)
+- **Payment**: Stripe integration
 - **Testing**: Vitest + React Testing Library + Playwright
 - **Linting**: ESLint + Prettier + TypeScript strict
 
@@ -207,7 +210,7 @@ src/hooks/
 - filename: string
 - content: string
 - createdAt: Date
-- fileType: 'txt' | 'md' | 'pdf'
+- fileType: 'txt' | 'md'
 
 ### Table: userConfig
 
@@ -222,6 +225,29 @@ src/hooks/
 - theme: "light" | "dark" | "system"
 - createdAt: Date
 - updatedAt: Date
+
+## FILE MANAGEMENT ARCHITECTURE
+
+### Local File Processing
+- **File Upload**: Native File API for file selection and reading
+- **Supported Formats**: .txt and .md files only
+- **File Size Limit**: 10MB maximum per file
+- **Content Extraction**: Text content read and stored in IndexedDB
+- **AI Integration**: File content automatically included in chat context
+
+### File Storage Strategy
+- **Local First**: All files stored locally in IndexedDB
+- **Document Manager**: Centralized UI for file management
+- **Content Indexing**: Full text content stored for AI processing
+- **Metadata Tracking**: Filename, size, type, upload date
+- **Cloud Sync Ready**: Architecture prepared for Appwrite integration
+
+### File Workflow
+1. **Upload**: User selects .txt/.md files via drag-drop or file picker
+2. **Validation**: File type and size validation
+3. **Processing**: Content extraction and storage in IndexedDB
+4. **Chat Integration**: Files attached to messages provide context to AI
+5. **Management**: View, delete, and organize files through DocumentManager
 
 ## QUALITY GATES
 
@@ -259,7 +285,9 @@ src/hooks/
 - [x] User can write message and receive response
 - [x] Conversation history preserved after refresh
 - [x] Can create new conversations
-- [ ] Can attach .txt/.md files and AI responds based on content
+- [x] Can attach .txt/.md files and AI responds based on content
+- [x] Document management (upload, view, delete)
+- [x] Local file storage with IndexedDB
 - [x] UI is responsive and professional
 - [x] Application works offline
 - [x] Smooth animations and transitions

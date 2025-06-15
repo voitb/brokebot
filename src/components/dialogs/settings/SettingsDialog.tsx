@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield, CreditCard, X, Check, Loader2, Settings, LogIn, LogOut } from "lucide-react";
+import { Shield, CreditCard, X, Check, Loader2, Settings, LogIn, LogOut, FileText } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
@@ -37,6 +37,7 @@ import {
 } from "../../ui/tooltip";
 import {
   GeneralTab,
+  DocumentsTab,
   PrivacyTab,
 } from "./components";
 import { useSettings, type SettingsTab } from "./hooks/useSettings";
@@ -53,6 +54,7 @@ interface SettingsDialogProps {
 
 const navigationItems = [
   { id: "general" as const, label: "General", icon: Settings },
+  { id: "documents" as const, label: "Documents", icon: FileText },
   { id: "privacy" as const, label: "Privacy", icon: Shield },
   { id: "billing" as const, label: "Billing", icon: CreditCard },
 ];
@@ -121,6 +123,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     switch (activeTab) {
       case "general":
         return <GeneralTab {...commonProps} />;
+      case "documents":
+        return <DocumentsTab />;
       case "privacy":
         return (
           <PrivacyTab
