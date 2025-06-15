@@ -29,16 +29,7 @@ export const WelcomeScreen: React.FC = () => {
       <ScrollArea className="h-[calc(100vh-64px)]">
 
       <div className="flex-1 flex items-center justify-center p-6 relative">
-        {!open && (
-          <div className="absolute top-4 left-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <Button variant="outline" size="sm" onClick={handleOpenNewChat}>
-                + New Chat
-              </Button>
-            </div>
-          </div>
-        )}
+        
 
         <div className="max-w-4xl w-full text-center space-y-8">
           <WelcomeHeader />

@@ -38,7 +38,7 @@ export function TermsOfService() {
         {/* Introduction */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Welcome to Local-GPT</CardTitle>
+                          <CardTitle>Welcome to BrokeBot</CardTitle>
             <CardDescription>
               A privacy-first, local AI assistant that runs entirely in your
               browser
@@ -46,7 +46,7 @@ export function TermsOfService() {
           </CardHeader>
           <CardContent>
             <p className="text-sm leading-relaxed">
-              Local-GPT is a web application that provides AI-powered
+                              BrokeBot is a web application that provides AI-powered
               conversations using WebLLM technology. By using this service, you
               agree to the following terms and conditions.
             </p>
@@ -58,14 +58,14 @@ export function TermsOfService() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="w-5 h-5" />
-              How Local-GPT Works
+              How BrokeBot Works
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <h4 className="font-medium mb-2">Local AI Processing</h4>
               <p className="text-sm text-muted-foreground">
-                Local-GPT runs AI models directly in your browser using WebLLM
+                BrokeBot runs AI models directly in your browser using WebLLM
                 technology. All AI processing happens locally on your device -
                 no data is sent to external servers for AI inference.
               </p>
@@ -82,7 +82,7 @@ export function TermsOfService() {
             <div>
               <h4 className="font-medium mb-2">Browser Requirements</h4>
               <p className="text-sm text-muted-foreground">
-                Local-GPT requires a modern browser with WebAssembly and WebGPU
+                BrokeBot requires a modern browser with WebAssembly and WebGPU
                 support. Performance depends on your device's capabilities.
               </p>
             </div>
@@ -173,7 +173,7 @@ export function TermsOfService() {
             <div>
               <h4 className="font-medium mb-2">Acceptable Use</h4>
               <p className="text-sm text-muted-foreground">
-                You agree to use Local-GPT responsibly and in compliance with
+                You agree to use BrokeBot responsibly and in compliance with
                 applicable laws. Do not use the service for illegal activities,
                 harassment, or generating harmful content.
               </p>
@@ -189,7 +189,7 @@ export function TermsOfService() {
             <div>
               <h4 className="font-medium mb-2">System Requirements</h4>
               <p className="text-sm text-muted-foreground">
-                Local-GPT requires significant computational resources.
+                BrokeBot requires significant computational resources.
                 Performance may vary based on your device capabilities and may
                 not work on older or low-power devices.
               </p>
@@ -206,7 +206,7 @@ export function TermsOfService() {
             <div>
               <h4 className="font-medium mb-2">Service Availability</h4>
               <p className="text-sm text-muted-foreground">
-                Local-GPT is provided "as is" without warranties. We do not
+                BrokeBot is provided "as is" without warranties. We do not
                 guarantee uninterrupted service or that the application will
                 meet your specific needs.
               </p>
@@ -238,7 +238,7 @@ export function TermsOfService() {
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
               These terms may be updated periodically. Continued use of
-              Local-GPT constitutes acceptance of any changes.
+              BrokeBot constitutes acceptance of any changes.
             </p>
             <p className="text-sm text-muted-foreground">
               For questions or concerns about these terms, please contact us

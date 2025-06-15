@@ -218,7 +218,7 @@ export function useUserConfig() {
       const dataStr = JSON.stringify(conversations, null, 2);
       const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
       
-      const exportFileDefaultName = `local-gpt-conversations-${new Date().toISOString().split('T')[0]}.json`;
+      const exportFileDefaultName = `brokebot-conversations-${new Date().toISOString().split('T')[0]}.json`;
       
       const linkElement = document.createElement("a");
       linkElement.setAttribute("href", dataUri);

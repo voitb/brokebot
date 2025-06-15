@@ -18,6 +18,7 @@ export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 export { Input } from "./input";
 export { Label } from "./label";
 export { LoadingDots } from "./loading-dots";
+export { Logo } from "./Logo";
 export { NavigationMenu, NavigationMenuContent, NavigationMenuIndicator, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport, navigationMenuTriggerStyle } from "./navigation-menu";
 export { Popover, PopoverContent, PopoverTrigger } from "./popover";
 export { ScrollArea, ScrollBar } from "./scroll-area";

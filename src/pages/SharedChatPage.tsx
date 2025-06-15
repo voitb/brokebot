@@ -144,7 +144,7 @@ export const SharedChatPage: React.FC = () => {
               href={import.meta.env.VITE_FRONTEND_URL || window.location.origin}
               className="text-primary hover:underline"
             >
-              Go to Local-GPT
+                                  Go to BrokeBot
             </a>
           </div>
         </div>

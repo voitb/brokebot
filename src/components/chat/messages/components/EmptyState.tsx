@@ -1,15 +1,15 @@
 import React from "react";
-import type { IConversation } from "../../../../lib/db";
+import type { Conversation } from "../../../../lib/db";
 
 interface EmptyStateProps {
-  conversation?: IConversation;
+  conversation?: Conversation;
 }
 
 /**
  * Empty state when no messages are present
  */
 export const EmptyState: React.FC<EmptyStateProps> = React.memo(({ conversation }) => {
-  const title = conversation ? `Chat: ${conversation.title}` : "Welcome to Local-GPT!";
+  const title = conversation ? `Chat: ${conversation.title}` : "Welcome to BrokeBot!";
   const description = conversation
     ? "Start chatting with your AI assistant."
     : "Start a conversation with your free AI assistant.";

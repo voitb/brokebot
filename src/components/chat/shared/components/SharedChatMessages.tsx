@@ -22,7 +22,7 @@ export const SharedChatMessages: React.FC<SharedChatMessagesProps> = ({
       <CardHeader>
         <CardTitle className="text-lg">Conversation</CardTitle>
         <CardDescription>
-          This conversation was shared from Local-GPT
+                      This conversation was shared from BrokeBot
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">

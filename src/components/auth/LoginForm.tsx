@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { GalleryVerticalEnd } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -75,10 +76,9 @@ export function LoginForm({ className }: React.ComponentProps<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col items-center gap-2">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
-          <GalleryVerticalEnd className="h-6 w-6" />
-          <h1 className="text-xl font-bold">Local-GPT</h1>
-        </Link>
+                  <Link to="/" className="flex items-center gap-2 font-semibold">
+            <Logo showText size="md" />
+          </Link>
         <p className="text-sm text-muted-foreground">
           Welcome back! Please sign in to your account.
         </p>
