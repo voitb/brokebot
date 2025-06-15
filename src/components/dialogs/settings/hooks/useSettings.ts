@@ -3,7 +3,7 @@ import { useUserConfig } from "@/hooks/useUserConfig";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
 
-export type SettingsTab = "general" | "privacy" | "billing";
+export type SettingsTab = "general" | "documents" | "privacy" | "billing";
 
 export const useSettings = () => {
   const { config, updateConfig } = useUserConfig();

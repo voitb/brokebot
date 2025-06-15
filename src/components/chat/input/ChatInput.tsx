@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useModel } from "../../../providers/ModelProvider";
-import { useChatInput, useDragDrop, type AttachedFile } from "./hooks";
+import { useChatInput, useDragDrop, useFileUpload, type AttachedFile } from "./hooks";
 import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
@@ -27,7 +27,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
   const { currentModel, isModelLoading, modelStatus } = useModel();
   const { isLoading, handleMessageSubmit, message, setMessage } =
     useChatInput();
-  const { isDragOver, handleDrop, handleDragOver, handleDragLeave } =
+  const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
 
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
@@ -50,9 +50,29 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     toast.info("Model retry is not yet implemented for unified models");
   };
 
-  const handleFilesSelected = () => {
-    // This will be handled by the FileUpload component
-    // We just need to listen for file changes via onFilesChanged
+  // Initialize useFileUpload hook at the top level
+  const { processFile } = useFileUpload({
+    supportsImages,
+    selectedModelName: currentModel?.name || "Model",
+  });
+
+  const handleFilesSelected = async (files: FileList) => {
+    // Convert FileList to array and process files
+    const fileArray = Array.from(files);
+    const processedFiles: AttachedFile[] = [];
+    
+    for (const file of fileArray) {
+      try {
+        const processedFile = await processFile(file);
+        processedFiles.push(processedFile);
+      } catch (error) {
+        console.error("Failed to process file:", error);
+      }
+    }
+
+    if (processedFiles.length > 0) {
+      setAttachedFiles(prev => [...prev, ...processedFiles]);
+    }
   };
 
   const removeFile = (fileId: string) => {
@@ -76,23 +96,25 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     setMessage("");
     setAttachedFiles([]);
 
-    // For now, we'll just include file information in the message
+    // Include file content in the message for AI processing
     let fullMessage = messageToSend;
 
     if (filesToSend.length > 0) {
-      const fileDescriptions = filesToSend
-        .map((f) => {
-          if (f.type === "image") {
-            return `[Image: ${f.file.name}]`;
-          } else if (f.type === "text") {
-            return `[Text file: ${f.file.name}]`;
-          } else {
-            return `[File: ${f.file.name}]`;
-          }
-        })
-        .join(" ");
+      const fileContents: string[] = [];
+      
+      filesToSend.forEach((f) => {
+        if (f.type === "text" && f.content) {
+          fileContents.push(`--- Content of ${f.file.name} ---\n${f.content}\n--- End of ${f.file.name} ---`);
+        } else if (f.type === "image") {
+          fileContents.push(`[Image: ${f.file.name}]`);
+        } else {
+          fileContents.push(`[File: ${f.file.name}]`);
+        }
+      });
 
-      fullMessage = `${messageToSend}\n\n${fileDescriptions}`;
+      if (fileContents.length > 0) {
+        fullMessage = `${messageToSend}\n\n${fileContents.join("\n\n")}`;
+      }
     }
 
     try {
@@ -142,6 +164,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
             className="relative"
             onDrop={(e) => handleDrop(e, handleFilesSelected)}
             onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
           >
             <Textarea
