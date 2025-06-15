@@ -19,6 +19,7 @@ import {
 } from "./components";
 import { useHeaderActions } from "./hooks/useHeaderActions";
 import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
+import { DeleteConversationDialog } from "../sidebar/components/DeleteConversationDialog";
 
 /**
  * Main chat header component with responsive layout
@@ -36,6 +37,8 @@ export const ChatHeader: React.FC = () => {
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
     handleNewChat,
     handleTitleClick,
     handleSaveTitle,
@@ -50,6 +53,7 @@ export const ChatHeader: React.FC = () => {
     handleAppend,
     fileInputRef,
     handleDeleteConversation,
+    handleDeleteConfirm,
   } = useHeaderActions({ conversationId });
 
   // Action button handlers
@@ -241,6 +245,16 @@ export const ChatHeader: React.FC = () => {
         onAppend={handleAppend}
         onOverwrite={handleOverwrite}
       />
+
+      {/* Delete confirmation dialog */}
+      {conversationId && conversationTitle && (
+        <DeleteConversationDialog
+          open={deleteDialogOpen}
+          conversationTitle={conversationTitle}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteDialogOpen(false)}
+        />
+      )}
     </TooltipProvider>
   );
 };

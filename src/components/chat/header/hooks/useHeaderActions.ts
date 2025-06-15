@@ -15,9 +15,11 @@ interface UseHeaderActionsReturn {
   isLoadingConversation: boolean;
   isConversationPinned: boolean;
   importDialogOpen: boolean;
+  deleteDialogOpen: boolean;
   
   // Actions
   setImportDialogOpen: (open: boolean) => void;
+  setDeleteDialogOpen: (open: boolean) => void;
   handleNewChat: () => Promise<void>;
   handleTitleClick: () => void;
   handleSaveTitle: (newTitle: string) => Promise<void>;
@@ -28,7 +30,8 @@ interface UseHeaderActionsReturn {
   handleFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOverwrite: () => void;
   handleAppend: () => void;
-  handleDeleteConversation: () => Promise<void>;
+  handleDeleteConversation: () => void;
+  handleDeleteConfirm: () => Promise<void>;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
@@ -52,6 +55,7 @@ export function useHeaderActions({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
 
   // Derived state
@@ -202,12 +206,17 @@ export function useHeaderActions({
     setPendingMessages(null);
   };
 
-  const handleDeleteConversation = async () => {
+  const handleDeleteConversation = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     if (!conversationId) return;
     
     try {
       await deleteConversation(conversationId);
       toast.success("Conversation deleted successfully.");
+      setDeleteDialogOpen(false);
       navigate("/chat");
     } catch (error) {
       console.error("Error deleting conversation:", error);
@@ -222,9 +231,11 @@ export function useHeaderActions({
     isLoadingConversation,
     isConversationPinned,
     importDialogOpen,
+    deleteDialogOpen,
     
     // Actions
     setImportDialogOpen,
+    setDeleteDialogOpen,
     handleNewChat,
     handleTitleClick,
     handleSaveTitle,
@@ -236,6 +247,7 @@ export function useHeaderActions({
     handleOverwrite,
     handleAppend,
     handleDeleteConversation,
+    handleDeleteConfirm,
     fileInputRef,
   };
 } 
