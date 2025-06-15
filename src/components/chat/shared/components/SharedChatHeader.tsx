@@ -25,7 +25,7 @@ export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
   onLogoClick,
 }) => {
   return (
-    <header className="bg-background border-b sticky top-0 z-10 shrink-0">
+    <header className="bg-background sticky top-0 z-10 shrink-0">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -33,13 +33,7 @@ export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
               onClick={onLogoClick}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <Logo size="md" />
-                              <div>
-                  <Logo showText size="md" />
-                  <p className="text-xs text-muted-foreground">
-                  Shared Conversation
-                </p>
-              </div>
+              <Logo size="md" /> 
             </button>
 
             <Separator

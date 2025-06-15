@@ -3,6 +3,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { SharedChatLayout } from "../components/chat/shared/SharedChatLayout";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
+import { Button } from "../components/ui/button";
 import {
   db,
   type Conversation,
@@ -132,20 +133,22 @@ export const SharedChatPage: React.FC = () => {
             </AlertDescription>
           </Alert>
 
-          <div className="text-center mt-6">
-            <button
+          <div className="text-center mt-6 flex items-center justify-center gap-4">
+            <Button
               onClick={() => window.location.reload()}
-              className="text-primary hover:underline"
+              variant="outline"
             >
               Try again
-            </button>
-            <span className="mx-2 text-muted-foreground">or</span>
-            <a
-              href={import.meta.env.VITE_FRONTEND_URL || window.location.origin}
-              className="text-primary hover:underline"
-            >
-                                  Go to BrokeBot
-            </a>
+            </Button>
+            <Button asChild>
+              <a
+                href={
+                  import.meta.env.VITE_FRONTEND_URL || window.location.origin
+                }
+              >
+                Go to BrokeBot
+              </a>
+            </Button>
           </div>
         </div>
       </div>

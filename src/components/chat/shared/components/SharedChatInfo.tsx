@@ -1,11 +1,5 @@
 import React from "react";
 import { Calendar, MessageSquare } from "lucide-react";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../ui/card";
 import type { Conversation, Message, ISharedLink } from "../../../../lib/db";
 
 interface SharedChatInfoProps {
@@ -20,33 +14,34 @@ export const SharedChatInfo: React.FC<SharedChatInfoProps> = ({
   sharedLink,
 }) => {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="flex-1">
-            <CardTitle className="text-xl break-words">
-              {conversation.title}
-            </CardTitle>
-            <CardDescription className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Shared {sharedLink.createdAt.toLocaleDateString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <MessageSquare className="w-4 h-4" />
-                {messages.length} messages
-              </span>
-            </CardDescription>
-          </div>
-          {sharedLink.showSharedBy && (
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Shared by</p>
-              <p className="font-medium">Anonymous User</p>
-            </div>
-          )}
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div className="flex-1">
+        <h1 className="text-2xl font-bold break-words tracking-tight">
+          {conversation.title}
+        </h1>
+        <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4" />
+            <span className="text-sm">
+              Shared on {sharedLink.createdAt.toLocaleDateString()}
+            </span>
+          </span>
+          <span className="hidden sm:inline-block text-xs">•</span>
+          <span className="flex items-center gap-1.5">
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-sm">
+              {messages.length} {messages.length === 1 ? "message" : "messages"}
+            </span>
+          </span>
         </div>
-      </CardHeader>
-    </Card>
+      </div>
+      {sharedLink.showSharedBy && (
+        <div className="text-right flex-shrink-0">
+          <p className="text-sm text-muted-foreground">Shared by</p>
+          <p className="font-medium text-sm">Anonymous User</p>
+        </div>
+      )}
+    </div>
   );
 }; 
  
