@@ -78,11 +78,75 @@ export const useSharedChat = (
     window.open(frontendUrl, "_blank");
   };
 
+  const handleDownloadHtmlPage = async () => {
+    toast.info("Preparing HTML file... Please wait.");
+    try {
+      // 1. Clone the entire document to avoid altering the live page
+      const clonedDoc = document.cloneNode(true) as Document;
+
+      // 2. Remove ephemeral UI elements (tooltips, toasts) from the clone
+      const tooltips = clonedDoc.querySelectorAll(
+        '[data-radix-popper-content-wrapper]'
+      );
+      tooltips.forEach((tooltip) => tooltip.remove());
+      const toasts = clonedDoc.querySelectorAll('[data-sonner-toaster]');
+      toasts.forEach((toast) => toast.remove());
+
+      // 3. Remove header and footer from the cloned document
+      clonedDoc.querySelector("header")?.remove();
+      clonedDoc.querySelector("footer")?.remove();
+
+      // 4. Fetch and embed all CSS stylesheets
+      const linkElements = Array.from(
+        clonedDoc.querySelectorAll('link[rel="stylesheet"]')
+      );
+      await Promise.all(
+        linkElements.map(async (link) => {
+          const href = link.getAttribute("href");
+          if (href) {
+            try {
+              const response = await fetch(href);
+              const cssText = await response.text();
+              const styleElement = clonedDoc.createElement("style");
+              styleElement.textContent = cssText;
+              link.parentNode?.replaceChild(styleElement, link);
+            } catch (error) {
+              console.warn(`Could not fetch or embed stylesheet: ${href}`, error);
+              // Keep the link tag if fetching fails
+            }
+          }
+        })
+      );
+
+      // 5. Get the final HTML as a string
+      const html = `<!DOCTYPE html>\n${clonedDoc.documentElement.outerHTML}`;
+
+      // 6. Create a Blob and trigger the download
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${conversation.title
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()}_page.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success("Page downloaded successfully!");
+    } catch (error) {
+      console.error("Failed to download HTML page:", error);
+      toast.error("An error occurred while preparing the download.");
+    }
+  };
+
   return {
     theme,
     handleCopyLink,
     handleDownloadChat,
     toggleTheme,
     handleLogoClick,
+    handleDownloadHtmlPage,
   };
 }; 
