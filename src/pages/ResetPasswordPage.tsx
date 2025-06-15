@@ -1,7 +1,8 @@
-import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import React, { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { AuthLayout } from "../components/auth/AuthLayout";
+import { ResetPasswordForm } from "../components/auth/ResetPasswordForm";
+import { SEOMetadata } from "../components/common/SEOMetadata";
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -11,23 +12,23 @@ export const ResetPasswordPage: React.FC = () => {
 
   useEffect(() => {
     if (!userId || !secret) {
-      // If params are missing, redirect to home or an error page
       navigate("/");
     }
   }, [userId, secret, navigate]);
 
   if (!userId || !secret) {
-    // Render nothing or a loading spinner while redirecting
-    return null;
+    return null; // or a loading indicator
   }
 
   return (
-    <ScrollArea className="h-screen">
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <div className="w-full max-w-sm">
-          <ResetPasswordForm userId={userId} secret={secret} />
-        </div>
-      </div>
-    </ScrollArea>
+    <>
+      <SEOMetadata
+        title="Reset Password"
+        description="Set a new password for your BrokeBot account."
+      />
+      <AuthLayout>
+        <ResetPasswordForm userId={userId} secret={secret} />
+      </AuthLayout>
+    </>
   );
 };

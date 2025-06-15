@@ -1,0 +1,19 @@
+# Allow all user agents
+User-agent: *
+
+# Allow access to the main pages and shared content
+Allow: /$
+Allow: /c/
+Allow: /share/
+Allow: /terms
+
+# Disallow access to authentication and settings pages
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /auth/callback
+Disallow: /settings
+
+# Path to the sitemap
+Sitemap: https://yourdomain.com/sitemap.xml 
