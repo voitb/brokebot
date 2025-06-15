@@ -11,6 +11,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Conversation, type Message, type Folder } from "../lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { useUserConfig } from "../hooks/useUserConfig";
+import { useSubscription } from "../hooks/business/useSubscription";
 import {
   syncCloudAndLocal,
   createConversationInCloud,
@@ -71,6 +72,7 @@ const ConversationsContext = createContext<ConversationsContextType | undefined>
 export function ConversationsProvider({ children }: { children: ReactNode }) {
   const { config } = useUserConfig();
   const { user } = useAuth();
+  const { hasActiveSubscription } = useSubscription();
   const [isInitialSyncDone, setIsInitialSyncDone] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const storeInCloud = config.storeConversationsInCloud;
@@ -80,7 +82,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     // This solves the race condition when toggling the switch.
     const shouldSync = options?.cloudStorageEnabled ?? storeInCloud;
 
-    if (!user || !shouldSync || isSyncing) {
+    if (!user || !shouldSync || !hasActiveSubscription || isSyncing) {
       return;
     }
 
@@ -97,15 +99,15 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsSyncing(false);
     }
-  }, [user, storeInCloud, isSyncing]);
+  }, [user, storeInCloud, hasActiveSubscription, isSyncing]);
 
   // Effect for the very first sync when the app loads
   useEffect(() => {
-    if (user && storeInCloud && !isInitialSyncDone) {
+    if (user && storeInCloud && hasActiveSubscription && !isInitialSyncDone) {
       triggerSync();
       setIsInitialSyncDone(true); // Mark initial sync as done for the session
     }
-  }, [user, storeInCloud, isInitialSyncDone, triggerSync]);
+  }, [user, storeInCloud, hasActiveSubscription, isInitialSyncDone, triggerSync]);
 
   const rawConversations = useLiveQuery(
     () => db.conversations.orderBy("updatedAt").reverse().toArray(),
@@ -129,8 +131,8 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
   // Keep useCallback for helper function used in other useCallback dependencies
   const getCloudSync = useCallback(() => {
-    return user && storeInCloud;
-  }, [user, storeInCloud]);
+    return user && storeInCloud && hasActiveSubscription;
+  }, [user, storeInCloud, hasActiveSubscription]);
 
   const createConversation = useCallback(async (
     title: string,
@@ -242,7 +244,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.delete(id);
        
-      if (user) {
+      if (getCloudSync()) {
         try {
           await deleteConversationFromCloud(id);
         } catch {
@@ -255,7 +257,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       console.error("Error deleting conversation:", error);
       toast.error("Failed to delete conversation.");
     }
-  }, [user]);
+  }, [getCloudSync]);
 
   const togglePinConversation = useCallback(async (id: string) => {
     try {
@@ -265,7 +267,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         pinned = convo.pinned;
       });
        
-      if (user && pinned !== undefined) {
+      if (getCloudSync() && pinned !== undefined) {
         try {
           await updateConversationInCloud(id, { pinned });
         } catch {
@@ -276,7 +278,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       console.error("Error toggling pin:", error);
       toast.error("Failed to update pin status.");
     }
-  }, [user]);
+  }, [getCloudSync]);
 
   const updateConversationTitle = useCallback(async (id: string, newTitle: string) => {
     try {
@@ -285,7 +287,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         convo.updatedAt = new Date();
       });
        
-      if (user) {
+      if (getCloudSync()) {
         try {
           await updateConversationInCloud(id, { title: newTitle });
         } catch {
@@ -296,7 +298,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       console.error("Error updating conversation title:", error);
       toast.error("Failed to update title.");
     }
-  }, [user]);
+  }, [getCloudSync]);
 
   const moveConversationToFolder = useCallback(
     async (conversationId: string, folderId: string | null) => {
@@ -305,7 +307,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
           convo.folderId = folderId ?? undefined;
           convo.updatedAt = new Date();
         });
-        if (user) {
+        if (getCloudSync()) {
           await updateConversationInCloud(conversationId, { folderId: folderId ?? undefined });
         }
       } catch (error) {
@@ -313,7 +315,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         toast.error("Failed to move conversation to folder.");
       }
     },
-    [user]
+    [getCloudSync]
   );
   
   const createFolder = useCallback(
@@ -327,7 +329,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       };
       try {
         await db.folders.add(newFolder);
-        if (user) {
+        if (getCloudSync() && user) {
           const { id, ...folderData } = newFolder;
           await createFolderInCloud(id, folderData, user.$id);
         }
@@ -339,7 +341,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
-    [user]
+    [getCloudSync, user]
   );
 
   const deleteFolder = useCallback(
@@ -352,7 +354,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
         await db.folders.delete(id);
 
-        if (user) {
+        if (getCloudSync()) {
           await deleteFolderFromCloud(id);
         }
 
@@ -362,7 +364,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         toast.error("Failed to delete folder.");
       }
     },
-    [user]
+    [getCloudSync]
   );
 
   const updateFolderName = useCallback(
@@ -372,7 +374,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
           folder.name = newName;
           folder.updatedAt = new Date();
         });
-        if (user) {
+        if (getCloudSync()) {
           await updateFolderInCloud(id, { name: newName });
         }
       } catch (error) {
@@ -380,7 +382,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         toast.error("Failed to update folder name.");
       }
     },
-    [user]
+    [getCloudSync]
   );
 
   const updateCompleteAIMessage = useCallback(

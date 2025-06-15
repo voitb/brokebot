@@ -33,10 +33,10 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
   const hasActiveSubscription = userInfo?.hasActiveSubscription ?? false;
 
   const handleToggleCloudStorage = async (checked: boolean) => {
-    // if (!hasActiveSubscription) {
-    //   toast.error("Cloud storage is only available with a paid subscription");
-    //   return;
-    // }
+    if (checked && !hasActiveSubscription) {
+      toast.error("Cloud storage is only available with a paid subscription");
+      return;
+    }
 
     await updateConfig({ storeConversationsInCloud: checked });
     toast.success(checked ? "Cloud storage enabled" : "Cloud storage disabled");
