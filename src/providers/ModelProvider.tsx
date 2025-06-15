@@ -62,10 +62,14 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
       try {
         const parsed = JSON.parse(storedModel) as UnifiedModel;
         if (parsed.type === "online" && parsed.onlineModel && config) {
-          // For online models, we need to recreate the client
+          // For online models, we need to recreate the client with OpenRouter key only
           setCurrentModelState(
             createOnlineModel(parsed.onlineModel, undefined, {
               openrouterApiKey: config.openrouterApiKey,
+              // Future keys - commented out for now
+              // openaiApiKey: config.openaiApiKey,
+              // anthropicApiKey: config.anthropicApiKey,
+              // googleApiKey: config.googleApiKey,
             })
           );
           return;
@@ -253,14 +257,20 @@ export const createOnlineModel = (
   client?: OpenRouterClient,
   keys?: ApiKeyConfig
 ): UnifiedModel => {
-  // If no client provided, create one with Appwrite Functions
+  // If no client provided, create one with Appwrite Functions and OpenRouter key only
   const finalClient =
     client ||
     new OpenRouterClient({
       functions,
       siteUrl: window.location.origin,
       siteName: "Local GPT",
-      keys: keys || {},
+      keys: keys || {
+        openrouterApiKey: undefined,
+        // Future keys - commented out for now
+        // openaiApiKey: undefined,
+        // anthropicApiKey: undefined,
+        // googleApiKey: undefined,
+      },
     });
 
   return {
