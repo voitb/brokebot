@@ -1,5 +1,5 @@
 import React from "react";
-import { Copy, Download, MessageSquare, Moon, Sun } from "lucide-react";
+import { Copy, Download, FileCode, MessageSquare, Moon, Sun } from "lucide-react";
 import { Separator } from "../../../ui/separator";
 import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";
@@ -14,6 +14,7 @@ interface SharedChatHeaderProps {
   onCopyLink: () => void;
   onDownloadChat: () => void;
   onLogoClick: () => void;
+  onDownloadHtmlPage: () => void;
 }
 
 export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
@@ -23,6 +24,7 @@ export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
   onCopyLink,
   onDownloadChat,
   onLogoClick,
+  onDownloadHtmlPage,
 }) => {
   return (
     <header className="bg-background sticky top-0 z-10 shrink-0">
@@ -80,6 +82,21 @@ export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
               </TooltipContent>
             </Tooltip>
 
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onDownloadHtmlPage}
+                >
+                  <FileCode className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Download page (.html)</p>
+              </TooltipContent>
+            </Tooltip>
+
             {sharedLink.allowDownload && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -92,7 +109,7 @@ export const SharedChatHeader: React.FC<SharedChatHeaderProps> = ({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Download chat</p>
+                  <p>Download chat (.json)</p>
                 </TooltipContent>
               </Tooltip>
             )}

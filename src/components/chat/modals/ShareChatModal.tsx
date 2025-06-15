@@ -14,7 +14,7 @@ import { useConversation } from "../../../hooks/useConversations";
 import { useShareChat } from "./hooks/useShareChat";
 import {
   ConversationInfo,
-  ShareSettings,
+  // ShareSettings, // TODO: Implement later
   ShareLinkSection,
 } from "./components";
 
@@ -31,11 +31,11 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = React.memo(
   ({ open, onOpenChange, conversationId }) => {
     const { conversation, messages } = useConversation(conversationId);
     const {
-      shareOptions,
-      setShareOptions,
+      // shareOptions, // TODO: Implement later
+      // setShareOptions, // TODO: Implement later
       shareId,
       isGeneratingLink,
-      hasActiveSubscription,
+      // hasActiveSubscription, // TODO: Implement later
       hasCloudStorage,
       generateShareLink,
       handlePreviewShare,
@@ -96,12 +96,12 @@ export const ShareChatModal: React.FC<ShareChatModalProps> = React.memo(
                 isShared={!!shareId}
               />
 
-              {/* Share Settings */}
-              <ShareSettings
+              {/* TODO: Implement later */}
+              {/* <ShareSettings
                 shareOptions={shareOptions}
                 onShareOptionsChange={setShareOptions}
                 hasActiveSubscription={hasActiveSubscription}
-              />
+              /> */}
 
               {/* Share Link Generation */}
               <ShareLinkSection

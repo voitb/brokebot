@@ -27,6 +27,7 @@ export const SharedChatLayout: React.FC<SharedChatLayoutProps> = ({
     handleDownloadChat,
     toggleTheme,
     handleLogoClick,
+    handleDownloadHtmlPage,
   } = useSharedChat(conversation, messages, sharedLink);
 
   return (
@@ -39,6 +40,7 @@ export const SharedChatLayout: React.FC<SharedChatLayoutProps> = ({
           onCopyLink={handleCopyLink}
           onDownloadChat={handleDownloadChat}
           onLogoClick={handleLogoClick}
+          onDownloadHtmlPage={handleDownloadHtmlPage}
         />
 
         <main className="flex-1 overflow-hidden">
