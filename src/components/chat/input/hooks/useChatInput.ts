@@ -97,7 +97,6 @@ export function useChatInput(): UseChatInputReturn {
     let aiMessageId: string | undefined;
 
     try {
-
       // Create new conversation if needed
       if (!currentConversationId) {
         const newConversationId = await createEmptyConversation();

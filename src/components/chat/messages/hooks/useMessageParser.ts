@@ -3,40 +3,55 @@ import { useMemo } from "react";
 interface ParsedMessage {
   thinking?: string;
   content: string;
+  attachments: { name: string }[];
 }
 
+const fileTagRegex = /<file name="([^"]+)">[\s\S]*?<\/file>/g;
+
 /**
- * Hook for parsing message content with thinking tags
+ * Hook for parsing message content with thinking and file tags
  */
 export function useMessageParser(content: string): ParsedMessage {
   return useMemo(() => {
+    let processedContent = content;
+
+    // Extract attachments first
+    const attachments: { name: string }[] = [];
+    const matches = [...processedContent.matchAll(fileTagRegex)];
+    matches.forEach(match => {
+      attachments.push({ name: match[1] });
+    });
+
+    // Remove file tags from content
+    processedContent = processedContent.replace(fileTagRegex, "").trim();
+
     // First check for complete thinking blocks anywhere in content
-    const completeThinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+    const completeThinkMatch = processedContent.match(/<think>([\s\S]*?)<\/think>/);
     if (completeThinkMatch) {
       const thinking = completeThinkMatch[1].trim();
-      const remainingContent = content
+      const remainingContent = processedContent
         .replace(/<think>[\s\S]*?<\/think>/g, "")
         .trim();
-      return { thinking, content: remainingContent };
+      return { thinking, content: remainingContent, attachments };
     }
 
     // Check if message starts with <think> but has no closing tag (still generating)
-    if (content.startsWith("<think>")) {
-      const thinking = content.replace(/^<think>/, "").trim();
-      return { thinking, content: "" };
+    if (processedContent.startsWith("<think>")) {
+      const thinking = processedContent.replace(/^<think>/, "").trim();
+      return { thinking, content: "", attachments };
     }
 
     // Check if content only contains </think> (end of thinking, no content yet)
-    if (content.trim() === "</think>") {
-      return { content: "" };
+    if (processedContent.trim() === "</think>") {
+      return { content: "", attachments };
     }
 
     // Check if content starts with </think> (thinking ended, now content starts)
-    if (content.startsWith("</think>")) {
-      const remainingContent = content.replace(/^<\/think>/, "").trim();
-      return { content: remainingContent };
+    if (processedContent.startsWith("</think>")) {
+      const remainingContent = processedContent.replace(/^<\/think>/, "").trim();
+      return { content: remainingContent, attachments };
     }
 
-    return { content };
+    return { content: processedContent, attachments };
   }, [content]);
 } 

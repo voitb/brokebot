@@ -152,25 +152,13 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     setMessage("");
     setAttachedFiles([]);
 
-    // Include file content in the message for AI processing
     let fullMessage = messageToSend;
 
     if (filesToSend.length > 0) {
-      const fileContents: string[] = [];
-      
-      filesToSend.forEach((f) => {
-        if (f.type === "text" && f.content) {
-          fileContents.push(`--- Content of ${f.file.name} ---\n${f.content}\n--- End of ${f.file.name} ---`);
-        } else if (f.type === "image") {
-          fileContents.push(`[Image: ${f.file.name}]`);
-        } else {
-          fileContents.push(`[File: ${f.file.name}]`);
-        }
-      });
-
-      if (fileContents.length > 0) {
-        fullMessage = `${messageToSend}\n\n${fileContents.join("\n\n")}`;
-      }
+      const fileContents = filesToSend
+        .map((f) => `<file name="${f.file.name}">\n${f.content}\n</file>`)
+        .join("\n\n");
+      fullMessage = `${messageToSend}\n\n${fileContents}`.trim();
     }
 
     try {

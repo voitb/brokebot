@@ -1,5 +1,5 @@
 import React from "react";
-import type { IMessage } from "../../../../lib/db";
+import type { Message } from "../../../../lib/db";
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
 import { useMessageParser, useSlowGenerationWarning } from "../hooks";
 import { 
@@ -9,11 +9,12 @@ import {
   MessageContent,
   MessageTimestamp,
   SlowGenerationWarning,
-  GeneratingIndicator
+  GeneratingIndicator,
+  AttachmentBadge,
 } from "./";
 
 interface MessageBubbleProps {
-  message: IMessage;
+  message: Message;
   isGenerating?: boolean;
   isLastMessage?: boolean;
   onRegenerate?: () => void;
@@ -68,6 +69,15 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           isUser={isUser}
           isGenerating={isAiGenerating}
         />
+
+        {/* Attachments for user messages */}
+        {isUser && parsedMessage.attachments.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {parsedMessage.attachments.map((att, index) => (
+              <AttachmentBadge key={index} fileName={att.name} />
+            ))}
+          </div>
+        )}
 
         {/* Message Actions (only for AI messages with content) */}
         {!isUser && (parsedMessage.content.trim() || isAiGenerating) && (
