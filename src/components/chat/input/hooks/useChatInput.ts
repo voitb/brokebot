@@ -36,12 +36,14 @@ const summarizeConversation = (messages: OpenRouterMessage[], maxMessages: numbe
     }
     
     const summary = conversationPairs.join('\n\n');
-    const summaryMessage: OpenRouterMessage = {
-      role: 'system',
-      content: `Previous conversation summary:\n${summary}\n\nContinue the conversation based on this context.`
-    };
     
-    return [...systemMessages, summaryMessage, ...recentMessages];
+    // Zamiast tworzyć nowy system message, dodaj podsumowanie do istniejącego
+    const enhancedSystemMessages = systemMessages.map(msg => ({
+      ...msg,
+      content: `${msg.content}\n\nPrevious conversation summary:\n${summary}\n\nContinue the conversation based on this context.`
+    }));
+    
+    return [...enhancedSystemMessages, ...recentMessages];
   }
   
   return [...systemMessages, ...recentMessages];

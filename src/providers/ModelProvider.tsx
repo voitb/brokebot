@@ -158,6 +158,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
           });
 
           let fullContent = "";
+          
           for await (const chunk of stream) {
             const delta = chunk.choices[0]?.delta?.content || "";
             if (delta) {
