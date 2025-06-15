@@ -1,11 +1,17 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TooltipProvider } from "../../ui/tooltip";
 import { useModel } from "../../../providers/ModelProvider";
-import { useChatInput, useDragDrop, useFileUpload, type AttachedFile } from "./hooks";
+import {
+  useChatInput,
+  useDragDrop,
+  useFileUpload,
+  useSpeechToText,
+  type AttachedFile,
+} from "./hooks";
 import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Mic } from "lucide-react";
 import { toast } from "sonner";
 import {
   FileUpload,
@@ -13,6 +19,7 @@ import {
   DragDropOverlay,
   ModelError,
   ModelStatus,
+  SpeechToTextButton,
 } from "./components";
 import type { QualityLevel } from "../../../types";
 
@@ -30,6 +37,47 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
 
+  const { 
+    status: transcriberStatus, 
+    startRecording, 
+    stopRecording,
+    isModelLoading: isWhisperModelLoading,
+    error: transcriberError,
+  } = useSpeechToText((transcript) => {
+    setMessage(message ? `${message} ${transcript}` : transcript);
+  });
+  
+  // Effect for handling STT toasts based on status and error state
+  useEffect(() => {
+    const STT_TOAST_ID = "stt-toast";
+
+    if (transcriberError) {
+      toast.error(transcriberError, { id: STT_TOAST_ID });
+      return; // Stop here to show the error
+    }
+
+    switch (transcriberStatus) {
+      case "loading":
+        toast.loading("Loading speech model...", { id: STT_TOAST_ID });
+        break;
+      case "processing":
+        toast.loading("Transcribing audio...", { id: STT_TOAST_ID });
+        break;
+      case "recording":
+        toast.message("Recording...", {
+          description: "Click the mic icon to stop.",
+          id: STT_TOAST_ID,
+          icon: <Mic className="h-4 w-4" />,
+        });
+        break;
+      case "ready":
+      case "uninitialized":
+      case "error": // Error toast is handled above, this just dismisses any active toast
+        toast.dismiss(STT_TOAST_ID);
+        break;
+    }
+  }, [transcriberStatus, transcriberError]);
+
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -40,6 +88,14 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     minHeight: 60,
     maxHeight: 200,
   });
+
+  const handleMicClick = () => {
+    if (transcriberStatus === "recording") {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   // For now, assume models don't support images unless we implement VLM support
   const supportsImages = false;
@@ -174,20 +230,25 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               onKeyDown={handleKeyDown}
               placeholder={
                 isModelReady && currentModel
-                  ? `Message ${currentModel.name}...`
+                  ? `Message ${currentModel.name}... or click the mic to talk`
                   : modelStatus
               }
-              className="min-h-[60px] max-h-[200px] resize-none pr-20 overflow-hidden"
-              disabled={isLoading || isModelLoading || isModelError}
+              className="min-h-[60px] max-h-[200px] resize-none pr-32 overflow-hidden"
+              disabled={isLoading || isModelLoading || isModelError || isWhisperModelLoading}
               style={{ height: "60px" }}
             />
 
-            {/* File Attachment Button */}
-            <div className="absolute bottom-2 right-14">
+            {/* Mic and File Attachment Buttons */}
+            <div className="absolute bottom-2 right-14 flex items-center">
+              <SpeechToTextButton
+                status={transcriberStatus}
+                onClick={handleMicClick}
+                disabled={isModelLoading || isModelError || isLoading}
+              />
               <FileUpload
                 supportsImages={supportsImages}
                 selectedModelName={currentModel?.name || "Model"}
-                disabled={isModelLoading || isModelError}
+                disabled={isModelLoading || isModelError || isLoading || isWhisperModelLoading}
                 onFilesChanged={setAttachedFiles}
               />
             </div>
@@ -201,6 +262,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
                 isLoading ||
                 isModelLoading ||
                 isModelError ||
+                isWhisperModelLoading ||
+                transcriberStatus === 'recording' ||
                 (!message.trim() && attachedFiles.length === 0)
               }
             >
