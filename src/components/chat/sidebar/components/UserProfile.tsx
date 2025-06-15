@@ -7,6 +7,9 @@ import {
   LifeBuoy,
   FileText,
   Keyboard,
+  Settings,
+  Shield,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "../../../ui/button";
@@ -18,7 +21,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from "../../../ui/dropdown-menu";
 import { useUserConfig } from "@/hooks/business/useUserConfig";
 
@@ -44,6 +51,14 @@ const UserProfileMenu: React.FC = () => {
 
   const openShortcutsModal = () => {
     navigate({ search: createSearchParams({ modal: "shortcuts" }).toString() });
+  };
+
+  const openSettingsModal = (tab?: string) => {
+    const params = new URLSearchParams({ modal: "settings" });
+    if (tab) {
+      params.set("tab", tab);
+    }
+    navigate({ search: params.toString() });
   };
 
   return (
@@ -80,31 +95,60 @@ const UserProfileMenu: React.FC = () => {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Settings className="w-4 h-4 mr-2" />
+                <span>Settings</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent className="w-48">
+                  <DropdownMenuItem onClick={() => openSettingsModal("general")}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    <span>General</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openSettingsModal("documents")}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    <span>Documents</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openSettingsModal("privacy")}>
+                    <Shield className="w-4 h-4 mr-2" />
+                    <span>Privacy</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openSettingsModal("billing")}>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    <span>Billing</span>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuItem onClick={openShortcutsModal}>
-              <Keyboard className="mr-2 h-4 w-4" />
+              <Keyboard className="w-4 h-4 mr-2" />
               <span>Shortcuts</span>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/terms" target="_blank">
-                <FileText className="mr-2 h-4 w-4" />
+                <FileText className="w-4 h-4 mr-2" />
                 <span>Terms of Service</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <LifeBuoy className="mr-2 h-4 w-4" />
+              <LifeBuoy className="w-4 h-4 mr-2" />
               <span>Support</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           {user ? (
-            <DropdownMenuItem onClick={logout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+            <DropdownMenuItem 
+              onClick={logout}
+              className="focus:bg-destructive/10"
+            >
+              <LogOut className="w-4 h-4 mr-2 text-destructive" />
+              <span className="text-destructive">Log out</span>
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem asChild>
               <Link to="/login">
-                <UserIcon className="mr-2 h-4 w-4" />
+                <UserIcon className="w-4 h-4 mr-2" />
                 <span>Login or Sign Up</span>
               </Link>
             </DropdownMenuItem>

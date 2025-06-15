@@ -28,6 +28,7 @@ interface UseHeaderActionsReturn {
   handleFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleOverwrite: () => void;
   handleAppend: () => void;
+  handleDeleteConversation: () => Promise<void>;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
@@ -43,6 +44,7 @@ export function useHeaderActions({
     togglePinConversation,
     updateConversationTitle,
     createEmptyConversation,
+    deleteConversation,
   } = useConversations();
   const { conversation } = useConversation(conversationId);
   
@@ -200,6 +202,19 @@ export function useHeaderActions({
     setPendingMessages(null);
   };
 
+  const handleDeleteConversation = async () => {
+    if (!conversationId) return;
+    
+    try {
+      await deleteConversation(conversationId);
+      toast.success("Conversation deleted successfully.");
+      navigate("/chat");
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast.error("Failed to delete conversation.");
+    }
+  };
+
   return {
     // State
     isEditingTitle,
@@ -220,6 +235,7 @@ export function useHeaderActions({
     handleFileImport,
     handleOverwrite,
     handleAppend,
+    handleDeleteConversation,
     fileInputRef,
   };
 } 
