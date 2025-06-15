@@ -2,7 +2,10 @@ import { Functions } from 'appwrite';
 
 export interface ApiKeyConfig {
   openrouterApiKey?: string;
-  // Add other keys here if the proxy needs them
+  // Future API keys - currently commented out
+  // openaiApiKey?: string;
+  // anthropicApiKey?: string;
+  // googleApiKey?: string;
 }
 
 export interface OpenRouterConfig {
@@ -105,6 +108,19 @@ export const PAID_API_MODELS = [
 
 export type OpenRouterModel = typeof FREE_LEARNING_MODELS[number] | typeof PAID_API_MODELS[number];
 
+// Helper function to validate OpenRouter API key format
+const validateOpenRouterKey = (key: string): boolean => {
+  // OpenRouter keys usually start with "sk-or-" and are long
+  const isValidFormat = key.startsWith('sk-or-') && key.length > 20;
+  console.log('OpenRouter key validation:', {
+    hasKey: !!key,
+    keyLength: key?.length || 0,
+    startsCorrectly: key?.startsWith('sk-or-') || false,
+    isValid: isValidFormat
+  });
+  return isValidFormat;
+};
+
 export class OpenRouterClient {
   private functions: Functions;
   private config: OpenRouterConfig;
@@ -114,6 +130,11 @@ export class OpenRouterClient {
     this.config = config;
     this.functions = config.functions;
     this.keys = config.keys;
+    
+    // Log key validation on client creation
+    if (this.keys.openrouterApiKey) {
+      validateOpenRouterKey(this.keys.openrouterApiKey);
+    }
   }
 
   async *streamCompletion(
@@ -122,8 +143,23 @@ export class OpenRouterClient {
     onProgress?: (content: string) => void
   ): AsyncGenerator<StreamResponse, void, unknown> {
     try {
-      if (!this.keys.openrouterApiKey) {
-        throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
+      // For now, always use OpenRouter API key
+      const apiKey = this.keys.openrouterApiKey;
+      
+      console.log('OpenRouter Client - Streaming:', {
+        model,
+        hasApiKey: !!apiKey,
+        apiKeyPrefix: apiKey ? `${apiKey.substring(0, 12)}...` : 'NONE',
+        apiKeyValid: apiKey ? validateOpenRouterKey(apiKey) : false,
+        messagesCount: messages.length
+      });
+      
+      if (!apiKey) {
+        throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');
+      }
+      
+      if (!validateOpenRouterKey(apiKey)) {
+        throw new Error('Invalid OpenRouter API key format. Key should start with "sk-or-" and be at least 20 characters long.');
       }
 
       // Since Appwrite Functions don't support streaming, we'll use chunked polling approach
@@ -133,9 +169,16 @@ export class OpenRouterClient {
           model,
           messages,
           stream: true, // We'll handle this in the function
-          api_key: this.keys.openrouterApiKey
+          api_key: apiKey
         })
       );
+
+      console.log('Appwrite function result:', {
+        statusCode: result.responseStatusCode,
+        hasBody: !!result.responseBody,
+        bodyPreview: result.responseBody ? result.responseBody.substring(0, 200) : 'EMPTY',
+        bodyLength: result.responseBody?.length || 0
+      });
 
       if (result.responseStatusCode !== 200) {
         const errorMsg = result.responseBody || 'Unknown function error';
@@ -191,6 +234,23 @@ export class OpenRouterClient {
     }
   }
 
+  // Simplified key selection - always use OpenRouter key for now
+  private getApiKeyForModel(model: string): string | undefined {
+    // For now, always return OpenRouter API key regardless of model
+    return this.keys.openrouterApiKey;
+    
+    // Future logic when we support other keys:
+    // if (model.startsWith('openai/')) {
+    //   return this.keys.openaiApiKey || this.keys.openrouterApiKey;
+    // } else if (model.startsWith('anthropic/')) {
+    //   return this.keys.anthropicApiKey || this.keys.openrouterApiKey;
+    // } else if (model.startsWith('google/')) {
+    //   return this.keys.googleApiKey || this.keys.openrouterApiKey;
+    // } else {
+    //   return this.keys.openrouterApiKey;
+    // }
+  }
+
   private splitIntoChunks(text: string, chunkSize: number = 3): string[] {
     const chunks: string[] = [];
     for (let i = 0; i < text.length; i += chunkSize) {
@@ -204,8 +264,21 @@ export class OpenRouterClient {
     messages: OpenRouterMessage[]
   ): Promise<string> {
     try {
-      if (!this.keys.openrouterApiKey) {
-        throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
+      const apiKey = this.getApiKeyForModel(model);
+      
+      console.log('OpenRouter Client - Send Message:', {
+        model,
+        hasApiKey: !!apiKey,
+        apiKeyPrefix: apiKey ? `${apiKey.substring(0, 12)}...` : 'NONE',
+        apiKeyValid: apiKey ? validateOpenRouterKey(apiKey) : false
+      });
+      
+      if (!apiKey) {
+        throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');
+      }
+      
+      if (!validateOpenRouterKey(apiKey)) {
+        throw new Error('Invalid OpenRouter API key format. Key should start with "sk-or-" and be at least 20 characters long.');
       }
 
       const result = await this.functions.createExecution(
@@ -213,9 +286,15 @@ export class OpenRouterClient {
         JSON.stringify({
           model,
           messages,
-          api_key: this.keys.openrouterApiKey // Pass API key to Appwrite Function
+          api_key: apiKey
         })
       );
+
+      console.log('Send Message - Appwrite function result:', {
+        statusCode: result.responseStatusCode,
+        hasBody: !!result.responseBody,
+        bodyPreview: result.responseBody ? result.responseBody.substring(0, 200) : 'EMPTY'
+      });
 
       if (result.responseStatusCode !== 200) {
         throw new Error(`Function execution failed: ${result.responseBody}`);
@@ -234,21 +313,69 @@ export class OpenRouterClient {
     }
   }
 
-  // Test API key validity
+  // Test API key validity with a simple request
   async testConnection(): Promise<boolean> {
     try {
+      console.log('Testing OpenRouter connection...');
+      
+      const apiKey = this.keys.openrouterApiKey;
+      if (!apiKey) {
+        console.error('No API key for connection test');
+        return false;
+      }
+      
+      if (!validateOpenRouterKey(apiKey)) {
+        console.error('Invalid API key format for connection test');
+        return false;
+      }
+      
       const result = await this.functions.createExecution(
         'proxy-ai',
         JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
-          messages: [{ role: "user", content: "test" }],
+          model: "deepseek/deepseek-r1-0528-qwen3-8b:free", // Use a free model for testing
+          messages: [{ role: "user", content: "Hello" }],
+          api_key: apiKey
         })
       );
+      
+      console.log('Connection test result:', {
+        statusCode: result.responseStatusCode,
+        hasBody: !!result.responseBody,
+        bodyPreview: result.responseBody ? result.responseBody.substring(0, 100) : 'EMPTY'
+      });
       
       return result.responseStatusCode === 200;
     } catch (error) {
       console.error('OpenRouter connection test failed:', error);
       return false;
+    }
+  }
+
+  // Public method to test API key
+  async testApiKey(): Promise<{ success: boolean; error?: string }> {
+    try {
+      const apiKey = this.keys.openrouterApiKey;
+      
+      if (!apiKey) {
+        return { success: false, error: 'No API key provided' };
+      }
+      
+      if (!validateOpenRouterKey(apiKey)) {
+        return { success: false, error: 'Invalid API key format' };
+      }
+      
+      const isConnected = await this.testConnection();
+      
+      if (isConnected) {
+        return { success: true };
+      } else {
+        return { success: false, error: 'Connection test failed' };
+      }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
     }
   }
 }

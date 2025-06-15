@@ -27,19 +27,39 @@ export function useUserConfig() {
     const decryptConfig = async () => {
       if (rawConfig) {
         const decryptedConfig = { ...rawConfig };
-        const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
+        // Focus only on OpenRouter key for now
+        const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey']; // Only OpenRouter for now
+        // Future keys: ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
+        
+        console.log('UserConfig - Decrypting keys:', {
+          hasRawConfig: !!rawConfig,
+          rawOpenRouterKey: rawConfig.openrouterApiKey ? `${rawConfig.openrouterApiKey.substring(0, 10)}...` : 'NONE'
+        });
         
         for (const key of keysToDecrypt) {
             const value = rawConfig[key] as string | undefined;
             if (value) {
                 try {
-                    (decryptedConfig as any)[key] = await decryptValue(value);
+                    const decryptedValue = await decryptValue(value);
+                    (decryptedConfig as any)[key] = decryptedValue;
+                    console.log(`UserConfig - Successfully decrypted ${key}:`, {
+                      original: `${value.substring(0, 10)}...`,
+                      decrypted: `${decryptedValue.substring(0, 10)}...`
+                    });
                 } catch (e) {
-                    console.warn(`Could not decrypt key: ${key}. It might be unencrypted.`);
+                    console.warn(`Could not decrypt key: ${key}. It might be unencrypted.`, e);
+                    // If decryption fails, assume it's unencrypted and use as-is
                     (decryptedConfig as any)[key] = value;
+                    console.log(`UserConfig - Using unencrypted ${key}:`, `${value.substring(0, 10)}...`);
         }
             }
         }
+        
+        console.log('UserConfig - Final decrypted config:', {
+          hasOpenRouterKey: !!decryptedConfig.openrouterApiKey,
+          openRouterKeyPrefix: decryptedConfig.openrouterApiKey ? `${decryptedConfig.openrouterApiKey.substring(0, 10)}...` : 'NONE'
+        });
+        
         setConfig(decryptedConfig);
       }
     };
@@ -97,17 +117,24 @@ export function useUserConfig() {
   ) => {
     try {
       const encryptedUpdates: Partial<UserConfig> = { ...updates };
-      const keysToEncrypt: (keyof UserConfig)[] = [
-        "openrouterApiKey",
-        "openaiApiKey",
-        "anthropicApiKey",
-        "googleApiKey",
-      ];
+      // Focus only on OpenRouter key for now
+      const keysToEncrypt: (keyof UserConfig)[] = ["openrouterApiKey"];
+      // Future keys: ["openrouterApiKey", "openaiApiKey", "anthropicApiKey", "googleApiKey"];
+
+      console.log('UserConfig - Updating config:', {
+        hasOpenRouterUpdate: !!(updates as any).openrouterApiKey,
+        openRouterUpdatePrefix: (updates as any).openrouterApiKey ? `${(updates as any).openrouterApiKey.substring(0, 10)}...` : 'NONE'
+      });
 
       for (const key of keysToEncrypt) {
         const value = updates[key as keyof typeof updates] as string | undefined;
         if (value) {
-          (encryptedUpdates as any)[key] = await encryptValue(value);
+          const encryptedValue = await encryptValue(value);
+          (encryptedUpdates as any)[key] = encryptedValue;
+          console.log(`UserConfig - Encrypted ${key}:`, {
+            original: `${value.substring(0, 10)}...`,
+            encrypted: `${encryptedValue.substring(0, 10)}...`
+          });
         }
       }
 
@@ -117,23 +144,26 @@ export function useUserConfig() {
         updatedAt: newUpdatedAt,
       });
 
+      console.log('UserConfig - Successfully updated local config');
+
       // Also update cloud if user is logged in and sync is enabled
       if (
         user &&
         (config.storeConversationsInCloud || updates.storeConversationsInCloud)
       ) {
         // Define the exact set of keys that are allowed in the Appwrite userConfig collection.
-        // This acts as a safelist to prevent sending local-only fields to the cloud.
+        // Focus only on OpenRouter for now
         const CLOUD_CONFIG_KEYS = [
           "userId",
-          "username",
+          "username", 
           "avatarUrl",
           "theme",
           "autoLoadModel",
-          "openaiApiKey",
-          "anthropicApiKey",
-          "googleApiKey",
-          "openrouterApiKey",
+          "openrouterApiKey", // Only OpenRouter key for now
+          // Future keys:
+          // "openaiApiKey",
+          // "anthropicApiKey", 
+          // "googleApiKey",
           "storeConversationsLocally",
           "storeConversationsInCloud",
         ];
@@ -154,14 +184,16 @@ export function useUserConfig() {
 
           if (Object.keys(payload).length > 0) {
             await updateCloudUserConfig(user.$id, payload);
+            console.log('UserConfig - Successfully updated cloud config');
           }
         } else {
           // CREATE: Config does not exist, send the full, filtered config.
           const fullConfigForCloud = { ...config, ...updates };
 
-          const keysToReEncrypt: (keyof UserConfig)[] = [
-            "openrouterApiKey", "openaiApiKey", "anthropicApiKey", "googleApiKey",
-          ];
+          // Re-encrypt for cloud (since config might have decrypted values)
+          const keysToReEncrypt: (keyof UserConfig)[] = ["openrouterApiKey"]; // Only OpenRouter for now
+          // Future keys: ["openrouterApiKey", "openaiApiKey", "anthropicApiKey", "googleApiKey"];
+          
           const fullEncryptedPayload = { ...fullConfigForCloud };
           for (const key of keysToReEncrypt) {
             const value = fullConfigForCloud[key as keyof typeof fullConfigForCloud] as string | undefined;
@@ -181,6 +213,7 @@ export function useUserConfig() {
           );
 
           await createCloudUserConfig(user.$id, payload);
+          console.log('UserConfig - Successfully created cloud config');
         }
       }
     } catch (error) {

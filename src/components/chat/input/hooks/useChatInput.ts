@@ -177,20 +177,84 @@ export function useChatInput(): UseChatInputReturn {
           if (aiMessageId) {
             await updateCompleteAIMessage(aiMessageId, accumulatedContent);
           }
+        } catch (error) {
+          console.error("Error generating response:", error);
+          
+          // Parse error message to provide better user feedback
+          let errorMessage = "Failed to generate response. Please try again.";
+          let actionLabel = "Regenerate";
+          let actionCallback = () => window.location.reload();
+          
+          if (error instanceof Error) {
+            const message = error.message.toLowerCase();
+            
+            if (message.includes('api key') || message.includes('unauthorized') || message.includes('401')) {
+              errorMessage = "API key error. Please check your API key configuration in Settings.";
+              actionLabel = "Open Settings";
+              actionCallback = () => {
+                // Try to open settings dialog/page - this is a simplified approach
+                const settingsButton = document.querySelector('[data-settings-trigger]');
+                if (settingsButton) {
+                  (settingsButton as HTMLElement).click();
+                } else {
+                  window.location.reload();
+                }
+              };
+            } else if (message.includes('model not found') || message.includes('model') || message.includes('unsupported')) {
+              errorMessage = "Model configuration error. Please select a different model or check your settings.";
+              actionLabel = "Select Model";
+              actionCallback = () => {
+                const modelSelector = document.querySelector('[data-model-selector]');
+                if (modelSelector) {
+                  (modelSelector as HTMLElement).click();
+                } else {
+                  window.location.reload();
+                }
+              };
+            } else if (message.includes('timeout') || message.includes('network')) {
+              errorMessage = "Network error. Please check your connection and try again.";
+              actionLabel = "Retry";
+              actionCallback = () => handleMessageSubmit(messageContent);
+            } else if (message.includes('rate limit') || message.includes('quota')) {
+              errorMessage = "API rate limit exceeded. Please wait a moment and try again.";
+              actionLabel = "Retry";
+              actionCallback = () => {
+                setTimeout(() => handleMessageSubmit(messageContent), 5000);
+              };
+            }
+          }
+          
+          // Show error notification with appropriate action
+          toast.error(errorMessage, {
+            action: {
+              label: actionLabel,
+              onClick: actionCallback
+            }
+          });
+
+          // Clean up empty AI message if it exists
+          if (currentConversationId && aiMessageId) {
+            updateMessage(currentConversationId, aiMessageId, "⚠️ Error generating response. Please try regenerating or check your API key configuration.");
+          }
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
         }
       }
     } catch (error) {
-      console.error("Error generating response:", error);
+      console.error("Outer catch - Error in message submit:", error);
+      
+      // Parse error message for outer catch as well
+      let errorMessage = "Failed to send message. Please try again.";
+      if (error instanceof Error && error.message.toLowerCase().includes('api key')) {
+        errorMessage = "API key configuration error. Please check your settings.";
+      }
       
       // Show error notification
-      toast.error("Failed to generate response. Please try again.", {
+      toast.error(errorMessage, {
         action: {
-          label: "Regenerate",
+          label: "Retry",
           onClick: () => {
-            // Simple regenerate action without circular dependency
             window.location.reload();
           }
         }
@@ -198,7 +262,7 @@ export function useChatInput(): UseChatInputReturn {
 
       // Clean up empty AI message if it exists
       if (currentConversationId && aiMessageId) {
-        updateMessage(currentConversationId, aiMessageId, "⚠️ Error generating response. Please try regenerating.");
+        updateMessage(currentConversationId, aiMessageId, "⚠️ Error sending message. Please check your configuration and try again.");
       }
     } finally {
       setIsLoading(false);

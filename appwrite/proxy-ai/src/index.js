@@ -1,6 +1,7 @@
 const HTTP_STATUS = {
   OK: 200,
   BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
   METHOD_NOT_ALLOWED: 405,
   INTERNAL_SERVER_ERROR: 500,
 };
@@ -12,6 +13,7 @@ const ERROR_MESSAGES = {
   MISSING_FIELDS: "Fields 'model' and 'messages' (as non-empty array) are required.",
   EXTERNAL_API_ERROR: "External API error.",
   SERVER_ERROR: "Server error occurred.",
+  INVALID_API_KEY: "Invalid API key. Please check your API key configuration.",
 };
 
 const CONFIG = {
@@ -76,15 +78,42 @@ const forwardToOpenRouter = async ({ model, messages, apiKey, log, error }) => {
 
     if (response.ok) {
       const responseData = await response.json();
+      log(`OpenRouter API response successful for model: ${model}`);
       return { data: responseData, status: response.status };
     } else {
       const errorText = await response.text();
+      let errorResponse;
+      try {
+        errorResponse = JSON.parse(errorText);
+      } catch {
+        errorResponse = { error: { message: errorText } };
+      }
+      
       error(`OpenRouter API error: ${response.status} - ${errorText}`);
-      return { error: { message: ERROR_MESSAGES.EXTERNAL_API_ERROR }, status: response.status };
+      
+      // Handle specific error cases
+      if (response.status === 401) {
+        return { 
+          error: { message: ERROR_MESSAGES.INVALID_API_KEY }, 
+          status: response.status,
+          details: errorResponse
+        };
+      }
+      
+      return { 
+        error: { message: ERROR_MESSAGES.EXTERNAL_API_ERROR }, 
+        status: response.status,
+        details: errorResponse
+      };
     }
   } catch (e) {
     clearTimeout(timeoutId);
     error(`Internal error while communicating with OpenRouter: ${e.message}`);
+    
+    if (e.name === 'AbortError') {
+      return { error: { message: "Request timeout" }, status: HTTP_STATUS.INTERNAL_SERVER_ERROR };
+    }
+    
     return { error: { message: ERROR_MESSAGES.SERVER_ERROR }, status: HTTP_STATUS.INTERNAL_SERVER_ERROR };
   }
 };
@@ -104,6 +133,8 @@ export default async ({ req, res, log, error }) => {
   const { model, messages, api_key } = body;
   const apiKey = api_key || process.env.OPENROUTER_API_KEY;
 
+  log(`Request received for model: ${model}, API key provided: ${apiKey ? 'YES' : 'NO'}`);
+
   if (!apiKey) {
     return sendError(res, ERROR_MESSAGES.API_KEY_MISSING, HTTP_STATUS.BAD_REQUEST, error, "OpenRouter API key not provided.");
   }
@@ -116,9 +147,11 @@ export default async ({ req, res, log, error }) => {
     const result = await forwardToOpenRouter({ model, messages, apiKey, log, error });
 
     if (result.error) {
+        log(`OpenRouter API error response: ${JSON.stringify(result)}`);
         return sendResponse(res, { error: result.error.message }, result.status);
     }
 
+    log(`Successfully processed request for model: ${model}`);
     return sendResponse(res, result.data, result.status);
 
   } catch (e) {

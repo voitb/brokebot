@@ -18,29 +18,43 @@ export const useOnlineModels = (
   const { config } = useUserConfig();
 
   const hasOpenRouterKey = !!config?.openrouterApiKey;
-  const hasPaidKey = !!(
-    config?.openaiApiKey ||
-    config?.googleApiKey ||
-    config?.anthropicApiKey
-  );
+  
+  // Commented out for now - focus only on OpenRouter
+  // const hasPaidKey = !!(
+  //   config?.openaiApiKey ||
+  //   config?.googleApiKey ||
+  //   config?.anthropicApiKey
+  // );
+  const hasPaidKey = hasOpenRouterKey; // For now, paid models also use OpenRouter key
 
   const handleModelSelect = useCallback(
     (model: OpenRouterModel) => {
-      // @ts-expect-error - `requiresApiKey` exists on paid models
-      const providerKey = model.requiresApiKey ? `${model.requiresApiKey}ApiKey` : 'openrouterApiKey';
-      // @ts-expect-error - `providerKey` is a valid key of config
-      if (!config || !config[providerKey]) {
-        toast.error(`Please add your ${model.provider} API key first in Settings -> General.`);
+      // For now, all models use OpenRouter key
+      if (!config?.openrouterApiKey) {
+        toast.error(`Please add your OpenRouter API key first in Settings.`);
         return;
       }
+
+      console.log('Creating OpenRouter client with key:', {
+        hasKey: !!config.openrouterApiKey,
+        keyPrefix: config.openrouterApiKey ? `${config.openrouterApiKey.substring(0, 8)}...` : 'NONE',
+        model: model.name
+      });
+
+      // Create keys config with only OpenRouter key for now
+      const keys = {
+        openrouterApiKey: config?.openrouterApiKey,
+        // Future keys - commented out for now
+        // openaiApiKey: config?.openaiApiKey,
+        // anthropicApiKey: config?.anthropicApiKey,
+        // googleApiKey: config?.googleApiKey,
+      };
 
       const client = new OpenRouterClient({
         functions,
         siteUrl: window.location.origin,
         siteName: "Local GPT",
-        keys: {
-          openrouterApiKey: config?.openrouterApiKey,
-        },
+        keys,
       });
 
       onModelSelect(model, client);
@@ -56,9 +70,10 @@ export const useOnlineModels = (
   return {
     storedKeys: {
       openrouter: config?.openrouterApiKey,
-      openai: config?.openaiApiKey,
-      google: config?.googleApiKey,
-      anthropic: config?.anthropicApiKey,
+      // Commented out for now
+      // openai: config?.openaiApiKey,
+      // google: config?.googleApiKey,
+      // anthropic: config?.anthropicApiKey,
     },
     hasOpenRouterKey,
     hasPaidKey,
