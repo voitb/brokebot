@@ -4,6 +4,7 @@ import { SharedChatLayout } from "../components/chat/shared/SharedChatLayout";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
+import { SEOMetadata } from "../components/common/SEOMetadata";
 import {
   db,
   type Conversation,
@@ -157,10 +158,17 @@ export const SharedChatPage: React.FC = () => {
 
   // Render shared chat
   return (
-    <SharedChatLayout
-      conversation={data.conversation}
-      messages={data.messages}
-      sharedLink={data.sharedLink}
-    />
+    <>
+      <SEOMetadata
+        title={data.conversation.title}
+        description={`A shared conversation with ${data.messages.length} messages. Shared via BrokeBot.`}
+        url={window.location.href}
+      />
+      <SharedChatLayout
+        conversation={data.conversation}
+        messages={data.messages}
+        sharedLink={data.sharedLink}
+      />
+    </>
   );
 };

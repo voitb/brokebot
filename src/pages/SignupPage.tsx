@@ -1,15 +1,18 @@
-import { SignupForm } from "@/components/auth/SignupForm";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import React from "react";
+import { AuthLayout } from "../components/auth/AuthLayout";
+import { SignupForm } from "../components/auth/SignupForm";
+import { SEOMetadata } from "../components/common/SEOMetadata";
 
 export const SignupPage: React.FC = () => {
   return (
-    <ScrollArea className="h-screen">
-      <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <div className="w-full max-w-sm">
-          <SignupForm />
-        </div>
-      </div>
-    </ScrollArea>
+    <>
+      <SEOMetadata
+        title="Sign Up"
+        description="Create a new BrokeBot account to start your AI journey."
+      />
+      <AuthLayout>
+        <SignupForm />
+      </AuthLayout>
+    </>
   );
 };
