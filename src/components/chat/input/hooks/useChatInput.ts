@@ -131,20 +131,57 @@ export function useChatInput(): UseChatInputReturn {
       if (currentModel) {
         console.log(`Generating response with model: ${currentModel.name} (${currentModel.type})`);
         
-        // Prepare messages for AI including system message
-        const allMessages: OpenRouterMessage[] = [
-          { role: "system", content: COMPLETE_AI_RULES },
-          ...messages.map(msg => ({
-            role: msg.role as "user" | "assistant",
-            content: msg.content,
-          })),
-          { role: "user", content: messageContent },
-        ];
+        let conversationMessages: OpenRouterMessage[];
+        
+        if (currentModel.type === "online") {
+          // For online models (OpenRouter), combine history into context to avoid rate limiting
+          // OpenRouter has limits on number of messages per request
+          
+          if (messages.length > 0) {
+            // Combine previous messages into context
+            const previousContext = messages
+              .slice(-10) // Take only last 10 messages to keep context manageable
+              .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
+              .join('\n\n');
+            
+            // Create system message with rules and context
+            const systemWithContext = `${COMPLETE_AI_RULES}
 
-        // Skróć konwersację jeśli jest za długa (max 12 ostatnich wiadomości + system + podsumowanie)
-        const conversationMessages = summarizeConversation(allMessages, 12);
+Previous conversation context:
+${previousContext}`;
 
-        console.log(`Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
+            conversationMessages = [
+              { role: "system", content: systemWithContext },
+              { role: "user", content: messageContent },
+            ];
+            
+            console.log(`OpenRouter mode - Combined ${messages.length} previous messages into context`);
+          } else {
+            // First message - no previous context
+            conversationMessages = [
+              { role: "system", content: COMPLETE_AI_RULES },
+              { role: "user", content: messageContent },
+            ];
+            
+            console.log(`OpenRouter mode - First message, no previous context`);
+          }
+        } else {
+          // For local models, use full message history as before
+          const allMessages: OpenRouterMessage[] = [
+            { role: "system", content: COMPLETE_AI_RULES },
+            ...messages.map(msg => ({
+              role: msg.role as "user" | "assistant",
+              content: msg.content,
+            })),
+            { role: "user", content: messageContent },
+          ];
+
+          // Skróć konwersację jeśli jest za długa (max 12 ostatnich wiadomości + system + podsumowanie)
+          conversationMessages = summarizeConversation(allMessages, 12);
+          
+          console.log(`Local mode - Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
+        }
+
         console.log('Messages being sent:', conversationMessages);
 
         abortControllerRef.current = new AbortController();
@@ -215,11 +252,11 @@ export function useChatInput(): UseChatInputReturn {
               errorMessage = "Network error. Please check your connection and try again.";
               actionLabel = "Retry";
               actionCallback = () => handleMessageSubmit(messageContent);
-            } else if (message.includes('rate limit') || message.includes('quota')) {
-              errorMessage = "API rate limit exceeded. Please wait a moment and try again.";
-              actionLabel = "Retry";
+            } else if (message.includes('rate limit') || message.includes('quota') || message.includes('429')) {
+              errorMessage = "API rate limit exceeded. OpenRouter is temporarily limiting requests. Please wait a moment and try again.";
+              actionLabel = "Retry in 10s";
               actionCallback = () => {
-                setTimeout(() => handleMessageSubmit(messageContent), 5000);
+                setTimeout(() => handleMessageSubmit(messageContent), 10000);
               };
             }
           }
@@ -301,16 +338,55 @@ export function useChatInput(): UseChatInputReturn {
 
       // Generate response with existing messages
       if (currentModel) {
-        const allMessages: OpenRouterMessage[] = [
-          { role: "system", content: COMPLETE_AI_RULES },
-          ...messages.slice(0, -1).map(msg => ({
-            role: msg.role as "user" | "assistant",
-            content: msg.content,
-          })),
-        ];
+        let conversationMessages: OpenRouterMessage[];
+        
+        if (currentModel.type === "online") {
+          // For online models (OpenRouter), combine history into context to avoid rate limiting
+          const messagesToProcess = messages.slice(0, -1); // Exclude the last AI message
+          
+          if (messagesToProcess.length > 0) {
+            // Combine previous messages into context
+            const previousContext = messagesToProcess
+              .slice(-10) // Take only last 10 messages to keep context manageable
+              .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
+              .join('\n\n');
+            
+            // Create system message with rules and context
+            const systemWithContext = `${COMPLETE_AI_RULES}
 
-        // Skróć konwersację jeśli jest za długa
-        const conversationMessages = summarizeConversation(allMessages, 12);
+Previous conversation context:
+${previousContext}`;
+
+            conversationMessages = [
+              { role: "system", content: systemWithContext },
+              { role: "user", content: "Please regenerate your last response based on the conversation context above." },
+            ];
+            
+            console.log(`Regenerate - OpenRouter mode - Combined ${messagesToProcess.length} previous messages into context`);
+          } else {
+            // No previous context
+            conversationMessages = [
+              { role: "system", content: COMPLETE_AI_RULES },
+              { role: "user", content: "Please provide a response." },
+            ];
+            
+            console.log(`Regenerate - OpenRouter mode - No previous context`);
+          }
+        } else {
+          // For local models, use full message history as before
+          const allMessages: OpenRouterMessage[] = [
+            { role: "system", content: COMPLETE_AI_RULES },
+            ...messages.slice(0, -1).map(msg => ({
+              role: msg.role as "user" | "assistant",
+              content: msg.content,
+            })),
+          ];
+
+          // Skróć konwersację jeśli jest za długa
+          conversationMessages = summarizeConversation(allMessages, 12);
+          
+          console.log(`Regenerate - Local mode - Original messages: ${allMessages.length}, after summarization: ${conversationMessages.length}`);
+        }
 
         setIsGenerating(true);
         abortControllerRef.current = new AbortController();

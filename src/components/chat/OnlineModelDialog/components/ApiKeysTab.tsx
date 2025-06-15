@@ -91,19 +91,7 @@ export const ApiKeysTab: React.FC = () => {
         ))}
       </div>
       
-      {/* Debug info - temporary */}
-      {config?.openrouterApiKey && (
-        <Card className="bg-muted/50">
-          <CardHeader>
-            <CardTitle className="text-xs text-muted-foreground">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs space-y-1">
-            <div>Key Length: {config.openrouterApiKey.length}</div>
-            <div>Key Prefix: {config.openrouterApiKey.substring(0, 12)}...</div>
-            <div>Starts with sk-or-: {config.openrouterApiKey.startsWith('sk-or-') ? '✅' : '❌'}</div>
-          </CardContent>
-        </Card>
-      )}
+    
     </div>
   );
 };
