@@ -29,7 +29,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = Rea
         <DialogHeader>
           <DialogTitle>Keyboard Shortcuts</DialogTitle>
           <DialogDescription>
-            Use these shortcuts to navigate BrokeBot faster
+            Use these shortcuts to navigate brokebot faster
           </DialogDescription>
         </DialogHeader>
 

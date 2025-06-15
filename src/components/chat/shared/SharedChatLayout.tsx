@@ -64,7 +64,7 @@ export const SharedChatLayout: React.FC<SharedChatLayoutProps> = ({
             rel="noopener noreferrer"
             className="font-medium hover:underline"
           >
-            BrokeBot
+            brokebot
           </a>
         </footer>
       </div>

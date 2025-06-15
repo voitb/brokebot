@@ -146,7 +146,7 @@ export const SharedChatPage: React.FC = () => {
                   import.meta.env.VITE_FRONTEND_URL || window.location.origin
                 }
               >
-                Go to BrokeBot
+                Go to brokebot
               </a>
             </Button>
           </div>

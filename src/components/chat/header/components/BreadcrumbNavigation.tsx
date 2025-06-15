@@ -48,7 +48,7 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
             className="cursor-pointer flex items-center gap-2 hover:text-foreground"
                       >
               <Logo size="sm" />
-              BrokeBot
+              brokebot
             </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
