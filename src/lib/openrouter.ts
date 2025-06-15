@@ -129,7 +129,8 @@ export class OpenRouterClient {
   async *streamCompletion(
     model: string,
     messages: OpenRouterMessage[],
-    onProgress?: (content: string) => void
+    onProgress?: (content: string) => void,
+    signal?: AbortSignal
   ): AsyncGenerator<StreamResponse, void, unknown> {
     try {
       // For now, always use OpenRouter API key
@@ -181,6 +182,10 @@ export class OpenRouterClient {
         let accumulatedContent = '';
 
         for (const chunk of chunks) {
+          if (signal?.aborted) {
+            yield { content: accumulatedContent, isComplete: true, error: "stopped" };
+            return;
+          }
           accumulatedContent += chunk;
           if (onProgress) {
             onProgress(accumulatedContent);

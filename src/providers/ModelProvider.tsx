@@ -38,7 +38,8 @@ interface ModelProviderState {
   sendMessage: (messages: OpenRouterMessage[]) => Promise<string>;
   streamMessage: (
     messages: OpenRouterMessage[],
-    onProgress?: (content: string) => void
+    onProgress?: (content: string) => void,
+    signal?: AbortSignal
   ) => AsyncGenerator<StreamResponse, void, unknown>;
 }
 
@@ -134,10 +135,16 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const streamMessage = useCallback(
     async function* (
       messages: OpenRouterMessage[],
-      onProgress?: (content: string) => void
+      onProgress?: (content: string) => void,
+      signal?: AbortSignal
     ): AsyncGenerator<StreamResponse, void, unknown> {
       if (!currentModel) {
         yield { content: "", isComplete: true, error: "No model selected" };
+        return;
+      }
+      
+      if (signal?.aborted) {
+        yield { content: "", isComplete: true, error: "stopped" };
         return;
       }
 
@@ -164,6 +171,9 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
           let fullContent = "";
           
           for await (const chunk of stream) {
+            if (signal?.aborted) {
+              break;
+            }
             const delta = chunk.choices[0]?.delta?.content || "";
             if (delta) {
               fullContent += delta;
@@ -203,7 +213,8 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
         yield* currentModel.client.streamCompletion(
           currentModel.id,
           messages,
-          onProgress
+          onProgress,
+          signal
         );
       }
     },

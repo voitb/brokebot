@@ -182,7 +182,11 @@ ${previousContext}`;
         try {
           let accumulatedContent = '';
           
-          for await (const chunk of streamMessage(conversationMessages)) {
+          for await (const chunk of streamMessage(
+            conversationMessages,
+            undefined,
+            abortControllerRef.current.signal
+          )) {
             // Check if generation was aborted
             if (abortControllerRef.current?.signal.aborted) {
               break;
@@ -383,7 +387,11 @@ ${previousContext}`;
         try {
           let accumulatedContent = '';
           
-          for await (const chunk of streamMessage(conversationMessages)) {
+          for await (const chunk of streamMessage(
+            conversationMessages,
+            undefined,
+            abortControllerRef.current.signal
+          )) {
             if (abortControllerRef.current?.signal.aborted) {
               break;
             }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { TooltipProvider } from "../../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../ui/tooltip";
 import { useModel } from "../../../providers/ModelProvider";
 import {
   useChatInput,
@@ -11,7 +11,7 @@ import {
 import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Loader2, Mic } from "lucide-react";
+import { Send, Loader2, Mic, Square } from "lucide-react";
 import { toast } from "sonner";
 import {
   FileUpload,
@@ -32,8 +32,14 @@ interface ChatInputProps {
  */
 export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
   const { currentModel, isModelLoading, modelStatus } = useModel();
-  const { isLoading, handleMessageSubmit, message, setMessage } =
-    useChatInput();
+  const {
+    isLoading,
+    isGenerating,
+    stopGeneration,
+    handleMessageSubmit,
+    message,
+    setMessage,
+  } = useChatInput();
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
 
@@ -241,26 +247,54 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
               />
             </div>
 
-            {/* Send Button */}
-            <Button
-              type="submit"
-              size="sm"
-              className="absolute bottom-2 right-4 h-8 w-8 p-0"
-              disabled={
-                isLoading ||
-                isModelLoading ||
-                isModelError ||
-                isWhisperModelLoading ||
-                transcriberStatus === 'recording' ||
-                (!message.trim() && attachedFiles.length === 0)
-              }
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
+            {/* Send Button / Stop Button */}
+            {isGenerating ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="absolute bottom-2 right-4 h-8 w-8 p-0"
+                    onClick={stopGeneration}
+                  >
+                    <Square className="h-4 w-4" />
+                    <span className="sr-only">Stop generation</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Stop Generation</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="absolute bottom-2 right-4 h-8 w-8 p-0"
+                    disabled={
+                      isLoading ||
+                      isModelLoading ||
+                      isModelError ||
+                      isWhisperModelLoading ||
+                      transcriberStatus === "recording" ||
+                      (!message.trim() && attachedFiles.length === 0)
+                    }
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Send Message</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Send Message</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
 
           {/* Model Status Bar */}
