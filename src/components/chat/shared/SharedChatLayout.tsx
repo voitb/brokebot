@@ -58,12 +58,12 @@ export const SharedChatLayout: React.FC<SharedChatLayoutProps> = ({
           <footer className="text-center py-4 text-xs text-muted-foreground border-t">
             Powered by{" "}
             <a
-              href="https://github.com/your-repo/local-gpt" // Replace with your repo link
+                              href="https://github.com/your-repo/brokebot" // Replace with your repo link
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium hover:underline"
             >
-              Local-GPT
+                              BrokeBot
             </a>
             .
           </footer>

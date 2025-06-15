@@ -1,5 +1,5 @@
 // Encryption utilities for API keys
-const ENCRYPTION_KEY_NAME = 'local-gpt-key';
+const ENCRYPTION_KEY_NAME = 'brokebot-key';
 
 /**
  * Gets or creates encryption key from environment or generates one
@@ -21,7 +21,7 @@ async function getEncryptionKey(): Promise<CryptoKey> {
     return await crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt: new TextEncoder().encode('local-gpt-salt'),
+        salt: new TextEncoder().encode('brokebot-salt'),
         iterations: 100000,
         hash: 'SHA-256',
       },

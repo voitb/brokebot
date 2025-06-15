@@ -1,6 +1,7 @@
 import React from "react"; 
 import { SidebarTrigger } from "../ui/sidebar";
 import { ConversationList } from "..";
+import { Logo } from "../ui/Logo";
 
 /**
  * Chat sidebar containing conversation list
@@ -11,7 +12,7 @@ export const ChatSidebar: React.FC = () => {
     <aside className="w-full h-full flex flex-col bg-background">
       {/* Header with app name and close button */}
       <div className="p-4 pb-3 flex items-center justify-between border-border">
-        <span className="text-lg font-semibold">Local-GPT</span>
+        <Logo size="md" className="ml-1" />
         <SidebarTrigger />
       </div>
 

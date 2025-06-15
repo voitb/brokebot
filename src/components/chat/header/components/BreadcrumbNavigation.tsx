@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "../../../ui/breadcrumb"; 
 import { EditableConversationTitle } from "../../sidebar/components";
+import { Logo } from "../../../ui/Logo";
 
 interface BreadcrumbNavigationProps {
   conversationTitle?: string;
@@ -45,10 +46,10 @@ export const BreadcrumbNavigation: React.FC<BreadcrumbNavigationProps> = ({
           <BreadcrumbLink
             onClick={() => navigate("/")}
             className="cursor-pointer flex items-center gap-1 hover:text-foreground"
-          >
-            <Home className="w-3 h-3" />
-            Local-GPT
-          </BreadcrumbLink>
+                      >
+              <Logo size="sm" />
+              BrokeBot
+            </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem className={`${isEditingTitle ? "rounded-none!" : ""}`}>

@@ -147,7 +147,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         <TooltipProvider>
           <DialogTitle className="sr-only">Settings</DialogTitle>
           <DialogDescription className="sr-only">
-            Customize your Local-GPT settings here.
+            Customize your BrokeBot settings here.
           </DialogDescription>
 
           {/* Mobile Layout */}

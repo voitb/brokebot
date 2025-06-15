@@ -154,7 +154,7 @@ const LoggedOutView: React.FC = () => {
         <div className="space-y-6 max-w-4xl">
             <div>
                 <Label className="text-base font-medium">Current Plan</Label>
-                <p className="text-sm text-muted-foreground">You're using Local-GPT in offline mode. Log in to upgrade and sync.</p>
+                <p className="text-sm text-muted-foreground">You're using BrokeBot in offline mode. Log in to upgrade and sync.</p>
             </div>
             <Card>
                 <CardHeader>
