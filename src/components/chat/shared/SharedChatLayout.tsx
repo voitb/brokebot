@@ -31,44 +31,41 @@ export const SharedChatLayout: React.FC<SharedChatLayoutProps> = ({
 
   return (
     <TooltipProvider>
-      <ScrollArea className="h-screen">
-        <div className="min-h-screen bg-background flex flex-col">
-          <SharedChatHeader
-            theme={theme}
-            sharedLink={sharedLink}
-            onToggleTheme={toggleTheme}
-            onCopyLink={handleCopyLink}
-            onDownloadChat={handleDownloadChat}
-            onLogoClick={handleLogoClick}
-          />
+      <div className="h-screen bg-background flex flex-col">
+        <SharedChatHeader
+          theme={theme}
+          sharedLink={sharedLink}
+          onToggleTheme={toggleTheme}
+          onCopyLink={handleCopyLink}
+          onDownloadChat={handleDownloadChat}
+          onLogoClick={handleLogoClick}
+        />
 
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full">
-              <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-                <SharedChatInfo
-                  conversation={conversation}
-                  messages={messages}
-                  sharedLink={sharedLink}
-                />
-                <SharedChatMessages messages={messages} />
-              </div>
-            </ScrollArea>
-          </div>
+        <main className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="container mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+              <SharedChatInfo
+                conversation={conversation}
+                messages={messages}
+                sharedLink={sharedLink}
+              />
+              <SharedChatMessages messages={messages} />
+            </div>
+          </ScrollArea>
+        </main>
 
-          <footer className="text-center py-4 text-xs text-muted-foreground border-t">
-            Powered by{" "}
-            <a
-                              href="https://github.com/your-repo/brokebot" // Replace with your repo link
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:underline"
-            >
-                              BrokeBot
-            </a>
-            .
-          </footer>
-        </div>
-      </ScrollArea>
+        <footer className="text-center p-4 text-sm text-muted-foreground  ">
+          Powered by{" "}
+          <a
+            href="https://github.com/your-repo/brokebot" // Replace with your repo link
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium hover:underline"
+          >
+            BrokeBot
+          </a>
+        </footer>
+      </div>
     </TooltipProvider>
   );
 };
