@@ -40,7 +40,7 @@ export const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
             <div className="space-y-2">
               <Label>Reset all settings</Label>
               <p className="text-sm text-muted-foreground">
-                Reset BrokeBot to default settings (keeps conversations)
+                Reset brokebot to default settings (keeps conversations)
               </p>
               <Button
                 variant="destructive"

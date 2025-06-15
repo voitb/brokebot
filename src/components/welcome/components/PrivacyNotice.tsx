@@ -4,7 +4,7 @@ export const PrivacyNotice: React.FC = () => {
   return (
     <div className="text-xs text-muted-foreground max-w-2xl mx-auto">
       <p>
-        <span className="font-bold">Privacy Notice:</span> BrokeBot is designed
+        <span className="font-bold">Privacy Notice:</span> brokebot is designed
         for local and offline use, but you can optionally connect it to external
         AI services (like OpenAI, Anthropic, Google). Please be aware that when
         using these services, your conversations may be processed and stored by

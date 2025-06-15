@@ -59,10 +59,10 @@ export const Logo: React.FC<LogoProps> = ({
       <div className={`flex items-center gap-2 ${className}`}>
         <img
           src={logoSrc}
-          alt="BrokeBot Logo"
+          alt="brokebot Logo"
           className={`${sizeClasses[size]} object-contain`}
         />
-        <span className={`font-semibold ${textSizeClasses[size]}`}>BrokeBot</span>
+        <span className={`font-semibold ${textSizeClasses[size]}`}>brokebot</span>
       </div>
     );
   }
@@ -70,7 +70,7 @@ export const Logo: React.FC<LogoProps> = ({
   return (
     <img
       src={logoSrc}
-      alt="BrokeBot Logo"
+      alt="brokebot Logo"
       className={`${sizeClasses[size]} object-contain ${className}`}
     />
   );

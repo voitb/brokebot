@@ -10,7 +10,7 @@ interface EmptyStateProps {
  * Empty state when no messages are present
  */
 export const EmptyState: React.FC<EmptyStateProps> = React.memo(({ conversation }) => {
-  const title = conversation ? `Chat: ${conversation.title}` : "Welcome to BrokeBot!";
+  const title = conversation ? `Chat: ${conversation.title}` : "Welcome to brokebot!";
   const description = conversation
     ? "Start chatting with your AI assistant."
     : "Start a conversation with your free AI assistant.";

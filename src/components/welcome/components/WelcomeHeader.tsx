@@ -7,7 +7,7 @@ export const WelcomeHeader: React.FC = () => (
           <Logo size="xl" className="mb-4" />
     </div>
       <h1 className="text-4xl font-bold tracking-tight">
-        Welcome to BrokeBot
+        Welcome to brokebot
       </h1>
     <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
       Your free, private AI assistant that runs entirely in your browser. No
