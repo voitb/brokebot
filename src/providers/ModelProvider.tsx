@@ -16,6 +16,7 @@ import {
 } from "../lib/openrouter";
 import { functions } from "../lib/appwriteClient";
 import { useUserConfig } from "../hooks/useUserConfig";
+import { useModels  } from "@/hooks/api";
 
 export type ModelType = "local" | "online";
 
@@ -34,6 +35,9 @@ interface ModelProviderState {
   isOnlineMode: boolean;
   isModelLoading: boolean;
   modelStatus: string;
+  availableOnlineModels: OpenRouterModel[];
+  isLoadingAvailableModels: boolean;
+  availableModelsError: string | null;
   setCurrentModel: (model: UnifiedModel) => void;
   sendMessage: (messages: OpenRouterMessage[]) => Promise<string>;
   streamMessage: (
@@ -52,6 +56,11 @@ interface ModelProviderProps {
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const webLLM = useWebLLM();
   const { config } = useUserConfig();
+  const { 
+    models: availableOnlineModels, 
+    isLoading: isLoadingAvailableModels, 
+    error: availableModelsError 
+  } = useModels();
   const [currentModel, setCurrentModelState] = useState<UnifiedModel | null>(
     null
   );
@@ -234,6 +243,9 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     isOnlineMode: currentModel?.type === "online",
     isModelLoading,
     modelStatus,
+    availableOnlineModels,
+    isLoadingAvailableModels,
+    availableModelsError,
     setCurrentModel,
     sendMessage,
     streamMessage,
