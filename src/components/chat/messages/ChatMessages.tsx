@@ -3,22 +3,24 @@ import { ScrollArea } from "../../ui/scroll-area";
 import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
 import { useSmartAutoScroll } from "../../../hooks/useSmartAutoScroll";
-import { useChatInput } from "../input/hooks";
 import { useWebLLM } from "../../../providers/WebLLMProvider";
 import { MessageBubble, EmptyState, ScrollToBottomButton } from "./components";
 
 interface ChatMessagesProps {
   isLoading?: boolean;
   isGenerating?: boolean;
+  onRegenerate: () => void;
+  onStopGeneration: () => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   isLoading = false,
   isGenerating = false,
+  onRegenerate,
+  onStopGeneration,
 }) => {
   const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
-  const { regenerateLastResponse, stopGeneration } = useChatInput();
   const { isLoading: isEngineLoading, status } = useWebLLM();
   const { scrollAreaRef, isAtBottom, handleScrollToBottomClick } =
     useSmartAutoScroll([messages, isGenerating, conversationId]);
@@ -44,14 +46,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 message.role === "assistant" &&
                 index === messages.length - 1 &&
                 isModelReady
-                  ? regenerateLastResponse
+                  ? onRegenerate
                   : undefined
               }
               onStopGeneration={
                 message.role === "assistant" &&
                 index === messages.length - 1 &&
                 isGenerating
-                  ? stopGeneration
+                  ? onStopGeneration
                   : undefined
               }
             />

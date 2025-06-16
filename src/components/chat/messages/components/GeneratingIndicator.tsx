@@ -10,7 +10,7 @@ export const GeneratingIndicator: React.FC = React.memo(() => (
     <MessageAvatar isUser={false} isGenerating={true} position="left" />
     <div className="flex items-center gap-2 text-muted-foreground py-2">
       <Loader2 className="w-4 h-4 animate-spin" />
-      <span className="text-sm">AI is thinking...</span>
+      <span className="text-sm">Responding...</span>
     </div>
   </div>
 )); 
