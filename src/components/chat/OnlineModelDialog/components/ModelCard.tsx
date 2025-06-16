@@ -1,7 +1,7 @@
 import React from "react";
 import { Brain, Eye, Zap, Cloud, Code, AlertTriangle } from "lucide-react";
 import { Badge } from "../../../ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../../ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -44,7 +44,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
 }) => {
   return (
     <Card
-      className={`transition-colors ${
+      className={`transition-colors flex flex-col h-full ${
         isEnabled
           ? "cursor-pointer hover:bg-accent"
           : "opacity-50 cursor-not-allowed"
@@ -62,7 +62,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0 space-y-2">
+      <CardContent className="pt-0 flex-grow">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -75,7 +75,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <div className="flex items-center justify-between">
+      </CardContent>
+      <CardFooter className="flex-col items-start space-y-2 pt-0">
+        <div className="flex items-center justify-between w-full">
           <Badge variant="outline" className="text-xs">
             {model.provider}
           </Badge>
@@ -91,7 +93,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             Learns from prompts
           </div>
         )}
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };

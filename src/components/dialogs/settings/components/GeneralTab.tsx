@@ -13,8 +13,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OpenRouterIcon } from "@/components/ui/ProviderIcons";
 import { type UserConfig } from "@/lib/db";
-import { useTheme } from "@/providers/ThemeProvider";
+import { useTheme } from "@/providers/ThemeProvider"; 
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;
@@ -28,13 +30,39 @@ interface GeneralTabProps {
   onSaveChanges: () => Promise<void>;
 }
 
+const apiKeyProviders = [
+  { 
+    id: "openrouterApiKey", 
+    name: "OpenRouter", 
+    icon: <OpenRouterIcon />,
+    url: "https://openrouter.ai/keys"
+  },
+  // { 
+  //   id: "openaiApiKey", 
+  //   name: "OpenAI", 
+  //   icon: <OpenAIIcon />,
+  //   url: "https://platform.openai.com/api-keys" 
+  // },
+  // { 
+  //   id: "googleApiKey", 
+  //   name: "Google", 
+  //   icon: <GeminiIcon />,
+  //   url: "https://aistudio.google.com/app/api-keys"
+  // },
+  // { 
+  //   id: "anthropicApiKey", 
+  //   name: "Anthropic", 
+  //   icon: <AnthropicIcon />,
+  //   url: "https://console.anthropic.com/settings/keys"
+  // },
+] as const;
+
 export const GeneralTab: React.FC<GeneralTabProps> = ({
   settings,
   onFieldChange,
   user,
   onUpdateName,
   onUpdatePassword,
-  onSaveChanges,
 }) => {
   const { setTheme } = useTheme();
   const [name, setName] = useState(user?.name || "");
@@ -176,77 +204,27 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
 
       <Separator />
 
-      {/* Models Section */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-medium">Local Models</h3>
-        <div className="pl-4 border-l-2">
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="auto-load-model">Auto-load model</Label>
-              <p className="text-xs text-muted-foreground">
-                Automatically load the selected model on startup for faster
-                first response.
-              </p>
-            </div>
-            <Switch
-              id="auto-load-model"
-              checked={!!settings.autoLoadModel}
-              onCheckedChange={(checked) =>
-                onFieldChange("autoLoadModel", checked)
-              }
-            />
-          </div>
-        </div>
-      </section>
-
-      <Separator />
-
       {/* API Keys Section */}
       <section className="space-y-4">
         <h3 className="text-lg font-medium">API Keys</h3>
         <div className="space-y-4 pl-4 border-l-2">
-          <div className="space-y-2">
-            <Label htmlFor="openrouter-api-key">OpenRouter API Key</Label>
-            <Input
-              id="openrouter-api-key"
-              type="password"
-              value={settings.openrouterApiKey || ""}
-              onChange={(e) =>
-                onFieldChange("openrouterApiKey", e.target.value)
-              }
-              placeholder="sk-or-..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="openai-api-key">OpenAI API Key</Label>
-            <Input
-              id="openai-api-key"
-              type="password"
-              value={settings.openaiApiKey || ""}
-              onChange={(e) => onFieldChange("openaiApiKey", e.target.value)}
-              placeholder="sk-..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="anthropic-api-key">Anthropic API Key</Label>
-            <Input
-              id="anthropic-api-key"
-              type="password"
-              value={settings.anthropicApiKey || ""}
-              onChange={(e) => onFieldChange("anthropicApiKey", e.target.value)}
-              placeholder="sk-ant-..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="google-api-key">Google API Key</Label>
-            <Input
-              id="google-api-key"
-              type="password"
-              value={settings.googleApiKey || ""}
-              onChange={(e) => onFieldChange("googleApiKey", e.target.value)}
-              placeholder="AIzaSy..."
-            />
-          </div>
+          {apiKeyProviders.map((provider) => (
+            <Card key={provider.id}>
+              <CardHeader className="flex flex-row items-center justify-between pb-4 space-y-0">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  {provider.icon}
+                  {provider.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* <SettingsApiKeySection 
+                  provider={provider.id} 
+                  name={provider.name}
+                  url={provider.url}
+                /> */}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
     </div>

@@ -149,7 +149,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[90vh] w-[90vw] p-0 overflow-hidden md:max-h-[720px] md:w-[98vw] md:max-w-5xl">
+      <DialogContent showCloseButton={false} className="h-[90vh] w-[90vw] p-0 overflow-hidden md:max-h-[720px] md:w-[98vw] md:max-w-5xl">
         <TooltipProvider>
           <DialogTitle className="sr-only">Settings</DialogTitle>
           <DialogDescription className="sr-only">
@@ -206,7 +206,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => onOpenChange(false)}
                       size="icon"
                     >
@@ -214,25 +214,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Cancel</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      onClick={handleSaveAndClose}
-                      disabled={isSaving}
-                      size="icon"
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Check className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isSaving ? "Saving..." : "Save Changes"}</p>
+                    <p>Close</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
@@ -308,7 +290,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => onOpenChange(false)}
                         size="icon"
                       >
@@ -316,25 +298,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Cancel</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        onClick={handleSaveAndClose}
-                        disabled={isSaving}
-                        size="icon"
-                      >
-                        {isSaving ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Check className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isSaving ? "Saving..." : "Save Changes"}</p>
+                      <p>Close</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
