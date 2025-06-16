@@ -13,7 +13,7 @@ function App() {
           <AuthProvider>
             <ResponsiveChatLayout>
               <Outlet />
-              <Toaster />
+              <Toaster position="top-right" />
               <ModalRoot />
             </ResponsiveChatLayout>
           </AuthProvider> 

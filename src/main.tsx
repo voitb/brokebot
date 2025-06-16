@@ -28,7 +28,6 @@ ReactDOM.createRoot(rootElement).render(
               <ModelProvider>
                 <ConversationsProvider>
                   <RouterProvider router={router} />
-                  <Toaster />
                 </ConversationsProvider>
               </ModelProvider>
             </WebLLMProvider>
