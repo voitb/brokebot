@@ -103,10 +103,10 @@ const LoggedInView: React.FC = () => {
                         </li>
                         <li>✓ Complete privacy with local models and your own keys</li>
                         <li>✓ Cross-device sync (manual JSON export)</li>
-                        <li>✓ Works offline</li>
-                        <li>✓ Offline chat sharing</li>
-                        <li>✓ No usage limits</li>
-                        <li>✓ Bring your own API keys (ChatGPT, Claude, Gemini, etc.) (coming soon)</li>
+                        <li>✓ Works offline & Offline chat sharing (html export)</li>
+                        <li>✓ Speech-to-text functionality</li>
+                        <li>✓ Read from .txt files</li>
+                        <li>✓ Bring your own API keys (Coming Soon)</li>
                     </ul>
                 </CardContent>
             </Card>
@@ -116,24 +116,40 @@ const LoggedInView: React.FC = () => {
                 </div> */}
                 <div className="space-y-4 lg:col-span-2">
                     <Card>
-                        <CardHeader><CardTitle className="text-sm">Plus Benefits</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle className="text-sm flex justify-between items-center">
+                                <span>Plus Benefits <span className="text-xs text-muted-foreground">(10$ monthly / 84$ yearly)</span></span>
+                                <Badge variant="outline">Coming Soon</Badge>
+                            </CardTitle>
+                        </CardHeader>
                         <CardContent>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li>✓ Everything in Local Free</li> 
-                                <li>✓ Automatic cloud backup</li>
-                                <li>✓ Online shared chat</li>
-                                <li>✓ Speech-to-text functionality</li>
-                                <li>✓ File uploads (Coming Soon)</li>
+                                <li>✓ Automatic cloud backup (optional)</li>
+                                <li>✓ Online shared chat links</li>
+                                <li>✓ Read from PDF and RTF files</li>
+                                <li>✓ Export chats to PDF</li>
+                                <li>✓ Advanced local reasoning models</li>
                                 <li>✓ Priority support</li>
                             </ul>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardHeader><CardTitle className="text-sm">Pro Benefits</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle className="text-sm flex justify-between items-center">
+                                <span>Pro Benefits <span className="text-xs text-muted-foreground">(20$ monthly / 168$ yearly)</span></span>
+                                <Badge variant="outline">Coming Soon</Badge>
+                            </CardTitle>
+                        </CardHeader>
                         <CardContent>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li>✓ Everything in Plus</li>
-                                <li>✓ Mint conversations as NFTs</li>
+                                <li>✓ Full voice-to-voice conversations</li>
+                                <li>✓ Image analysis & reasoning</li>
+                                <li>✓ Generate images & video</li>
+                                {/* <li>✓ Real-time web search (Experimental)</li>
+                                <li>✓ Mint conversations as NFTs (Experimental)</li>
+                                <li>✓ MCP integration (Experimental)</li> */}
                             </ul>
                         </CardContent>
                     </Card>
@@ -170,10 +186,10 @@ const LoggedOutView: React.FC = () => {
                         </li>
                         <li>✓ Complete privacy with local models and your own keys</li>
                         <li>✓ Cross-device sync (manual JSON export)</li>
-                        <li>✓ Works offline</li>
-                        <li>✓ Offline chat sharing</li>
-                        <li>✓ No usage limits</li>
-                        <li>✓ Bring your own API keys (ChatGPT, Claude, Gemini, etc.) (coming soon)</li>
+                        <li>✓ Works offline & Offline chat sharing (html export)</li>
+                        <li>✓ Speech-to-text functionality</li>
+                        <li>✓ Read from .txt files</li>
+                        <li>✓ Bring your own API keys (Coming Soon)</li>
                     </ul>
                 </CardContent>
             </Card>
@@ -194,24 +210,40 @@ const LoggedOutView: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                     <Card>
-                        <CardHeader><CardTitle className="text-sm">Plus Benefits</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle className="text-sm flex justify-between items-center">
+                                <span>Plus Benefits <span className="text-xs text-muted-foreground">(10$ monthly / 84$ yearly)</span></span>
+                                <Badge variant="outline">Coming Soon</Badge>
+                            </CardTitle>
+                        </CardHeader>
                         <CardContent>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li>✓ Everything in Local Free</li> 
-                                <li>✓ Automatic cloud backup</li>
-                                <li>✓ Online shared chat</li>
-                                <li>✓ Speech-to-text functionality</li>
-                                <li>✓ File uploads (Coming Soon)</li>
+                                <li>✓ Automatic cloud backup (optional)</li>
+                                <li>✓ Online shared chat links</li>
+                                <li>✓ Read from PDF and RTF files</li>
+                                <li>✓ Export chats to PDF</li>
+                                <li>✓ Advanced local reasoning models</li>
                                 <li>✓ Priority support</li>
                             </ul>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardHeader><CardTitle className="text-sm">Pro Benefits</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle className="text-sm flex justify-between items-center">
+                                <span>Pro Benefits <span className="text-xs text-muted-foreground">(20$ monthly / 168$ yearly)</span></span>
+                                <Badge variant="outline">Coming Soon</Badge>
+                            </CardTitle>
+                        </CardHeader>
                         <CardContent>
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li>✓ Everything in Plus</li>
-                                <li>✓ Mint conversations as NFTs</li>
+                                <li>✓ Full voice-to-voice conversations</li>
+                                <li>✓ Image analysis & reasoning</li>
+                                <li>✓ Generate images & video</li>
+                                {/* <li>✓ Real-time web search (Experimental)</li>
+                                <li>✓ Mint conversations as NFTs (Experimental)</li>
+                                <li>✓ MCP integration (Experimental)</li> */}
                             </ul>
                         </CardContent>
                     </Card>
