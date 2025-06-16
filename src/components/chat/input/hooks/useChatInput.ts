@@ -137,6 +137,7 @@ export function useChatInput(): UseChatInputReturn {
           if (messages.length > 0) {
             // Combine previous messages into context
             const previousContext = messages
+              .filter(msg => !msg.content.startsWith("⚠️"))
               .slice(-10) // Take only last 10 messages to keep context manageable
               .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
               .join('\n\n');
@@ -164,7 +165,7 @@ ${previousContext}`;
           // For local models, use full message history as before
           const allMessages: OpenRouterMessage[] = [
             { role: "system", content: COMPLETE_AI_RULES },
-            ...messages.map(msg => ({
+            ...messages.filter(msg => !msg.content.startsWith("⚠️")).map(msg => ({
               role: msg.role as "user" | "assistant",
               content: msg.content,
             })),
@@ -345,6 +346,7 @@ ${previousContext}`;
           if (messagesToProcess.length > 0) {
             // Combine previous messages into context
             const previousContext = messagesToProcess
+              .filter(msg => !msg.content.startsWith("⚠️"))
               .slice(-10) // Take only last 10 messages to keep context manageable
               .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
               .join('\n\n');
@@ -372,7 +374,7 @@ ${previousContext}`;
           // For local models, use full message history as before
           const allMessages: OpenRouterMessage[] = [
             { role: "system", content: COMPLETE_AI_RULES },
-            ...messages.slice(0, -1).map(msg => ({
+            ...messages.slice(0, -1).filter(msg => !msg.content.startsWith("⚠️")).map(msg => ({
               role: msg.role as "user" | "assistant",
               content: msg.content,
             })),
