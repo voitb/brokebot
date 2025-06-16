@@ -346,8 +346,11 @@ ${previousContext}`;
           const messagesToProcess = messages.slice(0, -1); // Exclude the last AI message
           
           if (messagesToProcess.length > 0) {
+            const lastPromptMessage = messagesToProcess[messagesToProcess.length - 1];
+            const historyForContext = messagesToProcess.slice(0, -1);
+            
             // Combine previous messages into context
-            const previousContext = messagesToProcess
+            const previousContext = historyForContext
               .filter(msg => !msg.content.startsWith("⚠️"))
               .slice(-10) // Take only last 10 messages to keep context manageable
               .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
@@ -361,11 +364,11 @@ ${previousContext}`;
 
             conversationMessages = [
               { role: "system", content: systemWithContext },
-              { role: "user", content: "Please regenerate your last response based on the conversation context above." },
+              { role: "user", content: lastPromptMessage.content },
             ];
             
           } else {
-            // No previous context
+            // No previous context - This case should ideally not be hit
             conversationMessages = [
               { role: "system", content: COMPLETE_AI_RULES },
               { role: "user", content: "Please provide a response." },
