@@ -26,87 +26,34 @@ export interface StreamResponse {
   error?: string;
 }
 
-// Available free models that learn from prompts
-export const FREE_LEARNING_MODELS = [
-  {
-    id: "deepseek/deepseek-r1-0528-qwen3-8b:free",
-    name: "DeepSeek R1 Qwen3 8B",
-    description: "Advanced reasoning model - learns from user prompts",
-    provider: "DeepSeek",
-    category: "reasoning",
-    warning: "This model learns from your conversations"
-  },
-  {
-    id: "google/gemini-2.0-flash-exp:free",
-    name: "Gemini 2.0 Flash Experimental",
-    description: "Latest Google multimodal model - learns from user prompts",
-    provider: "Google",
-    category: "multimodal",
-    warning: "This model learns from your conversations"
-  },
-  {
-    id: "qwen/qwen3-32b:free",
-    name: "Qwen3 32B",
-    description: "Large language model - learns from user prompts",
-    provider: "Alibaba",
-    category: "general",
-    warning: "This model learns from your conversations"
-  },
-  {
-    id: "google/gemma-3n-e4b-it:free",
-    name: "Gemma 3n E4B Instruct",
-    description: "Google's instruction-tuned model - learns from user prompts",
-    provider: "Google",
-    category: "instruction",
-    warning: "This model learns from your conversations"
-  }
-] as const;
+export interface OpenRouterModel {
+  id: string;
+  name:string;
+  description: string;
+  provider: string;
+  category: string;
+  isFree: boolean;
+  contextLength: number;
+  pricing: {
+    prompt: string;
+    completion: string;
+  };
+}
 
-// Paid models requiring API keys
-export const PAID_API_MODELS = [
-  {
-    id: "openai/gpt-4o",
-    name: "GPT-4o",
-    description: "OpenAI's flagship multimodal model",
-    provider: "OpenAI",
-    category: "multimodal",
-    requiresApiKey: "openai"
-  },
-  {
-    id: "openai/gpt-4o-mini",
-    name: "GPT-4o Mini",
-    description: "Smaller, faster version of GPT-4o",
-    provider: "OpenAI",
-    category: "efficient",
-    requiresApiKey: "openai"
-  },
-  {
-    id: "anthropic/claude-3.5-sonnet",
-    name: "Claude 3.5 Sonnet",
-    description: "Anthropic's most capable model",
-    provider: "Anthropic",
-    category: "reasoning",
-    requiresApiKey: "anthropic"
-  },
-  {
-    id: "anthropic/claude-3.5-haiku",
-    name: "Claude 3.5 Haiku",
-    description: "Fast and efficient Claude model",
-    provider: "Anthropic",
-    category: "efficient",
-    requiresApiKey: "anthropic"
-  },
-  {
-    id: "google/gemini-pro-1.5",
-    name: "Gemini Pro 1.5",
-    description: "Google's advanced multimodal model",
-    provider: "Google",
-    category: "multimodal",
-    requiresApiKey: "google"
-  }
-] as const;
+export const getCategoryFromModel = (model: { id: string, name: string, description: string }): string => {
+  const modelName = model.name.toLowerCase();
+  const modelId = model.id.toLowerCase();
+  const modelDesc = model.description.toLowerCase();
 
-export type OpenRouterModel = typeof FREE_LEARNING_MODELS[number] | typeof PAID_API_MODELS[number];
+  if (modelId.includes('vision') || modelDesc.includes('multimodal')) return 'multimodal';
+  if (modelName.includes('claude') && modelName.includes('sonnet')) return 'reasoning';
+  if (modelName.includes('gpt-4') || modelName.includes('reasoning')) return 'reasoning';
+  if (modelName.includes('flash') || modelName.includes('haiku') || modelName.includes('mini')) return 'efficient';
+  if (modelId.includes('code') || modelDesc.includes('coding')) return 'instruction';
+  if (modelName.includes('instruct')) return 'instruction';
+  
+  return 'general';
+};
 
 // Helper function to validate OpenRouter API key format
 const validateOpenRouterKey = (key: string): boolean => {
@@ -301,58 +248,58 @@ export class OpenRouterClient {
       );
       
       return result.responseStatusCode === 200;
-    } catch (error) {
-      console.error('OpenRouter connection test failed:', error);
+    } catch {
       return false;
     }
   }
 
-  // Public method to test API key
   async testApiKey(): Promise<{ success: boolean; error?: string }> {
     try {
       const apiKey = this.keys.openrouterApiKey;
-      
       if (!apiKey) {
-        return { success: false, error: 'No API key provided' };
+        return { success: false, error: 'API key is not set.' };
       }
-      
       if (!validateOpenRouterKey(apiKey)) {
-        return { success: false, error: 'Invalid API key format' };
+        return { success: false, error: 'Invalid API key format.' };
       }
       
-      const isConnected = await this.testConnection();
-      
-      if (isConnected) {
+      const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`
+        }
+      });
+
+      if (response.status === 200) {
         return { success: true };
+      } else if (response.status === 401) {
+        return { success: false, error: 'Invalid API key.' };
       } else {
-        return { success: false, error: 'Connection test failed' };
+        return { success: false, error: `API key validation failed with status: ${response.status}` };
       }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      };
+      return { success: false, error: 'A network error occurred while validating the API key.' };
     }
   }
 }
 
-// Utility to get stored API keys
 export const getStoredApiKeys = () => {
-  return {
-    openrouter: localStorage.getItem('openrouter_api_key') || '',
-    openai: localStorage.getItem('openai_api_key') || '',
-    anthropic: localStorage.getItem('anthropic_api_key') || '',
-    google: localStorage.getItem('google_api_key') || '',
-  };
+  if (typeof window === 'undefined') {
+    return {};
+  }
+  const keys = localStorage.getItem('apiKeys');
+  try {
+    return keys ? JSON.parse(keys) : {};
+  } catch {
+    return {};
+  }
 };
 
-// Utility to store API keys
 export const storeApiKeys = (keys: Partial<ReturnType<typeof getStoredApiKeys>>) => {
-  Object.entries(keys).forEach(([provider, key]) => {
-    if (key) {
-      localStorage.setItem(`${provider}_api_key`, key);
-    } else {
-      localStorage.removeItem(`${provider}_api_key`);
-    }
-  });
+  if (typeof window === 'undefined') {
+    return;
+  }
+  const currentKeys = getStoredApiKeys();
+  const newKeys = { ...currentKeys, ...keys };
+  localStorage.setItem('apiKeys', JSON.stringify(newKeys));
 }; 

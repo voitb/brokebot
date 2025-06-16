@@ -1,11 +1,12 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import {
   OpenRouterClient,
   type OpenRouterModel,
-} from "@/lib/openrouter";
+} from "../../../../lib/openrouter";
 import { functions } from "@/lib/appwriteClient";
 import { useUserConfig } from "@/hooks/useUserConfig";
+import { useModels } from "../../../../hooks/api/useModels";
 
 export const useOnlineModels = (
   open: boolean | undefined,
@@ -16,6 +17,10 @@ export const useOnlineModels = (
   onOpenChange?: (open: boolean) => void
 ) => {
   const { config } = useUserConfig();
+  const { models, isLoading, error } = useModels();
+
+  const freeModels = useMemo(() => models.filter(m => m.isFree), [models]);
+  const paidModels = useMemo(() => models.filter(m => !m.isFree), [models]);
 
   const hasOpenRouterKey = !!config?.openrouterApiKey;
   
@@ -69,6 +74,10 @@ export const useOnlineModels = (
       // google: config?.googleApiKey,
       // anthropic: config?.anthropicApiKey,
     },
+    freeModels,
+    paidModels,
+    isLoading,
+    error,
     hasOpenRouterKey,
     hasPaidKey,
     handleModelSelect,

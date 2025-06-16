@@ -11,7 +11,7 @@ export const APPWRITE_SUBSCRIPTIONS_COLLECTION_ID = 'subscriptions';
 
 // Functions
 export const APPWRITE_FUNC_CREATE_STRIPE_CHECKOUT_SESSION = 'create-stripe-checkout-session';
-export const APPWRITE_FUNC_MANAGE_SUBSCRIPTION = 'manage-subscription';
+export const APPWRITE_FUNC_MANAGE_SUBSCRIPTION = 'manage-subscription'; 
 
 // Stripe
 export const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';

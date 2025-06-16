@@ -1,5 +1,5 @@
 import React from "react";
-import { Cloud, Key, AlertTriangle, TestTube, Settings } from "lucide-react";
+import { Cloud, Key, AlertTriangle, TestTube, Settings, Loader } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +7,8 @@ import {
   DialogTitle,
 } from "../../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
-import { Alert, AlertDescription } from "../../ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../../ui/alert";
 import {
-  FREE_LEARNING_MODELS,
-  PAID_API_MODELS,
   type OpenRouterModel,
   type OpenRouterClient,
 } from "../../../lib/openrouter";
@@ -44,7 +42,77 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
     hasPaidKey,
     handleModelSelect,
     handleOpenChange,
+    freeModels,
+    paidModels,
+    isLoading,
+    error,
   } = useOnlineModels(open, onModelSelect, onOpenChange);
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-full p-8">
+          <Loader className="w-8 h-8 animate-spin" />
+          <p className="ml-4">Loading models...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="p-8">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Failed to load models from OpenRouter. Please try again later.
+              <br />
+              <small>{error.message}</small>
+            </AlertDescription>
+          </Alert>
+        </div>
+      );
+    }
+    
+    return (
+      <ScrollArea className="h-[calc(80vh-98px)]">
+        <TabsContent value="api-keys">
+          <ApiKeysTab />
+        </TabsContent>
+        <TabsContent value="free" className="space-y-4 p-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              These models are free but may learn from conversations.
+            </AlertDescription>
+          </Alert>
+          <ModelList
+            models={freeModels}
+            selectedModel={selectedModel}
+            onSelect={handleModelSelect}
+            isFree
+            availableKeys={storedKeys}
+          />
+        </TabsContent>
+        <TabsContent value="paid" className="space-y-4 p-4">
+          <Alert>
+            <Key className="h-4 w-4" />
+            <AlertDescription>
+              Premium models with enhanced capabilities. Your data remains
+              private.
+            </AlertDescription>
+          </Alert>
+          <ModelList
+            models={paidModels}
+            selectedModel={selectedModel}
+            onSelect={handleModelSelect}
+            isFree={false}
+            availableKeys={storedKeys}
+          />
+        </TabsContent>
+      </ScrollArea>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -80,42 +148,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[calc(80vh-98px)]">
-            <TabsContent value="api-keys">
-              <ApiKeysTab />
-            </TabsContent>
-            <TabsContent value="free" className="space-y-4 p-4">
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  These models are free but may learn from conversations.
-                </AlertDescription>
-              </Alert>
-              <ModelList
-                models={[...FREE_LEARNING_MODELS]}
-                selectedModel={selectedModel}
-                onSelect={handleModelSelect}
-                isFree
-                availableKeys={storedKeys}
-              />
-            </TabsContent>
-            <TabsContent value="paid" className="space-y-4 p-4">
-              <Alert>
-                <Key className="h-4 w-4" />
-                <AlertDescription>
-                  Premium models with enhanced capabilities. Your data remains
-                  private.
-                </AlertDescription>
-              </Alert>
-              <ModelList
-                models={[...PAID_API_MODELS]}
-                selectedModel={selectedModel}
-                onSelect={handleModelSelect}
-                isFree={false}
-                availableKeys={storedKeys}
-              />
-            </TabsContent>
-          </ScrollArea>
+          {renderContent()}
         </Tabs>
       </DialogContent>
     </Dialog>

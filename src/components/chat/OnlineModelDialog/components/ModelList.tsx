@@ -10,7 +10,7 @@ interface ApiKeys {
 }
 
 interface ModelListProps {
-  models: readonly OpenRouterModel[];
+  models: OpenRouterModel[];
   selectedModel?: OpenRouterModel | null;
   onSelect: (model: OpenRouterModel) => void;
   isFree: boolean;
@@ -27,16 +27,9 @@ export const ModelList: React.FC<ModelListProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {models.map((model) => {
-        let isEnabled = false;
-        if (isFree) {
-          isEnabled = !!availableKeys.openrouter;
-        } else {
-          // @ts-expect-error - requiresApiKey only exists on paid models
-          const requiredKey = model.requiresApiKey as keyof ApiKeys;
-          if (requiredKey) {
-            isEnabled = !!availableKeys[requiredKey];
-          }
-        }
+        // All OpenRouter models are enabled if the OpenRouter key is present.
+        const isEnabled = !!availableKeys.openrouter;
+        
         return (
           <ModelCard
             key={model.id}
