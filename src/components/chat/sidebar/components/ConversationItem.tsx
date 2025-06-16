@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
 import { Button } from "../../../ui/button";
 import {
@@ -44,7 +44,21 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     handleMove,
     handleCreateFolderAndMove,
     getItemStyles,
+    isActive,
   } = useConversationItem(conversation);
+
+  useEffect(() => {
+    const renameListener = () => {
+      if (isActive) {
+        // This is a bit of a hacky way to prevent the click
+        // from propagating and navigating.
+        const dummyEvent = { stopPropagation: () => {}, preventDefault: () => {} } as React.MouseEvent;
+        handleRename(dummyEvent);
+      }
+    };
+    document.addEventListener('conversation:rename', renameListener);
+    return () => document.removeEventListener('conversation:rename', renameListener);
+  }, [isActive, handleRename]);
 
   return (
     <>

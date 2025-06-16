@@ -24,7 +24,7 @@ export const NewChatButton: React.FC<NewChatButtonProps> = ({ onNewChat }) => {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Create new conversation (Alt+N)</p>
+          <p>Create new conversation (g n)</p>
         </TooltipContent>
       </Tooltip>
     </div>
