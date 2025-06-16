@@ -187,13 +187,15 @@ ${previousContext}`;
             undefined,
             abortControllerRef.current.signal
           )) {
-            // Check if generation was aborted
             if (abortControllerRef.current?.signal.aborted) {
               break;
             }
 
-            if (chunk.error) {
+            if (chunk.error && chunk.error !== "stopped") {
               throw new Error(chunk.error);
+            }
+            if (chunk.error === "stopped") {
+              break;
             }
 
             accumulatedContent = chunk.content;
@@ -396,8 +398,11 @@ ${previousContext}`;
               break;
             }
 
-            if (chunk.error) {
+            if (chunk.error && chunk.error !== "stopped") {
               throw new Error(chunk.error);
+            }
+            if (chunk.error === "stopped") {
+              break;
             }
 
             accumulatedContent = chunk.content;
