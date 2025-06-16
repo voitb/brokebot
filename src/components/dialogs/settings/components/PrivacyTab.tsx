@@ -30,14 +30,14 @@ export function PrivacyTab({
 }: PrivacyTabProps) {
   const {
     // State
-    config,
-    hasActiveSubscription,
+    // config,
+    // hasActiveSubscription,
     hasConversations: hasConversationsFromHook,
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,
  
-    handleToggleCloudStorage,
+    // handleToggleCloudStorage,
     handleClearAllDataConfirm,
     handleResetSettingsConfirm,
     handleExportConversations,
@@ -72,7 +72,7 @@ export function PrivacyTab({
 
         <DangerZoneSection
           onClearAllDataClick={() => setShowClearDataDialog(true)}
-          onResetSettingsClick={() => setShowResetSettingsDialog(true)}
+          // onResetSettingsClick={() => setShowResetSettingsDialog(true)}
           hasConversations={hasConversationsFromHook}
         />
       </div>

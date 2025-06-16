@@ -1,8 +1,5 @@
 import React from "react";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
-import { Button, ScrollArea } from "../ui";
-import { useNavigate } from "react-router-dom";
-import { useConversations } from "../../hooks/useConversations";
+import { ScrollArea } from "../ui";
 import { ChatHeader } from "../chat/header";
 import {
   GettingStarted,
@@ -12,18 +9,7 @@ import {
 } from "./components";
 import { SEOMetadata } from "../common/SEOMetadata";
 
-export const WelcomeScreen: React.FC = () => {
-  const { open } = useSidebar();
-  const { createEmptyConversation } = useConversations();
-  const navigate = useNavigate();
-
-  const handleOpenNewChat = async () => {
-    const conversationId = await createEmptyConversation("New Conversation");
-    if (conversationId) {
-      navigate(`/chat/${conversationId}`);
-    }
-  };
-
+export const WelcomeScreen: React.FC = () => { 
   return (
     <>
       <SEOMetadata

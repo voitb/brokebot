@@ -7,10 +7,10 @@ import {
 } from "../../../ui/card";
 import { Badge } from "../../../ui/badge";
 import { Globe, Lock } from "lucide-react";
-import type { IConversation } from "../../../../lib/db";
+import type { Conversation } from "../../../../lib/db";
 
 interface ConversationInfoProps {
-  conversation: IConversation;
+  conversation: Conversation;
   messagesCount: number;
   hasCloudStorage: boolean;
   isShared: boolean;

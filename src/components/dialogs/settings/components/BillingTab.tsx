@@ -7,25 +7,25 @@ import { Badge } from "../../../ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from '@/components/ui/button';
 import { Loader2, ExternalLink, LogIn } from 'lucide-react';
-import { PricingInteraction, type Plan } from "./PricingInteraction";
+// import {   type Plan } from "./PricingInteraction";
 
-const SUBSCRIPTION_PLANS: Plan[] = [
-    {
-        name: 'Plus',
-        monthlyPrice: 9,
-        yearlyPrice: 7,
-        monthlyPriceId: 'price_1RZx0MP4jwSv1dGyjJxAy9A2', 
-        yearlyPriceId: 'price_1RZz8rP4jwSv1dGyfDlqHshL',  
-        isPopular: true,
-    },
-    {
-        name: 'Pro',
-        monthlyPrice: 19,
-        yearlyPrice: 15,
-        monthlyPriceId: 'price_pro_monthly_placeholder',
-        yearlyPriceId: 'price_pro_yearly_placeholder',
-    }
-];
+// const SUBSCRIPTION_PLANS: Plan[] = [
+//     {
+//         name: 'Plus',
+//         monthlyPrice: 9,
+//         yearlyPrice: 7,
+//         monthlyPriceId: 'price_1RZx0MP4jwSv1dGyjJxAy9A2', 
+//         yearlyPriceId: 'price_1RZz8rP4jwSv1dGyfDlqHshL',  
+//         isPopular: true,
+//     },
+//     {
+//         name: 'Pro',
+//         monthlyPrice: 19,
+//         yearlyPrice: 15,
+//         monthlyPriceId: 'price_pro_monthly_placeholder',
+//         yearlyPriceId: 'price_pro_yearly_placeholder',
+//     }
+// ];
 
 const FreePlanCard = () => (
     <Card>
@@ -108,7 +108,7 @@ const LoggedInView: React.FC = () => {
         hasActiveSubscription, 
         isLoading: isSubLoading, 
         error, 
-        redirectToCheckout, 
+        // redirectToCheckout, 
         redirectToCustomerPortal 
     } = useSubscription();
     

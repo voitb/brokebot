@@ -10,7 +10,7 @@ import {
 import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Loader2, Mic, Square } from "lucide-react";
+import { Send, Mic, Square } from "lucide-react";
 import { toast } from "sonner";
 import {
   FileUpload,

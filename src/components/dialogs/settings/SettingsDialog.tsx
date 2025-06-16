@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Shield, CreditCard, X, Check, Loader2, Settings, LogIn, LogOut, FileText } from "lucide-react";
+import { Shield, CreditCard, X, Settings, LogIn, LogOut, FileText } from "lucide-react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
@@ -70,7 +70,6 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   
   const {
     settings,
-    isSaving,
     handleFieldChange,
     handleSaveChanges,
   } = useSettings();
@@ -101,12 +100,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     newParams.set("tab", tab);
     setSearchParams(newParams);
   };
-
-  const handleSaveAndClose = async () => {
-    await handleSaveChanges();
-    onOpenChange(false);
-  };
-
+  
   const getTabDisplayName = (tabId: SettingsTab) =>
     navigationItems.find((item) => item.id === tabId)?.label || tabId;
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Copy, Download, FileCode, MessageSquare, Moon, Sun } from "lucide-react";
+import { Copy, Download, FileCode, Moon, Sun } from "lucide-react";
 import { Separator } from "../../../ui/separator";
 import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";

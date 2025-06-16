@@ -1,7 +1,7 @@
 import React from "react"; 
 import { SidebarTrigger } from "../ui/sidebar";
 import { ConversationList } from "..";
-import { Logo } from "../ui/Logo";
+
 
 /**
  * Chat sidebar containing conversation list

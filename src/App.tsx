@@ -5,18 +5,20 @@ import { ModalRoot } from "./components/modals";
 import { AuthProvider } from "./providers/AuthProvider"; 
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { Seo } from './components/common/Seo';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <TooltipProvider> 
-          <AuthProvider>
-            <ResponsiveChatLayout>
-              <Outlet />
-              <Toaster position="top-right" />
-              <ModalRoot />
-            </ResponsiveChatLayout>
-          </AuthProvider> 
+        <Seo />
+        <AuthProvider>
+          <ResponsiveChatLayout>
+            <Outlet />
+            <Toaster position="top-right" />
+            <ModalRoot />
+          </ResponsiveChatLayout>
+        </AuthProvider> 
       </TooltipProvider>
     </ThemeProvider>
   );

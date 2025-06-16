@@ -2,17 +2,17 @@ import React from "react";
 import { Label } from "../../../../ui/label";
 import { Button } from "../../../../ui/button";
 import { Card, CardContent } from "../../../../ui/card";
-import { Trash2, Settings2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface DangerZoneSectionProps {
   onClearAllDataClick: () => void;
-  onResetSettingsClick: () => void;
+  // onResetSettingsClick: () => void;
   hasConversations?: boolean;
 }
 
 export const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
   onClearAllDataClick,
-  onResetSettingsClick,
+  // onResetSettingsClick,
   hasConversations = false,
 }) => {
   return (

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const useLayoutShortcuts = () => {
   const { open, setOpen } = useSidebar();
   const { handleNewChat } = useConversationList();
-  const { togglePinConversation, deleteConversation } = useConversations();
+  const { togglePinConversation } = useConversations();
   const conversationId = useConversationId();
   const navigate = useNavigate();
 

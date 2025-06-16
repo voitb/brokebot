@@ -64,11 +64,11 @@ const validateOpenRouterKey = (key: string): boolean => {
 
 export class OpenRouterClient {
   private functions: Functions;
-  private config: OpenRouterConfig;
+  // private config: OpenRouterConfig;
   private keys: ApiKeyConfig;
 
   constructor(config: OpenRouterConfig) {
-    this.config = config;
+    // this.config = config;
     this.functions = config.functions;
     this.keys = config.keys;
   }
@@ -161,7 +161,9 @@ export class OpenRouterClient {
   }
 
   // Simplified key selection - always use OpenRouter key for now
-  private getApiKeyForModel(model: string): string | undefined {
+  private getApiKeyForModel(
+    // model: string
+  ): string | undefined {
     // For now, always return OpenRouter API key regardless of model
     return this.keys.openrouterApiKey;
     
@@ -190,7 +192,8 @@ export class OpenRouterClient {
     messages: OpenRouterMessage[]
   ): Promise<string> {
     try {
-      const apiKey = this.getApiKeyForModel(model);
+      const apiKey = this.getApiKeyForModel();
+      // const apiKey = this.getApiKeyForModel(model);
       
       if (!apiKey) {
         throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');

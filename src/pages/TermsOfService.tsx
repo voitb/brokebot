@@ -1,26 +1,9 @@
 import React from "react";
-import { SEOMetadata } from "../components/common/SEOMetadata";
-import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { ArrowLeft, Shield, Database, Zap, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { SEOMetadata } from "../components/common/SEOMetadata"; 
+ 
 
-export const TermsOfService: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      navigate("/");
-    }
-  };
+export const TermsOfService: React.FC = () => { 
+ 
 
   return (
     <>
