@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../ui/tooltip";
 import { useModel } from "../../../providers/ModelProvider";
 import {
-  useChatInput,
   useDragDrop,
   useFileUpload,
   useSpeechToText,
@@ -24,22 +23,27 @@ import {
 import type { QualityLevel } from "../../../types";
 
 interface ChatInputProps {
+  message: string;
+  setMessage: (message: string) => void;
+  isLoading: boolean;
+  isGenerating: boolean;
+  onSend: (message?: string) => Promise<void>;
+  onStopGeneration: () => void;
   quality?: QualityLevel;
 }
 
 /**
  * Main chat input component with message form and options bar
  */
-export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
+export const ChatInput: React.FC<ChatInputProps> = React.memo(({
+  message,
+  setMessage,
+  isLoading,
+  isGenerating,
+  onSend,
+  onStopGeneration,
+}) => {
   const { currentModel, isModelLoading, modelStatus } = useModel();
-  const {
-    isLoading,
-    isGenerating,
-    stopGeneration,
-    handleMessageSubmit,
-    message,
-    setMessage,
-  } = useChatInput();
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
 
@@ -168,7 +172,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
     }
 
     try {
-      await handleMessageSubmit(fullMessage);
+      await onSend(fullMessage);
     } catch (error) {
       console.error("Failed to send message:", error);
       // Restore the message and files if submission failed
@@ -248,53 +252,39 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(() => {
             </div>
 
             {/* Send Button / Stop Button */}
-            {isGenerating ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="absolute bottom-2 right-4 h-8 w-8 p-0"
-                    onClick={stopGeneration}
-                  >
-                    <Square className="h-4 w-4" />
-                    <span className="sr-only">Stop generation</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Stop Generation</p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    className="absolute bottom-2 right-4 h-8 w-8 p-0"
-                    disabled={
-                      isLoading ||
-                      isModelLoading ||
-                      isModelError ||
-                      isWhisperModelLoading ||
-                      transcriberStatus === "recording" ||
-                      (!message.trim() && attachedFiles.length === 0)
-                    }
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
+            <div className="absolute bottom-2 right-2">
+              {isGenerating ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="destructive"
+                      onClick={onStopGeneration}
+                    >
+                      <Square className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Stop generation</TooltipContent>
+                </Tooltip>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="submit"
+                      size="icon"
+                      disabled={
+                        (!message.trim() && attachedFiles.length === 0) ||
+                        isLoading || isModelError || isWhisperModelLoading
+                      }
+                    >
                       <Send className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Send Message</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Send Message</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
           </div>
 
           {/* Model Status Bar */}

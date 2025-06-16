@@ -114,6 +114,9 @@ export function useChatInput(): UseChatInputReturn {
         content: messageContent,
       });
 
+      abortControllerRef.current = new AbortController();
+      setIsGenerating(true);
+
       // Create placeholder AI message
       aiMessageId = await addMessage(currentConversationId, {
         role: "assistant",
@@ -177,9 +180,6 @@ ${previousContext}`;
           
         }
 
-        abortControllerRef.current = new AbortController();
-        setIsGenerating(true);
-
         try {
           let accumulatedContent = '';
           
@@ -208,8 +208,7 @@ ${previousContext}`;
               break;
             }
           }
-
-          console.log('Response generated:', accumulatedContent);
+ 
           if (aiMessageId) {
             await updateCompleteAIMessage(aiMessageId, accumulatedContent);
           }
@@ -328,6 +327,9 @@ ${previousContext}`;
     if (!lastAiMessage) return;
 
     try {
+      setIsGenerating(true);
+      abortControllerRef.current = new AbortController();
+
       // Clear the last AI message content
       updateMessage(conversationId, lastAiMessage.id, "");
 
@@ -384,9 +386,6 @@ ${previousContext}`;
           conversationMessages = summarizeConversation(allMessages, 12);
           
         }
-
-        setIsGenerating(true);
-        abortControllerRef.current = new AbortController();
 
         try {
           let accumulatedContent = '';

@@ -5,15 +5,24 @@ import { ChatMessages } from "../messages";
 import { ChatInput } from "../input";
 import { useConversation } from "../../../hooks/useConversations";
 import { useConversationId } from "../../../hooks/useConversationId";
-import { useChatInput } from "../input/hooks"; 
+import { useChatInput } from "../input/hooks";
+
 /**
  * Main chat interface component combining header, messages, and input
  */
 export const ChatInterface: React.FC = () => {
   const conversationId = useConversationId();
-  const { conversation } = useConversation(conversationId); 
-  const { isGenerating } = useChatInput(); 
- 
+  const { conversation } = useConversation(conversationId);
+  const {
+    message,
+    setMessage,
+    isLoading,
+    isGenerating,
+    handleMessageSubmit,
+    regenerateLastResponse,
+    stopGeneration,
+  } = useChatInput();
+
   if (conversationId && conversation === undefined) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -28,8 +37,20 @@ export const ChatInterface: React.FC = () => {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <ChatHeader />
-      <ChatMessages isGenerating={isGenerating} />
-      <ChatInput />
+      <ChatMessages
+        isLoading={isLoading}
+        isGenerating={isGenerating}
+        onRegenerate={regenerateLastResponse}
+        onStopGeneration={stopGeneration}
+      />
+      <ChatInput
+        message={message}
+        setMessage={setMessage}
+        isLoading={isLoading}
+        isGenerating={isGenerating}
+        onSend={handleMessageSubmit}
+        onStopGeneration={stopGeneration}
+      />
     </div>
   );
 };

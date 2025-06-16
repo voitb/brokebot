@@ -19,10 +19,6 @@ const AvatarContent: React.FC<{ isUser: boolean; isGenerating: boolean }> = Reac
     return <>💸</>;
   }
 
-  if (isGenerating) {
-    return <Loader2 className="w-4 h-4 animate-spin" />;
-  }
-
   return <>🤖</>;
 });
 

@@ -16,10 +16,7 @@ const ThinkingDot: React.FC = React.memo(() => (
  */
 const ThinkingHeader: React.FC = React.memo(() => (
   <div className="flex items-center gap-2 mb-2">
-    <ThinkingDot />
-    <span className="text-xs font-medium text-muted-foreground">
-      AI is thinking...
-    </span>
+    <ThinkingDot /> 
   </div>
 ));
 
