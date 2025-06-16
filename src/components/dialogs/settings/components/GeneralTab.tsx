@@ -14,9 +14,15 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OpenRouterIcon } from "@/components/ui/ProviderIcons";
+import { 
+  OpenRouterIcon,
+  // OpenAIIcon,
+  // GeminiIcon,
+  // AnthropicIcon 
+} from "@/components/ui/ProviderIcons";
 import { type UserConfig } from "@/lib/db";
-import { useTheme } from "@/providers/ThemeProvider"; 
+import { useTheme } from "@/providers/ThemeProvider";
+import { ApiKeySection } from "@/components/chat/OnlineModelDialog/components/ApiKeySection";
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;
@@ -32,25 +38,25 @@ interface GeneralTabProps {
 
 const apiKeyProviders = [
   { 
-    id: "openrouterApiKey", 
+    id: "openrouter", 
     name: "OpenRouter", 
     icon: <OpenRouterIcon />,
     url: "https://openrouter.ai/keys"
   },
   // { 
-  //   id: "openaiApiKey", 
+  //   id: "openai", 
   //   name: "OpenAI", 
   //   icon: <OpenAIIcon />,
   //   url: "https://platform.openai.com/api-keys" 
   // },
   // { 
-  //   id: "googleApiKey", 
+  //   id: "google", 
   //   name: "Google", 
   //   icon: <GeminiIcon />,
   //   url: "https://aistudio.google.com/app/api-keys"
   // },
   // { 
-  //   id: "anthropicApiKey", 
+  //   id: "anthropic", 
   //   name: "Anthropic", 
   //   icon: <AnthropicIcon />,
   //   url: "https://console.anthropic.com/settings/keys"
@@ -217,11 +223,9 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {/* <SettingsApiKeySection 
-                  provider={provider.id} 
-                  name={provider.name}
-                  url={provider.url}
-                /> */}
+                <ApiKeySection 
+                  provider={provider.id as "openrouter" | "openai" | "google" | "anthropic"}
+                />
               </CardContent>
             </Card>
           ))}
