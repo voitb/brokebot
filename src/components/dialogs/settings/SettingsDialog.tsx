@@ -159,7 +159,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           {/* Mobile Layout */}
           <div className="flex md:hidden flex-col h-[90vh]">
             <div className="shrink-0 p-4 space-y-4 bg-background">
-              <h2 className="text-lg font-semibold">Settings</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Settings</h2>
+                <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
               <div className="grid grid-cols-2 gap-2">
                 {navigationItems.map(({ id, label, icon: Icon }) => (
                   <Button
@@ -178,7 +183,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <ScrollArea className="h-[calc(100%-150px)]">
               <div className="p-4">{renderTabContent()}</div>
             </ScrollArea>
-            <div className="shrink-0 p-4 bg-muted/20 flex flex-row justify-between gap-2">
+            <div className="shrink-0 p-4 border-t flex flex-row justify-between items-center gap-2">
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -202,7 +207,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   </>
                 )}
               </Button>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
