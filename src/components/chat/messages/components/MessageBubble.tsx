@@ -1,14 +1,13 @@
 import React from "react";
 import type { Message } from "../../../../lib/db";
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
-import { useMessageParser, useSlowGenerationWarning } from "../hooks";
+import { useMessageParser  } from "../hooks";
 import { 
   MessageAvatar, 
   ThinkingSection, 
   MessageActions,
   MessageContent,
-  MessageTimestamp,
-  SlowGenerationWarning,
+  MessageTimestamp, 
   GeneratingIndicator,
   AttachmentBadge,
 } from "./";
@@ -35,11 +34,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   const { isLoading: isEngineLoading, status } = useWebLLM();
   const isAiGenerating = !isUser && isGenerating && isLastMessage;
   const isModelReady = status === "Ready" && !isEngineLoading;
-  const parsedMessage = useMessageParser(message.content);
-  
-  const { showSlowWarning } = useSlowGenerationWarning({
-    isGenerating: isAiGenerating,
-  });
+  const parsedMessage = useMessageParser(message.content); 
 
   // If AI is generating but has no content yet, show loader without bubble
   if (isAiGenerating && !message.content.trim()) {
@@ -89,10 +84,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
             onRegenerate={onRegenerate}
             onStopGeneration={onStopGeneration}
           />
-        )}
-
-        {/* Slow Generation Warning */}
-        <SlowGenerationWarning show={showSlowWarning && isAiGenerating} />
+        )} 
 
         {/* Timestamp */}
         <MessageTimestamp timestamp={message.createdAt} isUser={isUser} />

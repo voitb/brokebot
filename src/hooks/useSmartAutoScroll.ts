@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect, useCallback, type DependencyList } from "react";
 
+const BUTTON_VISIBILITY_OFFSET = 100; // Show button if scrolled > 100px from bottom
+const AUTOSCROLL_LOCK_OFFSET = 10;   // Lock autoscroll if user scrolls up just a bit
+
 export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   dependencies: DependencyList = []
 ) {
   const scrollAreaRef = useRef<T>(null);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);
   const isInitialRender = useRef(true);
   
@@ -30,33 +33,43 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     const viewport = getViewport();
     if (!viewport) return;
 
+    let lastScrollTop = viewport.scrollTop;
+
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = viewport;
-      const atBottom = scrollHeight - scrollTop - clientHeight < 10;
-      setIsAtBottom(atBottom);
-
-      if (atBottom) {
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      
+      const isAtBottomForAutoScroll = distanceFromBottom < AUTOSCROLL_LOCK_OFFSET;
+      
+      if (scrollTop < lastScrollTop && !isAtBottomForAutoScroll) {
+        userHasScrolledUp.current = true;
+      }
+      
+      if (isAtBottomForAutoScroll) {
         userHasScrolledUp.current = false;
       }
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY < 0) {
-        const { scrollTop } = viewport;
-        if (scrollTop > 0) {
-          userHasScrolledUp.current = true;
-        }
-      }
+      
+      setShowScrollButton(distanceFromBottom > BUTTON_VISIBILITY_OFFSET);
+      
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     };
 
     viewport.addEventListener("scroll", handleScroll, { passive: true });
-    viewport.addEventListener("wheel", handleWheel, { passive: true });
+
+    const observer = new MutationObserver(() => {
+      handleScroll();
+    });
+
+    observer.observe(viewport, {
+      childList: true,
+      subtree: true,
+    });
 
     handleScroll();
 
     return () => {
       viewport.removeEventListener("scroll", handleScroll);
-      viewport.removeEventListener("wheel", handleWheel);
+      observer.disconnect();
     };
   }, [getViewport]);
 
@@ -79,7 +92,7 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
 
   return {
     scrollAreaRef,
-    isAtBottom,
+    showScrollButton,
     handleScrollToBottomClick,
   };
 } 

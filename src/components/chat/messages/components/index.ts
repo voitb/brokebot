@@ -7,7 +7,6 @@ export * from "./MessageAvatar";
 export * from "./MessageBubble";
 export * from "./MessageContent";
 export * from "./MessageTimestamp";
-export * from "./ScrollToBottomButton";
-export * from "./SlowGenerationWarning";
+export * from "./ScrollToBottomButton"; 
 export * from "./ThinkingSection";
 export * from "./AttachmentBadge"; 
