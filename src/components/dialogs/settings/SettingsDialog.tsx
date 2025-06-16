@@ -75,7 +75,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     handleSaveChanges,
   } = useSettings();
   const { conversations } = useConversations();
-  const { user, logout } = useAuth();
+  const { user, logout, updateName, updatePassword } = useAuth();
   const { hasActiveSubscription, subscription, checkSubscriptionStatus } = useSubscription();
 
   // Obsługa sukcesu płatności
@@ -122,7 +122,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     const commonProps = { settings, onFieldChange: handleFieldChange };
     switch (activeTab) {
       case "general":
-        return <GeneralTab {...commonProps} />;
+        return <GeneralTab 
+          {...commonProps} 
+          user={user}
+          onUpdateName={updateName}
+          onUpdatePassword={updatePassword}
+          onSaveChanges={handleSaveChanges}
+        />;
       case "documents":
         return <DocumentsTab />;
       case "privacy":

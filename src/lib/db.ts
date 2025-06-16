@@ -39,10 +39,9 @@ export interface UserConfig {
   autoLoadModel: boolean;
   storeConversationsInCloud?: boolean;
   openrouterApiKey?: string;
-  // Future API keys - commented out for now
-  // openaiApiKey?: string;
-  // anthropicApiKey?: string;
-  // googleApiKey?: string;
+  openaiApiKey?: string;
+  anthropicApiKey?: string;
+  googleApiKey?: string;
   theme: "light" | "dark" | "system";
   createdAt: Date;
   updatedAt: Date;

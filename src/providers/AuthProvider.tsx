@@ -20,6 +20,8 @@ interface AuthContextType {
     secret: string,
     pass: string
   ) => Promise<void>;
+  updateName: (name: string) => Promise<void>;
+  updatePassword: (oldPass: string, newPass: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -95,6 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await account.updateRecovery(userId, secret, pass);
   };
 
+  const updateName = async (name: string) => {
+    await account.updateName(name);
+    await getCurrentUser();
+  };
+
+  const updatePassword = async (oldPass: string, newPass: string) => {
+    await account.updatePassword(newPass, oldPass);
+  };
+
   const value = {
     user,
     isLoading,
@@ -106,6 +117,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loginWithGitHub,
     sendPasswordReset,
     confirmPasswordReset,
+    updateName,
+    updatePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
