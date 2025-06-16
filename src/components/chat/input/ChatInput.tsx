@@ -99,13 +99,28 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
     maxHeight: 200,
   });
 
-  const handleMicClick = () => {
+  const handleMicClick = React.useCallback(() => {
     if (transcriberStatus === "recording") {
       stopRecording();
     } else {
       startRecording();
     }
-  };
+  }, [transcriberStatus, startRecording, stopRecording]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.key === 'm') {
+        event.preventDefault();
+        handleMicClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleMicClick]);
 
   // For now, assume models don't support images unless we implement VLM support
   const supportsImages = false;

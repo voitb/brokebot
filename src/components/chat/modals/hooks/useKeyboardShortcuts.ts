@@ -28,6 +28,7 @@ export const useKeyboardShortcuts = (): KeyboardShortcutGroup[] => {
       title: "Chat Actions",
       shortcuts: [
         { label: "Pin Chat", keys: "Alt+P" },
+        { label: "Start/Stop Recording", keys: "Ctrl+M" },
         { label: "Rename Chat", keys: "Alt+R" },
         { label: "Delete Chat", keys: "Alt+Del" },
         { label: "Close Modal", keys: "Esc" },
