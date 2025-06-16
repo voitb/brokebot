@@ -22,7 +22,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   const conversationId = useConversationId();
   const { messages, conversation } = useConversation(conversationId);
   const { isLoading: isEngineLoading, status } = useWebLLM();
-  const { scrollAreaRef, isAtBottom, handleScrollToBottomClick } =
+  const { scrollAreaRef, showScrollButton, handleScrollToBottomClick } =
     useSmartAutoScroll([messages, isGenerating, conversationId]);
 
   // Check if model is ready
@@ -62,7 +62,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       </ScrollArea>
 
       <ScrollToBottomButton
-        show={!isAtBottom}
+        show={showScrollButton}
         onClick={handleScrollToBottomClick}
       />
     </div>

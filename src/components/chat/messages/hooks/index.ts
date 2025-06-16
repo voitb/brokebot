@@ -1,4 +1,3 @@
 export { useMessageParser } from './useMessageParser';
-export { useCopyToClipboard } from './useCopyToClipboard';
-export { useSlowGenerationWarning } from './useSlowGenerationWarning';
+export { useCopyToClipboard } from './useCopyToClipboard'; 
 export { useCodeHighlighting } from './useCodeHighlighting'; 
