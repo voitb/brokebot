@@ -7,6 +7,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
+import { toast } from "sonner";
 
 import WebLLMWorker from "../worker.ts?worker";
 import { COMPLETE_AI_RULES } from "../lib/aiRules";
@@ -518,6 +519,19 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
       });
     } catch (error) {
       console.error("WebLLM engine initialization error:", error);
+      if (error instanceof Error && (error.message.includes("WebGPU") || error.message.includes("Web-GPU"))) {
+        toast.error(
+          "WebGPU is required for local models to run in this browser.",
+          {
+            description: "Please enable WebGPU in your browser settings and refresh the page. This may require enabling a special flag.",
+            action: {
+              label: "Learn More",
+              onClick: () => window.open("https://developer.chrome.com/docs/web-platform/webgpu", "_blank"),
+            },
+            duration: 10000,
+          }
+        );
+      }
       setEngineState((prev) => ({
         ...prev,
         isLoading: false,

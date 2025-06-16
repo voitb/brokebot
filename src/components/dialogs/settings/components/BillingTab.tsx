@@ -111,10 +111,10 @@ const LoggedInView: React.FC = () => {
                 </CardContent>
             </Card>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div> 
+                {/* <div> 
                     <PricingInteraction plans={SUBSCRIPTION_PLANS} isLoading={isSubLoading} onSubscribeClick={redirectToCheckout} />
-                </div>
-                <div className="space-y-4">
+                </div> */}
+                <div className="space-y-4 lg:col-span-2">
                     <Card>
                         <CardHeader><CardTitle className="text-sm">Plus Benefits</CardTitle></CardHeader>
                         <CardContent>
