@@ -105,8 +105,8 @@ export const SEOMetadata: React.FC<SEOMetadataProps> = ({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={pageImage} />
       <meta name="twitter:image:alt" content={title} />
-      <meta name="twitter:creator" content="@voitec" />
-      <meta name="twitter:site" content="@voitec" />
+      <meta name="twitter:creator" content="@voitz__" />
+      <meta name="twitter:site" content="@voitz__" />
 
       {/* Additional Meta */}
       <meta name="format-detection" content="telephone=no" />

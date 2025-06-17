@@ -54,7 +54,7 @@
 | 🔒 **Uploaded files** | Your browser only | 100% Private |
 | 🔒 **Settings & preferences** | Your browser only | 100% Private |
 | 🔒 **Local AI models** | Your browser only | 100% Private |
-| 🔒 **Your API keys** | Encrypted in browser | 100% Private |
+| 🔒 **Your API keys** | Double-encrypted (browser + server) | 100% Private |
 | 🌐 **Account creation** | Appwrite (optional) | Secure & encrypted |
 | 🌐 **Free AI models** | OpenRouter (optional) | Prompts used for training |
 
@@ -135,7 +135,196 @@ brokebot uses [Appwrite](https://appwrite.io/) for secure user authentication an
    - Conversations collection for sync
    - Shared links collection for sharing
 
-For detailed setup instructions, see our [Appwrite Setup Guide](docs/appwrite-setup.md).
+For detailed setup instructions, see the [Self-Hosting Appwrite Functions](#self-hosting-appwrite-functions) section below.
+
+---
+
+## 🏗️ Self-Hosting Appwrite Functions
+
+If you want to run your own instance of brokebot with full control over the backend, you'll need to deploy the Appwrite functions included in this repository.
+
+### Prerequisites for Self-Hosting
+
+- **Appwrite instance** (self-hosted or Appwrite Cloud)
+- **Appwrite CLI** installed and configured
+- **Node.js 18+** for function development
+
+### Function Overview
+
+brokebot uses two Appwrite functions:
+
+1. **`encrypt-keys`** - Handles secure encryption/decryption of API keys
+2. **`proxy-ai`** - Proxies requests to AI providers with encrypted API keys
+
+### Deployment Steps
+
+#### 1. Install Appwrite CLI
+
+```bash
+npm install -g appwrite-cli
+```
+
+#### 2. Login to Your Appwrite Instance
+
+```bash
+# For Appwrite Cloud
+appwrite login
+
+# For self-hosted Appwrite
+appwrite login --endpoint https://your-appwrite-instance.com/v1
+```
+
+#### 3. Initialize Appwrite Project
+
+```bash
+# Navigate to your brokebot directory
+cd brokebot
+
+# Initialize Appwrite project (if not already done)
+appwrite init project
+```
+
+#### 4. Deploy the Encryption Function
+
+```bash
+# Navigate to encrypt-keys function
+cd appwrite/encrypt-keys
+
+# Deploy the function
+appwrite functions create \
+  --functionId encrypt-keys \
+  --name "Encrypt Keys" \
+  --runtime "node-18.0" \
+  --entrypoint "src/index.js" \
+  --timeout 30
+
+# Deploy the code
+appwrite functions createDeployment \
+  --functionId encrypt-keys \
+  --entrypoint "src/index.js" \
+  --code . \
+  --activate true
+```
+
+#### 5. Deploy the AI Proxy Function
+
+```bash
+# Navigate to proxy-ai function
+cd ../proxy-ai
+
+# Deploy the function
+appwrite functions create \
+  --functionId proxy-ai \
+  --name "AI Proxy" \
+  --runtime "node-18.0" \
+  --entrypoint "src/index.js" \
+  --timeout 300
+
+# Deploy the code
+appwrite functions createDeployment \
+  --functionId proxy-ai \
+  --entrypoint "src/index.js" \
+  --code . \
+  --activate true
+```
+
+#### 6. Set Environment Variables
+
+Both functions require environment variables for security:
+
+```bash
+# For encrypt-keys function
+appwrite functions updateVariable \
+  --functionId encrypt-keys \
+  --key MASTER_ENCRYPTION_KEY \
+  --value "your-super-secure-master-key-here"
+
+# For proxy-ai function  
+appwrite functions updateVariable \
+  --functionId proxy-ai \
+  --key APPWRITE_FUNCTION_ENDPOINT \
+  --value "https://your-appwrite-instance.com/v1"
+
+appwrite functions updateVariable \
+  --functionId proxy-ai \
+  --key APPWRITE_FUNCTION_PROJECT_ID \
+  --value "your-project-id"
+
+appwrite functions updateVariable \
+  --functionId proxy-ai \
+  --key APPWRITE_API_KEY \
+  --value "your-api-key"
+
+appwrite functions updateVariable \
+  --functionId proxy-ai \
+  --key APP_URL \
+  --value "https://your-brokebot-domain.com"
+
+appwrite functions updateVariable \
+  --functionId proxy-ai \
+  --key APP_TITLE \
+  --value "Your brokebot Instance"
+```
+
+#### 7. Configure Database Collections
+
+Create the required collections in your Appwrite database:
+
+```bash
+# Create conversations collection
+appwrite databases createCollection \
+  --databaseId your-database-id \
+  --collectionId conversations \
+  --name "Conversations"
+
+# Create messages collection  
+appwrite databases createCollection \
+  --databaseId your-database-id \
+  --collectionId messages \
+  --name "Messages"
+
+# Create user config collection
+appwrite databases createCollection \
+  --databaseId your-database-id \
+  --collectionId userConfig \
+  --name "User Config"
+```
+
+#### 8. Update Frontend Configuration
+
+Update your `.env.local` file with your Appwrite instance details:
+
+```bash
+VITE_APPWRITE_ENDPOINT=https://your-appwrite-instance.com/v1
+VITE_APPWRITE_PROJECT_ID=your-project-id
+VITE_APPWRITE_DATABASE_ID=your-database-id
+```
+
+### Security Considerations
+
+- **Master Encryption Key**: Generate a strong, random key (32+ characters) for `MASTER_ENCRYPTION_KEY`
+- **API Key Permissions**: Use a server API key with minimal required permissions
+- **HTTPS Only**: Always use HTTPS for your Appwrite instance and brokebot deployment
+- **Regular Updates**: Keep your Appwrite instance and functions updated
+
+### Function Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │ encrypt-keys    │    │   proxy-ai      │
+│                 │    │                 │    │                 │
+│ • Encrypts keys │───►│ • Re-encrypts   │◄───│ • Decrypts keys │
+│   locally       │    │   with master   │    │ • Calls AI APIs │
+│ • Sends to AI   │    │   key           │    │ • Returns result│
+│   proxy         │    │ • User-specific │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+This architecture ensures that:
+- API keys are encrypted both locally and on the server
+- Each user has unique encryption keys
+- The master key never leaves the server environment
+- All encryption is transparent and auditable
 
 ---
 
@@ -174,6 +363,7 @@ For detailed setup instructions, see our [Appwrite Setup Guide](docs/appwrite-se
 - **@mlc-ai/web-llm** - Local AI model execution
 - **Dexie.js** - IndexedDB wrapper for local storage
 - **Web Crypto API** - Client-side encryption for API keys
+- **AES-256-GCM** - Server-side encryption with PBKDF2 key derivation
 
 ### Backend (Optional)
 - **Appwrite** - Authentication and cloud sync
@@ -322,8 +512,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **[GitHub Discussions](https://github.com/voitec/brokebot/discussions)** - Questions and ideas
 - **[Issues](https://github.com/voitec/brokebot/issues)** - Bug reports and feature requests
-- **[Twitter](https://twitter.com/voitec)** - Updates and announcements
-- **Email**: support@voitec.dev
+- **[Twitter](https://x.com/voitz__)** - Updates and announcements
+- **Email**: v017dev@gmail.com
 
 ---
 
