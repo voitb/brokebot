@@ -71,7 +71,7 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/voitec/brokebot.git
+git clone https://github.com/voitb/brokebot.git
 cd brokebot
 
 # 2. Install dependencies
@@ -420,7 +420,7 @@ refactor: optimize chat component performance
 ```
 
 ### Areas We Need Help With
-- 🐛 **Bug fixes** - Check our [issues](https://github.com/voitec/brokebot/issues)
+- 🐛 **Bug fixes** - Check our [issues](https://github.com/voitb/brokebot/issues)
 - ✨ **New features** - AI model integrations, UI improvements
 - 📚 **Documentation** - Tutorials, guides, API docs
 - 🌍 **Translations** - Help make brokebot global
@@ -506,12 +506,12 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=voitec/brokebot&type=Date)](https://star-history.com/#voitec/brokebot&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=voitb/brokebot&type=Date)](https://star-history.com/#voitb/brokebot&Date)
 
 ## 💬 Community & Support
 
-- **[GitHub Discussions](https://github.com/voitec/brokebot/discussions)** - Questions and ideas
-- **[Issues](https://github.com/voitec/brokebot/issues)** - Bug reports and feature requests
+- **[GitHub Discussions](https://github.com/voitb/brokebot/discussions)** - Questions and ideas
+- **[Issues](https://github.com/voitb/brokebot/issues)** - Bug reports and feature requests
 - **[Twitter](https://x.com/voitz__)** - Updates and announcements
 - **Email**: v017dev@gmail.com
 
@@ -520,5 +520,5 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 <div align="center">
   <strong>Built with ❤️ for privacy, freedom, and the open source community</strong>
   
-  [⭐ Star us on GitHub](https://github.com/voitec/brokebot) • [🚀 Try brokebot](https://brokebot.voitz.dev) • [📖 Documentation](docs/)
+  [⭐ Star us on GitHub](https://github.com/voitb/brokebot) • [🚀 Try brokebot](https://brokebot.voitz.dev) • [📖 Documentation](docs/)
 </div>
