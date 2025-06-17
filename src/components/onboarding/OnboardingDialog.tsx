@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import type { ElementRef } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
