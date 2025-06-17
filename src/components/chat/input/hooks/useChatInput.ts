@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
-import { COMPLETE_AI_RULES } from "../../../../lib/aiRules";
+import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "../../../../lib/aiRules";
 import type { OpenRouterMessage } from "../../../../lib/openrouter";
 import { toast } from "sonner";
 
@@ -47,6 +47,40 @@ const summarizeConversation = (messages: OpenRouterMessage[], maxMessages: numbe
   }
   
   return [...systemMessages, ...recentMessages];
+};
+
+// New helper function to construct the prompt
+const buildPrompt = (
+  messages: OpenRouterMessage[], 
+  messageContent: string, 
+  isOnline: boolean
+): OpenRouterMessage[] => {
+  const history = messages
+    .filter(msg => !msg.content.startsWith("⚠️"))
+    .slice(-10)
+    .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
+    .join('\n\n');
+
+  if (isOnline) {
+    // For online models, use the contextual template to wrap the final user message
+    const systemPrompt = CONTEXTUAL_PROMPT_TEMPLATE.replace('{conversation_history}', history);
+    return [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: messageContent },
+    ];
+  } else {
+    // For local models, provide the full history directly as a series of messages
+    const conversationMessages: OpenRouterMessage[] = [
+      { role: 'system', content: COMPLETE_AI_RULES },
+      ...messages.filter(msg => !msg.content.startsWith("⚠️")).map(msg => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+      })),
+      { role: 'user', content: messageContent },
+    ];
+    // Summarize if too long
+    return summarizeConversation(conversationMessages, 12);
+  }
 };
 
 interface UseChatInputReturn {
@@ -131,54 +165,7 @@ export function useChatInput(): UseChatInputReturn {
 
       // Generate AI response
       if (currentModel) {
-        let conversationMessages: OpenRouterMessage[];
-        
-        if (currentModel.type === "online") {
-          // For online models (OpenRouter), combine history into context to avoid rate limiting
-          // OpenRouter has limits on number of messages per request
-          
-          if (messages.length > 0) {
-            // Combine previous messages into context
-            const previousContext = messages
-              .filter(msg => !msg.content.startsWith("⚠️"))
-              .slice(-10) // Take only last 10 messages to keep context manageable
-              .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
-              .join('\n\n');
-            
-            // Create system message with rules and context
-            const systemWithContext = `${COMPLETE_AI_RULES}
-
-Previous conversation context:
-${previousContext}`;
-
-            conversationMessages = [
-              { role: "system", content: systemWithContext },
-              { role: "user", content: messageContent },
-            ];
-            
-          } else {
-            // First message - no previous context
-            conversationMessages = [
-              { role: "system", content: COMPLETE_AI_RULES },
-              { role: "user", content: messageContent },
-            ];
-            
-          }
-        } else {
-          // For local models, use full message history as before
-          const allMessages: OpenRouterMessage[] = [
-            { role: "system", content: COMPLETE_AI_RULES },
-            ...messages.filter(msg => !msg.content.startsWith("⚠️")).map(msg => ({
-              role: msg.role as "user" | "assistant",
-              content: msg.content,
-            })),
-            { role: "user", content: messageContent },
-          ];
-
-          // Skróć konwersację jeśli jest za długa (max 12 ostatnich wiadomości + system + podsumowanie)
-          conversationMessages = summarizeConversation(allMessages, 12);
-          
-        }
+        const conversationMessages = buildPrompt(messages, messageContent, currentModel.type === 'online');
 
         try {
           let accumulatedContent = '';
@@ -339,56 +326,8 @@ ${previousContext}`;
 
       // Generate response with existing messages
       if (currentModel) {
-        let conversationMessages: OpenRouterMessage[];
-        
-        if (currentModel.type === "online") {
-          // For online models (OpenRouter), combine history into context to avoid rate limiting
-          const messagesToProcess = messages.slice(0, -1); // Exclude the last AI message
-          
-          if (messagesToProcess.length > 0) {
-            const lastPromptMessage = messagesToProcess[messagesToProcess.length - 1];
-            const historyForContext = messagesToProcess.slice(0, -1);
-            
-            // Combine previous messages into context
-            const previousContext = historyForContext
-              .filter(msg => !msg.content.startsWith("⚠️"))
-              .slice(-10) // Take only last 10 messages to keep context manageable
-              .map(msg => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
-              .join('\n\n');
-            
-            // Create system message with rules and context
-            const systemWithContext = `${COMPLETE_AI_RULES}
-
-Previous conversation context:
-${previousContext}`;
-
-            conversationMessages = [
-              { role: "system", content: systemWithContext },
-              { role: "user", content: lastPromptMessage.content },
-            ];
-            
-          } else {
-            // No previous context - This case should ideally not be hit
-            conversationMessages = [
-              { role: "system", content: COMPLETE_AI_RULES },
-              { role: "user", content: "Please provide a response." },
-            ];
-            
-          }
-        } else {
-          // For local models, use full message history as before
-          const allMessages: OpenRouterMessage[] = [
-            { role: "system", content: COMPLETE_AI_RULES },
-            ...messages.slice(0, -1).filter(msg => !msg.content.startsWith("⚠️")).map(msg => ({
-              role: msg.role as "user" | "assistant",
-              content: msg.content,
-            })),
-          ];
-
-          // Skróć konwersację jeśli jest za długa
-          conversationMessages = summarizeConversation(allMessages, 12);
-          
-        }
+        const messagesToProcess = messages.slice(0, -1);
+        const conversationMessages = buildPrompt(messagesToProcess, lastUserMessage.content, currentModel.type === 'online');
 
         try {
           let accumulatedContent = '';

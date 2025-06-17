@@ -121,4 +121,14 @@ Additional guidelines for engaging and helpful interactions:
 5. **Detailed Explanations**: Offer in-depth guidance when needed.
 `;
 
+export const CONTEXTUAL_PROMPT_TEMPLATE = `
+You are a helpful AI assistant. The following is a conversation history provided as context. Your main task is to respond to the final user message at the very end.
+
+*** CONVERSATION HISTORY (FOR CONTEXT) ***
+{conversation_history}
+*** END OF CONVERSATION HISTORY ***
+
+Based on the context above, please provide a direct and thorough response to the following user message:
+`;
+
 export const COMPLETE_AI_RULES = `${AI_SYSTEM_RULES}\n\n${CONVERSATION_RULES}`;

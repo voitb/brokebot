@@ -10,7 +10,6 @@ import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
 import WebLLMWorker from "../worker.ts?worker";
-import { COMPLETE_AI_RULES } from "../lib/aiRules";
 
 // Extended list of all available WebLLM models with hardware requirements
 export const AVAILABLE_MODELS = [
@@ -441,7 +440,6 @@ type EngineState = {
   availableModels: typeof AVAILABLE_MODELS;
   setSelectedModel: (model: ModelInfo) => void;
   loadModel: (modelId: string) => Promise<void>;
-  systemMessage: string;
 };
 
 const WebLLMContext = createContext<EngineState | undefined>(undefined);
@@ -559,7 +557,6 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     availableModels: AVAILABLE_MODELS,
     setSelectedModel,
     loadModel,
-    systemMessage: COMPLETE_AI_RULES,
   };
 
   return (
