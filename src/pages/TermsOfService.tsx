@@ -34,7 +34,7 @@ export const TermsOfService: React.FC = () => {
             <li><strong>Files:</strong> Any documents you upload (.txt, .md files) are processed and stored entirely on your device.</li>
             <li><strong>Settings:</strong> Your preferences, selected models, and configuration remain local.</li>
             <li><strong>Local AI Models:</strong> When using WebLLM models, all processing happens directly in your browser with no data transmission.</li>
-            <li><strong>API Keys:</strong> If you provide your own API keys (OpenAI, Anthropic, Google), they are encrypted using strong AES-256 encryption and stored only in your browser's local storage.</li>
+            <li><strong>API Keys:</strong> If you provide your own API keys (OpenAI, Anthropic, Google), they are encrypted using strong AES-256-GCM encryption with user-specific keys derived via PBKDF2 (100,000 iterations) and stored only in your browser's local storage.</li>
           </ul>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">🌐 What Goes Online</h3>
@@ -55,6 +55,17 @@ export const TermsOfService: React.FC = () => {
             <li><strong>Trade-off:</strong> In exchange for free access, OpenRouter may use your prompts to improve their models</li>
             <li><strong>Transparency:</strong> This is clearly indicated in the model selection interface</li>
             <li><strong>Alternative:</strong> Use local WebLLM models or your own API keys for complete privacy</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold mt-6 mb-3">🔐 External Encryption Services</h3>
+          <p>When using your own API keys, brokebot employs additional security measures:</p>
+          <ul className="list-disc ml-6 mb-4">
+            <li><strong>Server-Side Encryption:</strong> API keys are re-encrypted on our secure Appwrite functions before being sent to AI providers</li>
+            <li><strong>User-Specific Keys:</strong> Each user gets a unique encryption key derived from their user ID using cryptographic key derivation (PBKDF2)</li>
+            <li><strong>No Key Storage:</strong> The master encryption key is stored only in server environment variables and never logged or persisted</li>
+            <li><strong>Transit Security:</strong> All communications use HTTPS/TLS encryption</li>
+            <li><strong>Zero Knowledge:</strong> Even our servers cannot decrypt your API keys without your specific user context</li>
+            <li><strong>Open Source:</strong> You can inspect the encryption functions in our GitHub repository and even deploy your own instance</li>
           </ul>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">3. Data Retention and Deletion</h2>
@@ -147,9 +158,9 @@ export const TermsOfService: React.FC = () => {
             If you have questions about these terms or our privacy practices:
           </p>
           <ul className="list-disc ml-6 mb-4">
-            <li><strong>Email:</strong> support@voitec.dev</li>
+            <li><strong>Email:</strong> v017dev@gmail.com</li>
             <li><strong>GitHub:</strong> <a href="https://github.com/voitec/brokebot" className="text-blue-600 hover:underline">github.com/voitec/brokebot</a></li>
-            <li><strong>Security Issues:</strong> security@voitec.dev</li>
+            <li><strong>Security Issues:</strong> v017dev@gmail.com</li>
           </ul>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">10. Governing Law</h2>

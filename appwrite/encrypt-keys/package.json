@@ -9,6 +9,6 @@
   "dependencies": {
     "crypto": "^1.0.1"
   },
-  "author": "",
+  "author": "voitz <v017dev@gmail.com>",
   "license": "ISC"
 } 

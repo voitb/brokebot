@@ -56,11 +56,11 @@ export function Seo({
       "name": author
     } : {
       "@type": "Organization",
-      "name": "Voitec"
+      "name": "voitz"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Voitec",
+      "name": "voitz",
       "logo": {
         "@type": "ImageObject",
         "url": `${DEFAULT_URL}brokebot_light_square.png`
@@ -94,7 +94,7 @@ export function Seo({
       <title>{pageTitle}</title>
       <meta name="description" content={pageDescription} />
       <meta name="keywords" content={pageKeywords} />
-      <meta name="author" content={author || "Voitec"} />
+      <meta name="author" content={author || "voitz"} />
       <link rel="canonical" href={canonicalUrl} />
       
       {/* Robots */}
@@ -129,8 +129,8 @@ export function Seo({
       <meta name="twitter:description" content={pageDescription} />
       <meta name="twitter:image" content={pageImage} />
       <meta name="twitter:image:alt" content={pageTitle} />
-      <meta name="twitter:creator" content="@voitec" />
-      <meta name="twitter:site" content="@voitec" />
+      <meta name="twitter:creator" content="@voitz__" />
+      <meta name="twitter:site" content="@voitz__" />
 
       {/* Additional SEO */}
       <meta name="format-detection" content="telephone=no" />
