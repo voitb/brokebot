@@ -1,3 +1,5 @@
+const { Client, Functions } = require('node-appwrite');
+
 const HTTP_STATUS = {
   OK: 200,
   BAD_REQUEST: 400,
@@ -16,14 +18,23 @@ const ERROR_MESSAGES = {
   EXTERNAL_API_ERROR: "External API error.",
   SERVER_ERROR: "Server error occurred.",
   INVALID_API_KEY: "Invalid API key. Please check your API key configuration.",
+  DECRYPTION_ERROR: "Failed to decrypt API key.",
 };
 
 const CONFIG = {
   OPENROUTER_API_URL: "https://openrouter.ai/api/v1/chat/completions",
-  REQUEST_TIMEOUT_MS: 25000,
+  REQUEST_TIMEOUT_MS: 90000,
   APP_URL: process.env.APP_URL || "http://localhost:5173",
-  APP_TITLE: process.env.APP_TITLE || "Local GPT",
+  APP_TITLE: process.env.APP_TITLE || "brokebot",
 };
+
+// Initialize Appwrite client for internal function calls
+const client = new Client()
+  .setEndpoint(process.env.APPWRITE_FUNCTION_ENDPOINT)
+  .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+  .setKey(process.env.APPWRITE_API_KEY);
+
+const functions = new Functions(client);
 
 /**
  * Sends a JSON response.
@@ -137,6 +148,40 @@ const forwardToOpenRouter = async ({
   }
 };
 
+/**
+ * Decrypts API key using the encrypt-keys function
+ */
+const decryptApiKey = async (encryptedKey, userId, log, error) => {
+  try {
+    log(`Attempting to decrypt API key for user: ${userId}`);
+    
+    const execution = await functions.createExecution(
+      'encrypt-keys',
+      JSON.stringify({
+        action: 'decrypt',
+        data: encryptedKey,
+        userId: userId
+      })
+    );
+
+    if (execution.responseStatusCode !== 200) {
+      throw new Error(`Decryption request failed: ${execution.responseStatusCode}`);
+    }
+
+    const result = JSON.parse(execution.responseBody);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Decryption failed');
+    }
+
+    log(`Successfully decrypted API key for user: ${userId}`);
+    return result.decrypted;
+  } catch (e) {
+    error(`API key decryption failed: ${e.message}`);
+    throw new Error('Failed to decrypt API key');
+  }
+};
+
 // FIX: Use module.exports for CommonJS compatibility
 module.exports = async ({ req, res, log, error }) => {
   if (req.method !== "POST") {
@@ -160,13 +205,14 @@ module.exports = async ({ req, res, log, error }) => {
     );
   }
 
-  const { model, messages, api_key } = body;
-  const apiKey = api_key || process.env.OPENROUTER_API_KEY;
+  const { model, messages, api_key, user_id } = body;
+  const encryptedApiKey = api_key || process.env.OPENROUTER_API_KEY;
+  const userId = user_id;
 
   log(
-    `Request received for model: ${model}, API key provided: ${
-      apiKey ? "YES" : "NO"
-    }`
+    `Request received for model: ${model}, encrypted API key provided: ${
+      encryptedApiKey ? "YES" : "NO"
+    }, user ID: ${userId || "NOT PROVIDED"}`
   );
   log(`Messages count: ${Array.isArray(messages) ? messages.length : 0}`);
 
@@ -179,7 +225,7 @@ module.exports = async ({ req, res, log, error }) => {
     );
   }
 
-  if (!apiKey) {
+  if (!encryptedApiKey) {
     return sendError(
       res,
       ERROR_MESSAGES.API_KEY_MISSING,
@@ -189,11 +235,35 @@ module.exports = async ({ req, res, log, error }) => {
     );
   }
 
+  if (!userId) {
+    return sendError(
+      res,
+      "User ID is required for key decryption.",
+      HTTP_STATUS.BAD_REQUEST,
+      error,
+      "User ID not provided for key decryption."
+    );
+  }
+
   if (!model || !Array.isArray(messages) || messages.length === 0) {
     return sendError(res, ERROR_MESSAGES.MISSING_FIELDS, HTTP_STATUS.BAD_REQUEST);
   }
 
   try {
+    // Decrypt the API key
+    let apiKey;
+    try {
+      apiKey = await decryptApiKey(encryptedApiKey, userId, log, error);
+    } catch (decryptError) {
+      return sendError(
+        res,
+        ERROR_MESSAGES.DECRYPTION_ERROR,
+        HTTP_STATUS.BAD_REQUEST,
+        error,
+        `API key decryption failed: ${decryptError.message}`
+      );
+    }
+
     const result = await forwardToOpenRouter({
       model,
       messages,
