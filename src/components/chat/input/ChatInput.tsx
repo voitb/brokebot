@@ -21,6 +21,7 @@ import {
   SpeechToTextButton,
 } from "./components";
 import type { QualityLevel } from "../../../types";
+import { ScrollArea } from "@/components/ui";
 
 interface ChatInputProps {
   message: string;
@@ -91,13 +92,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea
-  useTextareaAutoResize({
-    textareaRef,
-    message,
-    minHeight: 60,
-    maxHeight: 200,
-  });
+  // Auto-resize textarea 
 
   const handleMicClick = React.useCallback(() => {
     if (transcriberStatus === "recording") {
@@ -230,12 +225,13 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
         {/* Main Input Form */}
         <form onSubmit={onSubmit} className="space-y-3">
           <div
-            className="relative"
+            className="relative border rounded-md"
             onDrop={(e) => handleDrop(e, handleFilesSelected)}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
           >
+            <ScrollArea className="min-h-[60px] max-h-[200px] w-full [&>div]:max-h-[200px]">
             <Textarea
               ref={textareaRef}
               value={message}
@@ -246,13 +242,13 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
                   ? `Message ${currentModel.name}... or click the mic to talk`
                   : modelStatus
               }
-              className="min-h-[60px] max-h-[200px] resize-none pr-32 overflow-hidden"
-              disabled={isLoading || isModelLoading || isModelError || isWhisperModelLoading}
-              style={{ height: "60px" }}
+              className="size-none pr-32 overflow-hidden border-none resize-none"
+              disabled={isLoading || isModelLoading || isModelError || isWhisperModelLoading} 
             />
+            </ScrollArea>
 
             {/* Mic and File Attachment Buttons */}
-            <div className="absolute bottom-2 right-14 flex items-center">
+            <div className="absolute bottom-2 right-16 flex items-center">
               <SpeechToTextButton
                 status={transcriberStatus}
                 onClick={handleMicClick}
@@ -267,7 +263,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
             </div>
 
             {/* Send Button / Stop Button */}
-            <div className="absolute bottom-2 right-2">
+            <div className="absolute bottom-2 right-4">
               {isGenerating ? (
                 <Tooltip>
                   <TooltipTrigger asChild>

@@ -17,4 +17,22 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'credentialless',
     },
   },
+  optimizeDeps: {
+    force: true,
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-tooltip',
+      'lucide-react',
+      'sonner',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge'
+    ],
+    exclude: [
+      '@mlc-ai/web-llm'
+    ]
+  },
 })
