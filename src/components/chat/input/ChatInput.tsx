@@ -7,7 +7,6 @@ import {
   useSpeechToText,
   type AttachedFile,
 } from "./hooks";
-import { useTextareaAutoResize } from "./hooks/useTextareaAutoResize";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
 import { Send, Mic, Square } from "lucide-react";
@@ -225,30 +224,33 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
         {/* Main Input Form */}
         <form onSubmit={onSubmit} className="space-y-3">
           <div
-            className="relative border rounded-md"
+            className="flex items-end gap-1 rounded-md border p-1.5"
             onDrop={(e) => handleDrop(e, handleFilesSelected)}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
           >
-            <ScrollArea className="min-h-[60px] max-h-[200px] w-full [&>div]:max-h-[200px]">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                isModelReady && currentModel
-                  ? `Message ${currentModel.name}... or click the mic to talk`
-                  : modelStatus
-              }
-              className="size-none pr-32 overflow-hidden border-none resize-none"
-              disabled={isLoading || isModelLoading || isModelError || isWhisperModelLoading} 
-            />
+            <ScrollArea className="min-h-[60px] max-h-[200px] flex-grow [&>div]:max-h-[200px]">
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  isModelReady && currentModel
+                    ? `Message ${currentModel.name}... or click the mic to talk`
+                    : modelStatus
+                }
+                className="w-full resize-none border-none bg-transparent pr-2 focus-visible:ring-0 focus-visible:ring-offset-0"
+                disabled={
+                  isLoading ||
+                  isModelLoading ||
+                  isModelError ||
+                  isWhisperModelLoading
+                }
+              />
             </ScrollArea>
-
-            {/* Mic and File Attachment Buttons */}
-            <div className="absolute bottom-2 right-16 flex items-center">
+            <div className="flex flex-shrink-0 items-center self-end pb-1">
               <SpeechToTextButton
                 status={transcriberStatus}
                 onClick={handleMicClick}
@@ -257,44 +259,49 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
               <FileUpload
                 supportsImages={supportsImages}
                 selectedModelName={currentModel?.name || "Model"}
-                disabled={isModelLoading || isModelError || isLoading || isWhisperModelLoading}
+                disabled={
+                  isModelLoading ||
+                  isModelError ||
+                  isLoading ||
+                  isWhisperModelLoading
+                }
                 onFilesChanged={setAttachedFiles}
               />
-            </div>
-
-            {/* Send Button / Stop Button */}
-            <div className="absolute bottom-2 right-4">
-              {isGenerating ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="destructive"
-                      onClick={onStopGeneration}
-                    >
-                      <Square className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Stop generation</TooltipContent>
-                </Tooltip>
-              ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="submit"
-                      size="icon"
-                      disabled={
-                        (!message.trim() && attachedFiles.length === 0) ||
-                        isLoading || isModelError || isWhisperModelLoading
-                      }
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Send message</TooltipContent>
-                </Tooltip>
-              )}
+              <div className="ml-1">
+                {isGenerating ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        onClick={onStopGeneration}
+                      >
+                        <Square className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Stop generation</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="submit"
+                        size="icon"
+                        disabled={
+                          (!message.trim() && attachedFiles.length === 0) ||
+                          isLoading ||
+                          isModelError ||
+                          isWhisperModelLoading
+                        }
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Send message</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
 
