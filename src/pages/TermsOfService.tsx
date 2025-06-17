@@ -159,7 +159,7 @@ export const TermsOfService: React.FC = () => {
           </p>
           <ul className="list-disc ml-6 mb-4">
             <li><strong>Email:</strong> v017dev@gmail.com</li>
-            <li><strong>GitHub:</strong> <a href="https://github.com/voitec/brokebot" className="text-blue-600 hover:underline">github.com/voitec/brokebot</a></li>
+            <li><strong>GitHub:</strong> <a href="https://github.com/voitb/brokebot" className="text-blue-600 hover:underline">github.com/voitb/brokebot</a></li>
             <li><strong>Security Issues:</strong> v017dev@gmail.com</li>
           </ul>
 
