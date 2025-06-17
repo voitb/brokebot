@@ -1,7 +1,7 @@
 import React from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "../lib/db";
-import { encryptValue, decryptValue } from "../lib/encryption";
+import { encryptValue, decryptValue } from "../lib/encryptionService";
 import { useAuth } from "@/providers/AuthProvider";
 import {
   getCloudUserConfig,
@@ -118,7 +118,9 @@ export function useUserConfig() {
         updatedAt: newUpdatedAt,
       });
 
-      console.log('UserConfig - Successfully updated local config');
+      if (import.meta.env.DEV) {
+        console.log('UserConfig - Successfully updated local config');
+      }
 
       // Also update cloud if user is logged in and sync is enabled
       if (
@@ -154,7 +156,9 @@ export function useUserConfig() {
 
           if (Object.keys(payload).length > 0) {
             await updateCloudUserConfig(user.$id, payload);
-            console.log('UserConfig - Successfully updated cloud config');
+            if (import.meta.env.DEV) {
+              console.log('UserConfig - Successfully updated cloud config');
+            }
           }
         } else {
           // CREATE: Config does not exist, send the full, filtered config.
@@ -182,7 +186,9 @@ export function useUserConfig() {
           );
 
           await createCloudUserConfig(user.$id, payload);
-          console.log('UserConfig - Successfully created cloud config');
+          if (import.meta.env.DEV) {
+            console.log('UserConfig - Successfully created cloud config');
+          }
         }
       }
     } catch (error) {
