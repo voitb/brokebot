@@ -29,6 +29,8 @@ Consider:
 - Potential solutions or explanations
 </think>
 
+**IMPORTANT**: Always use exactly \`<think>\` and \`</think>\` tags. Do NOT use any alternative formats like ◁think▷, [think], or *think*. The application expects standard HTML-style tags.
+
 Example:
 
 <think>

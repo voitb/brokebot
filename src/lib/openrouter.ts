@@ -1,5 +1,6 @@
 import { Functions } from 'appwrite';
 import { encryptValue, decryptValue } from './encryptionService';
+import { account } from './appwriteClient';
 
 export interface ApiKeyConfig {
   openrouterApiKey?: string;
@@ -74,6 +75,43 @@ export class OpenRouterClient {
     this.keys = config.keys;
   }
 
+  /**
+   * Gets current user ID for encryption context
+   */
+  private async getCurrentUserId(): Promise<string> {
+    try {
+      const user = await account.get();
+      return user.$id;
+    } catch (error) {
+      // For anonymous users, use a browser fingerprint
+      return this.getBrowserFingerprint();
+    }
+  }
+
+  /**
+   * Creates a unique browser fingerprint for anonymous users
+   */
+  private getBrowserFingerprint(): string {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Browser fingerprint', 2, 2);
+    }
+    
+    const fingerprint = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      new Date().getTimezoneOffset(),
+      canvas.toDataURL()
+    ].join('|');
+    
+    // Create a hash of the fingerprint
+    return btoa(fingerprint).slice(0, 32);
+  }
+
   async *streamCompletion(
     model: string,
     messages: OpenRouterMessage[],
@@ -92,6 +130,10 @@ export class OpenRouterClient {
         throw new Error('Invalid OpenRouter API key format. Key should start with "sk-or-" and be at least 20 characters long.');
       }
 
+      // Get user ID and encrypt API key
+      const userId = await this.getCurrentUserId();
+      const encryptedApiKey = await encryptValue(apiKey);
+
       // Since Appwrite Functions don't support streaming, we'll use chunked polling approach
       const result = await this.functions.createExecution(
         'proxy-ai',
@@ -99,7 +141,8 @@ export class OpenRouterClient {
           model,
           messages,
           stream: true, // We'll handle this in the function
-          api_key: apiKey
+          api_key: encryptedApiKey,
+          user_id: userId
         })
       );
 
@@ -194,7 +237,6 @@ export class OpenRouterClient {
   ): Promise<string> {
     try {
       const apiKey = this.getApiKeyForModel();
-      // const apiKey = this.getApiKeyForModel(model);
       
       if (!apiKey) {
         throw new Error('OpenRouter API key not found. Please add your OpenRouter API key in Settings.');
@@ -204,12 +246,17 @@ export class OpenRouterClient {
         throw new Error('Invalid OpenRouter API key format. Key should start with "sk-or-" and be at least 20 characters long.');
       }
 
+      // Get user ID and encrypt API key
+      const userId = await this.getCurrentUserId();
+      const encryptedApiKey = await encryptValue(apiKey);
+
       const result = await this.functions.createExecution(
         'proxy-ai',
         JSON.stringify({
           model,
           messages,
-          api_key: apiKey
+          api_key: encryptedApiKey,
+          user_id: userId
         })
       );
 
@@ -242,12 +289,17 @@ export class OpenRouterClient {
         return false;
       }
       
+      // Get user ID and encrypt API key
+      const userId = await this.getCurrentUserId();
+      const encryptedApiKey = await encryptValue(apiKey);
+      
       const result = await this.functions.createExecution(
         'proxy-ai',
         JSON.stringify({
           model: "deepseek/deepseek-r1-0528-qwen3-8b:free", // Use a free model for testing
           messages: [{ role: "user", content: "Hello" }],
-          api_key: apiKey
+          api_key: encryptedApiKey,
+          user_id: userId
         })
       );
       
@@ -345,4 +397,4 @@ export const storeApiKeys = async (keys: Partial<ReturnType<typeof getStoredApiK
     console.error('Failed to store API keys:', error);
     throw error;
   }
-}; 
+};
