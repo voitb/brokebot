@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FolderPlus } from "lucide-react";
 import { ScrollArea } from "../../ui/scroll-area";
 import { ConversationGroup } from "./components/ConversationGroup";
@@ -30,6 +30,19 @@ export const ConversationList: React.FC = () => {
 
   const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
   const { createFolder } = useConversations();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    };
+
+    document.addEventListener("app:focus-search", handleFocusSearch);
+    return () => {
+      document.removeEventListener("app:focus-search", handleFocusSearch);
+    };
+  }, []);
 
   const handleCreateFolder = (name: string) => {
     createFolder(name);
@@ -65,6 +78,7 @@ export const ConversationList: React.FC = () => {
       {/* Search Bar */}
       <div className="px-4 pb-4">
         <SearchBar
+          ref={searchInputRef}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           isSearching={isSearching}

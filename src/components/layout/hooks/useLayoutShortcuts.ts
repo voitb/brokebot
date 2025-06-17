@@ -1,23 +1,37 @@
 import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSidebar } from "../../ui/sidebar";
+import { useConversationList } from "@/components/chat/sidebar/hooks/useConversationList";
+import { useConversations } from "@/providers/ConversationsProvider";
+import { useConversationId } from "@/hooks/useConversationId";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export const useLayoutShortcuts = () => {
   const { open, setOpen } = useSidebar();
+  const { handleNewChat } = useConversationList();
+  const { togglePinConversation, deleteConversation } = useConversations();
+  const conversationId = useConversationId();
+  const navigate = useNavigate();
 
   useAppKeyboardShortcuts({
     onToggleSidebar: () => setOpen(!open),
-    onNewChat: () => {
-      // This is a bit of a hack, a more robust routing solution should be used
-      window.location.href = "/chat";
-    },
+    onNewChat: handleNewChat,
     onSearch: () => {
-      const searchInput = document.querySelector(
-        'input[placeholder="Search conversations..."]'
-      ) as HTMLInputElement;
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.select();
+      document.dispatchEvent(new CustomEvent("app:focus-search"));
+    },
+    onPinChat: () => {
+      if (conversationId) {
+        togglePinConversation(conversationId);
+        toast.success("Conversation pin status updated.");
       }
+    },
+    onDeleteChat: () => {
+      if (conversationId) {
+        document.dispatchEvent(new CustomEvent("conversation:delete", { detail: { conversationId } }));
+      }
+    },
+    onShowShortcuts: () => {
+      navigate({ search: "?modal=shortcuts" });
     },
     onRenameChat: () => {
       // This is also a hack, a better event system should be in place

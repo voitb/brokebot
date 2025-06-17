@@ -64,6 +64,36 @@ export function useHeaderActions({
   const isConversationPinned = currentConversation?.pinned || false;
   const isLoadingConversation = conversationId ? conversation === undefined : false;
 
+  // Event listener for deleting chat via shortcut
+  useEffect(() => {
+    const handleDelete = (event: Event) => {
+      // We need to check if the event detail matches the current conversation
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail?.conversationId === conversationId) {
+        setDeleteDialogOpen(true);
+      }
+    };
+
+    document.addEventListener("conversation:delete", handleDelete);
+    return () => {
+      document.removeEventListener("conversation:delete", handleDelete);
+    };
+  }, [conversationId]);
+
+  // Event listener for renaming chat via shortcut
+  useEffect(() => {
+    const handleRename = () => {
+      if (conversationId) {
+        handleTitleClick();
+      }
+    };
+
+    document.addEventListener("conversation:rename", handleRename);
+    return () => {
+      document.removeEventListener("conversation:rename", handleRename);
+    };
+  }, [conversationId]); // Dependency on conversationId ensures we don't trigger on null
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

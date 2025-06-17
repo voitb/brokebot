@@ -98,7 +98,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Share conversation {showShortcuts ? "(Alt+S)" : ""}</p>
+            <p>Share conversation</p>
           </TooltipContent>
         </Tooltip>
       )}
@@ -144,7 +144,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           <TooltipContent>
             <p>
               {isConversationPinned ? "Unpin" : "Pin"} conversation{" "}
-              {showShortcuts ? "(Alt+P)" : ""}
+              {showShortcuts ? "(g p)" : ""}
             </p>
           </TooltipContent>
         </Tooltip>

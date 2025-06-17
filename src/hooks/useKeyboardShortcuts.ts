@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConversationId } from './useConversationId';
 
@@ -23,6 +23,8 @@ export function useKeyboardShortcuts({
 }: UseKeyboardShortcutsProps = {}) {
   const navigate = useNavigate();
   const conversationId = useConversationId();
+  const lastKeyRef = useRef<string>('');
+  const timeoutRef = useRef<number | undefined>(undefined);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Ignore shortcuts when typing in input/textarea
@@ -34,52 +36,74 @@ export function useKeyboardShortcuts({
       return;
     }
 
-    const { ctrlKey, metaKey, key, altKey } = event;
-    const cmdOrCtrl = ctrlKey || metaKey;
+    const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
+    
+    // Clear timeout if exists
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
 
+    // Handle key sequences (g + letter)
+    if (lastKeyRef.current === 'g') {
+      lastKeyRef.current = '';
+      event.preventDefault();
+      
+      switch (key) {
+        case 'n': // g + n = New Chat
+          if (onNewChat) {
+            onNewChat();
+          } else {
+            navigate('/chat');
+          }
+          break;
+        case 's': // g + s = Toggle Sidebar
+          onToggleSidebar?.();
+          break;
+        case 'f': // g + f = Search
+          onSearch?.();
+          break;
+        case 'p': // g + p = Pin current chat
+          if (conversationId) {
+            onPinChat?.();
+          }
+          break;
+        case 'r': // g + r = Rename current chat
+          if (conversationId) {
+            onRenameChat?.();
+          }
+          break;
+        case 'd': // g + d = Delete current chat
+          if (conversationId) {
+            onDeleteChat?.();
+          }
+          break;
+        default:
+          // Invalid sequence, ignore
+          break;
+      }
+      return;
+    }
+
+    // Handle single key shortcuts
     switch (true) {
-      // Alt + N - New Chat
-      case altKey && key === 'n':
+      // g - Start sequence
+      case key === 'g' && !ctrlKey && !metaKey && !altKey && !shiftKey:
         event.preventDefault();
-        if (onNewChat) {
-          onNewChat();
-        } else {
-          navigate('/chat');
-        }
+        lastKeyRef.current = 'g';
+        // Reset sequence after 2 seconds
+        timeoutRef.current = window.setTimeout(() => {
+          lastKeyRef.current = '';
+        }, 2000);
         break;
 
-      // Ctrl/Cmd + B - Toggle Sidebar
-      case altKey && key === 'b':
-        event.preventDefault();
-        onToggleSidebar?.();
-        break;
-
-      // Ctrl/Cmd + J - Search (changed from Ctrl+K to avoid conflict)
-      case altKey && key === 'j':
+      // / - Focus search (common pattern)
+      case key === '/' && !ctrlKey && !metaKey && !altKey && !shiftKey:
         event.preventDefault();
         onSearch?.();
         break;
 
-      // Ctrl/Cmd + P - Pin current chat (changed from Ctrl+F)
-      case altKey && key === 'p' && !!conversationId:
-        event.preventDefault();
-        onPinChat?.();
-        break;
-
-      // Alt + R - Rename current chat  
-      case altKey && key === 'r' && !!conversationId:
-        event.preventDefault();
-        onRenameChat?.();
-        break;
-
-      // Alt + Delete - Delete current chat
-      case altKey && key === 'Delete' && !!conversationId:
-        event.preventDefault();
-        onDeleteChat?.();
-        break;
-
       // ? - Show shortcuts
-      case key === '?' && !cmdOrCtrl:
+      case key === '?' && !ctrlKey && !metaKey && !altKey && !shiftKey:
         event.preventDefault();
         onShowShortcuts?.();
         break;
@@ -87,9 +111,12 @@ export function useKeyboardShortcuts({
       // Escape - Close dialogs/modals (handled by components)
       case key === 'Escape':
         // Let components handle this
+        lastKeyRef.current = ''; // Reset sequence
         break;
 
       default:
+        // Reset sequence on any other key
+        lastKeyRef.current = '';
         break;
     }
   }, [
@@ -108,6 +135,9 @@ export function useKeyboardShortcuts({
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
     };
   }, [handleKeyDown]);
 
