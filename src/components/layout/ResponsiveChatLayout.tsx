@@ -8,14 +8,18 @@ import {
   SidebarProvider,
 } from "../ui/sidebar";
 import { useLayoutShortcuts } from "./hooks/useLayoutShortcuts";
+import { useOnboarding } from "../onboarding/hooks/useOnboarding";
+import { OnboardingDialog } from "../onboarding/OnboardingDialog";
 
 interface ResponsiveChatLayoutProps {
   children: ReactNode;
 }
 
-const LayoutShortcutsManager: React.FC = () => {
+const LayoutManager: React.FC = () => {
   useLayoutShortcuts();
-  return null;
+  const { showOnboarding, completeOnboarding } = useOnboarding();
+
+  return <OnboardingDialog isOpen={showOnboarding} onClose={completeOnboarding} />;
 };
 
 export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
@@ -24,7 +28,7 @@ export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
       className="bg-background! overflow-hidden"
       // Default state can be managed here or through the hook if extended
     >
-      <LayoutShortcutsManager />
+      <LayoutManager />
       <Sidebar className="border-none! bg-background! [&>div]:bg-background! w-80 shrink-0">
         <SidebarContent className="bg-background! overflow-hidden">
           <ChatSidebar />
