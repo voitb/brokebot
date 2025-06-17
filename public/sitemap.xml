@@ -8,22 +8,22 @@
 
   <!-- Main Pages -->
   <url>
-    <loc>https://yourdomain.com/</loc>
+    <loc>https://brokebot.voitz.dev.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/terms</loc>
+    <loc>https://brokebot.voitz.dev.com/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/login</loc>
+    <loc>https://brokebot.voitz.dev.com/login</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://yourdomain.com/signup</loc>
+    <loc>https://brokebot.voitz.dev.com/signup</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
