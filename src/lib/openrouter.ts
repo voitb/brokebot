@@ -1,4 +1,5 @@
 import { Functions } from 'appwrite';
+import { encryptValue, decryptValue } from './encryptionService';
 
 export interface ApiKeyConfig {
   openrouterApiKey?: string;
@@ -286,23 +287,62 @@ export class OpenRouterClient {
   }
 }
 
-export const getStoredApiKeys = () => {
+export const getStoredApiKeys = async () => {
   if (typeof window === 'undefined') {
     return {};
   }
-  const keys = localStorage.getItem('apiKeys');
+  
   try {
-    return keys ? JSON.parse(keys) : {};
-  } catch {
+    const encryptedKeys = localStorage.getItem('apiKeys');
+    if (!encryptedKeys) return {};
+    
+    const parsedKeys = JSON.parse(encryptedKeys);
+    const decryptedKeys: any = {};
+    
+    // Decrypt each key
+    for (const [provider, encryptedKey] of Object.entries(parsedKeys)) {
+      if (encryptedKey && typeof encryptedKey === 'string') {
+        try {
+          decryptedKeys[provider] = await decryptValue(encryptedKey);
+        } catch (error) {
+          console.warn(`Failed to decrypt API key for ${provider}:`, error);
+          // Skip this key if decryption fails
+        }
+      }
+    }
+    
+    return decryptedKeys;
+  } catch (error) {
+    console.error('Failed to retrieve API keys:', error);
     return {};
   }
 };
 
-export const storeApiKeys = (keys: Partial<ReturnType<typeof getStoredApiKeys>>) => {
+export const storeApiKeys = async (keys: Partial<ReturnType<typeof getStoredApiKeys>>) => {
   if (typeof window === 'undefined') {
     return;
   }
-  const currentKeys = getStoredApiKeys();
-  const newKeys = { ...currentKeys, ...keys };
-  localStorage.setItem('apiKeys', JSON.stringify(newKeys));
+  
+  try {
+    const currentKeys = await getStoredApiKeys();
+    const newKeys = { ...currentKeys, ...keys };
+    const encryptedKeys: any = {};
+    
+    // Encrypt each key
+    for (const [provider, key] of Object.entries(newKeys)) {
+      if (key && typeof key === 'string') {
+        try {
+          encryptedKeys[provider] = await encryptValue(key);
+        } catch (error) {
+          console.error(`Failed to encrypt API key for ${provider}:`, error);
+          throw new Error(`Failed to securely store API key for ${provider}`);
+        }
+      }
+    }
+    
+    localStorage.setItem('apiKeys', JSON.stringify(encryptedKeys));
+  } catch (error) {
+    console.error('Failed to store API keys:', error);
+    throw error;
+  }
 }; 

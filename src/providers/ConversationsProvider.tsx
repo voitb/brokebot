@@ -247,8 +247,10 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (getCloudSync()) {
         try {
           await deleteConversationFromCloud(id);
-        } catch {
-           console.log(`Conversation ${id} not found in cloud or already deleted.`);
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.log(`Conversation ${id} not found in cloud or already deleted.`);
+          }
         }
       }
       
@@ -270,8 +272,10 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (getCloudSync() && pinned !== undefined) {
         try {
           await updateConversationInCloud(id, { pinned });
-        } catch {
-           console.log(`Conversation ${id} not found in cloud for pin update.`);
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.log(`Conversation ${id} not found in cloud for pin update.`);
+          }
         }
       }
     } catch (error) {
@@ -290,8 +294,10 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       if (getCloudSync()) {
         try {
           await updateConversationInCloud(id, { title: newTitle });
-        } catch {
-           console.log(`Conversation ${id} not found in cloud for title update.`);
+        } catch (error) {
+          if (import.meta.env.DEV) {
+            console.log(`Conversation ${id} not found in cloud for title update.`);
+          }
         }
       }
     } catch (error) {

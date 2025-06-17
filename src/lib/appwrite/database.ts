@@ -654,7 +654,9 @@ export async function syncCloudToLocal(userId: string) {
     // 5. Use a bulk put operation to efficiently update the local DB.
     await db.conversations.bulkPut(localConversations);
 
-    console.log(`Synced ${localConversations.length} conversations and ${allMessages.length} messages from the cloud.`);
+    if (import.meta.env.DEV) {
+      console.log(`Synced ${localConversations.length} conversations and ${allMessages.length} messages from the cloud.`);
+    }
 
   } catch (error) {
     console.error("Failed to sync cloud to local database:", error);

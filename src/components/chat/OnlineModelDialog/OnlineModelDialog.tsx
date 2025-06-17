@@ -95,7 +95,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
           />
         </TabsContent>
         <TabsContent value="paid" className="space-y-4 p-4">
-          <Alert>
+          {/* <Alert>
             <Key className="h-4 w-4" />
             <AlertDescription>
               Premium models with enhanced capabilities. Your data remains
@@ -108,7 +108,16 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
             onSelect={handleModelSelect}
             isFree={false}
             availableKeys={storedKeys}
-          />
+          /> */}
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Key className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+            <p className="text-muted-foreground max-w-md">
+              Premium model integration is currently in development. Soon you'll be able to access advanced AI models with enhanced capabilities while keeping your data private.
+            </p>
+          </div>
         </TabsContent>
       </ScrollArea>
     )
