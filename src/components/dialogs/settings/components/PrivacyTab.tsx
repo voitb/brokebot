@@ -52,11 +52,7 @@ export function PrivacyTab({
   return (
     <>
       <div className="space-y-6">
-        <DataStorageSection 
-          storeConversationsInCloud={config.storeConversationsInCloud || false}
-          hasActiveSubscription={hasActiveSubscription} 
-          onToggleCloudStorage={handleToggleCloudStorage}
-        />
+        <DataStorageSection />
 
         <Separator />
 

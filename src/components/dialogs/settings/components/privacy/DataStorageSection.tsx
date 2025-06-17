@@ -1,20 +1,17 @@
 import React from "react";
 import { Label } from "../../../../ui/label";
-import { Switch } from "../../../../ui/switch";
-import { Info, Crown } from "lucide-react";
+// import { Switch } from "../../../../ui/switch";
+import { Info } from "lucide-react";
+// import { Crown } from "lucide-react";
 
-interface DataStorageSectionProps {
-  storeConversationsInCloud: boolean;
-  hasActiveSubscription: boolean;
-  onToggleCloudStorage: (checked: boolean) => void;
-}
+// interface DataStorageSectionProps {
+//   storeConversationsInCloud: boolean;
+//   hasActiveSubscription: boolean;
+//   onToggleCloudStorage: (checked: boolean) => void;
+// }
 
-export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
-  storeConversationsInCloud,
-  hasActiveSubscription,
-  onToggleCloudStorage,
-}) => {
-  const isCloudSwitchDisabled = !hasActiveSubscription;
+export const DataStorageSection: React.FC = () => {
+  // const isCloudSwitchDisabled = !hasActiveSubscription;
   
   return (
     <>
@@ -31,10 +28,10 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
           To ensure a seamless offline experience, your chat history is always
           kept in your browser's local storage. You can clear all data anytime
           in the "Danger Zone".
-              </p>
-            </div>
+        </p>
+      </div>
 
-      <div className="space-y-2 pt-4">
+      {/* <div className="space-y-2 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <Label className="flex items-center gap-2">
@@ -57,7 +54,7 @@ export const DataStorageSection: React.FC<DataStorageSectionProps> = ({
             An active Plus subscription is required to enable Cloud Sync.
           </p>
         )}
-      </div>
+      </div> */}
     </>
   );
 };
