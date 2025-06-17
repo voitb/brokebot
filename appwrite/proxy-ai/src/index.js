@@ -9,8 +9,10 @@ const HTTP_STATUS = {
 const ERROR_MESSAGES = {
   METHOD_NOT_ALLOWED: "Method Not Allowed",
   INVALID_JSON: "Invalid JSON format.",
-  API_KEY_MISSING: "OpenRouter API key not provided. Please configure your API key.",
-  MISSING_FIELDS: "Fields 'model' and 'messages' (as non-empty array) are required.",
+  API_KEY_MISSING:
+    "OpenRouter API key not provided. Please configure your API key.",
+  MISSING_FIELDS:
+    "Fields 'model' and 'messages' (as non-empty array) are required.",
   EXTERNAL_API_ERROR: "External API error.",
   SERVER_ERROR: "Server error occurred.",
   INVALID_API_KEY: "Invalid API key. Please check your API key configuration.",
@@ -19,8 +21,8 @@ const ERROR_MESSAGES = {
 const CONFIG = {
   OPENROUTER_API_URL: "https://openrouter.ai/api/v1/chat/completions",
   REQUEST_TIMEOUT_MS: 25000,
-  APP_URL: process.env.APP_URL || "http://localhost:5173",  
-  APP_TITLE: process.env.APP_TITLE || "Local GPT",  
+  APP_URL: process.env.APP_URL || "http://localhost:5173",
+  APP_TITLE: process.env.APP_TITLE || "Local GPT",
 };
 
 /**
@@ -53,19 +55,30 @@ const sendError = (res, message, statusCode, logError, internalLogMessage) => {
  * @param {{model: string, messages: any[], apiKey: string, log: function, error: function}} params
  * @returns {Promise<{data: object, status: number}|{error: object, status: number}>}
  */
-const forwardToOpenRouter = async ({ model, messages, apiKey, log, error }) => {
+const forwardToOpenRouter = async ({
+  model,
+  messages,
+  apiKey,
+  log,
+  error,
+}) => {
   log(`Forwarding request to model: ${model} with ${messages.length} messages`);
   log(`Messages preview: ${JSON.stringify(messages.slice(0, 2))}...`);
-  log(`Making request to OpenRouter with API key: ${apiKey ? 'SET' : 'NOT SET'}`);
+  log(
+    `Making request to OpenRouter with API key: ${apiKey ? "SET" : "NOT SET"}`
+  );
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    CONFIG.REQUEST_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(CONFIG.OPENROUTER_API_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": CONFIG.APP_URL,
         "X-Title": CONFIG.APP_TITLE,
@@ -88,61 +101,92 @@ const forwardToOpenRouter = async ({ model, messages, apiKey, log, error }) => {
       } catch {
         errorResponse = { error: { message: errorText } };
       }
-      
+
       error(`OpenRouter API error: ${response.status} - ${errorText}`);
-      
+
       // Handle specific error cases
       if (response.status === 401) {
-        return { 
-          error: { message: ERROR_MESSAGES.INVALID_API_KEY }, 
+        return {
+          error: { message: ERROR_MESSAGES.INVALID_API_KEY },
           status: response.status,
-          details: errorResponse
+          details: errorResponse,
         };
       }
-      
-      return { 
-        error: { message: ERROR_MESSAGES.EXTERNAL_API_ERROR }, 
+
+      return {
+        error: { message: ERROR_MESSAGES.EXTERNAL_API_ERROR },
         status: response.status,
-        details: errorResponse
+        details: errorResponse,
       };
     }
   } catch (e) {
     clearTimeout(timeoutId);
     error(`Internal error while communicating with OpenRouter: ${e.message}`);
-    
-    if (e.name === 'AbortError') {
-      return { error: { message: "Request timeout" }, status: HTTP_STATUS.INTERNAL_SERVER_ERROR };
+
+    if (e.name === "AbortError") {
+      return {
+        error: { message: "Request timeout" },
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      };
     }
-    
-    return { error: { message: ERROR_MESSAGES.SERVER_ERROR }, status: HTTP_STATUS.INTERNAL_SERVER_ERROR };
+
+    return {
+      error: { message: ERROR_MESSAGES.SERVER_ERROR },
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    };
   }
 };
 
-export default async ({ req, res, log, error }) => {
+// FIX: Use module.exports for CommonJS compatibility
+module.exports = async ({ req, res, log, error }) => {
   if (req.method !== "POST") {
-    return sendError(res, ERROR_MESSAGES.METHOD_NOT_ALLOWED, HTTP_STATUS.METHOD_NOT_ALLOWED);
+    return sendError(
+      res,
+      ERROR_MESSAGES.METHOD_NOT_ALLOWED,
+      HTTP_STATUS.METHOD_NOT_ALLOWED
+    );
   }
 
   let body;
   try {
     body = JSON.parse(req.body);
   } catch (e) {
-    return sendError(res, ERROR_MESSAGES.INVALID_JSON, HTTP_STATUS.BAD_REQUEST, error, `Failed to parse JSON: ${e.message}`);
+    return sendError(
+      res,
+      ERROR_MESSAGES.INVALID_JSON,
+      HTTP_STATUS.BAD_REQUEST,
+      error,
+      `Failed to parse JSON: ${e.message}`
+    );
   }
 
   const { model, messages, api_key } = body;
   const apiKey = api_key || process.env.OPENROUTER_API_KEY;
 
-  log(`Request received for model: ${model}, API key provided: ${apiKey ? 'YES' : 'NO'}`);
+  log(
+    `Request received for model: ${model}, API key provided: ${
+      apiKey ? "YES" : "NO"
+    }`
+  );
   log(`Messages count: ${Array.isArray(messages) ? messages.length : 0}`);
-  
+
   // Log message structure for debugging rate limits
   if (Array.isArray(messages)) {
-    log(`Message structure: ${messages.map(m => `${m.role}(${m.content?.length || 0} chars)`).join(', ')}`);
+    log(
+      `Message structure: ${messages
+        .map((m) => `${m.role}(${m.content?.length || 0} chars)`)
+        .join(", ")}`
+    );
   }
 
   if (!apiKey) {
-    return sendError(res, ERROR_MESSAGES.API_KEY_MISSING, HTTP_STATUS.BAD_REQUEST, error, "OpenRouter API key not provided.");
+    return sendError(
+      res,
+      ERROR_MESSAGES.API_KEY_MISSING,
+      HTTP_STATUS.BAD_REQUEST,
+      error,
+      "OpenRouter API key not provided."
+    );
   }
 
   if (!model || !Array.isArray(messages) || messages.length === 0) {
@@ -150,17 +194,28 @@ export default async ({ req, res, log, error }) => {
   }
 
   try {
-    const result = await forwardToOpenRouter({ model, messages, apiKey, log, error });
+    const result = await forwardToOpenRouter({
+      model,
+      messages,
+      apiKey,
+      log,
+      error,
+    });
 
     if (result.error) {
-        log(`OpenRouter API error response: ${JSON.stringify(result)}`);
-        return sendResponse(res, { error: result.error.message }, result.status);
+      log(`OpenRouter API error response: ${JSON.stringify(result)}`);
+      return sendResponse(res, { error: result.error.message }, result.status);
     }
 
     log(`Successfully processed request for model: ${model}`);
     return sendResponse(res, result.data, result.status);
-
   } catch (e) {
-    return sendError(res, ERROR_MESSAGES.SERVER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR, error, `Unhandled exception in main handler: ${e.message}`);
+    return sendError(
+      res,
+      ERROR_MESSAGES.SERVER_ERROR,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error,
+      `Unhandled exception in main handler: ${e.message}`
+    );
   }
 };
