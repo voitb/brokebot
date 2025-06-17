@@ -43,7 +43,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
     handleModelSelect,
     handleOpenChange,
     freeModels,
-    paidModels,
+    // paidModels,
     isLoading,
     error,
   } = useOnlineModels(onModelSelect, onOpenChange);
