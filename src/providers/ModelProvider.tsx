@@ -37,7 +37,7 @@ interface ModelProviderState {
   modelStatus: string;
   availableOnlineModels: OpenRouterModel[];
   isLoadingAvailableModels: boolean;
-  availableModelsError: string | null;
+  availableModelsError: Error | null;
   setCurrentModel: (model: UnifiedModel) => void;
   sendMessage: (messages: OpenRouterMessage[]) => Promise<string>;
   streamMessage: (

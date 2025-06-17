@@ -1,2 +1,2 @@
-export { useSettingsData } from './useSettingsData';
-export type { UserData, ApiKeys } from './useSettingsData'; 
+export { useSettings } from './useSettings';
+export type { SettingsTab } from './useSettings'; 

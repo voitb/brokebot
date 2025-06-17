@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { IConversation } from '../lib/db';
+import type { Conversation } from '../lib/db';
 
 export const useConversationMenu = (
-  conversations: IConversation[] | null,
+  conversations: Conversation[] | null,
   togglePinConversation: (id: string) => Promise<void>
 ) => {
   const navigate = useNavigate();

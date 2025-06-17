@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { FileText, Upload, Trash2, RefreshCw, Calendar } from "lucide-react";
 // Note: date-fns not available, using native Date
 // import { formatDistanceToNow } from "date-fns";
-import { toast } from "sonner";
+
 
 interface DocumentManagerProps {
   className?: string;

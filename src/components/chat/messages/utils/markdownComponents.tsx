@@ -1,4 +1,4 @@
-import React from "react";
+
 import type { Components } from "react-markdown";
 import { CodeBlock } from "../components/CodeBlock";
 import { ScrollArea } from "../../../ui/scroll-area";

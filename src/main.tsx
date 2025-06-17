@@ -9,7 +9,8 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { WebLLMProvider } from "./providers/WebLLMProvider";
 import { ModelProvider } from "./providers/ModelProvider";
 import { ConversationsProvider } from "./providers/ConversationsProvider";
-import "./index.css"; 
+import "./index.css";
+import { Toaster } from './components/ui/sonner.tsx'
 
 const rootElement = document.getElementById("root");
 
@@ -27,6 +28,7 @@ ReactDOM.createRoot(rootElement).render(
               <ModelProvider>
                 <ConversationsProvider>
                   <RouterProvider router={router} />
+                  <Toaster />
                 </ConversationsProvider>
               </ModelProvider>
             </WebLLMProvider>

@@ -46,7 +46,7 @@ export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
     paidModels,
     isLoading,
     error,
-  } = useOnlineModels(open, onModelSelect, onOpenChange);
+  } = useOnlineModels(onModelSelect, onOpenChange);
 
   const renderContent = () => {
     if (isLoading) {

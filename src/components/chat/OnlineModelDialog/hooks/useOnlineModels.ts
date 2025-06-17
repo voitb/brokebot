@@ -9,7 +9,6 @@ import { useUserConfig } from "@/hooks/useUserConfig";
 import { useModels } from "../../../../hooks/api/useModels";
 
 export const useOnlineModels = (
-  open: boolean | undefined,
   onModelSelect: (
     model: OpenRouterModel,
     client: OpenRouterClient | null

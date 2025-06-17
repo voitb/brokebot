@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import type { ConversationGroup } from '../types';
-import type { IConversation } from '../lib/db';
+import type { Conversation } from '../lib/db';
 
 // Helper function to group conversations by time periods
 const groupConversationsByTime = (
-  conversations: IConversation[]
+  conversations: Conversation[]
 ): ConversationGroup[] => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -94,7 +94,7 @@ const groupConversationsByTime = (
 };
 
 export const useConversationGroups = (
-  conversations: IConversation[] | null,
+  conversations: Conversation[] | null,
   searchQuery: string = ''
 ) => {
   const filteredGroups = useMemo(() => {

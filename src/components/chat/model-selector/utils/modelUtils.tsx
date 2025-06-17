@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Cpu, HardDrive, Zap, AlertTriangle, Eye, Database, Code, Calculator, Shield } from "lucide-react";
 
 export const getCategoryIcon = (category: string) => {

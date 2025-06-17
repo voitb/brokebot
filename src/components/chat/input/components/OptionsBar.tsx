@@ -9,7 +9,7 @@ import {
 import { Button } from "../../../ui/button";
 import { Badge } from "../../../ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { ModelSelector } from "../../ModelSelector";
+import { ModelSelector } from "../../model-selector";
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
 import type { QualityLevel } from "../../../../types";
 

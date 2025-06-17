@@ -1,6 +1,6 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
-import { Loader2 } from "lucide-react";
+
 
 interface MessageAvatarProps {
   isUser: boolean;
@@ -13,7 +13,7 @@ interface MessageAvatarProps {
  */
 const AvatarContent: React.FC<{ isUser: boolean; isGenerating: boolean }> = React.memo(({ 
   isUser, 
-  isGenerating 
+  isGenerating: _isGenerating 
 }) => {
   if (isUser) {
     return <>💸</>;

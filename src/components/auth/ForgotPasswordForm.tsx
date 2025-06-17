@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { GalleryVerticalEnd } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ export function ForgotPasswordForm({ className }: React.ComponentProps<"div">) {
   const { sendPasswordReset } = useAuth();
 
   const sendPasswordResetAction = async (
-    state: State,
+    _state: State,
     values: FormValues
   ): Promise<State> => {
     try {

@@ -7,7 +7,7 @@ import {
   APPWRITE_FOLDERS_COLLECTION_ID
 } from "../appwriteClient";
 import { db } from "../db";
-import { Databases, ID, Query } from "appwrite";
+import { Databases, Query } from "appwrite";
 import type { Conversation, Message, UserConfig, Folder } from "../db";
 import type { Models } from "appwrite";
 
@@ -24,36 +24,30 @@ interface AppwriteConversation {
   $updatedAt:string;
 }
 
-interface AppwriteMessage {
-  role: "user" | "assistant";
-  content: string;
-  createdAt: string; // ISO 8601 string
-  conversationId: string;
-  $id: string;
-}
 
-interface AppwriteFolder {
-  name: string;
-  userId: string;
-  $id: string;
-  $createdAt: string;
-  $updatedAt: string;
-}
+
+// interface AppwriteFolder {
+//   name: string;
+//   userId: string;
+//   $id: string;
+//   $createdAt: string;
+//   $updatedAt: string;
+// }
 
 /**
  * Converts an Appwrite document for a conversation into the local Dexie format.
  * Messages are handled separately.
  */
-function mapAppwriteConversationToLocal(appwriteDoc: AppwriteConversation): Omit<Conversation, 'messages'> {
-  return {
-    id: appwriteDoc.$id,
-    title: appwriteDoc.title,
-    pinned: appwriteDoc.pinned,
-    folderId: appwriteDoc.folderId,
-    createdAt: new Date(appwriteDoc.$createdAt),
-    updatedAt: new Date(appwriteDoc.$updatedAt),
-  };
-}
+// function mapAppwriteConversationToLocal(appwriteDoc: AppwriteConversation): Omit<Conversation, 'messages'> {
+//   return {
+//     id: appwriteDoc.$id,
+//     title: appwriteDoc.title,
+//     pinned: appwriteDoc.pinned,
+//     folderId: appwriteDoc.folderId,
+//     createdAt: new Date(appwriteDoc.$createdAt),
+//     updatedAt: new Date(appwriteDoc.$updatedAt),
+//   };
+// }
 
 // --- FOLDERS ---
 export async function createFolderInCloud(
@@ -518,7 +512,7 @@ export async function syncCloudAndLocal(userId: string) {
   // 3. Sync Folders
   const folderSyncPromises = [];
   const cloudFolderIds = new Set(cloudFolders.map((f) => f.id));
-  const localFolderIds = new Set(localFolders.map((f) => f.id));
+  // const localFolderIds = new Set(localFolders.map((f) => f.id));
 
   // 3a. Update local folders that are also in the cloud (cloud wins)
   for (const cloudFolder of cloudFolders) {
