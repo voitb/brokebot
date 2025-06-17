@@ -5,13 +5,14 @@ import { ModalRoot } from "./components/modals";
 import { AuthProvider } from "./providers/AuthProvider"; 
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { TooltipProvider } from "./components/ui/tooltip";
-import { Seo } from './components/common/Seo';
+import { Seo, PerformanceSEO } from './components/common';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <TooltipProvider> 
         <Seo />
+        <PerformanceSEO enableWebVitals={true} />
         <AuthProvider>
           <ResponsiveChatLayout>
             <Outlet />

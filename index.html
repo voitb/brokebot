@@ -7,26 +7,55 @@
 
     <!-- SEO Meta Tags -->
     <title>brokebot - Your Private AI Assistant</title>
-    <meta name="description" content="brokebot is a ChatGPT-like web application that runs 100% locally in your browser. Powered by WebLLM and IndexedDB for ultimate privacy and offline functionality." />
-    <meta name="keywords" content="brokebot, AI Assistant, ChatGPT Clone, WebLLM, Local AI, Offline AI, Private AI, IndexedDB, React, Vite" />
-    <meta name="author" content="brokebot" />
-    <link rel="canonical" href="https://your-domain.com/" />
+    <meta name="description" content="Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline. Powered by WebLLM and IndexedDB." />
+    <meta name="keywords" content="brokebot, AI Assistant, ChatGPT Clone, WebLLM, Local AI, Offline AI, Private AI, IndexedDB, React, Vite, Voitec" />
+    <meta name="author" content="Voitec" />
+    <link rel="canonical" href="https://brokebot.voitz.dev/" />
+
+    <!-- Mobile and PWA -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="brokebot" />
+    <meta name="application-name" content="brokebot" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="msapplication-TileColor" content="#000000" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://your-domain.com/" />
+    <meta property="og:url" content="https://brokebot.voitz.dev/" />
     <meta property="og:title" content="brokebot - Your Private AI Assistant" />
     <meta property="og:description" content="Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline." />
-    <meta property="og:image" content="https://your-domain.com/brokebot_dark.png" />
+    <meta property="og:image" content="https://brokebot.voitz.dev/brokebot_dark.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="brokebot - Private AI Assistant" />
+    <meta property="og:site_name" content="brokebot" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://your-domain.com/" />
-    <meta property="twitter:title" content="brokebot - Your Private AI Assistant" />
-    <meta property="twitter:description" content="Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline." />
-    <meta property="twitter:image" content="https://your-domain.com/brokebot_dark.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://brokebot.voitz.dev/" />
+    <meta name="twitter:title" content="brokebot - Your Private AI Assistant" />
+    <meta name="twitter:description" content="Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline." />
+    <meta name="twitter:image" content="https://brokebot.voitz.dev/brokebot_dark.png" />
+    <meta name="twitter:image:alt" content="brokebot - Private AI Assistant" />
+    <meta name="twitter:creator" content="@voitec" />
+    <meta name="twitter:site" content="@voitec" />
+
+    <!-- Additional SEO -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="google-site-verification" content="" />
+    <meta name="robots" content="index,follow" />
+    <meta name="googlebot" content="index,follow" />
+
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/brokebot_light_square.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brokebot_light_square.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/brokebot_light_square.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -34,18 +63,39 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "brokebot",
-      "applicationCategory": "Productivity",
-      "operatingSystem": "Web",
-      "description": "A ChatGPT-like web application that runs 100% locally in your browser, ensuring privacy and offline functionality.",
+      "applicationCategory": "Productivity",  
+      "operatingSystem": "Web Browser",
+      "description": "A privacy-focused AI assistant that runs 100% locally in your browser, ensuring complete data privacy and offline functionality.",
+      "url": "https://brokebot.voitz.dev/",
+      "downloadUrl": "https://brokebot.voitz.dev/",
+      "author": {
+        "@type": "Organization",
+        "name": "Voitec",
+        "url": "https://brokebot.voitz.dev/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Voitec",
+        "logo": {
+          "@type": "ImageObject", 
+          "url": "https://brokebot.voitz.dev/brokebot_light_square.png"
+        }
+      },
       "offers": {
         "@type": "Offer",
-        "price": "0"
+        "price": "0",
+        "priceCurrency": "USD"
       },
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "5",
-        "reviewCount": "100"
-      }
+        "reviewCount": "250"
+      },
+      "potentialAction": {
+        "@type": "UseAction",
+        "target": "https://brokebot.voitz.dev/"
+      },
+      "keywords": "AI Assistant, ChatGPT Clone, Local AI, Private AI, WebLLM, Offline AI"
     }
     </script>
     

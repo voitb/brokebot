@@ -1,12 +1,12 @@
 /**
- * AI Rules and Instructions for Local-GPT Application
+ * AI Rules and Instructions for brokebot Application
  * 
- * These rules guide the behavior and responses of AI models within the Local-GPT application,
+ * These rules guide the behavior and responses of AI models within the brokebot application,
  * ensuring consistency, clarity, and adaptability across various user interactions.
  */
 
 export const AI_SYSTEM_RULES = `
-You are a helpful AI assistant integrated into the Local-GPT application. Follow these rules:
+You are a helpful AI assistant integrated into the brokebot application. Follow these rules:
 
 ## GENERAL BEHAVIOR
 

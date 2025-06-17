@@ -1,12 +1,12 @@
-# PROJEKT LOCAL-GPT - Lokalny Asystent AI
+# BROKEBOT PROJECT - Local AI Assistant
 
-# Klon ChatGPT działający w przeglądarce z WebLLM i IndexedDB
+# ChatGPT Clone running in browser with WebLLM and IndexedDB
 
 ## PROJECT DESCRIPTION
 
-Local-GPT to aplikacja webowa będąca klonem ChatGPT, która działa w 100% lokalnie w przeglądarce.
-Wykorzystuje WebLLM dla modelu AI i IndexedDB dla trwałej pamięci, zapewniając prywatność,
-darmowe użytkowanie i pracę offline.
+Brokebot is a web application that serves as a ChatGPT clone, operating 100% locally in the browser.
+It uses WebLLM for AI models and IndexedDB for persistent storage, ensuring privacy,
+free usage, and offline functionality.
 
 ## CRITICAL RULES - ABSOLUTELY MUST FOLLOW
 
