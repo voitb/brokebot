@@ -45,6 +45,8 @@ interface ModelProviderState {
     onProgress?: (content: string) => void,
     signal?: AbortSignal
   ) => AsyncGenerator<StreamResponse, void, unknown>;
+  interruptGeneration: () => void;
+  resetChat: () => Promise<void>;
 }
 
 const ModelContext = createContext<ModelProviderState | undefined>(undefined);
@@ -94,6 +96,18 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
   }, [webLLM.selectedModel, config]);
+
+  const interruptGeneration = useCallback(() => {
+    if (currentModel?.type === "local" && webLLM.engine) {
+      webLLM.engine.interruptGenerate();
+    }
+  }, [currentModel, webLLM.engine]);
+
+  const resetChat = useCallback(async () => {
+    if (currentModel?.type === "local" && webLLM.engine && currentModel.id) {
+      await webLLM.engine.reload(currentModel.id);
+    }
+  }, [currentModel, webLLM.engine]);
 
   const setCurrentModel = useCallback(
     (model: UnifiedModel) => {
@@ -196,10 +210,14 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
             }
           }
 
-          yield {
-            content: fullContent,
-            isComplete: true,
-          };
+          if (signal?.aborted) {
+            yield { content: fullContent, isComplete: true, error: "stopped" };
+          } else {
+            yield {
+              content: fullContent,
+              isComplete: true,
+            };
+          }
         } catch (error) {
           yield {
             content: "",
@@ -249,6 +267,8 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     setCurrentModel,
     sendMessage,
     streamMessage,
+    interruptGeneration,
+    resetChat,
   };
 
   return (
