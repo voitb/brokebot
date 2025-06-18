@@ -128,7 +128,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
     };
     return (
         <Dialog modal={true} open={isOpen}>
-            <DialogContent showCloseButton={false} className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-lg [&>button:last-child]:top-3.5">
+            <DialogContent showCloseButton={false} className="flex flex-col gap-0 p-0 max-h-[90vh] sm:max-w-lg [&>button:last-child]:top-3.5">
                 <DialogHeader className="contents space-y-0 text-left">
                     <DialogTitle className="border-b border-border px-6 py-4 text-base">
                         Welcome to brokebot!
