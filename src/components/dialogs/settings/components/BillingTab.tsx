@@ -56,7 +56,7 @@ const PlusProBenefitsCards = () => (
         <Card>
             <CardHeader>
                 <CardTitle className="text-sm flex justify-between items-center">
-                    <span>Plus Benefits <span className="text-xs text-muted-foreground">(10$ monthly / 84$ yearly)</span></span>
+                    <span>Plus Benefits <span className="text-xs text-muted-foreground">(7$ monthly / 60$ yearly)</span></span>
                     <Badge variant="outline">Coming Soon</Badge>
                 </CardTitle>
             </CardHeader>
@@ -75,7 +75,7 @@ const PlusProBenefitsCards = () => (
         <Card>
             <CardHeader>
                 <CardTitle className="text-sm flex justify-between items-center">
-                    <span>Pro Benefits <span className="text-xs text-muted-foreground">(20$ monthly / 168$ yearly)</span></span>
+                    <span>Pro Benefits <span className="text-xs text-muted-foreground">(15$ monthly / 120$ yearly)</span></span>
                     <Badge variant="outline">Coming Soon</Badge>
                 </CardTitle>
             </CardHeader>
@@ -85,6 +85,7 @@ const PlusProBenefitsCards = () => (
                     <li>✓ Full voice-to-voice conversations</li>
                     <li>✓ Image analysis & reasoning</li>
                     <li>✓ Generate images & video</li>
+                    <li>More coming soon...</li>
                     {/* <li>✓ Real-time web search (Experimental)</li>
                         <li>✓ Mint conversations as NFTs (Experimental)</li>
                         <li>✓ MCP integration (Experimental)</li> */}

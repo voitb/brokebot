@@ -19,7 +19,7 @@ const OnboardingContent = () => (
                 <strong>Welcome to brokebot!</strong>
             </p>
             <p>
-                brokebot is designed to be a privacy-first AI assistant. This overview explains how your data is handled so you can make informed choices.
+                brokebot is a free, privacy-first AI assistant. This overview explains how your data is handled so you can make informed choices.
             </p>
         </div>
 
@@ -94,7 +94,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
         const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement;
         const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
-        // Tolerancja 20px - uważamy za "na dole"
+        // 20px tolerance - considered "at the bottom"
         const isAtBottom = distanceFromBottom <= 20;
 
         if (isAtBottom && !hasReadToBottom) {

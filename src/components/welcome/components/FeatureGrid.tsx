@@ -27,8 +27,8 @@ const features: Feature[] = [
   },
   {
     icon: Shield,
-    title: "100% Private",
-    description: "All data stays on your device, no cloud required",
+    title: "Free & 100% Private",
+    description: "Completely free with local models. All data stays on your device.",
   },
   {
     icon: Cpu,
