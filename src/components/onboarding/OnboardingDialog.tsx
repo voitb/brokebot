@@ -14,6 +14,22 @@ import { ScrollArea } from "../ui";
 
 const OnboardingContent = () => (
     <div className="space-y-4 [&_strong]:font-semibold [&_strong]:text-foreground [&_p]:text-muted-foreground">
+        <div className="rounded-md border border-yellow-500/50 bg-yellow-950/20 p-4 space-y-1">
+            <p>
+                <strong className="text-yellow-400/90">A Note on "Broke"</strong>
+            </p>
+            <p>
+                The name isn't just about providing free models. It's also a nod to
+                the fact that this is a personal project, sometimes coded purely on
+                vibes. As a result, it can be a little... well, "broke".
+            </p>
+            <p className="pt-2">
+                This journey has taught me that "vibe-driven development" isn't the
+                best path, so things are being fixed properly. Known issues are tracked
+                on GitHub, and your feedback is highly appreciated!
+            </p>
+        </div>
+
         <div className="space-y-1">
             <p>
                 <strong>Welcome to brokebot!</strong>

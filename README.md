@@ -12,9 +12,13 @@
   [![Appwrite](https://img.shields.io/badge/Appwrite-F02E65?style=flat&logo=appwrite&logoColor=white)](https://appwrite.io/)
 </div>
 
+> **⚠️ A Note on "Broke":** This project is a work-in-progress. The name isn't just about providing free AI models, but also a nod to the fact that it's a bit... well, "broke". It was often coded purely on vibes, which I've learned is not the most sustainable development strategy.
+> 
+> That said, it's actively maintained and being improved. Known issues are tracked in the [GitHub Issues](https://github.com/voitb/brokebot/issues). Your feedback and contributions are welcome!
+
 ---
 
-## 🎯 What is brokebot?
+## �� What is brokebot?
 
 **brokebot** is a versatile, privacy-focused ChatGPT alternative that puts **you in control**. It offers a hybrid approach:
 - **Run 100% locally** in your browser for absolute privacy with **WebLLM**.
@@ -498,11 +502,13 @@ refactor: optimize chat component performance
 - [ ] Blockchain integration for decentralized AI
 - [ ] Advanced privacy features (TOR support)
 
-### 💻 Development Pace & Project Board
+### 💻 Development Pace & Project Status
 
-This project is developed and maintained by a single person in their free time. This means development may not be rapid, but **the project is actively maintained and will not be abandoned.** We believe in steady, sustainable open-source development.
+This project is developed and maintained by a single person in their free time, mainly for personal use. This means development may not be rapid, but **the project is actively maintained and will not be abandoned.**
 
-We are committed to transparency about our development process. A public project board with our task list and development pipeline is **coming soon!** This will allow you to see what we're working on, what's coming next, and where you can contribute.
+Please be aware that this is a work-in-progress. You may encounter bugs or other issues. Known bugs are tracked in the [GitHub Issues](https://github.com/voitb/brokebot/issues). Your patience and contributions are highly appreciated.
+
+We are committed to transparency. A public project board with our task list and development pipeline is **coming soon!** This will allow you to see what we're working on and what's next.
 
 ---
 
