@@ -17,8 +17,7 @@ import {
   BreadcrumbNavigation,
   NewChatButton,
 } from "./components";
-import { useHeaderActions } from "./hooks/useHeaderActions";
-import { ImportConfirmationDialog } from "../modals/ImportConfirmationDialog";
+import { useHeaderActions } from "./hooks/useHeaderActions"; 
 import { DeleteConversationDialog } from "../sidebar/components/DeleteConversationDialog";
 
 /**
@@ -46,11 +45,7 @@ export const ChatHeader: React.FC = () => {
     handleTogglePinConversation,
     handleExportConversation,
     handleImportConversation,
-    handleFileImport,
-    importDialogOpen,
-    setImportDialogOpen,
-    handleOverwrite,
-    handleAppend,
+    handleFileImport, 
     fileInputRef,
     handleDeleteConversation,
     handleDeleteConfirm,
@@ -237,14 +232,7 @@ export const ChatHeader: React.FC = () => {
         className="hidden"
         accept="application/json"
       />
-
-      {/* Modals */}
-      <ImportConfirmationDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-        onAppend={handleAppend}
-        onOverwrite={handleOverwrite}
-      />
+ 
 
       {/* Delete confirmation dialog */}
       {conversationId && conversationTitle && (

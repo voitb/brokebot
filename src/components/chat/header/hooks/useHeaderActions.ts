@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
-import { type Conversation, type Message } from "../../../../lib/db";
+import { type Conversation} from "../../../../lib/db";
 import { toast } from "sonner";
 
 interface UseHeaderActionsOptions {
@@ -31,8 +31,7 @@ interface UseHeaderActionsReturn {
   handleDeleteConfirm: () => Promise<void>;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
-
-type JsonMessage = Omit<Message, "createdAt"> & { createdAt: string };
+ 
 
 export function useHeaderActions({ 
   conversationId 
@@ -44,9 +43,7 @@ export function useHeaderActions({
     togglePinConversation,
     updateConversationTitle,
     createEmptyConversation,
-    deleteConversation,
-    addMessage,
-    updateMessage,
+    deleteConversation, 
   } = useConversations();
   const { conversation } = useConversation(conversationId);
   const { importConversations } = useUserConfig();
