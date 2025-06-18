@@ -402,6 +402,7 @@ This architecture ensures that:
 
 ### How You Can Help
 Your feedback is crucial for making brokebot better!
+- 🚀 **Create an Account**: This is one of the best ways to support the project! User registrations and github stars are a key metric that shows the project is valued by the community, which directly motivates me to continue development and the rollout of new features (like free cloud sync, coming soon!).
 - 🐛 **Report Bugs**: If you find a bug, please [create an issue](https://github.com/voitb/brokebot/issues) with a detailed description and steps to reproduce it.
 - ✨ **Suggest Features**: Have a great idea? [Open an issue](https://github.com/voitb/brokebot/issues) and tell us about it.
 - 👨‍💻 **Contribute Code**: Check our [issues](https://github.com/voitb/brokebot/issues) for tasks labeled `help-wanted` or `good-first-issue`.

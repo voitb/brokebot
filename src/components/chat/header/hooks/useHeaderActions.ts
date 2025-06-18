@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
+import { useUserConfig } from "../../../../hooks/useUserConfig";
 import { type Conversation, type Message } from "../../../../lib/db";
 import { toast } from "sonner";
 
@@ -14,11 +15,9 @@ interface UseHeaderActionsReturn {
   conversationTitle?: string;
   isLoadingConversation: boolean;
   isConversationPinned: boolean;
-  importDialogOpen: boolean;
   deleteDialogOpen: boolean;
   
   // Actions
-  setImportDialogOpen: (open: boolean) => void;
   setDeleteDialogOpen: (open: boolean) => void;
   handleNewChat: () => Promise<void>;
   handleTitleClick: () => void;
@@ -28,8 +27,6 @@ interface UseHeaderActionsReturn {
   handleExportConversation: () => void;
   handleImportConversation: () => void;
   handleFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleOverwrite: () => void;
-  handleAppend: () => void;
   handleDeleteConversation: () => void;
   handleDeleteConfirm: () => Promise<void>;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -48,15 +45,16 @@ export function useHeaderActions({
     updateConversationTitle,
     createEmptyConversation,
     deleteConversation,
+    addMessage,
+    updateMessage,
   } = useConversations();
   const { conversation } = useConversation(conversationId);
+  const { importConversations } = useUserConfig();
   
   // Local state
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [pendingMessages, setPendingMessages] = useState<Message[] | null>(null);
 
   // Derived state
   const currentConversation = conversations?.find(c => c.id === conversationId);
@@ -181,7 +179,7 @@ export function useHeaderActions({
 
   const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !conversationId) return;
+    if (!file) return;
 
     if (file.type !== "application/json") {
       toast.error("Please select a valid JSON file.");
@@ -192,48 +190,35 @@ export function useHeaderActions({
       const text = await file.text();
       const importedConv = JSON.parse(text) as Conversation;
 
-      if (!importedConv.messages || !Array.isArray(importedConv.messages)) {
-        toast.error("Invalid conversation file format. Missing 'messages' array.");
+      // Basic validation
+      if (
+        !importedConv.id ||
+        !importedConv.title ||
+        !Array.isArray(importedConv.messages)
+      ) {
+        toast.error(
+          "Invalid conversation file format. Missing required fields."
+        );
         return;
       }
+      
+      const importedCount = await importConversations([importedConv]);
 
-      const normalizedMessages: Message[] = (
-        importedConv.messages as unknown as JsonMessage[]
-      ).map((msg) => ({
-        ...msg,
-        createdAt: new Date(msg.createdAt),
-      }));
-
-      if (currentConversation && currentConversation.messages.length > 0) {
-        setPendingMessages(normalizedMessages);
-        setImportDialogOpen(true);
+      if (importedCount > 0) {
+        toast.success("Conversation imported successfully!");
+        navigate(`/chat/${importedConv.id}`);
       } else {
-        toast.success("Conversation imported successfully.");
+        toast.info("Conversation already exists. No changes were made.");
       }
     } catch (e) {
       console.error("Failed to import conversation:", e);
       toast.error("Failed to parse or import conversation file.");
     } finally {
+      // Reset file input to allow importing the same file again
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
-  };
-  
-  const handleOverwrite = async () => {
-    if (conversationId && pendingMessages) {
-      toast.success("Conversation overwritten successfully.");
-    }
-    setImportDialogOpen(false);
-    setPendingMessages(null);
-  };
-
-  const handleAppend = async () => {
-    if (conversationId && pendingMessages) {
-      toast.success("Messages appended successfully.");
-    }
-    setImportDialogOpen(false);
-    setPendingMessages(null);
   };
 
   const handleDeleteConversation = () => {
@@ -260,11 +245,9 @@ export function useHeaderActions({
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
-    importDialogOpen,
     deleteDialogOpen,
     
     // Actions
-    setImportDialogOpen,
     setDeleteDialogOpen,
     handleNewChat,
     handleTitleClick,
@@ -274,8 +257,6 @@ export function useHeaderActions({
     handleExportConversation,
     handleImportConversation,
     handleFileImport,
-    handleOverwrite,
-    handleAppend,
     handleDeleteConversation,
     handleDeleteConfirm,
     fileInputRef,

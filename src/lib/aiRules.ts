@@ -31,6 +31,8 @@ Consider:
 
 **IMPORTANT**: Always use exactly \`<think>\` and \`</think>\` tags. Do NOT use any alternative formats like ◁think▷, [think], or *think*. The application expects standard HTML-style tags.
 
+**CRITICAL**: After completing your thinking process, you MUST always provide a direct response to the user. Never end your response with only thinking tags - always follow up with an actual answer or assistance to the user's query.
+
 Example:
 
 <think>

@@ -19,22 +19,21 @@ const OnboardingContent = () => (
                 <strong>Welcome to brokebot!</strong>
             </p>
             <p>
-                brokebot is a free, privacy-first AI assistant. This overview explains how your data is handled so you can make informed choices.
+                Our main goal is to provide free access to powerful AI models, while giving you full control over your privacy. This overview explains how it works.
             </p>
         </div>
 
         <div className="space-y-1">
             <p>
-                <strong>Local-First by Default</strong>
+                <strong>Free Models First, Privacy by Design</strong>
             </p>
             <p>
-                Your privacy is the priority. By default, everything is stored locally on your device:
+                By default, you can use powerful online AI models for free. For absolute privacy, you can switch to a local model (WebLLM) at any time, which runs entirely on your device.
             </p>
             <ul className="list-disc space-y-1 pl-6">
-                <li>Conversations and uploaded files are stored only in your browser.</li>
-                <li>Settings and API keys are encrypted and stored locally.</li>
+                <li>Conversations and files with local models are stored only in your browser.</li>
+                <li>Settings and API keys are always encrypted and stored locally.</li>
             </ul>
-            <p>This allows you to use the app offline and ensures your data remains private.</p>
         </div>
 
         <div className="space-y-1">
@@ -60,10 +59,19 @@ const OnboardingContent = () => (
                 <strong className="text-yellow-400/90">Free Models (via OpenRouter)</strong>
             </p>
             <p>
-                To provide free access, some models are routed through OpenRouter. Be aware that these third-party providers may use your prompts to improve their services. This is a trade-off for free usage.
+                To provide free access, some models are routed through a secure proxy function before reaching OpenRouter. While our proxy does not log your conversation content, be aware that third-party providers may use your prompts to improve their services. This is the trade-off for free usage.
             </p>
             <p className="font-semibold">
                 By using a free model, you acknowledge and accept this condition.
+            </p>
+        </div>
+
+        <div className="space-y-1">
+            <p>
+                <strong>Your Support Matters</strong>
+            </p>
+            <p>
+                Creating an account is a great way to show your support! It signals that you find brokebot useful and motivates further development—including free conversation sync (coming soon)!
             </p>
         </div>
 
