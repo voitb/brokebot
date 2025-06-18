@@ -220,7 +220,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     }
   }, [getCloudSync]);
 
-    const updateMessage = useCallback(async (
+  const updateMessage = useCallback(async (
     conversationId: string,
     messageId: string,
     newContent: string
@@ -229,10 +229,14 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       await db.conversations.where("id").equals(conversationId).modify(convo => {
         const messageIndex = convo.messages.findIndex(msg => msg.id === messageId);
         if (messageIndex !== -1) {
-          convo.messages[messageIndex].content = newContent;
-          convo.updatedAt = new Date();
+          // Only update if content has actually changed
+          if (convo.messages[messageIndex].content !== newContent) {
+            convo.messages[messageIndex].content = newContent;
+            convo.updatedAt = new Date();
+          }
         }
       });
+
       // Note: We don't sync partial message updates to the cloud.
       // The full message is synced by `addMessage` once generation is complete.
     } catch (error) {

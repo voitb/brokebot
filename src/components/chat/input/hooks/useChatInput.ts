@@ -98,6 +98,7 @@ export function useChatInput(): UseChatInputReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const wasAborted = useRef(false);
   const conversationId = useConversationId();
   const navigate = useNavigate();
   const {
@@ -108,16 +109,17 @@ export function useChatInput(): UseChatInputReturn {
     updateCompleteAIMessage,
   } = useConversations();
   const { messages } = useConversation(conversationId);
-  const { currentModel, streamMessage } = useModel();
+  const { currentModel, streamMessage, interruptGeneration, resetChat } = useModel();
 
   // Keep useCallback for complex async function with abort controller logic
   const stopGeneration = useCallback(() => {
     if (abortControllerRef.current) {
+      wasAborted.current = true;
       abortControllerRef.current.abort();
-      abortControllerRef.current = null;
+      interruptGeneration(); // For local WebLLM model
     }
     setIsGenerating(false);
-  }, []);
+  }, [interruptGeneration]);
 
   // Keep useCallback for very complex async function with many dependencies
   const handleMessageSubmit = useCallback(async (customMessage?: string) => {
@@ -261,6 +263,10 @@ export function useChatInput(): UseChatInputReturn {
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
+          if (wasAborted.current) {
+            await resetChat();
+            wasAborted.current = false; // Reset the flag
+          }
         }
       }
     } catch (error) {
@@ -303,6 +309,8 @@ export function useChatInput(): UseChatInputReturn {
     streamMessage,
     updateMessage,
     updateCompleteAIMessage,
+    interruptGeneration,
+    resetChat,
   ]);
 
   // Keep useCallback for complex async function with many dependencies
@@ -359,6 +367,10 @@ export function useChatInput(): UseChatInputReturn {
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
+          if (wasAborted.current) {
+            await resetChat();
+            wasAborted.current = false; // Reset the flag
+          }
         }
       }
     } catch (error) {
@@ -370,7 +382,7 @@ export function useChatInput(): UseChatInputReturn {
       // Set error message in the AI message
       updateMessage(conversationId, lastAiMessage.id, "⚠️ Error regenerating response. Please try again.");
     }
-  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage, updateCompleteAIMessage]);
+  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage, updateCompleteAIMessage, interruptGeneration, resetChat]);
 
   return {
     message,
