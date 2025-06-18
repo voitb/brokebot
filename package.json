@@ -1,7 +1,7 @@
 {
   "name": "brokebot",
   "private": true,
-  "version": "3.1.3",
+  "version": "4.0.0",
   "type": "module",
   "author": "voitz <v017dev@gmail.com>",
   "scripts": {
