@@ -19,14 +19,15 @@ const OnboardingContent = () => (
                 <strong className="text-yellow-400/90">A Note on "Broke"</strong>
             </p>
             <p>
-                The name isn't just about providing free models. It's also a nod to
-                the fact that this is a personal project, sometimes coded purely on
-                vibes. As a result, it can be a little... well, "broke".
+                The name isn't just about providing free models. It's a nod to the
+                fact that this started as a "cloneathon" project, sometimes coded purely
+                on vibes. As a result, it can be a little... well, "broke".
             </p>
             <p className="pt-2">
-                This journey has taught me that "vibe-driven development" isn't the
-                best path, so things are being fixed properly. Known issues are tracked
-                on GitHub, and your feedback is highly appreciated!
+                This journey taught me that "vibe-driven development" isn't the best
+                path (and I definitely don't recommend it!). From this point forward,
+                things will be fixed more properly. Known issues are tracked on
+                GitHub, and your feedback is highly appreciated!
             </p>
         </div>
 
