@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="brokebot_readme.png" alt="brokebot logo" width="120" height="120" />
+  <img src="https://raw.githubusercontent.com/voitb/brokebot/main/public/brokebot_readme.png" alt="brokebot logo" width="120" height="120" />
   
-  # 🤖 brokebot - Your Privacy-First AI Assistant
+  # 🤖 brokebot - Your Free, Private AI Assistant
   
-  **A ChatGPT clone that runs 100% locally in your browser**
+  **A flexible ChatGPT clone that runs locally with WebLLM or connects to powerful online models.**
   
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -16,47 +16,68 @@
 
 ## 🎯 What is brokebot?
 
-**brokebot** is a privacy-focused ChatGPT alternative that puts **you in control**. Unlike other AI assistants that send your data to remote servers, brokebot runs entirely in your browser using cutting-edge WebLLM technology.
+**brokebot** is a versatile, privacy-focused ChatGPT alternative that puts **you in control**. It offers a hybrid approach:
+- **Run 100% locally** in your browser for absolute privacy with **WebLLM**.
+- **Access powerful online AI models** for free through **OpenRouter**, with the understanding that prompts may be used for model training.
 
-### 🔒 Privacy-First Design
-- **100% Local Processing**: Your conversations never leave your device
-- **No Data Collection**: We don't see, store, or analyze your chats
-- **Offline Capable**: Works without internet after initial setup
-- **Open Source**: Fully transparent and auditable code
+### 🔑 Core Principles
+- **Free First**: Core features, including access to powerful models, are free.
+- **Privacy by Default**: Your data stays on your device when using local models.
+- **Full Transparency**: We are clear about when data is sent to third-party services.
+- **Open Source**: Fully auditable code for your peace of mind.
 
-### 🚀 Powerful Features
+###  Powerful Features
 - **Multiple AI Models**: Local WebLLM models + API support for OpenAI, Claude, Gemini
 - **File Chat**: Upload and discuss .txt/.md files with AI
 - **Smart Organization**: Search, filter, and manage conversations
 - **Modern UI**: Beautiful, responsive interface built with Shadcn/ui
 - **PWA Ready**: Install as a desktop/mobile app
 
+### Key Features & Current Limitations
+- **Text & Code Generation**: The AI can generate text and format code snippets using Markdown.
+- **File Chat**: You can upload `.txt` and `.md` files for the AI to analyze and discuss. Support for other formats (like PDFs and images) is planned for the future.
+- **Max File Size**: 10MB per file.
+- **How it works**: Upload → AI reads content → Discuss with context.
+- **Privacy**: All files are processed locally in your browser and are never uploaded to any server.
+
 ---
 
 ## 🏗️ How It Works
 
-### Local-First Architecture
+brokebot's architecture is designed for flexibility, allowing you to choose between complete privacy and the power of cloud-based AI models.
+
+### Local-First Architecture with Online Model Proxy
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Your Browser  │    │   IndexedDB     │    │    WebLLM       │
-│                 │    │                 │    │                 │
-│  • Conversations│◄──►│  • Local Storage│◄──►│  • AI Models    │
-│  • Files        │    │  • Encrypted    │    │  • Local Compute│
-│  • Settings     │    │    API Keys     │    │  • No Internet  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌────────────────────┐
+│   Your Browser  │    │   IndexedDB     │    │    WebLLM Engine   │
+│ (React UI)      │    │ (Local Storage) │    │   (Local AI Model) │
+│                 │◄───►│ • Conversations │◄───►│ • 100% Offline   │
+│ • Chat Interface│    │ • Files         │    │ • Runs on Device   │
+│ • Settings      │    │ • API Keys      │    │                    │
+└───────┬─────────┘    └─────────────────┘    └────────────────────┘
+        │
+        │ (If using Free Online Models)
+        ▼
+┌─────────────────┐    ┌─────────────────┐
+│ Appwrite Proxy  │    │  OpenRouter AI  │
+│ (proxy-ai func) │    │ (Online Models) │
+│                 │───►│                 │
+│ • Secure Proxy  │    │ • Free Models   │
+│ • No logging    │    │ • Learns from   │
+│                 │    │   prompts       │
+└─────────────────┘    └─────────────────┘
 ```
 
 ### What Stays Local vs. What Goes Online
 
-| Feature | Data Location | Privacy Level |
-|---------|---------------|---------------|
-| 🔒 **Conversations** | Your browser only | 100% Private |
-| 🔒 **Uploaded files** | Your browser only | 100% Private |
-| 🔒 **Settings & preferences** | Your browser only | 100% Private |
-| 🔒 **Local AI models** | Your browser only | 100% Private |
-| 🔒 **Your API keys** | Double-encrypted (browser + server) | 100% Private |
-| 🌐 **Account creation** | Appwrite (optional) | Secure & encrypted |
-| 🌐 **Free AI models** | OpenRouter (optional) | Prompts used for training |
+| Feature | Data Location | Privacy Level & Notes |
+|---------|---------------|-----------------------|
+| 🔒 **Local AI Models (WebLLM)** | Your browser only | **100% Private.** No data ever leaves your device. |
+| 🌐 **Free AI Models (OpenRouter)** | Sent to OpenRouter via our secure proxy | **Prompts may be used for training by the model provider.** This is the trade-off for free access. Our proxy does not log your conversations. |
+| 🔜 **Your API Keys (Coming Soon)** | Your browser ↔ AI Provider | **Private to you.** Your keys will be encrypted and sent directly from your browser or via our secure proxy. |
+| 🔜 **Cloud Sync (Coming Soon)** | Your browser ↔ Appwrite | **Optional.** End-to-end encrypted backup and sync of your conversations. |
+| 🔒 **Uploaded Files** | Your browser only | **100% Private.** Files are read and processed locally. |
+| 🔒 **Settings & Preferences** | Your browser only | **100% Private.** |
 
 ---
 
@@ -86,20 +107,19 @@ Visit `http://localhost:5173` and start chatting! 🎉
 ### First Time Setup
 
 1. **Choose your AI model:**
-   - 🔒 **Local WebLLM models** (completely private, no internet required)
-   - 🌐 **Your own API keys** (OpenAI, Claude, Gemini - private to you)
-   - 🌐 **Free models** (OpenRouter - prompts may be used for training)
+   - 🔒 **Local WebLLM models** (completely private, works offline after first download)
+   - 🌐 **Free Online models (via OpenRouter)** (powerful, but prompts may be used for training)
 
-2. **Optional: Create an account**
-   - Enables conversation sync across devices
-   - Powered by secure Appwrite backend
-   - Can be skipped for full offline usage
+2. **Coming Soon:**
+   - 🔜 **Your own API keys**: Connect to OpenAI, Claude, Gemini, and more.
+   - 🔜 **Paid OpenRouter models**: Access to premium, cutting-edge models.
+   - 🔜 **Cloud sync**: Create an optional account to sync conversations across devices.
 
 ---
 
 ## 🔧 Authentication Setup (Optional)
 
-### Appwrite Configuration
+**Note:** If you only plan to use local WebLLM models and do not need cloud sync or online models, you can skip the Appwrite setup entirely. brokebot will run in a 100% local, offline-first mode.
 
 brokebot uses [Appwrite](https://appwrite.io/) for secure user authentication and optional cloud features. Here's how to set it up:
 
@@ -153,10 +173,14 @@ If you want to run your own instance of brokebot with full control over the back
 
 brokebot uses two Appwrite functions:
 
-1. **`encrypt-keys`** - Handles secure encryption/decryption of API keys
-2. **`proxy-ai`** - Proxies requests to AI providers with encrypted API keys
+1.  **`encrypt-keys`** - Handles secure encryption/decryption of API keys (for future features).
+2.  **`proxy-ai`** - Proxies requests to AI providers (like OpenRouter) to protect the app's API keys and enable rate limiting.
 
 ### Deployment Steps
+
+**Important Note on Function Deployment:** When you deploy a function using the Appwrite CLI or in the Appwrite Console, you must configure the paths correctly. The **root directory** for the function must be set to its specific folder (e.g., `appwrite/encrypt-keys` or `appwrite/proxy-ai`). The **entrypoint command** should then be `src/index.js`. This structure is crucial because it allows Appwrite's build service to find the `package.json` in the function's root and automatically install the required Node.js dependencies.
+
+The commands below should be run from within the respective function's directory. All these steps can also be performed manually through the Appwrite Console (web UI) if you prefer a graphical interface over the command line.
 
 #### 1. Install Appwrite CLI
 
@@ -187,10 +211,10 @@ appwrite init project
 #### 4. Deploy the Encryption Function
 
 ```bash
-# Navigate to encrypt-keys function
+# Navigate to encrypt-keys function directory
 cd appwrite/encrypt-keys
 
-# Deploy the function
+# Deploy the function definition
 appwrite functions create \
   --functionId encrypt-keys \
   --name "Encrypt Keys" \
@@ -198,34 +222,40 @@ appwrite functions create \
   --entrypoint "src/index.js" \
   --timeout 30
 
-# Deploy the code
+# Deploy the code with dependencies
 appwrite functions createDeployment \
   --functionId encrypt-keys \
   --entrypoint "src/index.js" \
   --code . \
   --activate true
+
+# IMPORTANT: Go back to the project root
+cd ../..
 ```
 
 #### 5. Deploy the AI Proxy Function
 
 ```bash
-# Navigate to proxy-ai function
-cd ../proxy-ai
+# Navigate to proxy-ai function directory
+cd appwrite/proxy-ai
 
-# Deploy the function
+# Deploy the function definition
 appwrite functions create \
-  --functionId proxy-ai \
+  --function-id proxy-ai \
   --name "AI Proxy" \
   --runtime "node-18.0" \
   --entrypoint "src/index.js" \
   --timeout 300
 
-# Deploy the code
+# Deploy the code with dependencies
 appwrite functions createDeployment \
-  --functionId proxy-ai \
+  --function-id proxy-ai \
   --entrypoint "src/index.js" \
   --code . \
   --activate true
+
+# IMPORTANT: Go back to the project root
+cd ../..
 ```
 
 #### 6. Set Environment Variables
@@ -340,15 +370,16 @@ This architecture ensures that:
 
 | Model Type | Privacy | Cost | Performance | Best For |
 |------------|---------|------|-------------|----------|
-| **WebLLM Local** | 🔒 100% Private | 💰 Free | ⚡ Good | Privacy-focused users |
-| **Your API Keys** | 🔒 Private to you | 💰 Pay-per-use | ⚡ Excellent | Power users |
-| **Free Models** | 🌐 Shared with provider | 💰 Free | ⚡ Very Good | Casual users |
+| **WebLLM Local** | 🔒 100% Private | 💰 Free | ⚡ Good | Privacy-focused users, offline use. |
+| **Free Models (OpenRouter)** | 🌐 Shared with provider | 💰 Free | ⚡ Very Good | Casual users. Prompts may be used for model training. |
+| **Your API Keys (Coming Soon)** | 🔒 Private to you | 💰 Pay-per-use | ⚡ Excellent | Power users wanting to use their own accounts. |
 
-### File Chat Feature
-- **Supported formats**: .txt, .md files
-- **Max file size**: 10MB per file
-- **How it works**: Upload → AI reads content → Discuss with context
-- **Privacy**: Files processed locally, never uploaded to servers
+### Key Features & Current Limitations
+- **Text & Code Generation**: The AI can generate text and format code snippets using Markdown.
+- **File Chat**: You can upload `.txt` and `.md` files for the AI to analyze and discuss. Support for other formats (like PDFs and images) is planned for the future.
+- **Max File Size**: 10MB per file.
+- **How it works**: Upload → AI reads content → Discuss with context.
+- **Privacy**: All files are processed locally in your browser and are never uploaded to any server.
 
 ---
 
@@ -368,6 +399,14 @@ This architecture ensures that:
 ### Backend (Optional)
 - **Appwrite** - Authentication and cloud sync
 - **OpenRouter** - Access to various AI models
+
+### How You Can Help
+Your feedback is crucial for making brokebot better!
+- 🐛 **Report Bugs**: If you find a bug, please [create an issue](https://github.com/voitb/brokebot/issues) with a detailed description and steps to reproduce it.
+- ✨ **Suggest Features**: Have a great idea? [Open an issue](https://github.com/voitb/brokebot/issues) and tell us about it.
+- 👨‍💻 **Contribute Code**: Check our [issues](https://github.com/voitb/brokebot/issues) for tasks labeled `help-wanted` or `good-first-issue`.
+- 📚 **Improve Documentation**: Found a typo or something unclear? Let us know!
+- 🌍 **Translate**: Help bring brokebot to more users around the world.
 
 ---
 
@@ -433,11 +472,16 @@ refactor: optimize chat component performance
 
 ### ✅ Current Features (v1.0)
 - [x] Local WebLLM model support
+- [x] Free online models via OpenRouter
 - [x] Conversation management
 - [x] File upload and chat
 - [x] User authentication (Appwrite)
 - [x] Responsive design
 - [x] PWA support
+- [ ] Cloud sync & sharing
+- [ ] Image file support
+- [ ] Voice conversations
+- [ ] Custom model fine-tuning
 
 ### 🚀 Coming Soon (v1.1)
 - [ ] Image file support
@@ -453,6 +497,12 @@ refactor: optimize chat component performance
 - [ ] Blockchain integration for decentralized AI
 - [ ] Advanced privacy features (TOR support)
 
+### 💻 Development Pace & Project Board
+
+This project is developed and maintained by a single person in their free time. This means development may not be rapid, but **the project is actively maintained and will not be abandoned.** We believe in steady, sustainable open-source development.
+
+We are committed to transparency about our development process. A public project board with our task list and development pipeline is **coming soon!** This will allow you to see what we're working on, what's coming next, and where you can contribute.
+
 ---
 
 ## ❓ FAQ
@@ -466,18 +516,9 @@ Yes! By default, all your conversations, files, and settings stay on your device
 <details>
 <summary><strong>How much does it cost?</strong></summary>
 
-brokebot is completely free and open source. You only pay if you choose to use your own API keys with providers like OpenAI or Claude.
+brokebot is completely free and open source. You only pay if you choose to use your own API keys with providers like OpenAI or Claude, and using additional features that are provided in billing plans.
 </details>
 
-<details>
-<summary><strong>Which browsers are supported?</strong></summary>
-
-Modern browsers with WebGPU support:
-- Chrome 113+
-- Edge 113+ 
-- Firefox (experimental WebGPU support)
-- Safari (limited support)
-</details>
 
 <details>
 <summary><strong>Can I run brokebot offline?</strong></summary>
@@ -518,7 +559,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ---
 
 <div align="center">
-  <strong>Built with ❤️ for privacy, freedom, and the open source community</strong>
+  <strong>Built with ❤️ for all my broke brothers and sisters privacy, freedom, and the open source community</strong>
   
   [⭐ Star us on GitHub](https://github.com/voitb/brokebot) • [🚀 Try brokebot](https://brokebot.voitz.dev) • [📖 Documentation](docs/)
 </div>

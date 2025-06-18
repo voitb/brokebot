@@ -12,7 +12,7 @@ export const TermsOfService: React.FC = () => {
         <h1 className="text-4xl font-bold mb-6">Terms of Service</h1>
         <div className="prose dark:prose-invert max-w-none">
           <p>
-            Welcome to <strong>brokebot</strong> - your privacy-first AI assistant! These terms of service outline the rules and
+            Welcome to <strong>brokebot</strong> - your free, privacy-first AI assistant! These terms of service outline the rules and
             regulations for the use of our application and explain exactly how your data is handled.
           </p>
           <p><strong>Last updated:</strong> {new Date().toLocaleDateString()}</p>
@@ -174,7 +174,7 @@ export const TermsOfService: React.FC = () => {
           <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-3">🛡️ Summary: Your Privacy Matters</h3>
             <p className="mb-3">
-              <strong>brokebot is built privacy-first.</strong> Your conversations, files, and personal data 
+              <strong>brokebot is built free and privacy-first.</strong> Your conversations, files, and personal data 
               stay on your device by default. Only optional features (account creation and free AI models) 
               involve any data transmission, and we're completely transparent about what, when, and why.
             </p>
