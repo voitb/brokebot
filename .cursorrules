@@ -4,7 +4,7 @@
 
 ## PROJECT DESCRIPTION
 
-Brokebot is a web application that serves as a ChatGPT clone, operating 100% locally in the browser.
+brokebot is a web application that serves as a ChatGPT clone, operating 100% locally in the browser.
 It uses WebLLM for AI models and IndexedDB for persistent storage, ensuring privacy,
 free usage, and offline functionality.
 
