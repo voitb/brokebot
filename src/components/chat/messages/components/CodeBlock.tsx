@@ -1,6 +1,7 @@
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { CopyButton } from "../../../ui";
+import { ScrollArea, ScrollBar } from "@/components/ui";
 import { useCodeHighlighting } from "../hooks";
 
 interface CodeBlockProps {
@@ -58,21 +59,34 @@ export const CodeBlock: React.FC<CodeBlockProps> = React.memo(
     return (
       <div className="relative group">
         <CodeBlockHeader language={language} code={code} />
-        <SyntaxHighlighter
-          style={syntaxStyle}
-          language={language}
-          PreTag="div"
-          wrapLines={false}
-          className="!m-0 !rounded-t-none !border-t-0"
-          customStyle={{
-            margin: 0,
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-          }}
-        >
-          {code}
-        </SyntaxHighlighter>
+        <div className="flex">
+          <ScrollArea  
+            className="w-1 flex-1 rounded-b-lg border"
+          >
+            <SyntaxHighlighter
+              style={syntaxStyle}
+              language={language}
+              PreTag="div"
+              wrapLines={false}
+              className="!m-0 !rounded-none !border-0"
+              customStyle={{
+                margin: 0,
+                padding: '1rem',
+                borderRadius: 0,
+                border: 'none',
+                whiteSpace: 'pre',
+                minWidth: '100%',
+                width: 'max-content',
+              }}
+            >
+              {code}
+            </SyntaxHighlighter>
+            <ScrollBar orientation="horizontal" className="w-full" />
+          </ScrollArea>
+        </div>
       </div>
     );
   }
 );
+
+CodeBlock.displayName = "CodeBlock";  
