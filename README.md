@@ -12,9 +12,9 @@
   [![Appwrite](https://img.shields.io/badge/Appwrite-F02E65?style=flat&logo=appwrite&logoColor=white)](https://appwrite.io/)
 </div>
 
-> **⚠️ A Note on "Broke":** This project is a work-in-progress. The name isn't just about providing free AI models, but also a nod to the fact that it's a bit... well, "broke". It was often coded purely on vibes, which I've learned is not the most sustainable development strategy.
+> **⚠️ A Note on "Broke":** This project started as a "cloneathon" and is a work-in-progress. The name isn't just about providing free AI models, but also a nod to the fact that it's a bit... well, "broke". It was often coded purely on vibes, which I've learned is not the most sustainable development strategy (and I don't recommend it!).
 > 
-> That said, it's actively maintained and being improved. Known issues are tracked in the [GitHub Issues](https://github.com/voitb/brokebot/issues). Your feedback and contributions are welcome!
+> From this point forward, things will be fixed more properly. It's actively maintained, and known issues are tracked in the [GitHub Issues](https://github.com/voitb/brokebot/issues). Your feedback and contributions are welcome!
 
 ---
 
