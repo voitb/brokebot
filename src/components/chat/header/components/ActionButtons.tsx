@@ -5,7 +5,6 @@ import {
   Moon,
   Settings,
   Keyboard,
-  Share2,
   Download,
   Upload,
 } from "lucide-react";
@@ -21,14 +20,12 @@ interface ActionButtonsProps {
   onTogglePinConversation: () => Promise<void>;
   onOpenSettings: () => void;
   onOpenShortcuts: () => void;
-  onOpenShare: () => void;
-  onExportConversation: () => void;
+  onOpenExport: () => void;
   onImportConversation: () => void;
 }
 
 /**
- * Reusable action buttons for header - theme, settings, shortcuts, pin, share
- * Can be configured to show/hide certain buttons based on context
+ * Reusable action buttons for header - theme, settings, shortcuts, pin, export
  */
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
   theme,
@@ -39,8 +36,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onTogglePinConversation,
   onOpenSettings,
   onOpenShortcuts,
-  onOpenShare,
-  onExportConversation,
+  onOpenExport,
   onImportConversation,
 }) => {
   return (
@@ -65,7 +61,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       {conversationId && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={onExportConversation}>
+            <Button variant="ghost" size="sm" onClick={onOpenExport}>
               <Download className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
@@ -85,20 +81,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           </TooltipTrigger>
           <TooltipContent>
             <p>Import conversation</p>
-          </TooltipContent>
-        </Tooltip>
-      )}
-
-      {/* Share Button (conditional) */}
-      {conversationId && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={onOpenShare}>
-              <Share2 className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Share conversation</p>
           </TooltipContent>
         </Tooltip>
       )}
