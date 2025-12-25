@@ -46,8 +46,7 @@ export function useUserConfig() {
         ...encryptedUpdates,
         updatedAt: new Date(),
       });
-    } catch (error) {
-      console.error("Error updating user config:", error);
+    } catch {
       toast.error("Failed to save settings.");
     }
   };
@@ -60,8 +59,8 @@ export function useUserConfig() {
         updatedAt: new Date(),
       };
       await db.userConfig.put(newConfig);
-    } catch (error) {
-      console.error("Error resetting user config:", error);
+    } catch {
+      // Silent fail - reset is non-critical
     }
   };
 
@@ -71,8 +70,8 @@ export function useUserConfig() {
       await db.documents.clear();
       await db.folders.clear();
       await resetConfig();
-    } catch (error) {
-      console.error("Error clearing all data:", error);
+    } catch {
+      toast.error("Failed to clear data.");
     }
   };
 
@@ -88,8 +87,8 @@ export function useUserConfig() {
       linkElement.setAttribute("href", dataUri);
       linkElement.setAttribute("download", exportFileDefaultName);
       linkElement.click();
-    } catch (error) {
-      console.error("Error exporting conversations:", error);
+    } catch {
+      toast.error("Failed to export conversations.");
     }
   };
 

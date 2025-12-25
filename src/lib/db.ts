@@ -65,41 +65,49 @@ export class LocalGptDB extends Dexie {
   constructor() {
     super("LocalGptDB");
 
+    // Version 2: Initial stable schema
     this.version(2).stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
     });
 
+    // LEGACY: Version 3-5 migrations for removed cloud/sharing features
+    // Kept for backward compatibility with existing user databases
+    // These features were removed in favor of local-only architecture
+
+    // v3: Added storeConversationsInCloud (removed feature)
     this.version(3).stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
     }).upgrade(async (tx) => {
-      const config = await tx.table('userConfig').get('user_config');
+      const config = await tx.table("userConfig").get("user_config");
       if (config && config.storeConversationsInCloud === undefined) {
-        await tx.table('userConfig').update('user_config', {
-          storeConversationsInCloud: false
+        await tx.table("userConfig").update("user_config", {
+          storeConversationsInCloud: false,
         });
       }
     });
 
+    // v4: Added shareId index (removed feature)
     this.version(4).stores({
       conversations: "id, title, pinned, shareId, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
     });
 
+    // v5: Migrated to sharedLinks table (removed feature)
     this.version(5).stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       sharedLinks: "id, conversationId, createdAt, updatedAt",
       userConfig: "id, updatedAt",
     }).upgrade(async (tx) => {
-      const conversations = await tx.table('conversations').toArray();
+      const conversations = await tx.table("conversations").toArray();
       const sharedLinks = conversations
-        .filter(conv => conv.shareId)
-        .map(conv => ({
+        .filter((conv) => conv.shareId)
+        .map((conv) => ({
           id: conv.shareId,
           conversationId: conv.id,
           title: conv.title,
@@ -113,14 +121,15 @@ export class LocalGptDB extends Dexie {
         }));
 
       if (sharedLinks.length > 0) {
-        await tx.table('sharedLinks').bulkAdd(sharedLinks);
+        await tx.table("sharedLinks").bulkAdd(sharedLinks);
       }
 
-      await tx.table('conversations').toCollection().modify(conv => {
+      await tx.table("conversations").toCollection().modify((conv) => {
         delete conv.shareId;
       });
     });
 
+    // v6: Added folders feature
     this.version(6).stores({
       conversations: "id, title, pinned, folderId, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
@@ -129,7 +138,7 @@ export class LocalGptDB extends Dexie {
       folders: "id, name, createdAt, updatedAt",
     });
 
-    // Version 7 - Remove sharedLinks table (local-only architecture)
+    // v7: Remove sharedLinks table - final local-only architecture
     this.version(7).stores({
       conversations: "id, title, pinned, folderId, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",

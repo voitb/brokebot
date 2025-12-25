@@ -161,8 +161,7 @@ export const ExportChatModal: React.FC<ExportChatModalProps> = React.memo(
         }
         toast.success(`Exported as ${format.toUpperCase()}`);
         onOpenChange(false);
-      } catch (error) {
-        console.error("Export failed:", error);
+      } catch {
         toast.error("Failed to export conversation");
       } finally {
         setIsExporting(false);

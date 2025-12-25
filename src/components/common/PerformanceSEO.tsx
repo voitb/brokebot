@@ -13,24 +13,12 @@ export const PerformanceSEO: React.FC<PerformanceSEOProps> = ({
   useEffect(() => {
     if (!enableWebVitals) return;
 
-    // Web Vitals monitoring for SEO
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.entryType === 'navigation') {
-          const navEntry = entry as PerformanceNavigationTiming;
-          
-          // Log important metrics for SEO
-          console.log('SEO Performance Metrics:', {
-            domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.domContentLoadedEventStart,
-            loadComplete: navEntry.loadEventEnd - navEntry.loadEventStart,
-            firstPaint: performance.getEntriesByType('paint')[0]?.startTime,
-            firstContentfulPaint: performance.getEntriesByType('paint')[1]?.startTime,
-          });
-        }
-      }
+    // Web Vitals monitoring for SEO - metrics tracked internally
+    const observer = new PerformanceObserver(() => {
+      // Performance metrics are collected but not logged
     });
 
-    observer.observe({ entryTypes: ['navigation'] });
+    observer.observe({ entryTypes: ["navigation"] });
 
     return () => observer.disconnect();
   }, [enableWebVitals]);

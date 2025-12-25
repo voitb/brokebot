@@ -71,8 +71,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       return newConversation.id;
-    } catch (error) {
-      console.error("Error creating conversation:", error);
+    } catch {
       toast.error("Failed to create conversation.");
       return null;
     }
@@ -95,8 +94,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.add(newConversation);
       return newConversation.id;
-    } catch (error) {
-      console.error("Error creating empty conversation:", error);
+    } catch {
       toast.error("Failed to create conversation.");
       return null;
     }
@@ -119,7 +117,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       });
       return newMessage.id;
     } catch (error) {
-      console.error("Error adding message:", error);
       toast.error("Failed to save message.");
       throw error;
     }
@@ -138,8 +135,8 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
           convo.updatedAt = new Date();
         }
       });
-    } catch (error) {
-      console.error("Error updating message:", error);
+    } catch {
+      // Silent fail for message updates
     }
   }, []);
 
@@ -147,8 +144,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     try {
       await db.conversations.delete(id);
       toast.success("Conversation deleted.");
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
+    } catch {
       toast.error("Failed to delete conversation.");
     }
   }, []);
@@ -158,8 +154,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       await db.conversations.where("id").equals(id).modify(convo => {
         convo.pinned = !convo.pinned;
       });
-    } catch (error) {
-      console.error("Error toggling pin:", error);
+    } catch {
       toast.error("Failed to update pin status.");
     }
   }, []);
@@ -170,8 +165,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         convo.title = newTitle;
         convo.updatedAt = new Date();
       });
-    } catch (error) {
-      console.error("Error updating conversation title:", error);
+    } catch {
       toast.error("Failed to update title.");
     }
   }, []);
@@ -185,8 +179,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         convo.folderId = folderId ?? undefined;
         convo.updatedAt = new Date();
       });
-    } catch (error) {
-      console.error("Error moving conversation:", error);
+    } catch {
       toast.error("Failed to move conversation to folder.");
     }
   }, []);
@@ -203,8 +196,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       await db.folders.add(newFolder);
       toast.success(`Folder "${name}" created.`);
       return newFolder.id;
-    } catch (error) {
-      console.error("Error creating folder:", error);
+    } catch {
       toast.error("Failed to create folder.");
       return null;
     }
@@ -217,8 +209,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       });
       await db.folders.delete(id);
       toast.success("Folder deleted.");
-    } catch (error) {
-      console.error("Error deleting folder:", error);
+    } catch {
       toast.error("Failed to delete folder.");
     }
   }, []);
@@ -229,8 +220,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         folder.name = newName;
         folder.updatedAt = new Date();
       });
-    } catch (error) {
-      console.error("Error updating folder name:", error);
+    } catch {
       toast.error("Failed to update folder name.");
     }
   }, []);

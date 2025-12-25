@@ -45,8 +45,7 @@ export const useSpeechToText = (
       setStatus("loading");
       SpeechRecognitionService.getInstance().then(() => {
         setStatus("ready");
-      }).catch(err => {
-        console.error("Failed to load speech model:", err);
+      }).catch(() => {
         setError("Failed to load speech recognition model.");
         setStatus("error");
       });
@@ -55,7 +54,6 @@ export const useSpeechToText = (
 
   const handleRecordingStop = useCallback(async () => {
     if (audioChunksRef.current.length === 0) {
-        console.warn("No audio chunks recorded.");
         setStatus("ready");
         return;
     }
@@ -75,14 +73,11 @@ export const useSpeechToText = (
             task: "transcribe",
         });
 
-        const newTranscript = (result as any)?.text?.trim() ?? "";
+        const newTranscript = (result as { text?: string })?.text?.trim() ?? "";
         if (newTranscript) {
             onTranscriptReceived(newTranscript);
-        } else {
-            console.warn("Transcription resulted in empty text.");
         }
-    } catch (err) {
-        console.error("Transcription failed:", err);
+    } catch {
         setError("An error occurred during transcription.");
     } finally {
         URL.revokeObjectURL(audioUrl);
@@ -95,7 +90,6 @@ export const useSpeechToText = (
       if (status === "uninitialized" || status === "loading") {
           setError("Model is still loading, please wait.");
       }
-      console.warn(`Cannot start recording in status: ${status}`);
       return;
     }
     
@@ -117,8 +111,7 @@ export const useSpeechToText = (
       
       recorder.start();
       setStatus("recording");
-    } catch (err) {
-      console.error("Failed to start recording:", err);
+    } catch {
       setError("Could not access microphone. Please check permissions.");
       setStatus("error");
     }

@@ -36,7 +36,7 @@ export const useFileUpload = ({
   const { uploadDocument } = useDocuments();
 
   const processFile = async (file: File): Promise<AttachedFile> => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = Math.random().toString(36).substring(2, 11);
     let type: AttachedFile["type"] = "other";
     let preview: string | undefined;
     let content: string | undefined;
@@ -65,8 +65,7 @@ export const useFileUpload = ({
         if (savedDocument) {
           document = savedDocument;
         }
-      } catch (error) {
-        console.error("Failed to process text file:", error);
+      } catch {
         toast.error("Failed to process text file");
       }
     }

@@ -1,5 +1,3 @@
-"use client";
-
 import { Shield, X, Settings, FileText } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import {

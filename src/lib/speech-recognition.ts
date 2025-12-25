@@ -39,14 +39,12 @@ export class SpeechRecognitionService {
       return this.loadingPromise;
     }
 
-    console.log("Initializing new speech recognition pipeline instance.");
     this.loadingPromise = pipeline(this.task, this.model, {
       progress_callback,
     }) as Promise<AutomaticSpeechRecognitionPipeline>;
 
     try {
       this.instance = await this.loadingPromise;
-      console.log("Pipeline instance created successfully.");
       return this.instance;
     } finally {
       this.loadingPromise = null; // Clear the promise after completion
@@ -59,7 +57,6 @@ export class SpeechRecognitionService {
    */
   static async dispose(): Promise<void> {
     if (this.instance) {
-      console.log("Disposing speech recognition pipeline instance.");
       await this.instance.dispose();
       this.instance = null;
     }

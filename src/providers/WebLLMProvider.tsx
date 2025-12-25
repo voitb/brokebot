@@ -516,7 +516,6 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         status: "Ready",
       });
     } catch (error) {
-      console.error("WebLLM engine initialization error:", error);
       if (error instanceof Error && (error.message.includes("WebGPU") || error.message.includes("Web-GPU"))) {
         toast.error(
           "WebGPU is required for local models to run in this browser.",

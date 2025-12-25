@@ -25,9 +25,8 @@ export const useSettings = () => {
     try {
       await updateConfig(settings);
       toast.success("Settings saved successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save settings.");
-      console.error(error);
     } finally {
       setIsSaving(false);
     }
