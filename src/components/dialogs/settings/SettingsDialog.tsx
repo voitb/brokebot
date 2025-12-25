@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-import { Shield, CreditCard, X, Settings, LogIn, LogOut, FileText } from "lucide-react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Shield, X, Settings, FileText } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,10 +41,6 @@ import {
 } from "./components";
 import { useSettings, type SettingsTab } from "./hooks/useSettings";
 import { useConversations } from "@/hooks/useConversations";
-import { useAuth } from "@/providers/AuthProvider";
-import { useSubscription } from "@/hooks/business/useSubscription";
-import { BillingTab } from './components/BillingTab';
-import { toast } from "sonner";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -56,84 +51,40 @@ const navigationItems = [
   { id: "general" as const, label: "General", icon: Settings },
   { id: "documents" as const, label: "Documents", icon: FileText },
   { id: "privacy" as const, label: "Privacy", icon: Shield },
-  { id: "billing" as const, label: "Billing", icon: CreditCard },
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-  
-  // Pobierz aktywny tab z URL, domyślnie "general"
+
   const activeTab = (searchParams.get("tab") as SettingsTab) || "general";
-  const status = searchParams.get("status");
-  const sessionId = searchParams.get("session_id");
-  
+
   const {
     settings,
     handleFieldChange,
     handleSaveChanges,
   } = useSettings();
   const { conversations } = useConversations();
-  const { user, logout, updateName, updatePassword } = useAuth();
-  const { hasActiveSubscription, subscription, checkSubscriptionStatus } = useSubscription();
-
-  // Obsługa sukcesu płatności
-  React.useEffect(() => {
-    if (status === "success" && sessionId) {
-      toast.success("Payment successful! Your subscription is now active.", {
-        duration: 5000,
-      });
-      
-      // Odśwież status subskrypcji
-      checkSubscriptionStatus();
-      
-      // Usuń parametry status i session_id z URL
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete("status");
-      newParams.delete("session_id");
-      setSearchParams(newParams);
-    }
-  }, [status, sessionId, checkSubscriptionStatus, searchParams, setSearchParams]);
 
   const setActiveTab = (tab: SettingsTab) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set("tab", tab);
     setSearchParams(newParams);
   };
-  
+
   const getTabDisplayName = (tabId: SettingsTab) =>
     navigationItems.find((item) => item.id === tabId)?.label || tabId;
 
   const hasConversations = conversations && conversations.length > 0;
-  const userInfo = {
-    isLoggedIn: !!user,
-    hasActiveSubscription: hasActiveSubscription,
-    subscriptionPlan: subscription?.planId ?? "Free",
-    subscriptionStatus: subscription?.status ?? "None",
-  };
 
   const renderTabContent = () => {
     const commonProps = { settings, onFieldChange: handleFieldChange };
     switch (activeTab) {
       case "general":
-        return <GeneralTab 
-          {...commonProps} 
-          user={user}
-          onUpdateName={updateName}
-          onUpdatePassword={updatePassword}
-          onSaveChanges={handleSaveChanges}
-        />;
+        return <GeneralTab {...commonProps} onSaveChanges={handleSaveChanges} />;
       case "documents":
         return <DocumentsTab />;
       case "privacy":
-        return (
-          <PrivacyTab
-            userInfo={userInfo}
-            hasConversations={hasConversations}
-          />
-        );
-      case "billing":
-        return <BillingTab />;
+        return <PrivacyTab hasConversations={hasConversations} />;
       default:
         return null;
     }
@@ -177,46 +128,17 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <ScrollArea className="h-[calc(100%-150px)]">
               <div className="p-4">{renderTabContent()}</div>
             </ScrollArea>
-            <div className="shrink-0 p-4 border-t flex flex-row justify-between items-center gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (user) {
-                    logout();
-                  } else {
-                    navigate('/login');
-                  }
-                }}
-                className="flex items-center gap-2"
-              >
-                {user ? (
-                  <>
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    <span>Login</span>
-                  </>
-                )}
-              </Button>
-              <div className="flex items-center gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      onClick={() => onOpenChange(false)}
-                      size="icon"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Close</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
+            <div className="shrink-0 p-4 border-t flex justify-end">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" onClick={() => onOpenChange(false)} size="icon">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Close</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
@@ -229,10 +151,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     <SidebarMenu>
                       {navigationItems.map(({ id, label, icon: Icon }) => (
                         <SidebarMenuItem key={id}>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={activeTab === id}
-                          >
+                          <SidebarMenuButton asChild isActive={activeTab === id}>
                             <button onClick={() => setActiveTab(id)}>
                               <Icon />
                               <span>{label}</span>
@@ -255,44 +174,15 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                       </BreadcrumbItem>
                       <BreadcrumbSeparator />
                       <BreadcrumbItem>
-                        <BreadcrumbPage>
-                          {getTabDisplayName(activeTab)}
-                        </BreadcrumbPage>
+                        <BreadcrumbPage>{getTabDisplayName(activeTab)}</BreadcrumbPage>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
                 </div>
                 <div className="ml-auto flex items-center gap-2 px-4">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      if (user) {
-                        logout();
-                      } else {
-                        navigate('/login');
-                      }
-                    }}
-                    className="flex items-center gap-2 mr-2"
-                  >
-                    {user ? (
-                      <>
-                        <LogOut className="h-4 w-4" />
-                        <span>Logout</span>
-                      </>
-                    ) : (
-                      <>
-                        <LogIn className="h-4 w-4" />
-                        <span>Login</span>
-                      </>
-                    )}
-                  </Button>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        onClick={() => onOpenChange(false)}
-                        size="icon"
-                      >
+                      <Button variant="ghost" onClick={() => onOpenChange(false)} size="icon">
                         <X className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>

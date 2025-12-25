@@ -1,17 +1,12 @@
-import React from "react";
 import { Link, useNavigate, createSearchParams } from "react-router-dom";
 import {
-  LogOut,
-  User as UserIcon,
   ChevronsUpDown,
   LifeBuoy,
   FileText,
   Keyboard,
   Settings,
   Shield,
-  CreditCard,
 } from "lucide-react";
-import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "../../../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
 import {
@@ -27,22 +22,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "../../../ui/dropdown-menu";
-import { useUserConfig } from "@/hooks/business/useUserConfig";
+import { useUserConfig } from "@/hooks/useUserConfig";
 
 const UserProfileMenu: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { config: localUserConfig } = useUserConfig();
+  const { config } = useUserConfig();
   const navigate = useNavigate();
 
-  if (!localUserConfig) {
-    return null;
-  }
+  const displayName = config?.username || "User";
+  const avatarUrl = config?.avatarUrl;
 
-  const displayName = user?.name || localUserConfig.username;
-  const displaySubtext = user?.email || "Local Profile";
-  const avatarUrl = localUserConfig.avatarUrl;
-
-  const initials = (displayName || "User")
+  const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -77,9 +66,7 @@ const UserProfileMenu: React.FC = () => {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {displaySubtext}
-              </p>
+              <p className="text-xs text-muted-foreground truncate">Local Profile</p>
             </div>
             <ChevronsUpDown className="w-4 h-4 text-muted-foreground ml-2" />
           </Button>
@@ -88,9 +75,7 @@ const UserProfileMenu: React.FC = () => {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{displayName}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {displaySubtext}
-              </p>
+              <p className="text-xs leading-none text-muted-foreground">Local Profile</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -114,10 +99,6 @@ const UserProfileMenu: React.FC = () => {
                     <Shield className="w-4 h-4 mr-2" />
                     <span>Privacy</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => openSettingsModal("billing")}>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    <span>Billing</span>
-                  </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
@@ -136,23 +117,6 @@ const UserProfileMenu: React.FC = () => {
               <span>Support</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          {user ? (
-            <DropdownMenuItem 
-              onClick={logout}
-              className="focus:bg-destructive/10"
-            >
-              <LogOut className="w-4 h-4 mr-2 text-destructive" />
-              <span className="text-destructive">Log out</span>
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem asChild>
-              <Link to="/login">
-                <UserIcon className="w-4 h-4 mr-2" />
-                <span>Login or Sign Up</span>
-              </Link>
-            </DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -160,18 +124,5 @@ const UserProfileMenu: React.FC = () => {
 };
 
 export const UserProfile: React.FC = () => {
-  const { isLoading: isAuthLoading } = useAuth();
-  const { isLoading: isConfigLoading } = useUserConfig();
-
-  const isLoading = isAuthLoading || isConfigLoading;
-
-  if (isLoading) {
-    return (
-      <div className="p-4">
-        <div className="h-10 w-full bg-muted animate-pulse rounded-md" />
-      </div>
-    );
-  }
-
   return <UserProfileMenu />;
 };

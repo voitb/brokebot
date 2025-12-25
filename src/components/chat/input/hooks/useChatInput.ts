@@ -106,7 +106,6 @@ export function useChatInput(): UseChatInputReturn {
     addMessage,
     updateMessage,
     updateConversationTitle,
-    updateCompleteAIMessage,
   } = useConversations();
   const { messages } = useConversation(conversationId);
   const { currentModel, streamMessage, interruptGeneration, resetChat } = useModel();
@@ -198,8 +197,8 @@ export function useChatInput(): UseChatInputReturn {
             }
           }
  
-          if (aiMessageId) {
-            await updateCompleteAIMessage(aiMessageId, accumulatedContent);
+          if (aiMessageId && currentConversationId) {
+            await updateMessage(currentConversationId, aiMessageId, accumulatedContent);
           }
         } catch (error) {
           console.error("Error generating response:", error);
@@ -308,8 +307,6 @@ export function useChatInput(): UseChatInputReturn {
     currentModel,
     streamMessage,
     updateMessage,
-    updateCompleteAIMessage,
-    interruptGeneration,
     resetChat,
   ]);
 
@@ -363,7 +360,7 @@ export function useChatInput(): UseChatInputReturn {
               break;
             }
           }
-          await updateCompleteAIMessage(lastAiMessage.id, accumulatedContent);
+          await updateMessage(conversationId, lastAiMessage.id, accumulatedContent);
         } finally {
           setIsGenerating(false);
           abortControllerRef.current = null;
@@ -382,7 +379,7 @@ export function useChatInput(): UseChatInputReturn {
       // Set error message in the AI message
       updateMessage(conversationId, lastAiMessage.id, "⚠️ Error regenerating response. Please try again.");
     }
-  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage, updateCompleteAIMessage, interruptGeneration, resetChat]);
+  }, [conversationId, messages, isLoading, isGenerating, currentModel, streamMessage, updateMessage, resetChat]);
 
   return {
     message,

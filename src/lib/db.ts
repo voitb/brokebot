@@ -12,22 +12,20 @@ export interface Message {
 }
 
 export interface Folder {
-  id: string; // uuid
+  id: string;
   name: string;
-  userId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Conversation {
-  id: string; // uuid
+  id: string;
   title: string;
   messages: Message[];
   pinned: boolean;
   createdAt: Date;
   updatedAt: Date;
-  userId?: string;
-  modelId?: string; // To track which model was used
+  modelId?: string;
   folderId?: string;
 }
 
@@ -37,11 +35,7 @@ export interface UserConfig {
   avatarUrl?: string;
   selectedModelId: string;
   autoLoadModel: boolean;
-  storeConversationsInCloud?: boolean;
   openrouterApiKey?: string;
-  openaiApiKey?: string;
-  anthropicApiKey?: string;
-  googleApiKey?: string;
   theme: "light" | "dark" | "system";
   createdAt: Date;
   updatedAt: Date;
@@ -68,13 +62,11 @@ export interface ISharedLink {
   updatedAt: Date;
 }
 
-// Default configuration
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
   username: "User",
   selectedModelId: AVAILABLE_MODELS[0].id,
   autoLoadModel: true,
-  storeConversationsInCloud: false,
   theme: "system",
   createdAt: new Date(),
   updatedAt: new Date(),

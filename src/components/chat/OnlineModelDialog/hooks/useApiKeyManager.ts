@@ -1,41 +1,26 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
-import { type UserConfig } from "../../../../lib/db";
 
-// This function is local now as it's small and only used here.
 function maskApiKey(key: string): string {
   if (!key || key.length < 8) return "";
   return key.slice(0, 4) + "••••••••" + key.slice(-4);
 }
 
-// Map provider keys to UserConfig keys
-const providerToConfigKey: Record<string, keyof UserConfig> = {
-  openrouter: "openrouterApiKey",
-  openai: "openaiApiKey",
-  google: "googleApiKey",
-  anthropic: "anthropicApiKey",
-};
-
-export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => {
+export const useApiKeyManager = (provider: "openrouter") => {
   const { config, updateConfig } = useUserConfig();
-  const configKey = providerToConfigKey[provider];
 
   const [apiKey, setApiKey] = useState("");
   const [hasStoredKey, setHasStoredKey] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (config && configKey) {
-      const keyExists = !!config[configKey];
+    if (config && provider === "openrouter") {
+      const keyExists = !!config.openrouterApiKey;
       setHasStoredKey(keyExists);
-      if (keyExists) {
-        setApiKey(maskApiKey(config[configKey] as string));
-      } else {
-        setApiKey("");
-      }
+      setApiKey(keyExists ? maskApiKey(config.openrouterApiKey!) : "");
     }
-  }, [config, configKey]);
+  }, [config, provider]);
 
   const handleApiKeySave = async () => {
     if (!apiKey.trim() || apiKey.includes("••••")) {
@@ -43,7 +28,7 @@ export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => 
       return;
     }
 
-    await updateConfig({ [configKey]: apiKey });
+    await updateConfig({ openrouterApiKey: apiKey });
     setHasStoredKey(true);
     setApiKey(maskApiKey(apiKey));
     setIsEditing(false);
@@ -51,7 +36,7 @@ export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => 
   };
 
   const handleApiKeyRemove = async () => {
-    await updateConfig({ [configKey]: "" });
+    await updateConfig({ openrouterApiKey: "" });
     setHasStoredKey(false);
     setApiKey("");
     setIsEditing(false);
@@ -59,15 +44,15 @@ export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => 
   };
 
   const startEditing = () => {
-    if (config && configKey) {
-      setApiKey((config[configKey] as string) || "");
+    if (config) {
+      setApiKey(config.openrouterApiKey || "");
     }
     setIsEditing(true);
   };
 
   const cancelEditing = () => {
-    if (config && configKey) {
-      const currentKey = config[configKey] as string;
+    if (config) {
+      const currentKey = config.openrouterApiKey;
       setApiKey(currentKey ? maskApiKey(currentKey) : "");
     }
     setIsEditing(false);
@@ -83,4 +68,4 @@ export const useApiKeyManager = (provider: keyof typeof providerToConfigKey) => 
     startEditing,
     cancelEditing,
   };
-}; 
+};

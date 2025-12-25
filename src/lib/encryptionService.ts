@@ -1,24 +1,9 @@
-import { functions } from './appwriteClient';
-import { account } from './appwriteClient';
+const ALGORITHM = 'AES-GCM';
+const KEY_LENGTH = 256;
+const IV_LENGTH = 12;
 
-const ENCRYPTION_FUNCTION_ID = 'encrypt-keys';
+let cachedKey: CryptoKey | null = null;
 
-/**
- * Gets current user ID for encryption context
- */
-async function getCurrentUserId(): Promise<string> {
-  try {
-    const user = await account.get();
-    return user.$id;
-  } catch (error) {
-    // For anonymous users, use a browser fingerprint
-    return getBrowserFingerprint();
-  }
-}
-
-/**
- * Creates a unique browser fingerprint for anonymous users
- */
 function getBrowserFingerprint(): string {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -27,7 +12,7 @@ function getBrowserFingerprint(): string {
     ctx.font = '14px Arial';
     ctx.fillText('Browser fingerprint', 2, 2);
   }
-  
+
   const fingerprint = [
     navigator.userAgent,
     navigator.language,
@@ -35,85 +20,80 @@ function getBrowserFingerprint(): string {
     new Date().getTimezoneOffset(),
     canvas.toDataURL()
   ].join('|');
-  
-  // Create a hash of the fingerprint
-  return btoa(fingerprint).slice(0, 32);
+
+  return fingerprint;
 }
 
-/**
- * Encrypts data using Appwrite function
- */
+async function deriveKey(): Promise<CryptoKey> {
+  if (cachedKey) return cachedKey;
+
+  const fingerprint = getBrowserFingerprint();
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(fingerprint),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  const salt = encoder.encode('brokebot-local-encryption-salt');
+
+  cachedKey = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    { name: ALGORITHM, length: KEY_LENGTH },
+    false,
+    ['encrypt', 'decrypt']
+  );
+
+  return cachedKey;
+}
+
 export async function encryptValue(plaintext: string): Promise<string> {
   if (!plaintext) return '';
-  
-  try {
-    const userId = await getCurrentUserId();
-    
-    const response = await functions.createExecution(
-      ENCRYPTION_FUNCTION_ID,
-      JSON.stringify({
-        action: 'encrypt',
-        data: plaintext,
-        userId: userId
-      })
-    );
-    
-    if (response.responseStatusCode !== 200) {
-      throw new Error(`Encryption failed with status: ${response.responseStatusCode}`);
-    }
-    
-    const result = JSON.parse(response.responseBody);
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Encryption failed');
-    }
-    
-    return result.encrypted;
-  } catch (error) {
-    console.error('Encryption error:', error);
-    throw new Error('Failed to encrypt sensitive data');
-  }
+
+  const key = await deriveKey();
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+  const encoder = new TextEncoder();
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: ALGORITHM, iv },
+    key,
+    encoder.encode(plaintext)
+  );
+
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+
+  return btoa(String.fromCharCode(...combined));
 }
 
-/**
- * Decrypts data using Appwrite function
- */
 export async function decryptValue(encryptedText: string): Promise<string> {
   if (!encryptedText) return '';
-  
-  try {
-    const userId = await getCurrentUserId();
-    
-    const response = await functions.createExecution(
-      ENCRYPTION_FUNCTION_ID,
-      JSON.stringify({
-        action: 'decrypt',
-        data: encryptedText,
-        userId: userId
-      })
-    );
-    
-    if (response.responseStatusCode !== 200) {
-      throw new Error(`Decryption failed with status: ${response.responseStatusCode}`);
-    }
-    
-    const result = JSON.parse(response.responseBody);
-    
-    if (!result.success) {
-      throw new Error(result.error || 'Decryption failed');
-    }
-    
-    return result.decrypted;
-  } catch (error) {
-    console.error('Decryption error:', error);
-    throw new Error('Failed to decrypt sensitive data');
-  }
+
+  const key = await deriveKey();
+  const combined = Uint8Array.from(atob(encryptedText), c => c.charCodeAt(0));
+
+  const iv = combined.slice(0, IV_LENGTH);
+  const data = combined.slice(IV_LENGTH);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: ALGORITHM, iv },
+    key,
+    data
+  );
+
+  return new TextDecoder().decode(decrypted);
 }
 
-/**
- * Clears encryption cache (for security reset)
- */
 export function clearEncryptionCache(): void {
-  // Since encryption is server-side, we just need to clear localStorage
+  cachedKey = null;
   localStorage.removeItem('apiKeys');
-} 
+}
