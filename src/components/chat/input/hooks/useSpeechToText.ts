@@ -17,17 +17,7 @@ export interface UseSpeechToTextResult {
   error: string | null;
 }
 
-/**
- * A senior-level hook for handling speech-to-text functionality.
- *
- * This hook encapsulates the entire STT logic, from loading the model
- * to recording audio and processing the transcript. It follows best practices
- * by separating concerns (model management is in SpeechRecognitionService),
- * managing state cleanly, and decoupling from UI side-effects like toasts.
- *
- * @param onTranscriptReceived - Callback function invoked with the final transcript.
- * @returns An object with status, control functions, and error state.
- */
+/** Manages speech-to-text recording and transcription state */
 export const useSpeechToText = (
   onTranscriptReceived: (transcript: string) => void
 ): UseSpeechToTextResult => {
