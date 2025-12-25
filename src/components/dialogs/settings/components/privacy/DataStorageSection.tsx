@@ -1,18 +1,7 @@
-import React from "react";
 import { Label } from "../../../../ui/label";
-// import { Switch } from "../../../../ui/switch";
 import { Info } from "lucide-react";
-// import { Crown } from "lucide-react";
 
-// interface DataStorageSectionProps {
-//   storeConversationsInCloud: boolean;
-//   hasActiveSubscription: boolean;
-//   onToggleCloudStorage: (checked: boolean) => void;
-// }
-
-export const DataStorageSection: React.FC = () => {
-  // const isCloudSwitchDisabled = !hasActiveSubscription;
-  
+export const DataStorageSection = () => {
   return (
     <>
       <div>
@@ -30,31 +19,6 @@ export const DataStorageSection: React.FC = () => {
           in the "Danger Zone".
         </p>
       </div>
-
-      {/* <div className="space-y-2 pt-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label className="flex items-center gap-2">
-              Enable Cloud Sync
-              <Crown className="h-4 w-4 text-amber-500" />
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Sync across devices (Plus feature)
-            </p>
-          </div>
-          <Switch
-            checked={storeConversationsInCloud}
-            onCheckedChange={onToggleCloudStorage}
-            disabled={isCloudSwitchDisabled}
-          />
-        </div>
-
-        {!hasActiveSubscription && (
-          <p className="text-xs text-amber-600 dark:text-amber-500">
-            An active Plus subscription is required to enable Cloud Sync.
-          </p>
-        )}
-      </div> */}
     </>
   );
 };

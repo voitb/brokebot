@@ -5,31 +5,28 @@ import {
   type PipelineType,
 } from "@xenova/transformers";
 
-// Environment setup to use remote models and browser cache for performance
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
-/**
- * Manages the singleton instance of the speech recognition pipeline.
- * This ensures the model is loaded only once and reused across the application,
- * providing a centralized point for model management.
- */
+interface ProgressInfo {
+  status: string;
+  name?: string;
+  file?: string;
+  progress?: number;
+  loaded?: number;
+  total?: number;
+}
+
 export class SpeechRecognitionService {
   private static task: PipelineType = "automatic-speech-recognition";
-  private static model = "Xenova/whisper-small"; // Using the 'small' model for better accuracy
+  private static model = "Xenova/whisper-small";
   private static instance: AutomaticSpeechRecognitionPipeline | null = null;
   private static loadingPromise: Promise<AutomaticSpeechRecognitionPipeline> | null =
     null;
 
-  /**
-   * Gets the singleton instance of the speech recognition pipeline.
-   * If the instance doesn't exist, it initializes the pipeline.
-   * This prevents concurrent loading and ensures only one instance is created.
-   * @param progress_callback - Optional callback to track model loading progress.
-   */
   static async getInstance(
-    progress_callback?: (progress: any) => void
+    progress_callback?: (progress: ProgressInfo) => void
   ): Promise<AutomaticSpeechRecognitionPipeline> {
     if (this.instance) {
       return this.instance;
@@ -47,14 +44,10 @@ export class SpeechRecognitionService {
       this.instance = await this.loadingPromise;
       return this.instance;
     } finally {
-      this.loadingPromise = null; // Clear the promise after completion
+      this.loadingPromise = null;
     }
   }
-  
-  /**
-   * Disposes of the pipeline instance to free up resources.
-   * Note: This will require the model to be reloaded on next use.
-   */
+
   static async dispose(): Promise<void> {
     if (this.instance) {
       await this.instance.dispose();
