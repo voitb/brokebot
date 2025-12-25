@@ -213,4 +213,13 @@ describe("useConversationItem", () => {
       expect(result.current.isMenuOpen).toBe(false);
     });
   });
+
+  it("returns isPinned reflecting conversation pinned state", () => {
+    const { result } = renderHook(
+      () => useConversationItem(testConversation),
+      { wrapper }
+    );
+
+    expect(result.current.isPinned).toBe(testConversation.pinned);
+  });
 });

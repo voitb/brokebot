@@ -30,6 +30,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
     isMenuOpen,
     deleteDialogOpen,
     isCreateFolderDialogOpen,
+    isPinned,
     folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
@@ -101,10 +102,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
             >
               <DropdownMenuItem onClick={handlePinToggle}>
                 <Star
-                  className={`w-4 h-4 mr-2 ${conversation.pinned ? "fill-current text-yellow-500" : ""
+                  className={`w-4 h-4 mr-2 ${isPinned ? "fill-current text-yellow-500" : ""
                   }`}
                 />
-                {conversation.pinned ? "Remove from" : "Add to"} Favourites
+                {isPinned ? "Remove from" : "Add to"} Favourites
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleRename}>
                 <Edit className="w-4 h-4 mr-2" />

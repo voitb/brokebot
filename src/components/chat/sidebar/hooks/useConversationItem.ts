@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../providers/ConversationsProvider";
 import { useConversationId } from "../../../../hooks/useConversationId";
@@ -21,6 +21,11 @@ export const useConversationItem = (conversation: Conversation) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isCreateFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
 
+  const [optimisticPinned, setOptimisticPinned] = useOptimistic(
+    conversation.pinned,
+    (_, newPinned: boolean) => newPinned
+  );
+
   const isActive = currentConversationId === conversation.id;
 
   const handleConversationClick = () => {
@@ -31,8 +36,11 @@ export const useConversationItem = (conversation: Conversation) => {
 
   const handlePinToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await togglePinConversation(conversation.id);
+    startTransition(() => {
+      setOptimisticPinned(!conversation.pinned);
+    });
     setIsMenuOpen(false);
+    await togglePinConversation(conversation.id);
   };
 
   const handleRename = (e: React.MouseEvent) => {
@@ -98,6 +106,7 @@ export const useConversationItem = (conversation: Conversation) => {
     deleteDialogOpen,
     isCreateFolderDialogOpen,
     isActive,
+    isPinned: optimisticPinned,
     folders,
     setIsMenuOpen,
     setDeleteDialogOpen,
