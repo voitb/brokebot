@@ -1,4 +1,3 @@
-import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { OpenRouterClient, type OpenRouterModel } from "../../../../lib/openrouter";
 import { useUserConfig } from "@/hooks/useUserConfig";
@@ -11,30 +10,27 @@ export const useOnlineModels = (
   const { config } = useUserConfig();
   const { models, isLoading, error } = useModels();
 
-  const freeModels = useMemo(() => models.filter((m) => m.isFree), [models]);
-  const paidModels = useMemo(() => models.filter((m) => !m.isFree), [models]);
+  const freeModels = models.filter((m) => m.isFree);
+  const paidModels = models.filter((m) => !m.isFree);
 
   const hasOpenRouterKey = !!config?.openrouterApiKey;
   const hasPaidKey = hasOpenRouterKey;
 
-  const handleModelSelect = useCallback(
-    (model: OpenRouterModel) => {
-      if (!config?.openrouterApiKey) {
-        toast.error("Please add your OpenRouter API key first in Settings.");
-        return;
-      }
+  const handleModelSelect = (model: OpenRouterModel) => {
+    if (!config?.openrouterApiKey) {
+      toast.error("Please add your OpenRouter API key first in Settings.");
+      return;
+    }
 
-      const client = new OpenRouterClient({
-        siteUrl: window.location.origin,
-        siteName: "Brokebot",
-        keys: { openrouterApiKey: config.openrouterApiKey },
-      });
+    const client = new OpenRouterClient({
+      siteUrl: window.location.origin,
+      siteName: "Brokebot",
+      keys: { openrouterApiKey: config.openrouterApiKey },
+    });
 
-      onModelSelect(model, client);
-      onOpenChange?.(false);
-    },
-    [config, onModelSelect, onOpenChange]
-  );
+    onModelSelect(model, client);
+    onOpenChange?.(false);
+  };
 
   const handleOpenChange = (isOpen: boolean) => {
     onOpenChange?.(isOpen);

@@ -46,11 +46,9 @@ vi.mock("sonner", () => ({
   },
 }));
 
-vi.mock("../../../lib/speech-recognition", () => ({
-  SpeechRecognitionService: {
-    getInstance: vi.fn().mockResolvedValue(() => Promise.resolve({ text: "" })),
-    dispose: vi.fn().mockResolvedValue(undefined),
-  },
+vi.mock("../../../lib/transcriber", () => ({
+  getTranscriber: vi.fn().mockResolvedValue(() => Promise.resolve({ text: "" })),
+  disposeTranscriber: vi.fn().mockResolvedValue(undefined),
 }));
 
 function renderChatInterface(conversationId?: string) {

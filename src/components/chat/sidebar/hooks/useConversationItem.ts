@@ -1,4 +1,4 @@
-import { useState, useCallback, useOptimistic, startTransition } from "react";
+import { useState, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../providers/ConversationsProvider";
 import { useConversationId } from "../../../../hooks/useConversationId";
@@ -75,20 +75,17 @@ export const useConversationItem = (conversation: Conversation) => {
     }
   };
 
-  const handleMove = useCallback(
-    async (folderId: string | null) => {
-      await moveConversationToFolder(conversation.id, folderId);
-      setIsMenuOpen(false);
-    },
-    [conversation.id, moveConversationToFolder]
-  );
+  const handleMove = async (folderId: string | null) => {
+    await moveConversationToFolder(conversation.id, folderId);
+    setIsMenuOpen(false);
+  };
 
-  const handleCreateFolderAndMove = useCallback(async (folderName: string) => {
+  const handleCreateFolderAndMove = async (folderName: string) => {
     const newFolderId = await createFolder(folderName);
     if (newFolderId) {
       await handleMove(newFolderId);
     }
-  }, [createFolder, handleMove]);
+  };
 
   const getItemStyles = () => {
     if (isEditing || isActive) {

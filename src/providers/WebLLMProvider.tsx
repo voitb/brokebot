@@ -3,7 +3,6 @@ import {
   useContext,
   useState,
   useEffect,
-  useCallback,
   type ReactNode,
 } from "react";
 import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
@@ -62,7 +61,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     status: "Initializing...",
   });
 
-  const loadModel = useCallback(async (modelId: string) => {
+  const loadModel = async (modelId: string) => {
     try {
       setEngineState((prev) => ({
         ...prev,
@@ -112,7 +111,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         status: "Initialization error",
       }));
     }
-  }, []);
+  };
 
   const setSelectedModel = (model: ModelInfo) => {
     setSelectedModelState(model);

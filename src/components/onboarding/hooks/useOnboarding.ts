@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 const ONBOARDING_COMPLETED_KEY = "onboardingCompleted-v1";
 
@@ -12,10 +12,10 @@ export const useOnboarding = () => {
     }
   }, []);
 
-  const completeOnboarding = useCallback(() => {
+  const completeOnboarding = () => {
     localStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
     setShowOnboarding(false);
-  }, []);
+  };
 
   return {
     showOnboarding,

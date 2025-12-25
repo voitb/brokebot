@@ -67,39 +67,44 @@ export class OpenRouterClient {
     this.siteName = config.siteName || 'Brokebot';
   }
 
+  private getValidatedApiKey(): { key: string } | { error: string } {
+    const apiKey = this.keys.openrouterApiKey;
+    if (!apiKey) {
+      return { error: 'OpenRouter API key not found. Please add your API key in Settings.' };
+    }
+    if (!validateOpenRouterKey(apiKey)) {
+      return { error: 'Invalid OpenRouter API key format.' };
+    }
+    return { key: apiKey };
+  }
+
+  private buildHeaders(apiKey: string): HeadersInit {
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': this.siteUrl,
+      'X-Title': this.siteName,
+    };
+  }
+
   async *streamCompletion(
     model: string,
     messages: OpenRouterMessage[],
     onProgress?: (content: string) => void,
     signal?: AbortSignal
   ): AsyncGenerator<StreamResponse, void, unknown> {
-    const apiKey = this.keys.openrouterApiKey;
-
-    if (!apiKey) {
-      yield { content: '', isComplete: true, error: 'OpenRouter API key not found. Please add your API key in Settings.' };
-      return;
-    }
-
-    if (!validateOpenRouterKey(apiKey)) {
-      yield { content: '', isComplete: true, error: 'Invalid OpenRouter API key format.' };
+    const validation = this.getValidatedApiKey();
+    if ('error' in validation) {
+      yield { content: '', isComplete: true, error: validation.error };
       return;
     }
 
     try {
       const response = await fetch(OPENROUTER_API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': this.siteUrl,
-          'X-Title': this.siteName
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          stream: true
-        }),
-        signal
+        headers: this.buildHeaders(validation.key),
+        body: JSON.stringify({ model, messages, stream: true }),
+        signal,
       });
 
       if (!response.ok) {
@@ -158,25 +163,15 @@ export class OpenRouterClient {
   }
 
   async sendMessage(model: string, messages: OpenRouterMessage[]): Promise<string> {
-    const apiKey = this.keys.openrouterApiKey;
-
-    if (!apiKey) {
-      throw new Error('OpenRouter API key not found. Please add your API key in Settings.');
-    }
-
-    if (!validateOpenRouterKey(apiKey)) {
-      throw new Error('Invalid OpenRouter API key format.');
+    const validation = this.getValidatedApiKey();
+    if ('error' in validation) {
+      throw new Error(validation.error);
     }
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': this.siteUrl,
-        'X-Title': this.siteName
-      },
-      body: JSON.stringify({ model, messages, stream: false })
+      headers: this.buildHeaders(validation.key),
+      body: JSON.stringify({ model, messages, stream: false }),
     });
 
     if (!response.ok) {
@@ -189,20 +184,15 @@ export class OpenRouterClient {
   }
 
   async testApiKey(): Promise<{ success: boolean; error?: string }> {
-    const apiKey = this.keys.openrouterApiKey;
-
-    if (!apiKey) {
-      return { success: false, error: 'API key is not set.' };
-    }
-
-    if (!validateOpenRouterKey(apiKey)) {
-      return { success: false, error: 'Invalid API key format.' };
+    const validation = this.getValidatedApiKey();
+    if ('error' in validation) {
+      return { success: false, error: validation.error };
     }
 
     try {
       const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${apiKey}` }
+        headers: { Authorization: `Bearer ${validation.key}` },
       });
 
       if (response.status === 200) {

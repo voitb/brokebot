@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { SpeechRecognitionService } from "../../../../lib/speech-recognition";
+import { getTranscriber } from "../../../../lib/transcriber";
 
 export type TranscriberStatus =
   | "uninitialized"
@@ -31,7 +31,7 @@ export const useSpeechToText = (
   useEffect(() => {
     if (status === "uninitialized") {
       setStatus("loading");
-      SpeechRecognitionService.getInstance()
+      getTranscriber()
         .then(() => setStatus("ready"))
         .catch(() => {
           setError("Failed to load speech recognition model.");
@@ -63,7 +63,7 @@ export const useSpeechToText = (
     audioChunksRef.current = [];
 
     try {
-      const recognizer = await SpeechRecognitionService.getInstance();
+      const recognizer = await getTranscriber();
       const result = await recognizer(audioUrl, {
         chunk_length_s: 30,
         stride_length_s: 5,

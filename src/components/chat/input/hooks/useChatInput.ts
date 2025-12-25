@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
@@ -34,99 +34,81 @@ export function useChatInput(): UseChatInputReturn {
   const { currentModel } = useModel();
   const { isGenerating, streamResponse, stopGeneration } = useMessageStream();
 
-  const handleMessageSubmit = useCallback(
-    async (customMessage?: string) => {
-      const messageContent = (customMessage || message).trim();
-      if (!messageContent || isLoading || isGenerating) return;
+  const handleMessageSubmit = async (customMessage?: string) => {
+    const messageContent = (customMessage || message).trim();
+    if (!messageContent || isLoading || isGenerating) return;
 
-      setIsLoading(true);
-      setMessage("");
+    setIsLoading(true);
+    setMessage("");
 
-      let currentConversationId = conversationId;
-      let aiMessageId: string | undefined;
+    let currentConversationId = conversationId;
+    let aiMessageId: string | undefined;
 
-      try {
-        if (!currentConversationId) {
-          const newConversationId = await createEmptyConversation();
-          if (newConversationId) {
-            currentConversationId = newConversationId;
-            navigate(`/conversation/${newConversationId}`);
-          } else {
-            throw new Error("Failed to create conversation");
-          }
+    try {
+      if (!currentConversationId) {
+        const newConversationId = await createEmptyConversation();
+        if (newConversationId) {
+          currentConversationId = newConversationId;
+          navigate(`/conversation/${newConversationId}`);
+        } else {
+          throw new Error("Failed to create conversation");
         }
+      }
 
-        await addMessage(currentConversationId, {
-          role: "user",
-          content: messageContent,
+      await addMessage(currentConversationId, {
+        role: "user",
+        content: messageContent,
+      });
+
+      aiMessageId = await addMessage(currentConversationId, {
+        role: "assistant",
+        content: "",
+      });
+
+      if (messages.length === 0) {
+        const title =
+          messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
+        await updateConversationTitle(currentConversationId, title);
+      }
+
+      if (currentModel) {
+        const conversationMessages = buildPrompt(
+          messages,
+          messageContent,
+          currentModel.type === "online"
+        );
+
+        const result = await streamResponse(conversationMessages, (content) => {
+          updateMessage(currentConversationId!, aiMessageId!, content);
         });
 
-        aiMessageId = await addMessage(currentConversationId, {
-          role: "assistant",
-          content: "",
-        });
-
-        if (messages.length === 0) {
-          const title =
-            messageContent.slice(0, 50) +
-            (messageContent.length > 50 ? "..." : "");
-          await updateConversationTitle(currentConversationId, title);
-        }
-
-        if (currentModel) {
-          const conversationMessages = buildPrompt(
-            messages,
-            messageContent,
-            currentModel.type === "online"
-          );
-
-          const result = await streamResponse(conversationMessages, (content) => {
-            updateMessage(currentConversationId!, aiMessageId!, content);
-          });
-
-          if (result.error) {
-            showErrorToast(result.error, () => handleMessageSubmit(messageContent));
-            updateMessage(
-              currentConversationId,
-              aiMessageId,
-              "⚠️ Error generating response. Please try regenerating or check your API key configuration."
-            );
-          } else {
-            await updateMessage(currentConversationId, aiMessageId, result.content);
-          }
-        }
-      } catch (error) {
-        showErrorToast(error);
-        if (currentConversationId && aiMessageId) {
+        if (result.error) {
+          showErrorToast(result.error, () => handleMessageSubmit(messageContent));
           updateMessage(
             currentConversationId,
             aiMessageId,
-            "⚠️ Error sending message. Please check your configuration and try again."
+            "⚠️ Error generating response. Please try regenerating or check your API key configuration."
           );
+        } else {
+          await updateMessage(currentConversationId, aiMessageId, result.content);
         }
-      } finally {
-        setIsLoading(false);
       }
-    },
-    [
-      message,
-      isLoading,
-      isGenerating,
-      conversationId,
-      createEmptyConversation,
-      navigate,
-      addMessage,
-      messages,
-      updateConversationTitle,
-      currentModel,
-      streamResponse,
-      updateMessage,
-    ]
-  );
+    } catch (error) {
+      showErrorToast(error);
+      if (currentConversationId && aiMessageId) {
+        updateMessage(
+          currentConversationId,
+          aiMessageId,
+          "⚠️ Error sending message. Please check your configuration and try again."
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const regenerateLastResponse = useCallback(async () => {
-    if (!conversationId || messages.length < 2 || isLoading || isGenerating)
-      return;
+  const regenerateLastResponse = async () => {
+    if (!conversationId || messages.length < 2 || isLoading || isGenerating) return;
 
     const lastAiMessage = messages
       .slice()
@@ -165,15 +147,7 @@ export function useChatInput(): UseChatInputReturn {
         await updateMessage(conversationId, lastAiMessage.id, result.content);
       }
     }
-  }, [
-    conversationId,
-    messages,
-    isLoading,
-    isGenerating,
-    currentModel,
-    streamResponse,
-    updateMessage,
-  ]);
+  };
 
   return {
     message,
