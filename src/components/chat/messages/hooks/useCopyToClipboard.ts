@@ -18,11 +18,10 @@ export const useCopyToClipboard = (): CopyToClipboardResult => {
       setTimeout(() => {
         setCopied(false);
       }, 2000);
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
+    } catch {
       toast.error("Failed to copy to clipboard");
     }
-  } ;
+  };
 
   return {
     copied,

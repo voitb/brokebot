@@ -164,9 +164,8 @@ export function useHeaderActions({
       linkElement.setAttribute("href", dataUri);
       linkElement.setAttribute("download", exportFileDefaultName);
       linkElement.click();
-    } catch (error) {
-      console.error("Error exporting conversation:", error);
-      // You might want to show a toast notification here
+    } catch {
+      toast.error("Failed to export conversation.");
     }
   };
 
@@ -207,8 +206,7 @@ export function useHeaderActions({
       } else {
         toast.info("Conversation already exists. No changes were made.");
       }
-    } catch (e) {
-      console.error("Failed to import conversation:", e);
+    } catch {
       toast.error("Failed to parse or import conversation file.");
     } finally {
       // Reset file input to allow importing the same file again
@@ -230,8 +228,7 @@ export function useHeaderActions({
       toast.success("Conversation deleted successfully.");
       setDeleteDialogOpen(false);
       navigate("/chat");
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
+    } catch {
       toast.error("Failed to delete conversation.");
     }
   };

@@ -37,13 +37,11 @@ export function useActionButtons({
   }, [conversationId, togglePin]);
 
   const openSettings = () => {
-    // This will be handled by parent component state
-    console.log("Open settings");
+    // Handled by parent component state
   };
 
   const openShortcuts = () => {
-    // This will be handled by parent component state
-    console.log("Open shortcuts");
+    // Handled by parent component state
   };
 
   return {

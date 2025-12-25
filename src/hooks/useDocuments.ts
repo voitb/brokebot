@@ -31,8 +31,7 @@ export const useDocuments = (): UseDocumentsReturn => {
       setError(null);
       const docs = await db.documents.orderBy("createdAt").reverse().toArray();
       setDocuments(docs);
-    } catch (err) {
-      console.error("Failed to load documents:", err);
+    } catch {
       setError("Failed to load documents");
     } finally {
       setIsLoading(false);
@@ -81,8 +80,7 @@ export const useDocuments = (): UseDocumentsReturn => {
       toast.success(`Document "${file.name}" uploaded successfully!`);
       return savedDocument;
 
-    } catch (err) {
-      console.error("Failed to upload document:", err);
+    } catch {
       setError("Failed to upload document");
       toast.error("Failed to upload document");
       return null;
@@ -95,8 +93,7 @@ export const useDocuments = (): UseDocumentsReturn => {
       await db.documents.delete(id);
       setDocuments(prev => prev.filter(doc => doc.id !== id));
       toast.success("Document deleted successfully!");
-    } catch (err) {
-      console.error("Failed to delete document:", err);
+    } catch {
       setError("Failed to delete document");
       toast.error("Failed to delete document");
     }
@@ -106,8 +103,7 @@ export const useDocuments = (): UseDocumentsReturn => {
     try {
       const document = await db.documents.get(id);
       return document?.content || null;
-    } catch (err) {
-      console.error("Failed to get document content:", err);
+    } catch {
       return null;
     }
   };

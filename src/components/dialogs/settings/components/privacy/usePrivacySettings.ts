@@ -66,8 +66,7 @@ export const usePrivacySettings = (hasConversations = false) => {
 
       const count = await importConversations(data);
       toast.success(`Successfully imported ${count} conversation(s)`);
-    } catch (error) {
-      console.error("Import error:", error);
+    } catch {
       toast.error(
         "Failed to import conversations. Please check the file format."
       );

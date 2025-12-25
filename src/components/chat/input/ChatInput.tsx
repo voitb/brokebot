@@ -140,8 +140,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
       try {
         const processedFile = await processFile(file);
         processedFiles.push(processedFile);
-      } catch (error) {
-        console.error("Failed to process file:", error);
+      } catch {
+        toast.error(`Failed to process file: ${file.name}`);
       }
     }
 
@@ -182,9 +182,7 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
 
     try {
       await onSend(fullMessage);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      // Restore the message and files if submission failed
+    } catch {
       setMessage(messageToSend);
       setAttachedFiles(filesToSend);
       toast.error("Failed to send message. Please try again.");

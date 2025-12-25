@@ -38,8 +38,7 @@ export const ApiKeysTab: React.FC = () => {
       } else {
         toast.error(`API key test failed: ${testResult.error}`);
       }
-    } catch (error) {
-      console.error("Connection test error:", error);
+    } catch {
       toast.error("Connection test failed.");
     } finally {
       setIsTestingConnection(false);
