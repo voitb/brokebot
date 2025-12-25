@@ -1,199 +1,54 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "../lib/db";
 import { encryptValue, decryptValue } from "../lib/encryptionService";
-import { useAuth } from "@/providers/AuthProvider";
-import {
-  getCloudUserConfig,
-  createCloudUserConfig,
-  updateCloudUserConfig,
-} from "../lib/appwrite/database";
 import { toast } from "sonner";
 
 export function useUserConfig() {
-  const { user } = useAuth();
-
   const rawConfig = useLiveQuery(
     () => db.userConfig.get("user_config"),
     [],
     DEFAULT_USER_CONFIG
   );
 
-  const [config, setConfig] = React.useState<UserConfig>(DEFAULT_USER_CONFIG);
-  const [isSynced, setIsSynced] = React.useState(false);
+  const [config, setConfig] = useState<UserConfig>(DEFAULT_USER_CONFIG);
 
-  // Decrypt local config keys initially
-  React.useEffect(() => {
+  useEffect(() => {
     const decryptConfig = async () => {
       if (rawConfig) {
-        const decryptedConfig = { ...rawConfig };
-        // Focus only on OpenRouter key for now
-        const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey'];
-        
-        for (const key of keysToDecrypt) {
-            const value = rawConfig[key] as string | undefined;
-            if (value) {
-                try {
-                    const decryptedValue = await decryptValue(value);
-                    (decryptedConfig as any)[key] = decryptedValue;
-                } catch (e) {
-                    console.warn(`Could not decrypt key: ${key}. It might be unencrypted.`);
-                    // If decryption fails, assume it's unencrypted and use as-is
-                    (decryptedConfig as any)[key] = value;
+        const decryptedConfig: UserConfig = { ...rawConfig };
+
+        if (rawConfig.openrouterApiKey) {
+          try {
+            decryptedConfig.openrouterApiKey = await decryptValue(rawConfig.openrouterApiKey);
+          } catch {
+            decryptedConfig.openrouterApiKey = rawConfig.openrouterApiKey;
+          }
         }
-            }
-        }
-        
+
         setConfig(decryptedConfig);
       }
     };
     decryptConfig();
   }, [rawConfig]);
 
-  // Sync with cloud
-  React.useEffect(() => {
-    const syncConfig = async () => {
-      if (user && !isSynced) {
-        try {
-          const cloudConfigDoc = await getCloudUserConfig(user.$id);
-          
-          if (cloudConfigDoc) {
-            // Cloud config exists, use it as the source of truth
-            const { $id, $collectionId, $databaseId, $createdAt, $updatedAt, ...cloudData } = cloudConfigDoc;
-            const cloudConfig = { ...cloudData, id: 'user_config' } as unknown as UserConfig;
-            
-            // We need to decrypt keys from the cloud
-            const keysToDecrypt: (keyof UserConfig)[] = ['openrouterApiKey', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey'];
-            for (const key of keysToDecrypt) {
-                const value = cloudConfig[key] as string | undefined;
-                if (value) {
-                    (cloudConfig as any)[key] = await decryptValue(value);
-                }
-            }
-            
-            await db.userConfig.put(cloudConfig); // Update local DB
-            setConfig(cloudConfig);
-            toast.info("User settings synced from cloud.");
-          } else if (config) {
-            // No cloud config, so upload local one
-            const { id, ...localConfig } = config;
-            await updateConfig(localConfig); // Create in cloud
-          }
-        } catch (error) {
-          console.error("Failed to sync user config:", error);
-          toast.error("Failed to sync user settings.");
-        } finally {
-          setIsSynced(true);
-        }
-      }
-    };
-
-    if(config.storeConversationsInCloud) {
-        syncConfig();
-    } else {
-        setIsSynced(true); // Sync is not enabled, so we consider it "synced"
-    }
-
-  }, [user, isSynced, config.storeConversationsInCloud]);
-
   const updateConfig = async (
     updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>
   ) => {
     try {
-      const encryptedUpdates: Partial<UserConfig> = { ...updates };
-      // Focus only on OpenRouter key for now
-      const keysToEncrypt: (keyof UserConfig)[] = ["openrouterApiKey"];
+      const encryptedUpdates = { ...updates };
 
-      for (const key of keysToEncrypt) {
-        const value = updates[key as keyof typeof updates] as string | undefined;
-        if (value) {
-          const encryptedValue = await encryptValue(value);
-          (encryptedUpdates as any)[key] = encryptedValue;
-        }
+      if (updates.openrouterApiKey) {
+        encryptedUpdates.openrouterApiKey = await encryptValue(updates.openrouterApiKey);
       }
 
-      const newUpdatedAt = new Date();
       await db.userConfig.update("user_config", {
         ...encryptedUpdates,
-        updatedAt: newUpdatedAt,
+        updatedAt: new Date(),
       });
-
-      if (import.meta.env.DEV) {
-        console.log('UserConfig - Successfully updated local config');
-      }
-
-      // Also update cloud if user is logged in and sync is enabled
-      if (
-        user &&
-        (config.storeConversationsInCloud || updates.storeConversationsInCloud)
-      ) {
-        // Define the exact set of keys that are allowed in the Appwrite userConfig collection.
-        // Focus only on OpenRouter for now
-        const CLOUD_CONFIG_KEYS = [
-          "userId",
-          "username", 
-          "avatarUrl",
-          "theme",
-          "autoLoadModel",
-          "openrouterApiKey", // Only OpenRouter key for now
-          "storeConversationsLocally",
-          "storeConversationsInCloud",
-        ];
-
-        // "Upsert" logic: check if config exists, then create or update.
-        const existingCloudConfig = await getCloudUserConfig(user.$id);
-
-        if (existingCloudConfig) {
-          // UPDATE: Config exists, send only the filtered, encrypted partial updates.
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, createdAt, updatedAt, ...updatesForCloud } = encryptedUpdates;
-
-          const payload = Object.fromEntries(
-            Object.entries(updatesForCloud).filter(([key]) =>
-              CLOUD_CONFIG_KEYS.includes(key)
-            )
-          );
-
-          if (Object.keys(payload).length > 0) {
-            await updateCloudUserConfig(user.$id, payload);
-            if (import.meta.env.DEV) {
-              console.log('UserConfig - Successfully updated cloud config');
-            }
-          }
-        } else {
-          // CREATE: Config does not exist, send the full, filtered config.
-          const fullConfigForCloud = { ...config, ...updates };
-
-          // Re-encrypt for cloud (since config might have decrypted values)
-          const keysToReEncrypt: (keyof UserConfig)[] = ["openrouterApiKey"]; // Only OpenRouter for now
-          
-          const fullEncryptedPayload = { ...fullConfigForCloud };
-          for (const key of keysToReEncrypt) {
-            const value = fullConfigForCloud[key as keyof typeof fullConfigForCloud] as string | undefined;
-            if (value) {
-              (fullEncryptedPayload as any)[key] = await encryptValue(value);
-            }
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { id, createdAt, updatedAt, ...fullPayload } = fullEncryptedPayload;
-          (fullPayload as any).userId = user.$id;
-
-          const payload = Object.fromEntries(
-            Object.entries(fullPayload).filter(([key]) =>
-              CLOUD_CONFIG_KEYS.includes(key)
-            )
-          );
-
-          await createCloudUserConfig(user.$id, payload);
-          if (import.meta.env.DEV) {
-            console.log('UserConfig - Successfully created cloud config');
-          }
-        }
-      }
     } catch (error) {
       console.error("Error updating user config:", error);
-      toast.error("Failed to save settings to the cloud.");
+      toast.error("Failed to save settings.");
     }
   };
 
@@ -214,6 +69,7 @@ export function useUserConfig() {
     try {
       await db.conversations.clear();
       await db.documents.clear();
+      await db.folders.clear();
       await resetConfig();
     } catch (error) {
       console.error("Error clearing all data:", error);
@@ -225,9 +81,9 @@ export function useUserConfig() {
       const conversations = await db.conversations.toArray();
       const dataStr = JSON.stringify(conversations, null, 2);
       const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-      
+
       const exportFileDefaultName = `brokebot-conversations-${new Date().toISOString().split('T')[0]}.json`;
-      
+
       const linkElement = document.createElement("a");
       linkElement.setAttribute("href", dataUri);
       linkElement.setAttribute("download", exportFileDefaultName);
@@ -238,35 +94,27 @@ export function useUserConfig() {
   };
 
   const importConversations = async (conversations: Conversation[]): Promise<number> => {
-    try {
-      // Add conversations to database
-      let importedCount = 0;
-      
-      for (const conversation of conversations) {
-        // Check if conversation already exists
-        const existing = await db.conversations.get(conversation.id);
-        if (!existing) {
-          // Ensure the conversation has proper date objects
-          const normalizedConversation: Conversation = {
-            ...conversation,
-            createdAt: new Date(conversation.createdAt),
-            updatedAt: new Date(conversation.updatedAt),
-            messages: conversation.messages.map((msg: Message) => ({
-              ...msg,
-              createdAt: new Date(msg.createdAt),
-            })),
-          };
-          
-          await db.conversations.add(normalizedConversation);
-          importedCount++;
-        }
+    let importedCount = 0;
+
+    for (const conversation of conversations) {
+      const existing = await db.conversations.get(conversation.id);
+      if (!existing) {
+        const normalizedConversation: Conversation = {
+          ...conversation,
+          createdAt: new Date(conversation.createdAt),
+          updatedAt: new Date(conversation.updatedAt),
+          messages: conversation.messages.map((msg: Message) => ({
+            ...msg,
+            createdAt: new Date(msg.createdAt),
+          })),
+        };
+
+        await db.conversations.add(normalizedConversation);
+        importedCount++;
       }
-      
-      return importedCount;
-    } catch (error) {
-      console.error("Error importing conversations:", error);
-      throw error;
     }
+
+    return importedCount;
   };
 
   return {
@@ -277,4 +125,4 @@ export function useUserConfig() {
     exportConversations,
     importConversations,
   };
-} 
+}

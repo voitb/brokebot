@@ -6,17 +6,11 @@ import { Input } from "../../../ui/input";
 import { Label } from "../../../ui/label";
 
 interface ApiKeySectionProps {
-  provider: "openrouter" | "openai" | "google" | "anthropic";
+  provider: "openrouter";
 }
 
 const providerDetails = {
   openrouter: { name: "OpenRouter", url: "https://openrouter.ai/keys" },
-  openai: { name: "OpenAI", url: "https://platform.openai.com/api-keys" },
-  google: { name: "Google", url: "https://aistudio.google.com/app/api-keys" },
-  anthropic: {
-    name: "Anthropic",
-    url: "https://console.anthropic.com/settings/keys",
-  },
 };
 
 export const ApiKeySection: React.FC<ApiKeySectionProps> = ({ provider }) => {

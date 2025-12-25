@@ -4,18 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { OpenRouterIcon } from "../../../ui/ProviderIcons";
 import { OpenRouterClient } from "../../../../lib/openrouter";
-import { functions } from "../../../../lib/appwriteClient";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
 import { toast } from "sonner";
 import { TestTube, Loader2 } from "lucide-react";
 
-// Focus only on OpenRouter for now - other providers commented out
 const providers = [
   { id: "openrouter", name: "OpenRouter", icon: <OpenRouterIcon /> },
-  // Future providers - commented out for now
-  // { id: "openai", name: "OpenAI", icon: <OpenAIIcon /> },
-  // { id: "google", name: "Google", icon: <GeminiIcon /> },
-  // { id: "anthropic", name: "Anthropic", icon: <AnthropicIcon /> },
 ] as const;
 
 export const ApiKeysTab: React.FC = () => {
@@ -29,27 +23,24 @@ export const ApiKeysTab: React.FC = () => {
     }
 
     setIsTestingConnection(true);
-    
+
     try {
       const client = new OpenRouterClient({
-        functions,
         siteUrl: window.location.origin,
-        siteName: "Local GPT",
-        keys: {
-          openrouterApiKey: config.openrouterApiKey,
-        },
+        siteName: "Brokebot",
+        keys: { openrouterApiKey: config.openrouterApiKey },
       });
 
       const testResult = await client.testApiKey();
-      
+
       if (testResult.success) {
-        toast.success("✅ OpenRouter API key is working!");
+        toast.success("OpenRouter API key is working!");
       } else {
-        toast.error(`❌ OpenRouter API key test failed: ${testResult.error}`);
+        toast.error(`API key test failed: ${testResult.error}`);
       }
     } catch (error) {
       console.error("Connection test error:", error);
-      toast.error("Connection test failed. Check console for details.");
+      toast.error("Connection test failed.");
     } finally {
       setIsTestingConnection(false);
     }
@@ -88,8 +79,6 @@ export const ApiKeysTab: React.FC = () => {
           </Card>
         ))}
       </div>
-      
-    
     </div>
   );
 };

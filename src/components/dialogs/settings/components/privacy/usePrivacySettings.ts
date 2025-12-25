@@ -1,52 +1,22 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserConfig } from "../../../../../hooks/useUserConfig";
-import { useConversations } from "@/hooks/useConversations";
 import { toast } from "sonner";
 
-interface UserInfo {
-  isLoggedIn: boolean;
-  hasActiveSubscription: boolean;
-  subscriptionPlan: string;
-  subscriptionStatus: string;
-}
-
-export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false) => {
+export const usePrivacySettings = (hasConversations = false) => {
   const {
     config,
-    updateConfig,
     resetConfig,
     clearAllData,
     exportConversations,
     importConversations,
   } = useUserConfig();
-  const { triggerSync } = useConversations();
 
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Dialog states
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false);
-
-  // Use subscription status from props or fallback to mock
-  const hasActiveSubscription = userInfo?.hasActiveSubscription ?? false;
-
-  const handleToggleCloudStorage = async (checked: boolean) => {
-    if (checked && !hasActiveSubscription) {
-      toast.error("Cloud storage is only available with a paid subscription");
-      return;
-    }
-
-    await updateConfig({ storeConversationsInCloud: checked });
-    toast.success(checked ? "Cloud storage enabled" : "Cloud storage disabled");
-
-    if (checked) {
-      // Pass the new state directly to ensure the check inside triggerSync passes,
-      // bypassing any potential state propagation delay.
-      triggerSync({ cloudStorageEnabled: true });
-    }
-  };
 
   const handleClearAllDataConfirm = async () => {
     await clearAllData();
@@ -71,7 +41,7 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
   };
 
   const handleFileImport = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -110,23 +80,16 @@ export const usePrivacySettings = (userInfo?: UserInfo, hasConversations = false
   };
 
   return {
-    // State
     config,
-    hasActiveSubscription,
     hasConversations,
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,
-
-    // Actions
-    handleToggleCloudStorage,
     handleClearAllDataConfirm,
     handleResetSettingsConfirm,
     handleExportConversations,
     handleImportClick,
     handleFileImport,
-
-    // Dialog controls
     setShowClearDataDialog,
     setShowResetSettingsDialog,
   };

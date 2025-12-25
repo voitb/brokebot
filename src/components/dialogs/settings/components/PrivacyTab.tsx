@@ -9,45 +9,24 @@ import {
   usePrivacySettings,
 } from "./privacy";
 
-interface UserInfo {
-  isLoggedIn: boolean;
-  hasActiveSubscription: boolean;
-  subscriptionPlan: string;
-  subscriptionStatus: string;
-}
-
 interface PrivacyTabProps {
-  userInfo?: UserInfo;
   hasConversations?: boolean;
 }
 
-/**
- * Privacy settings tab with data storage, import/export, and danger zone
- */
-export function PrivacyTab({
-  userInfo,
-  hasConversations = false,
-}: PrivacyTabProps) {
+export function PrivacyTab({ hasConversations = false }: PrivacyTabProps) {
   const {
-    // State
-    // config,
-    // hasActiveSubscription,
     hasConversations: hasConversationsFromHook,
     showClearDataDialog,
     showResetSettingsDialog,
     fileInputRef,
- 
-    // handleToggleCloudStorage,
     handleClearAllDataConfirm,
     handleResetSettingsConfirm,
     handleExportConversations,
     handleImportClick,
     handleFileImport,
-
-    // Dialog controls
     setShowClearDataDialog,
     setShowResetSettingsDialog,
-  } = usePrivacySettings(userInfo, hasConversations);
+  } = usePrivacySettings(hasConversations);
 
   return (
     <>
@@ -72,12 +51,10 @@ export function PrivacyTab({
 
         <DangerZoneSection
           onClearAllDataClick={() => setShowClearDataDialog(true)}
-          // onResetSettingsClick={() => setShowResetSettingsDialog(true)}
           hasConversations={hasConversationsFromHook}
         />
       </div>
 
-      {/* Confirmation Dialogs */}
       <ClearAllDataDialog
         open={showClearDataDialog}
         onConfirm={handleClearAllDataConfirm}

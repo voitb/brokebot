@@ -14,7 +14,6 @@ import {
   type StreamResponse,
   type ApiKeyConfig,
 } from "../lib/openrouter";
-import { functions } from "../lib/appwriteClient";
 import { useUserConfig } from "../hooks/useUserConfig";
 import { useModels  } from "@/hooks/api";
 
@@ -300,20 +299,12 @@ export const createOnlineModel = (
   client?: OpenRouterClient,
   keys?: ApiKeyConfig
 ): UnifiedModel => {
-  // If no client provided, create one with Appwrite Functions and OpenRouter key only
   const finalClient =
     client ||
     new OpenRouterClient({
-      functions,
       siteUrl: window.location.origin,
-      siteName: "Local GPT",
-      keys: keys || {
-        openrouterApiKey: undefined,
-        // Future keys - commented out for now
-        // openaiApiKey: undefined,
-        // anthropicApiKey: undefined,
-        // googleApiKey: undefined,
-      },
+      siteName: "Brokebot",
+      keys: keys || { openrouterApiKey: undefined },
     });
 
   return {

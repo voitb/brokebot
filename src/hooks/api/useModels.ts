@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { type OpenRouterModel, getCategoryFromModel } from '../../lib/openrouter';
 
+interface OpenRouterApiModel {
+  id: string;
+  name: string;
+  description: string;
+  context_length: number;
+  pricing: {
+    prompt: string;
+    completion: string;
+  };
+}
+
 interface UseModelsReturn {
   models: OpenRouterModel[];
   isLoading: boolean;
@@ -36,7 +47,7 @@ export function useModels(): UseModelsReturn {
         }
 
         const formattedModels: OpenRouterModel[] = data
-        .map((model: any) => ({
+        .map((model: OpenRouterApiModel) => ({
           id: model.id,
           name: model.name,
           description: model.description,
@@ -48,8 +59,8 @@ export function useModels(): UseModelsReturn {
         }));
 
         setModels(formattedModels);
-      } catch (e: any) {
-        setError(e);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
       } finally {
         setIsLoading(false);
       }
