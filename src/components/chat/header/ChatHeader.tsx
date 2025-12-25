@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, createSearchParams } from "react-router-dom";
-import { MoreHorizontal, Star, Sun, Moon, Settings, Keyboard, Share2, Download, Upload, Trash2 } from "lucide-react";
+import { MoreHorizontal, Star, Sun, Moon, Settings, Keyboard, Download, Upload, Trash2 } from "lucide-react";
 import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { Button } from "../../ui/button";
@@ -43,9 +43,8 @@ export const ChatHeader: React.FC = () => {
     handleSaveTitle,
     handleCancelTitleEdit,
     handleTogglePinConversation,
-    handleExportConversation,
     handleImportConversation,
-    handleFileImport, 
+    handleFileImport,
     fileInputRef,
     handleDeleteConversation,
     handleDeleteConfirm,
@@ -64,11 +63,11 @@ export const ChatHeader: React.FC = () => {
     navigate({ search: createSearchParams({ modal: "shortcuts" }).toString() });
   };
 
-  const handleOpenShare = () => {
+  const handleOpenExport = () => {
     if (!conversationId) return;
     navigate({
       search: createSearchParams({
-        modal: "share",
+        modal: "export",
         conversationId,
       }).toString(),
     });
@@ -95,11 +94,7 @@ export const ChatHeader: React.FC = () => {
         {conversationId && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleOpenShare}>
-              <Share2 className="w-4 h-4 mr-2" />
-              Share conversation
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportConversation}>
+            <DropdownMenuItem onClick={handleOpenExport}>
               <Download className="w-4 h-4 mr-2" />
               Export conversation
             </DropdownMenuItem>

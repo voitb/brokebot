@@ -1,10 +1,10 @@
 # BROKEBOT PROJECT - Local AI Assistant
 
-# ChatGPT Clone running in browser with WebLLM and IndexedDB
+# Privacy-first ChatGPT clone running 100% in browser with WebLLM and IndexedDB
 
 ## PROJECT DESCRIPTION
 
-brokebot is a web application that serves as a ChatGPT clone, operating 100% locally in the browser.
+brokebot is a web application that serves as a ChatGPT alternative, operating 100% locally in the browser.
 It uses WebLLM for AI models and IndexedDB for persistent storage, ensuring privacy,
 free usage, and offline functionality.
 
@@ -130,7 +130,6 @@ src/components/
 - **Integration tests** - for hook interactions
 - **Component tests** - React Testing Library
 - **E2E tests** - for critical user flows
-- **Visual regression** - for UI consistency
 
 ## FILE STRUCTURE
 
@@ -186,8 +185,6 @@ src/hooks/
 - **Local AI**: @mlc-ai/web-llm
 - **Database**: Dexie.js (IndexedDB wrapper)
 - **File Handling**: Native File API + IndexedDB storage
-- **Backend**: Appwrite (auth, cloud sync, payments)
-- **Payment**: Stripe integration
 - **Testing**: Vitest + React Testing Library + Playwright
 - **Linting**: ESLint + Prettier + TypeScript strict
 
@@ -201,7 +198,6 @@ src/hooks/
 - pinned: boolean
 - createdAt: Date
 - updatedAt: Date
-- userId?: string (for logged users)
 - modelId?: string (which model was used)
 
 ### Table: documents
@@ -240,7 +236,6 @@ src/hooks/
 - **Document Manager**: Centralized UI for file management
 - **Content Indexing**: Full text content stored for AI processing
 - **Metadata Tracking**: Filename, size, type, upload date
-- **Cloud Sync Ready**: Architecture prepared for Appwrite integration
 
 ### File Workflow
 1. **Upload**: User selects .txt/.md files via drag-drop or file picker
@@ -279,20 +274,6 @@ src/hooks/
 - [ ] Color contrast compliance
 - [ ] Focus management
 - [ ] ARIA labels where needed
-
-## MVP SUCCESS METRICS
-
-- [x] User can write message and receive response
-- [x] Conversation history preserved after refresh
-- [x] Can create new conversations
-- [x] Can attach .txt/.md files and AI responds based on content
-- [x] Document management (upload, view, delete)
-- [x] Local file storage with IndexedDB
-- [x] UI is responsive and professional
-- [x] Application works offline
-- [x] Smooth animations and transitions
-- [x] Chat filtering and search
-- [x] Chat management (pin, rename, delete)
 
 ## DEVELOPMENT WORKFLOW
 
