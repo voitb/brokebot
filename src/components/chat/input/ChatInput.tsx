@@ -33,10 +33,7 @@ interface ChatInputProps {
   quality?: QualityLevel;
 }
 
-/**
- * Main chat input component with message form and options bar
- */
-export const ChatInput: React.FC<ChatInputProps> = React.memo(({
+export const ChatInput: React.FC<ChatInputProps> = ({
   message,
   setMessage,
   isLoading,
@@ -65,13 +62,13 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
 
   // Auto-resize textarea 
 
-  const handleMicClick = React.useCallback(() => {
+  const handleMicClick = () => {
     if (transcriberStatus === "recording") {
       stopRecording();
     } else {
       startRecording();
     }
-  }, [transcriberStatus, startRecording, stopRecording]);
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -82,11 +79,8 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleMicClick]);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  });
 
   // For now, assume models don't support images unless we implement VLM support
   const supportsImages = false;
@@ -304,4 +298,4 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
       </div>
     </TooltipProvider>
   );
-});
+};
