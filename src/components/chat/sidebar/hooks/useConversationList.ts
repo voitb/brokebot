@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "../../../../providers/ConversationsProvider";
 import type { Conversation, Folder } from "../../../../lib/db";
@@ -24,27 +24,15 @@ export function useConversationList(): UseConversationListReturn {
   const navigate = useNavigate();
   const { conversations, folders, createEmptyConversation } = useConversations();
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [deferredSearchTerm, setDeferredSearchTerm] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  // Debounce search term
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setDebouncedSearchTerm("");
-      setIsSearching(false);
-      return;
-    }
-
-    setIsSearching(true);
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-      setIsSearching(false);
-    }, 300); // 300ms delay
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm]);
+  const handleSearchChange = useCallback((term: string) => {
+    setSearchTerm(term);
+    startTransition(() => {
+      setDeferredSearchTerm(term);
+    });
+  }, []);
 
   const processedData = useMemo(() => {
     if (!conversations || !folders) {
@@ -55,7 +43,7 @@ export function useConversationList(): UseConversationListReturn {
       };
     }
 
-    const term = debouncedSearchTerm.toLowerCase().trim();
+    const term = deferredSearchTerm.toLowerCase().trim();
     
     // 1. Initial filtering of conversations - enhanced content search
     const filteredConversations = term
@@ -134,7 +122,7 @@ export function useConversationList(): UseConversationListReturn {
       foldersWithConversations: finalFolders,
       unfolded,
     };
-  }, [conversations, folders, debouncedSearchTerm]);
+  }, [conversations, folders, deferredSearchTerm]);
 
   // Handle new chat creation
   const handleNewChat = useCallback(async (folderId?: string) => {
@@ -146,8 +134,8 @@ export function useConversationList(): UseConversationListReturn {
 
   return {
     searchTerm,
-    isSearching,
-    setSearchTerm,
+    isSearching: isPending,
+    setSearchTerm: handleSearchChange,
     handleNewChat,
     pinnedConversations: processedData.pinned,
     foldersWithConversations: processedData.foldersWithConversations,

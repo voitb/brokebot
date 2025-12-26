@@ -69,20 +69,18 @@ describe("useConversationList", () => {
     ).toHaveLength(1);
   });
 
-  it("debounces search term", async () => {
-    vi.useFakeTimers();
+  it("updates search term with transition", async () => {
     const { result } = renderHook(() => useConversationList(), { wrapper });
 
     act(() => {
       result.current.setSearchTerm("test");
     });
-    expect(result.current.isSearching).toBe(true);
 
-    act(() => {
-      vi.advanceTimersByTime(300);
+    expect(result.current.searchTerm).toBe("test");
+
+    await waitFor(() => {
+      expect(result.current.isSearching).toBe(false);
     });
-    expect(result.current.isSearching).toBe(false);
-    vi.useRealTimers();
   });
 
   it("filters by title match", async () => {
@@ -95,12 +93,9 @@ describe("useConversationList", () => {
       expect(result.current.unfoldedConversations).toHaveLength(2);
     });
 
-    vi.useFakeTimers();
     act(() => {
       result.current.setSearchTerm("react");
     });
-    await vi.advanceTimersByTimeAsync(300);
-    vi.useRealTimers();
 
     await waitFor(() => {
       expect(result.current.unfoldedConversations).toHaveLength(1);
@@ -109,20 +104,24 @@ describe("useConversationList", () => {
     expect(result.current.unfoldedConversations[0].title).toBe("React Help");
   });
 
-  it("clears search term immediately when empty", () => {
-    vi.useFakeTimers();
+  it("clears search term when set to empty", async () => {
     const { result } = renderHook(() => useConversationList(), { wrapper });
 
     act(() => {
       result.current.setSearchTerm("test");
     });
-    expect(result.current.isSearching).toBe(true);
+
+    expect(result.current.searchTerm).toBe("test");
 
     act(() => {
       result.current.setSearchTerm("");
     });
-    expect(result.current.isSearching).toBe(false);
-    vi.useRealTimers();
+
+    expect(result.current.searchTerm).toBe("");
+
+    await waitFor(() => {
+      expect(result.current.isSearching).toBe(false);
+    });
   });
 
   it("sorts conversations by updatedAt", async () => {

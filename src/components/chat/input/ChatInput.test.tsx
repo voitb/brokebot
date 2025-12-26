@@ -55,6 +55,7 @@ vi.mock("./hooks", () => ({
     isModelLoading: false,
     error: null,
   })),
+  useTranscriberToasts: vi.fn(),
 }));
 
 import { useModel } from "../../../providers/ModelProvider";

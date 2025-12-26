@@ -5,11 +5,12 @@ import {
   useDragDrop,
   useFileUpload,
   useSpeechToText,
+  useTranscriberToasts,
   type AttachedFile,
 } from "./hooks";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
-import { Send, Mic, Square } from "lucide-react";
+import { Send, Square } from "lucide-react";
 import { toast } from "sonner";
 import {
   FileUpload,
@@ -47,46 +48,17 @@ export const ChatInput: React.FC<ChatInputProps> = React.memo(({
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
 
-  const { 
-    status: transcriberStatus, 
-    startRecording, 
+  const {
+    status: transcriberStatus,
+    startRecording,
     stopRecording,
     isModelLoading: isWhisperModelLoading,
     error: transcriberError,
   } = useSpeechToText((transcript) => {
     setMessage(message ? `${message} ${transcript}` : transcript);
   });
-  
-  // Effect for handling STT toasts based on status and error state
-  useEffect(() => {
-    const STT_TOAST_ID = "stt-toast";
 
-    if (transcriberError) {
-      toast.error(transcriberError, { id: STT_TOAST_ID });
-      return; // Stop here to show the error
-    }
-
-    switch (transcriberStatus) {
-      case "loading":
-        toast.loading("Loading speech model...", { id: STT_TOAST_ID });
-        break;
-      case "processing":
-        toast.loading("Transcribing audio...", { id: STT_TOAST_ID });
-        break;
-      case "recording":
-        toast.message("Recording...", {
-          description: "Click the mic icon to stop.",
-          id: STT_TOAST_ID,
-          icon: <Mic className="h-4 w-4" />,
-        });
-        break;
-      case "ready":
-      case "uninitialized":
-      case "error": // Error toast is handled above, this just dismisses any active toast
-        toast.dismiss(STT_TOAST_ID);
-        break;
-    }
-  }, [transcriberStatus, transcriberError]);
+  useTranscriberToasts(transcriberStatus, transcriberError);
 
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
