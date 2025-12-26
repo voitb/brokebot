@@ -49,7 +49,7 @@ export function useChatInput(): UseChatInputReturn {
         const newConversationId = await createEmptyConversation();
         if (newConversationId) {
           currentConversationId = newConversationId;
-          navigate(`/conversation/${newConversationId}`);
+          navigate(`/chat/${newConversationId}`);
         } else {
           throw new Error("Failed to create conversation");
         }

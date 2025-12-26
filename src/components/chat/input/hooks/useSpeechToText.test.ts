@@ -1,0 +1,339 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { renderHook, act, waitFor } from "@testing-library/react";
+import { useSpeechToText } from "./useSpeechToText";
+
+const mockGetTranscriber = vi.fn();
+
+vi.mock("../../../../lib/transcriber", () => ({
+  getTranscriber: () => mockGetTranscriber(),
+}));
+
+// Mock MediaRecorder
+class MockMediaRecorder {
+  state = "inactive";
+  ondataavailable: ((event: { data: Blob }) => void) | null = null;
+  onstop: (() => void) | null = null;
+  mimeType = "audio/webm";
+
+  start() {
+    this.state = "recording";
+  }
+
+  stop() {
+    this.state = "inactive";
+    if (this.ondataavailable) {
+      this.ondataavailable({ data: new Blob(["audio"], { type: "audio/webm" }) });
+    }
+    if (this.onstop) {
+      this.onstop();
+    }
+  }
+}
+
+// Mock MediaStream
+class MockMediaStream {
+  private tracks: Array<{ stop: () => void }> = [{ stop: vi.fn() }];
+
+  getTracks() {
+    return this.tracks;
+  }
+}
+
+describe("useSpeechToText", () => {
+  const mockOnTranscriptReceived = vi.fn();
+  let originalMediaDevices: typeof navigator.mediaDevices;
+  let originalMediaRecorder: typeof MediaRecorder;
+  let originalURL: typeof URL;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    // Mock URL
+    originalURL = global.URL;
+    global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
+    global.URL.revokeObjectURL = vi.fn();
+
+    // Mock MediaRecorder
+    originalMediaRecorder = global.MediaRecorder;
+    global.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
+
+    // Mock navigator.mediaDevices
+    originalMediaDevices = navigator.mediaDevices;
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: {
+        getUserMedia: vi.fn().mockResolvedValue(new MockMediaStream()),
+      },
+      configurable: true,
+    });
+
+    // Default: transcriber loads successfully
+    mockGetTranscriber.mockResolvedValue(
+      vi.fn().mockResolvedValue({ text: "Transcribed text" })
+    );
+  });
+
+  afterEach(() => {
+    global.MediaRecorder = originalMediaRecorder;
+    global.URL = originalURL;
+    Object.defineProperty(navigator, "mediaDevices", {
+      value: originalMediaDevices,
+      configurable: true,
+    });
+  });
+
+  describe("initialization", () => {
+    it("starts in uninitialized status", () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+      // Note: immediately transitions to loading
+      expect(["uninitialized", "loading"]).toContain(result.current.status);
+    });
+
+    it("loads transcriber on mount", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      expect(mockGetTranscriber).toHaveBeenCalled();
+    });
+
+    it("sets error status if transcriber fails to load", async () => {
+      mockGetTranscriber.mockRejectedValue(new Error("Failed to load"));
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("error");
+      });
+
+      expect(result.current.error).toBe("Failed to load speech recognition model.");
+    });
+
+    it("shows isModelLoading during loading", async () => {
+      let resolveTranscriber: (value: unknown) => void;
+      mockGetTranscriber.mockReturnValue(
+        new Promise((resolve) => {
+          resolveTranscriber = resolve;
+        })
+      );
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.isModelLoading).toBe(true);
+      });
+
+      await act(async () => {
+        resolveTranscriber!(vi.fn());
+      });
+
+      await waitFor(() => {
+        expect(result.current.isModelLoading).toBe(false);
+      });
+    });
+  });
+
+  describe("startRecording", () => {
+    it("requests microphone access", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true });
+    });
+
+    it("sets status to recording", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      expect(result.current.status).toBe("recording");
+    });
+
+    it("does nothing if not ready", async () => {
+      mockGetTranscriber.mockReturnValue(new Promise(() => {})); // Never resolves
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+      expect(result.current.error).toBe("Model is still loading, please wait.");
+    });
+
+    it("sets error if microphone access denied", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error("Permission denied")
+      );
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      expect(result.current.error).toBe("Could not access microphone. Please check permissions.");
+      expect(result.current.status).toBe("error");
+    });
+  });
+
+  describe("stopRecording", () => {
+    it("stops media recorder if recording", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      expect(result.current.status).toBe("recording");
+
+      await act(async () => {
+        result.current.stopRecording();
+      });
+
+      // After stopping, should process and return to ready
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+    });
+
+    it("does nothing if not recording", async () => {
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      // Should not throw
+      act(() => {
+        result.current.stopRecording();
+      });
+
+      expect(result.current.status).toBe("ready");
+    });
+  });
+
+  describe("transcription", () => {
+    it("calls onTranscriptReceived with transcribed text", async () => {
+      const mockRecognizer = vi.fn().mockResolvedValue({ text: "Hello world" });
+      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      await act(async () => {
+        result.current.stopRecording();
+      });
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      expect(mockOnTranscriptReceived).toHaveBeenCalledWith("Hello world");
+    });
+
+    it("trims transcript before sending", async () => {
+      const mockRecognizer = vi.fn().mockResolvedValue({ text: "  trimmed text  " });
+      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      await act(async () => {
+        result.current.stopRecording();
+      });
+
+      await waitFor(() => {
+        expect(mockOnTranscriptReceived).toHaveBeenCalledWith("trimmed text");
+      });
+    });
+
+    it("does not call callback for empty transcript", async () => {
+      const mockRecognizer = vi.fn().mockResolvedValue({ text: "" });
+      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      await act(async () => {
+        result.current.stopRecording();
+      });
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      expect(mockOnTranscriptReceived).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("cleanup", () => {
+    it("stops recording on unmount", async () => {
+      const mockStop = vi.fn();
+      const mockStream = {
+        getTracks: () => [{ stop: mockStop }],
+      };
+      (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockStream
+      );
+
+      const { result, unmount } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      unmount();
+
+      expect(mockStop).toHaveBeenCalled();
+    });
+  });
+});

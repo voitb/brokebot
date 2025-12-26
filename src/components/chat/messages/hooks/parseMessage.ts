@@ -51,7 +51,7 @@ function extractThinking(text: string, attachments: { name: string }[]): ParsedM
   return { content: trimmed, attachments };
 }
 
-export function useMessageParser(content: string | undefined): ParsedMessage {
+export function parseMessage(content: string | undefined): ParsedMessage {
   if (!content || typeof content !== 'string') {
     return { content: '', attachments: [] };
   }

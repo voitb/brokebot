@@ -10,8 +10,6 @@ interface UseActionButtonsReturn {
   isConversationPinned: boolean;
   toggleTheme: () => void;
   togglePinConversation: () => Promise<void>;
-  openSettings: () => void;
-  openShortcuts: () => void;
 }
 
 export function useActionButtons({
@@ -33,16 +31,10 @@ export function useActionButtons({
     }
   };
 
-  const openSettings = () => {};
-
-  const openShortcuts = () => {};
-
   return {
     theme,
     isConversationPinned,
     toggleTheme,
     togglePinConversation,
-    openSettings,
-    openShortcuts,
   };
 }

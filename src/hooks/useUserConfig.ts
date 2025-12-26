@@ -14,6 +14,8 @@ export function useUserConfig() {
   const [config, setConfig] = useState<UserConfig>(DEFAULT_USER_CONFIG);
 
   useEffect(() => {
+    let cancelled = false;
+
     const decryptConfig = async () => {
       if (rawConfig) {
         const decryptedConfig: UserConfig = { ...rawConfig };
@@ -26,10 +28,16 @@ export function useUserConfig() {
           }
         }
 
-        setConfig(decryptedConfig);
+        if (!cancelled) {
+          setConfig(decryptedConfig);
+        }
       }
     };
     decryptConfig();
+
+    return () => {
+      cancelled = true;
+    };
   }, [rawConfig]);
 
   const updateConfig = async (
