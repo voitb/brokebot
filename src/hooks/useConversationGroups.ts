@@ -1,8 +1,6 @@
-import { useMemo } from 'react';
 import type { ConversationGroup } from '../types';
 import type { Conversation } from '../lib/db';
 
-// Helper function to group conversations by time periods
 const groupConversationsByTime = (
   conversations: Conversation[]
 ): ConversationGroup[] => {
@@ -97,22 +95,24 @@ export const useConversationGroups = (
   conversations: Conversation[] | null,
   searchQuery: string = ''
 ) => {
-  const filteredGroups = useMemo(() => {
-    if (!conversations) return [];
+  if (!conversations) {
+    return { filteredGroups: [] };
+  }
 
-    const grouped = groupConversationsByTime(conversations);
+  const grouped = groupConversationsByTime(conversations);
 
-    if (!searchQuery) return grouped;
+  if (!searchQuery) {
+    return { filteredGroups: grouped };
+  }
 
-    return grouped
-      .map((group) => ({
-        ...group,
-        conversations: group.conversations.filter((conversation) =>
-          conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      }))
-      .filter((group) => group.conversations.length > 0);
-  }, [conversations, searchQuery]);
+  const filteredGroups = grouped
+    .map((group) => ({
+      ...group,
+      conversations: group.conversations.filter((conversation) =>
+        conversation.title.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((group) => group.conversations.length > 0);
 
   return { filteredGroups };
 }; 

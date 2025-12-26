@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useCallback,
-  useMemo,
-} from "react";
+import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Conversation, type Message, type Folder } from "../lib/db";
@@ -39,16 +34,15 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const conversations = useMemo(() => {
-    if (!rawConversations) return [];
-    return [...rawConversations].sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return 0;
-    });
-  }, [rawConversations]);
+  const conversations = rawConversations
+    ? [...rawConversations].sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return 0;
+      })
+    : [];
 
-  const createConversation = useCallback(async (
+  const createConversation = async (
     title: string,
     firstMessageContent: string
   ): Promise<string | null> => {
@@ -75,9 +69,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to create conversation.");
       return null;
     }
-  }, []);
+  };
 
-  const createEmptyConversation = useCallback(async (
+  const createEmptyConversation = async (
     title: string = "New Conversation",
     folderId?: string
   ): Promise<string | null> => {
@@ -98,9 +92,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to create conversation.");
       return null;
     }
-  }, []);
+  };
 
-  const addMessage = useCallback(async (
+  const addMessage = async (
     conversationId: string,
     message: Omit<Message, "id" | "createdAt">
   ): Promise<string> => {
@@ -120,9 +114,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to save message.");
       throw error;
     }
-  }, []);
+  };
 
-  const updateMessage = useCallback(async (
+  const updateMessage = async (
     conversationId: string,
     messageId: string,
     newContent: string
@@ -138,18 +132,18 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       // Silent fail for message updates
     }
-  }, []);
+  };
 
-  const deleteConversation = useCallback(async (id: string) => {
+  const deleteConversation = async (id: string) => {
     try {
       await db.conversations.delete(id);
       toast.success("Conversation deleted.");
     } catch {
       toast.error("Failed to delete conversation.");
     }
-  }, []);
+  };
 
-  const togglePinConversation = useCallback(async (id: string) => {
+  const togglePinConversation = async (id: string) => {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
         convo.pinned = !convo.pinned;
@@ -157,9 +151,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       toast.error("Failed to update pin status.");
     }
-  }, []);
+  };
 
-  const updateConversationTitle = useCallback(async (id: string, newTitle: string) => {
+  const updateConversationTitle = async (id: string, newTitle: string) => {
     try {
       await db.conversations.where("id").equals(id).modify(convo => {
         convo.title = newTitle;
@@ -168,9 +162,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       toast.error("Failed to update title.");
     }
-  }, []);
+  };
 
-  const moveConversationToFolder = useCallback(async (
+  const moveConversationToFolder = async (
     conversationId: string,
     folderId: string | null
   ) => {
@@ -182,9 +176,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       toast.error("Failed to move conversation to folder.");
     }
-  }, []);
+  };
 
-  const createFolder = useCallback(async (name: string): Promise<string | null> => {
+  const createFolder = async (name: string): Promise<string | null> => {
     const newFolder: Folder = {
       id: uuidv4(),
       name,
@@ -200,9 +194,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to create folder.");
       return null;
     }
-  }, []);
+  };
 
-  const deleteFolder = useCallback(async (id: string) => {
+  const deleteFolder = async (id: string) => {
     try {
       await db.conversations.where("folderId").equals(id).modify(convo => {
         delete convo.folderId;
@@ -212,9 +206,9 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       toast.error("Failed to delete folder.");
     }
-  }, []);
+  };
 
-  const updateFolderName = useCallback(async (id: string, newName: string) => {
+  const updateFolderName = async (id: string, newName: string) => {
     try {
       await db.folders.where("id").equals(id).modify(folder => {
         folder.name = newName;
@@ -223,10 +217,10 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     } catch {
       toast.error("Failed to update folder name.");
     }
-  }, []);
+  };
 
-  const value = useMemo(() => ({
-    conversations: conversations || [],
+  const value: ConversationsContextType = {
+    conversations,
     folders: folders || [],
     createConversation,
     createEmptyConversation,
@@ -239,21 +233,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     createFolder,
     deleteFolder,
     updateFolderName,
-  }), [
-    conversations,
-    folders,
-    createConversation,
-    createEmptyConversation,
-    addMessage,
-    updateMessage,
-    deleteConversation,
-    togglePinConversation,
-    updateConversationTitle,
-    moveConversationToFolder,
-    createFolder,
-    deleteFolder,
-    updateFolderName,
-  ]);
+  };
 
   return (
     <ConversationsContext.Provider value={value}>

@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback, type DependencyList } from "react";
+import { useState, useRef, useEffect, type DependencyList } from "react";
 
-const BUTTON_VISIBILITY_OFFSET = 100; // Show button if scrolled > 100px from bottom
-const AUTOSCROLL_LOCK_OFFSET = 10;   // Lock autoscroll if user scrolls up just a bit
+const BUTTON_VISIBILITY_OFFSET = 100;
+const AUTOSCROLL_LOCK_OFFSET = 10;
 
 export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   dependencies: DependencyList = []
@@ -10,24 +10,21 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);
   const isInitialRender = useRef(true);
-  
-  const getViewport = useCallback(() => {
+
+  const getViewport = () => {
     const scrollArea = scrollAreaRef.current;
     if (!scrollArea) return null;
     return scrollArea.querySelector(
       "[data-radix-scroll-area-viewport]"
     ) as HTMLElement ?? scrollArea;
-  }, []);
+  };
 
-  const scrollToBottom = useCallback((behavior: "smooth" | "auto" = "smooth") => {
+  const scrollToBottom = (behavior: "smooth" | "auto" = "smooth") => {
     const viewport = getViewport();
     if (viewport) {
-      viewport.scrollTo({
-        top: viewport.scrollHeight,
-        behavior,
-      });
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior });
     }
-  }, [getViewport]);
+  };
 
   useEffect(() => {
     const viewport = getViewport();
@@ -71,7 +68,7 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
       viewport.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
-  }, [getViewport]);
+  }, []);
 
   useEffect(() => {
     if (isInitialRender.current) {

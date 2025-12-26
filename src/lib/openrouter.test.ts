@@ -128,7 +128,7 @@ describe("openrouter", () => {
         const result = await client.testApiKey();
 
         expect(result.success).toBe(false);
-        expect(result.error).toContain("not set");
+        expect(result.error).toContain("not found");
       });
 
       it("returns error for invalid API key format", async () => {
@@ -139,7 +139,7 @@ describe("openrouter", () => {
         const result = await client.testApiKey();
 
         expect(result.success).toBe(false);
-        expect(result.error).toContain("Invalid API key format");
+        expect(result.error).toContain("Invalid OpenRouter API key format");
       });
 
       it("returns success for valid API key", async () => {

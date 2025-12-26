@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConversationId } from './useConversationId';
 
@@ -26,99 +26,95 @@ export function useKeyboardShortcuts({
   const lastKeyRef = useRef<string>('');
   const timeoutRef = useRef<number | undefined>(undefined);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    // Ignore shortcuts when typing in input/textarea
-    if (
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      event.target instanceof HTMLElement && event.target.isContentEditable
-    ) {
-      return;
-    }
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLElement && event.target.isContentEditable
+      ) {
+        return;
+      }
 
-    const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
-    
-    // Clear timeout if exists
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-    }
+      const { key, ctrlKey, metaKey, altKey, shiftKey } = event;
 
-    // Handle key sequences (g + letter)
-    if (lastKeyRef.current === 'g') {
-      lastKeyRef.current = '';
-      event.preventDefault();
-      
-      switch (key) {
-        case 'n': // g + n = New Chat
-          if (onNewChat) {
-            onNewChat();
-          } else {
-            navigate('/chat');
-          }
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+
+      if (lastKeyRef.current === 'g') {
+        lastKeyRef.current = '';
+        event.preventDefault();
+
+        switch (key) {
+          case 'n':
+            if (onNewChat) {
+              onNewChat();
+            } else {
+              navigate('/chat');
+            }
+            break;
+          case 's':
+            onToggleSidebar?.();
+            break;
+          case 'f':
+            onSearch?.();
+            break;
+          case 'p':
+            if (conversationId) {
+              onPinChat?.();
+            }
+            break;
+          case 'r':
+            if (conversationId) {
+              onRenameChat?.();
+            }
+            break;
+          case 'd':
+            if (conversationId) {
+              onDeleteChat?.();
+            }
+            break;
+        }
+        return;
+      }
+
+      switch (true) {
+        case key === 'g' && !ctrlKey && !metaKey && !altKey && !shiftKey:
+          event.preventDefault();
+          lastKeyRef.current = 'g';
+          timeoutRef.current = window.setTimeout(() => {
+            lastKeyRef.current = '';
+          }, 2000);
           break;
-        case 's': // g + s = Toggle Sidebar
-          onToggleSidebar?.();
-          break;
-        case 'f': // g + f = Search
+
+        case key === '/' && !ctrlKey && !metaKey && !altKey && !shiftKey:
+          event.preventDefault();
           onSearch?.();
           break;
-        case 'p': // g + p = Pin current chat
-          if (conversationId) {
-            onPinChat?.();
-          }
+
+        case key === '?' && !ctrlKey && !metaKey && !altKey && !shiftKey:
+          event.preventDefault();
+          onShowShortcuts?.();
           break;
-        case 'r': // g + r = Rename current chat
-          if (conversationId) {
-            onRenameChat?.();
-          }
+
+        case key === 'Escape':
+          lastKeyRef.current = '';
           break;
-        case 'd': // g + d = Delete current chat
-          if (conversationId) {
-            onDeleteChat?.();
-          }
-          break;
+
         default:
-          // Invalid sequence, ignore
+          lastKeyRef.current = '';
           break;
       }
-      return;
-    }
+    };
 
-    // Handle single key shortcuts
-    switch (true) {
-      // g - Start sequence
-      case key === 'g' && !ctrlKey && !metaKey && !altKey && !shiftKey:
-        event.preventDefault();
-        lastKeyRef.current = 'g';
-        // Reset sequence after 2 seconds
-        timeoutRef.current = window.setTimeout(() => {
-          lastKeyRef.current = '';
-        }, 2000);
-        break;
-
-      // / - Focus search (common pattern)
-      case key === '/' && !ctrlKey && !metaKey && !altKey && !shiftKey:
-        event.preventDefault();
-        onSearch?.();
-        break;
-
-      // ? - Show shortcuts
-      case key === '?' && !ctrlKey && !metaKey && !altKey && !shiftKey:
-        event.preventDefault();
-        onShowShortcuts?.();
-        break;
-
-      // Escape - Close dialogs/modals (handled by components)
-      case key === 'Escape':
-        // Let components handle this
-        lastKeyRef.current = ''; // Reset sequence
-        break;
-
-      default:
-        // Reset sequence on any other key
-        lastKeyRef.current = '';
-        break;
-    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+    };
   }, [
     navigate,
     conversationId,
@@ -131,23 +127,10 @@ export function useKeyboardShortcuts({
     onShowShortcuts,
   ]);
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [handleKeyDown]);
-
   return {
-    // Return functions that components can call
-    createNewChat: () => {
-      navigate('/chat');
-    },
+    createNewChat: () => navigate('/chat'),
     navigateHome: () => navigate('/'),
     currentConversationId: conversationId,
     onShowShortcuts,
   };
-} 
+}

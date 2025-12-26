@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useTheme } from "../../../../providers/ThemeProvider";
 import {
   oneDark,
@@ -17,29 +16,17 @@ interface UseCodeHighlightingReturn {
   syntaxStyle: { [key: string]: React.CSSProperties };
 }
 
-/**
- * Custom hook for code highlighting configuration
- */
 export const useCodeHighlighting = ({
   className,
   children,
 }: UseCodeHighlightingProps): UseCodeHighlightingReturn => {
   const { theme } = useTheme();
 
-  const highlightingConfig = useMemo(() => {
-    const match = /language-(\w+)/.exec(className || "");
-    const language = match ? match[1] : "";
-    const code = String(children).replace(/\n$/, "");
-    const isInline = !match;
-    const syntaxStyle = theme === "dark" ? oneDark : oneLight;
+  const match = /language-(\w+)/.exec(className || "");
+  const language = match ? match[1] : "";
+  const code = String(children).replace(/\n$/, "");
+  const isInline = !match;
+  const syntaxStyle = theme === "dark" ? oneDark : oneLight;
 
-    return {
-      language,
-      code,
-      isInline,
-      syntaxStyle,
-    };
-  }, [className, children, theme]);
-
-  return highlightingConfig;
+  return { language, code, isInline, syntaxStyle };
 }; 

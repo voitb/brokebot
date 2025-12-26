@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 interface ParsedMessage {
   thinking?: string;
   content: string;
@@ -26,7 +24,6 @@ function extractThinking(text: string, attachments: { name: string }[]): ParsedM
     const openEsc = escapeRegex(open);
     const closeEsc = escapeRegex(close);
 
-    // Complete block: <think>...</think>
     const completeRegex = new RegExp(`${openEsc}([\\s\\S]*?)${closeEsc}`, 'g');
     const completeMatch = trimmed.match(completeRegex);
     if (completeMatch) {
@@ -36,18 +33,15 @@ function extractThinking(text: string, attachments: { name: string }[]): ParsedM
       return { thinking, content, attachments };
     }
 
-    // Unclosed opening tag (still generating)
     if (trimmed.startsWith(open)) {
       const thinking = trimmed.slice(open.length).trim();
       return { thinking, content: '', attachments };
     }
 
-    // Just the closing tag
     if (trimmed === close) {
       return { content: '', attachments };
     }
 
-    // Starts with closing tag (thinking ended)
     if (trimmed.startsWith(close)) {
       const content = trimmed.slice(close.length).trim();
       return { content, attachments };
@@ -58,15 +52,12 @@ function extractThinking(text: string, attachments: { name: string }[]): ParsedM
 }
 
 export function useMessageParser(content: string | undefined): ParsedMessage {
-  return useMemo(() => {
-    if (!content || typeof content !== 'string') {
-      return { content: '', attachments: [] };
-    }
+  if (!content || typeof content !== 'string') {
+    return { content: '', attachments: [] };
+  }
 
-    // Extract attachments
-    const attachments = [...content.matchAll(fileTagRegex)].map(m => ({ name: m[1] }));
-    const processedContent = content.replace(fileTagRegex, '').trim();
+  const attachments = [...content.matchAll(fileTagRegex)].map((m) => ({ name: m[1] }));
+  const processedContent = content.replace(fileTagRegex, '').trim();
 
-    return extractThinking(processedContent, attachments);
-  }, [content]);
+  return extractThinking(processedContent, attachments);
 }

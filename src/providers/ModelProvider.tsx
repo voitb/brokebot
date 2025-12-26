@@ -2,7 +2,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  useCallback,
   useTransition,
   type ReactNode,
   useEffect,
@@ -99,157 +98,127 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     }
   }, [webLLM.selectedModel, config]);
 
-  const interruptGeneration = useCallback(() => {
+  const interruptGeneration = () => {
     if (currentModel?.type === "local" && webLLM.engine) {
       webLLM.engine.interruptGenerate();
     }
-  }, [currentModel, webLLM.engine]);
+  };
 
-  const resetChat = useCallback(async () => {
+  const resetChat = async () => {
     if (currentModel?.type === "local" && webLLM.engine && currentModel.id) {
       await webLLM.engine.reload(currentModel.id);
     }
-  }, [currentModel, webLLM.engine]);
+  };
 
-  const setCurrentModel = useCallback(
-    (model: UnifiedModel) => {
-      startTransition(() => {
-        setCurrentModelState(model);
-        localStorage.setItem("unifiedModel", JSON.stringify(model));
+  const setCurrentModel = (model: UnifiedModel) => {
+    startTransition(() => {
+      setCurrentModelState(model);
+      localStorage.setItem("unifiedModel", JSON.stringify(model));
 
-        if (model.type === "local" && model.localModel) {
-          webLLM.setSelectedModel(model.localModel);
-        }
-      });
-    },
-    [webLLM]
-  );
+      if (model.type === "local" && model.localModel) {
+        webLLM.setSelectedModel(model.localModel);
+      }
+    });
+  };
 
-  const sendMessage = useCallback(
-    async (messages: OpenRouterMessage[]): Promise<string> => {
-      if (!currentModel) {
-        throw new Error("No model selected");
+  const sendMessage = async (messages: OpenRouterMessage[]): Promise<string> => {
+    if (!currentModel) {
+      throw new Error("No model selected");
+    }
+
+    if (currentModel.type === "local") {
+      if (!webLLM.engine) {
+        throw new Error("WebLLM engine not ready");
       }
 
-      if (currentModel.type === "local") {
-        // Use WebLLM for local models
-        if (!webLLM.engine) {
-          throw new Error("WebLLM engine not ready");
-        }
+      const response = await webLLM.engine.chat.completions.create({
+        messages: messages.map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+        stream: false,
+      });
 
-        const response = await webLLM.engine.chat.completions.create({
+      return response.choices[0]?.message?.content || "";
+    } else {
+      if (!currentModel.client) {
+        throw new Error("OpenRouter client not configured");
+      }
+
+      return await currentModel.client.sendMessage(currentModel.id, messages);
+    }
+  };
+
+  async function* streamMessage(
+    messages: OpenRouterMessage[],
+    onProgress?: (content: string) => void,
+    signal?: AbortSignal
+  ): AsyncGenerator<StreamResponse, void, unknown> {
+    if (!currentModel) {
+      yield { content: "", isComplete: true, error: "No model selected" };
+      return;
+    }
+
+    if (signal?.aborted) {
+      yield { content: "", isComplete: true, error: "stopped" };
+      return;
+    }
+
+    if (currentModel.type === "local") {
+      if (!webLLM.engine) {
+        yield { content: "", isComplete: true, error: "WebLLM engine not ready" };
+        return;
+      }
+
+      try {
+        const stream = await webLLM.engine.chat.completions.create({
           messages: messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
           })),
-          stream: false,
+          stream: true,
         });
 
-        return response.choices[0]?.message?.content || "";
-      } else {
-        // Use OpenRouter for online models
-        if (!currentModel.client) {
-          throw new Error("OpenRouter client not configured");
-        }
+        let fullContent = "";
 
-        return await currentModel.client.sendMessage(currentModel.id, messages);
-      }
-    },
-    [currentModel, webLLM.engine]
-  );
-
-  const streamMessage = useCallback(
-    async function* (
-      messages: OpenRouterMessage[],
-      onProgress?: (content: string) => void,
-      signal?: AbortSignal
-    ): AsyncGenerator<StreamResponse, void, unknown> {
-      if (!currentModel) {
-        yield { content: "", isComplete: true, error: "No model selected" };
-        return;
-      }
-      
-      if (signal?.aborted) {
-        yield { content: "", isComplete: true, error: "stopped" };
-        return;
-      }
-
-      if (currentModel.type === "local") {
-        // Use WebLLM streaming for local models
-        if (!webLLM.engine) {
-          yield {
-            content: "",
-            isComplete: true,
-            error: "WebLLM engine not ready",
-          };
-          return;
-        }
-
-        try {
-          const stream = await webLLM.engine.chat.completions.create({
-            messages: messages.map((msg) => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-            stream: true,
-          });
-
-          let fullContent = "";
-          
-          for await (const chunk of stream) {
-            if (signal?.aborted) {
-              break;
-            }
-            const delta = chunk.choices[0]?.delta?.content || "";
-            if (delta) {
-              fullContent += delta;
-              if (onProgress) {
-                onProgress(fullContent);
-              }
-              yield {
-                content: fullContent,
-                isComplete: false,
-              };
-            }
-          }
-
+        for await (const chunk of stream) {
           if (signal?.aborted) {
-            yield { content: fullContent, isComplete: true, error: "stopped" };
-          } else {
-            yield {
-              content: fullContent,
-              isComplete: true,
-            };
+            break;
           }
-        } catch (error) {
-          yield {
-            content: "",
-            isComplete: true,
-            error:
-              error instanceof Error ? error.message : "Unknown error occurred",
-          };
-        }
-      } else {
-        // Use OpenRouter streaming for online models
-        if (!currentModel.client) {
-          yield {
-            content: "",
-            isComplete: true,
-            error: "OpenRouter client not configured",
-          };
-          return;
+          const delta = chunk.choices[0]?.delta?.content || "";
+          if (delta) {
+            fullContent += delta;
+            onProgress?.(fullContent);
+            yield { content: fullContent, isComplete: false };
+          }
         }
 
-        yield* currentModel.client.streamCompletion(
-          currentModel.id,
-          messages,
-          onProgress,
-          signal
-        );
+        if (signal?.aborted) {
+          yield { content: fullContent, isComplete: true, error: "stopped" };
+        } else {
+          yield { content: fullContent, isComplete: true };
+        }
+      } catch (error) {
+        yield {
+          content: "",
+          isComplete: true,
+          error: error instanceof Error ? error.message : "Unknown error occurred",
+        };
       }
-    },
-    [currentModel, webLLM.engine]
-  );
+    } else {
+      if (!currentModel.client) {
+        yield { content: "", isComplete: true, error: "OpenRouter client not configured" };
+        return;
+      }
+
+      yield* currentModel.client.streamCompletion(
+        currentModel.id,
+        messages,
+        onProgress,
+        signal
+      );
+    }
+  }
 
   const isModelLoading = currentModel?.type === "local" && webLLM.isLoading;
   const modelStatus =
