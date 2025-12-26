@@ -12,6 +12,12 @@ vi.mock("sonner", () => ({
   },
 }));
 
+// Type-safe helper to access context after it's been verified as defined
+function assertContext(context: ReturnType<typeof useConversations> | undefined): ReturnType<typeof useConversations> {
+  if (!context) throw new Error("Context not initialized - ensure waitFor check passed");
+  return context;
+}
+
 function TestComponent({ onReady }: { onReady?: (ctx: ReturnType<typeof useConversations>) => void }) {
   const ctx = useConversations();
   if (onReady) onReady(ctx);
@@ -74,7 +80,7 @@ describe("ConversationsProvider", () => {
 
       let conversationId: string | null = null;
       await act(async () => {
-        conversationId = await context.createConversation("New Chat", "Hello!");
+        conversationId = await assertContext(context).createConversation("New Chat", "Hello!");
       });
 
       expect(conversationId).toBeTruthy();
@@ -103,10 +109,10 @@ describe("ConversationsProvider", () => {
 
       let result: string | null = null;
       await act(async () => {
-        result = await context.createConversation("Test", "Content");
+        result = await assertContext(context).createConversation("Test", "Content");
       });
 
-      expect(result!).toBeNull();
+      expect(result).toBeNull();
     });
   });
 
@@ -126,7 +132,7 @@ describe("ConversationsProvider", () => {
 
       let conversationId: string | null = null;
       await act(async () => {
-        conversationId = await context.createEmptyConversation("Empty Chat");
+        conversationId = await assertContext(context).createEmptyConversation("Empty Chat");
       });
 
       const saved = await db.conversations.get(conversationId!);
@@ -150,7 +156,7 @@ describe("ConversationsProvider", () => {
 
       let conversationId: string | null = null;
       await act(async () => {
-        conversationId = await context.createEmptyConversation("In Folder", folder.id);
+        conversationId = await assertContext(context).createEmptyConversation("In Folder", folder.id);
       });
 
       const saved = await db.conversations.get(conversationId!);
@@ -174,7 +180,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.addMessage(conversation.id, { role: "user", content: "New message" });
+        await assertContext(context).addMessage(conversation.id, { role: "user", content: "New message" });
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -198,7 +204,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.addMessage(conversation.id, { role: "user", content: "Test" });
+        await assertContext(context).addMessage(conversation.id, { role: "user", content: "Test" });
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -223,7 +229,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.updateMessage(conversation.id, message.id, "Updated content");
+        await assertContext(context).updateMessage(conversation.id, message.id, "Updated content");
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -247,7 +253,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.updateMessage(conversation.id, message.id, "Same");
+        await assertContext(context).updateMessage(conversation.id, message.id, "Same");
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -271,7 +277,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.deleteConversation(conversation.id);
+        await assertContext(context).deleteConversation(conversation.id);
       });
 
       const deleted = await db.conversations.get(conversation.id);
@@ -295,7 +301,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.togglePinConversation(conversation.id);
+        await assertContext(context).togglePinConversation(conversation.id);
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -317,7 +323,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.togglePinConversation(conversation.id);
+        await assertContext(context).togglePinConversation(conversation.id);
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -363,7 +369,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.updateConversationTitle(conversation.id, "New Title");
+        await assertContext(context).updateConversationTitle(conversation.id, "New Title");
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -387,10 +393,10 @@ describe("ConversationsProvider", () => {
 
       let folderId: string | null = null;
       await act(async () => {
-        folderId = await context.createFolder("New Folder");
+        folderId = await assertContext(context).createFolder("New Folder");
       });
 
-      expect(folderId!).toBeTruthy();
+      expect(folderId).toBeTruthy();
       const folder = await db.folders.get(folderId!);
       expect(folder?.name).toBe("New Folder");
     });
@@ -411,7 +417,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.deleteFolder(folder.id);
+        await assertContext(context).deleteFolder(folder.id);
       });
 
       const deletedFolder = await db.folders.get(folder.id);
@@ -436,7 +442,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.updateFolderName(folder.id, "New Name");
+        await assertContext(context).updateFolderName(folder.id, "New Name");
       });
 
       const updated = await db.folders.get(folder.id);
@@ -459,7 +465,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.moveConversationToFolder(conversation.id, folder.id);
+        await assertContext(context).moveConversationToFolder(conversation.id, folder.id);
       });
 
       const updated = await db.conversations.get(conversation.id);
@@ -482,7 +488,7 @@ describe("ConversationsProvider", () => {
       });
 
       await act(async () => {
-        await context.moveConversationToFolder(conversation.id, null);
+        await assertContext(context).moveConversationToFolder(conversation.id, null);
       });
 
       const updated = await db.conversations.get(conversation.id);

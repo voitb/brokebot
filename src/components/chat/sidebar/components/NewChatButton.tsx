@@ -1,7 +1,7 @@
 import React from "react";
 import { Plus } from "lucide-react";
 import { Button } from "../../../ui/button";
-import { cn } from "../../../../lib/utils";
+import { cn } from "@/utils/cn";
 
 interface NewChatButtonProps {
   onNewChat: (folderId?: string) => void;

@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { useModels } from "./useModels";
 
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+vi.stubGlobal("fetch", mockFetch);
 
 describe("useModels", () => {
   beforeEach(() => {

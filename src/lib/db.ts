@@ -49,39 +49,42 @@ export interface Document {
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
   username: "User",
-  selectedModelId: AVAILABLE_MODELS[0].id,
+  selectedModelId: AVAILABLE_MODELS[0]?.id ?? "Llama-3.2-3B-Instruct-q4f16_1-MLC",
   autoLoadModel: true,
   theme: "system",
   createdAt: new Date(),
   updatedAt: new Date(),
 };
 
-export class LocalGptDB extends Dexie {
-  conversations!: EntityTable<Conversation, "id">;
-  folders!: EntityTable<Folder, "id">;
-  documents!: EntityTable<Document, "id">;
-  userConfig!: EntityTable<UserConfig, "id">;
+type BrokebotDatabase = Dexie & {
+  conversations: EntityTable<Conversation, "id">;
+  folders: EntityTable<Folder, "id">;
+  documents: EntityTable<Document, "id">;
+  userConfig: EntityTable<UserConfig, "id">;
+};
 
-  constructor() {
-    super("LocalGptDB");
+export function createDatabase(): BrokebotDatabase {
+  // Keep "LocalGptDB" name for backward compatibility with existing user data
+  const db = new Dexie("LocalGptDB") as BrokebotDatabase;
 
-    // Version 2: Initial stable schema
-    this.version(2).stores({
+  // Version 2: Initial stable schema
+  db.version(2).stores({
+    conversations: "id, title, pinned, createdAt, updatedAt",
+    documents: "++id, filename, fileType, createdAt",
+    userConfig: "id, updatedAt",
+  });
+
+  // LEGACY: Version 3-5 migrations for removed cloud/sharing features
+  // Kept for backward compatibility with existing user databases
+
+  // v3: Added storeConversationsInCloud (removed feature)
+  db.version(3)
+    .stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       userConfig: "id, updatedAt",
-    });
-
-    // LEGACY: Version 3-5 migrations for removed cloud/sharing features
-    // Kept for backward compatibility with existing user databases
-    // These features were removed in favor of local-only architecture
-
-    // v3: Added storeConversationsInCloud (removed feature)
-    this.version(3).stores({
-      conversations: "id, title, pinned, createdAt, updatedAt",
-      documents: "++id, filename, fileType, createdAt",
-      userConfig: "id, updatedAt",
-    }).upgrade(async (tx) => {
+    })
+    .upgrade(async (tx) => {
       const config = await tx.table("userConfig").get("user_config");
       if (config && config.storeConversationsInCloud === undefined) {
         await tx.table("userConfig").update("user_config", {
@@ -90,20 +93,22 @@ export class LocalGptDB extends Dexie {
       }
     });
 
-    // v4: Added shareId index (removed feature)
-    this.version(4).stores({
-      conversations: "id, title, pinned, shareId, createdAt, updatedAt",
-      documents: "++id, filename, fileType, createdAt",
-      userConfig: "id, updatedAt",
-    });
+  // v4: Added shareId index (removed feature)
+  db.version(4).stores({
+    conversations: "id, title, pinned, shareId, createdAt, updatedAt",
+    documents: "++id, filename, fileType, createdAt",
+    userConfig: "id, updatedAt",
+  });
 
-    // v5: Migrated to sharedLinks table (removed feature)
-    this.version(5).stores({
+  // v5: Migrated to sharedLinks table (removed feature)
+  db.version(5)
+    .stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
       documents: "++id, filename, fileType, createdAt",
       sharedLinks: "id, conversationId, createdAt, updatedAt",
       userConfig: "id, updatedAt",
-    }).upgrade(async (tx) => {
+    })
+    .upgrade(async (tx) => {
       const conversations = await tx.table("conversations").toArray();
       const sharedLinks = conversations
         .filter((conv) => conv.shareId)
@@ -124,36 +129,41 @@ export class LocalGptDB extends Dexie {
         await tx.table("sharedLinks").bulkAdd(sharedLinks);
       }
 
-      await tx.table("conversations").toCollection().modify((conv) => {
-        delete conv.shareId;
-      });
+      await tx
+        .table("conversations")
+        .toCollection()
+        .modify((conv) => {
+          delete conv.shareId;
+        });
     });
 
-    // v6: Added folders feature
-    this.version(6).stores({
-      conversations: "id, title, pinned, folderId, createdAt, updatedAt",
-      documents: "++id, filename, fileType, createdAt",
-      sharedLinks: "id, conversationId, createdAt, updatedAt",
-      userConfig: "id, updatedAt",
-      folders: "id, name, createdAt, updatedAt",
-    });
+  // v6: Added folders feature
+  db.version(6).stores({
+    conversations: "id, title, pinned, folderId, createdAt, updatedAt",
+    documents: "++id, filename, fileType, createdAt",
+    sharedLinks: "id, conversationId, createdAt, updatedAt",
+    userConfig: "id, updatedAt",
+    folders: "id, name, createdAt, updatedAt",
+  });
 
-    // v7: Remove sharedLinks table - final local-only architecture
-    this.version(7).stores({
-      conversations: "id, title, pinned, folderId, createdAt, updatedAt",
-      documents: "++id, filename, fileType, createdAt",
-      sharedLinks: null, // Delete the table
-      userConfig: "id, updatedAt",
-      folders: "id, name, createdAt, updatedAt",
-    });
+  // v7: Remove sharedLinks table - final local-only architecture
+  db.version(7).stores({
+    conversations: "id, title, pinned, folderId, createdAt, updatedAt",
+    documents: "++id, filename, fileType, createdAt",
+    sharedLinks: null,
+    userConfig: "id, updatedAt",
+    folders: "id, name, createdAt, updatedAt",
+  });
 
-    this.on("ready", async () => {
-      const config = await this.userConfig.get("user_config");
-      if (!config) {
-        await this.userConfig.add(DEFAULT_USER_CONFIG);
-      }
-    });
-  }
+  db.on("ready", async () => {
+    const config = await db.userConfig.get("user_config");
+    if (!config) {
+      await db.userConfig.add(DEFAULT_USER_CONFIG);
+    }
+  });
+
+  return db;
 }
 
-export const db = new LocalGptDB();
+// Default database instance for convenience
+export const db = createDatabase();

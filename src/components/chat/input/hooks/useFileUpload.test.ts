@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useFileUpload } from "./useFileUpload";
+import { useFileUpload, type AttachedFile } from "./useFileUpload";
+
+// Helper to assert file result is defined after act() completes
+function assertFile(file: AttachedFile | null): AttachedFile {
+  if (!file) throw new Error("File not initialized");
+  return file;
+}
 
 vi.mock("sonner", () => ({
   toast: {
@@ -287,13 +293,14 @@ describe("useFileUpload", () => {
 
       const file = createMockFile("image.png", "fake-image-data", "image/png");
 
-      let processedFile: Awaited<ReturnType<typeof result.current.processFile>> | null = null;
+      let processedFile: AttachedFile | null = null;
       await act(async () => {
         processedFile = await result.current.processFile(file);
       });
 
-      expect(processedFile?.preview).toBeDefined();
-      expect(processedFile?.preview).toContain("data:");
+      const file_ = assertFile(processedFile);
+      expect(file_.preview).toBeDefined();
+      expect(file_.preview).toContain("data:");
     });
 
     it("reads content for text files", async () => {
@@ -303,13 +310,13 @@ describe("useFileUpload", () => {
 
       const file = createMockFile("test.txt", "Hello world content");
 
-      let processedFile: Awaited<ReturnType<typeof result.current.processFile>> | null = null;
+      let processedFile: AttachedFile | null = null;
       await act(async () => {
         processedFile = await result.current.processFile(file);
       });
 
       await waitFor(() => {
-        expect(processedFile?.content).toBe("Hello world content");
+        expect(assertFile(processedFile).content).toBe("Hello world content");
       });
     });
 
@@ -321,15 +328,15 @@ describe("useFileUpload", () => {
       const file1 = createMockFile("test1.txt", "Content 1");
       const file2 = createMockFile("test2.txt", "Content 2");
 
-      let processed1: Awaited<ReturnType<typeof result.current.processFile>> | null = null;
-      let processed2: Awaited<ReturnType<typeof result.current.processFile>> | null = null;
+      let processed1: AttachedFile | null = null;
+      let processed2: AttachedFile | null = null;
 
       await act(async () => {
         processed1 = await result.current.processFile(file1);
         processed2 = await result.current.processFile(file2);
       });
 
-      expect(processed1?.id).not.toBe(processed2?.id);
+      expect(assertFile(processed1).id).not.toBe(assertFile(processed2).id);
     });
 
     it("categorizes other file types", async () => {
@@ -339,12 +346,12 @@ describe("useFileUpload", () => {
 
       const file = createMockFile("data.json", '{"key": "value"}', "application/json");
 
-      let processedFile: Awaited<ReturnType<typeof result.current.processFile>> | null = null;
+      let processedFile: AttachedFile | null = null;
       await act(async () => {
         processedFile = await result.current.processFile(file);
       });
 
-      expect(processedFile?.type).toBe("other");
+      expect(assertFile(processedFile).type).toBe("other");
     });
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
-  OpenRouterClient,
+  createOpenRouterClient,
   getCategoryFromModel,
   getStoredApiKeys,
   storeApiKeys,
@@ -69,7 +69,6 @@ describe("openrouter", () => {
     });
 
     it('returns "efficient" for mini models', () => {
-      // Note: GPT-4o Mini matches "gpt-4" first, so use a different mini model
       const model = { id: "claude-mini", name: "Claude Mini", description: "" };
       expect(getCategoryFromModel(model)).toBe("efficient");
     });
@@ -104,39 +103,13 @@ describe("openrouter", () => {
     });
   });
 
-  describe("OpenRouterClient", () => {
+  describe("createOpenRouterClient", () => {
     const validApiKey = "sk-or-v1-test-key-12345678901234567890";
 
-    describe("constructor", () => {
-      it("uses provided site config", () => {
-        const client = new OpenRouterClient({
-          siteUrl: "https://example.com",
-          siteName: "TestApp",
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        expect(client).toBeDefined();
-      });
-    });
-
-    describe("testApiKey", () => {
-      it("returns error when API key is not set", async () => {
-        const client = new OpenRouterClient({
-          keys: {},
-        });
-
-        const result = await client.testApiKey();
-
-        expect(result.success).toBe(false);
-        expect(result.error).toContain("not found");
-      });
-
+    describe("testConnection", () => {
       it("returns error for invalid API key format", async () => {
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: "invalid-key" },
-        });
-
-        const result = await client.testApiKey();
+        const client = createOpenRouterClient("invalid-key");
+        const result = await client.testConnection();
 
         expect(result.success).toBe(false);
         expect(result.error).toContain("Invalid OpenRouter API key format");
@@ -147,11 +120,8 @@ describe("openrouter", () => {
           status: 200,
         });
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        const result = await client.testApiKey();
+        const client = createOpenRouterClient(validApiKey);
+        const result = await client.testConnection();
 
         expect(result.success).toBe(true);
         expect(mockFetch).toHaveBeenCalledWith(
@@ -168,11 +138,8 @@ describe("openrouter", () => {
           status: 401,
         });
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        const result = await client.testApiKey();
+        const client = createOpenRouterClient(validApiKey);
+        const result = await client.testConnection();
 
         expect(result.success).toBe(false);
         expect(result.error).toContain("Invalid API key");
@@ -181,11 +148,8 @@ describe("openrouter", () => {
       it("handles network errors", async () => {
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        const result = await client.testApiKey();
+        const client = createOpenRouterClient(validApiKey);
+        const result = await client.testConnection();
 
         expect(result.success).toBe(false);
         expect(result.error).toContain("Network error");
@@ -193,18 +157,8 @@ describe("openrouter", () => {
     });
 
     describe("sendMessage", () => {
-      it("throws when API key is missing", async () => {
-        const client = new OpenRouterClient({ keys: {} });
-
-        await expect(
-          client.sendMessage("gpt-4", [{ role: "user", content: "Hi" }])
-        ).rejects.toThrow("API key not found");
-      });
-
       it("throws for invalid API key format", async () => {
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: "bad-key" },
-        });
+        const client = createOpenRouterClient("bad-key");
 
         await expect(
           client.sendMessage("gpt-4", [{ role: "user", content: "Hi" }])
@@ -220,10 +174,7 @@ describe("openrouter", () => {
             }),
         });
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
+        const client = createOpenRouterClient(validApiKey);
         const result = await client.sendMessage("gpt-4", [
           { role: "user", content: "Hi" },
         ]);
@@ -238,9 +189,7 @@ describe("openrouter", () => {
           json: () => Promise.resolve({ error: { message: "Server error" } }),
         });
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
+        const client = createOpenRouterClient(validApiKey);
 
         await expect(
           client.sendMessage("gpt-4", [{ role: "user", content: "Hi" }])
@@ -249,21 +198,8 @@ describe("openrouter", () => {
     });
 
     describe("streamCompletion", () => {
-      it("yields error when API key is missing", async () => {
-        const client = new OpenRouterClient({ keys: {} });
-
-        const stream = client.streamCompletion("gpt-4", [
-          { role: "user", content: "Hi" },
-        ]);
-
-        const result = await stream.next();
-        expect(result.value?.error).toContain("API key not found");
-      });
-
       it("yields error for invalid API key format", async () => {
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: "bad-key" },
-        });
+        const client = createOpenRouterClient("bad-key");
 
         const stream = client.streamCompletion("gpt-4", [
           { role: "user", content: "Hi" },
@@ -281,43 +217,16 @@ describe("openrouter", () => {
           Object.assign(new Error("Aborted"), { name: "AbortError" })
         );
 
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
+        const client = createOpenRouterClient(validApiKey);
 
         const stream = client.streamCompletion(
           "gpt-4",
           [{ role: "user", content: "Hi" }],
-          undefined,
-          abortController.signal
+          { signal: abortController.signal }
         );
 
         const result = await stream.next();
         expect(result.value?.error).toBe("stopped");
-      });
-    });
-
-    describe("testConnection", () => {
-      it("returns true when testApiKey succeeds", async () => {
-        mockFetch.mockResolvedValueOnce({ status: 200 });
-
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        const result = await client.testConnection();
-        expect(result).toBe(true);
-      });
-
-      it("returns false when testApiKey fails", async () => {
-        mockFetch.mockResolvedValueOnce({ status: 401 });
-
-        const client = new OpenRouterClient({
-          keys: { openrouterApiKey: validApiKey },
-        });
-
-        const result = await client.testConnection();
-        expect(result).toBe(false);
       });
     });
   });

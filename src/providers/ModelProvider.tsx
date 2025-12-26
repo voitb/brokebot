@@ -8,11 +8,11 @@ import React, {
 } from "react";
 import { useWebLLM, type ModelInfo } from "./WebLLMProvider";
 import {
-  OpenRouterClient,
+  createOpenRouterClient,
+  type OpenRouterClient,
   type OpenRouterModel,
   type OpenRouterMessage,
   type StreamResponse,
-  type ApiKeyConfig,
 } from "../lib/openrouter";
 import { useUserConfig } from "../hooks/useUserConfig";
 import { useModels  } from "@/hooks/api";
@@ -77,13 +77,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
         if (parsed.type === "online" && parsed.onlineModel && config) {
           // For online models, we need to recreate the client with OpenRouter key only
           setCurrentModelState(
-            createOnlineModel(parsed.onlineModel, undefined, {
-              openrouterApiKey: config.openrouterApiKey,
-              // Future keys - commented out for now
-              // openaiApiKey: config.openaiApiKey,
-              // anthropicApiKey: config.anthropicApiKey,
-              // googleApiKey: config.googleApiKey,
-            })
+            createOnlineModel(parsed.onlineModel, config.openrouterApiKey)
           );
           return;
         }
@@ -214,8 +208,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
       yield* currentModel.client.streamCompletion(
         currentModel.id,
         messages,
-        onProgress,
-        signal
+        { onProgress, signal }
       );
     }
   }
@@ -270,23 +263,12 @@ export const createLocalModel = (localModel: ModelInfo): UnifiedModel => ({
 
 export const createOnlineModel = (
   onlineModel: OpenRouterModel,
-  client?: OpenRouterClient,
-  keys?: ApiKeyConfig
-): UnifiedModel => {
-  const finalClient =
-    client ||
-    new OpenRouterClient({
-      siteUrl: window.location.origin,
-      siteName: "Brokebot",
-      keys: keys || { openrouterApiKey: undefined },
-    });
-
-  return {
-    id: onlineModel.id,
-    name: onlineModel.name,
-    type: "online",
-    description: onlineModel.description,
-    onlineModel,
-    client: finalClient,
-  };
-};
+  apiKey?: string
+): UnifiedModel => ({
+  id: onlineModel.id,
+  name: onlineModel.name,
+  type: "online",
+  description: onlineModel.description,
+  onlineModel,
+  client: apiKey ? createOpenRouterClient(apiKey) : undefined,
+});

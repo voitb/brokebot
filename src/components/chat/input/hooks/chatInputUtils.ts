@@ -1,5 +1,5 @@
-import type { OpenRouterMessage } from "../../../../lib/openrouter";
-import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "../../../../lib/aiRules";
+import type { OpenRouterMessage } from "@/lib/openrouter";
+import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/constants/prompts";
 
 /**
  * Summarizes long conversations by keeping recent messages and adding earlier context as a summary

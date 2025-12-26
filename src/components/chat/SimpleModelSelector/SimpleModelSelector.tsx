@@ -17,10 +17,7 @@ import {
   createOnlineModel,
 } from "../../../providers/ModelProvider";
 import { OnlineModelDialog } from "../OnlineModelDialog";
-import {
-  type OpenRouterModel,
-  OpenRouterClient,
-} from "../../../lib/openrouter";
+import { type OpenRouterModel } from "../../../lib/openrouter";
 import { toast } from "sonner";
 import { LocalModelList } from "./components/LocalModelList";
 import { useUserConfig } from "../../../hooks/useUserConfig";
@@ -53,18 +50,14 @@ export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
     setIsDropdownOpen(false);
   };
 
-  const handleOnlineModelSelect = (
-    model: OpenRouterModel,
-    client: OpenRouterClient | null
-  ) => {
-    if (!client) {
-      toast.error("Failed to create OpenRouter client");
+  const handleOnlineModelSelect = (model: OpenRouterModel, apiKey: string) => {
+    if (!apiKey) {
+      toast.error("OpenRouter API key is required");
       return;
     }
 
-    const onlineModel = createOnlineModel(model, client);
+    const onlineModel = createOnlineModel(model, apiKey);
     setCurrentModel(onlineModel);
-    // Dialog closes itself via onOpenChange
   };
 
   const handleDialogTrigger = () => {

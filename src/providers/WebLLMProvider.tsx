@@ -9,9 +9,11 @@ import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
 import WebLLMWorker from "../worker.ts?worker";
-import { AVAILABLE_MODELS, type ModelInfo } from "../lib/webllm-models";
+import { createModelCatalog, type ModelInfo } from "../lib/webllm";
 
-export { AVAILABLE_MODELS, type ModelInfo };
+export { type ModelInfo };
+
+export const AVAILABLE_MODELS = createModelCatalog();
 
 interface EngineState {
   engine: WebWorkerMLCEngine | null;

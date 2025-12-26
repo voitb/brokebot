@@ -10,13 +10,13 @@ import {
 import { ScrollArea } from "../../ui/scroll-area";
 import { useWebLLM, type ModelInfo } from "../../../providers/WebLLMProvider";
 import { OnlineModelDialog } from "../OnlineModelDialog";
-import { type OpenRouterModel, type OpenRouterClient } from "../../../lib/openrouter";
+import { type OpenRouterModel } from "../../../lib/openrouter";
 import { useModelSelector } from "./hooks/useModelSelector";
 import { ModelCategory } from "./components/ModelCategory";
 
 interface ModelSelectorProps {
   disabled?: boolean;
-  onOnlineModelSelect?: (model: OpenRouterModel, client: OpenRouterClient | null) => void;
+  onOnlineModelSelect?: (model: OpenRouterModel, apiKey: string) => void;
 }
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
@@ -38,10 +38,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
     setSelectedOnlineModel(null);
   };
 
-  const handleOnlineModelSelect = (model: OpenRouterModel, client: OpenRouterClient | null) => {
+  const handleOnlineModelSelect = (model: OpenRouterModel, apiKey: string) => {
     setSelectedOnlineModel(model);
     if (onOnlineModelSelect) {
-      onOnlineModelSelect(model, client);
+      onOnlineModelSelect(model, apiKey);
     }
   };
 

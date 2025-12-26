@@ -21,7 +21,6 @@ describe("useSmartAutoScroll", () => {
     disconnect: ReturnType<typeof vi.fn>;
     takeRecords: ReturnType<typeof vi.fn>;
   };
-  let observerCallback: MutationCallback;
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -32,14 +31,15 @@ describe("useSmartAutoScroll", () => {
       takeRecords: vi.fn(),
     };
 
-    global.MutationObserver = vi.fn((callback: MutationCallback) => {
-      observerCallback = callback;
-      return mockObserver;
-    }) as unknown as typeof MutationObserver;
+    vi.stubGlobal(
+      "MutationObserver",
+      vi.fn(() => mockObserver)
+    );
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   describe("initial state", () => {

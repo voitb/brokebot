@@ -8,20 +8,14 @@ import {
 } from "../../ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "../../ui/alert";
-import {
-  type OpenRouterModel,
-  type OpenRouterClient,
-} from "../../../lib/openrouter";
+import { type OpenRouterModel } from "../../../lib/openrouter";
 import { ApiKeysTab } from "./components/ApiKeysTab";
 import { ModelList } from "./components/ModelList";
 import { ScrollArea } from "@/components/ui";
 import { useOnlineModels } from "./hooks/useOnlineModels";
 
 interface OnlineModelDialogProps {
-  onModelSelect: (
-    model: OpenRouterModel,
-    client: OpenRouterClient | null
-  ) => void;
+  onModelSelect: (model: OpenRouterModel, apiKey: string) => void;
   selectedModel?: OpenRouterModel | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
