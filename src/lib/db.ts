@@ -46,6 +46,11 @@ export interface Document {
   fileType: "txt" | "md" | "pdf";
 }
 
+export interface EncryptionKey {
+  id: string;
+  key: CryptoKey;
+}
+
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
   username: "User",
@@ -61,10 +66,10 @@ type BrokebotDatabase = Dexie & {
   folders: EntityTable<Folder, "id">;
   documents: EntityTable<Document, "id">;
   userConfig: EntityTable<UserConfig, "id">;
+  encryptionKey: EntityTable<EncryptionKey, "id">;
 };
 
 export function createDatabase(): BrokebotDatabase {
-  // Keep "LocalGptDB" name for backward compatibility with existing user data
   const db = new Dexie("BrokenbotDB") as BrokebotDatabase;
 
   // Version 2: Initial stable schema
@@ -153,6 +158,15 @@ export function createDatabase(): BrokebotDatabase {
     sharedLinks: null,
     userConfig: "id, updatedAt",
     folders: "id, name, createdAt, updatedAt",
+  });
+
+  // v8: Add encryptionKey table for storing non-extractable CryptoKey
+  db.version(8).stores({
+    conversations: "id, title, pinned, folderId, createdAt, updatedAt",
+    documents: "++id, filename, fileType, createdAt",
+    userConfig: "id, updatedAt",
+    folders: "id, name, createdAt, updatedAt",
+    encryptionKey: "id",
   });
 
   db.on("ready", async () => {

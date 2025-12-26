@@ -1,38 +1,33 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { encryptValue, decryptValue, clearEncryptionCache } from "./encryptionService";
 
-// Mock the browser APIs
-const mockCanvas = {
-  getContext: vi.fn(() => ({
-    textBaseline: "",
-    font: "",
-    fillText: vi.fn(),
-  })),
-  toDataURL: vi.fn(() => "data:image/png;base64,mockcanvas"),
-};
+// Mock the db module
+vi.mock("./db", () => {
+  let storage: Map<string, { id: string; key: CryptoKey }> = new Map();
 
-vi.stubGlobal("document", {
-  createElement: vi.fn(() => mockCanvas),
-});
-
-vi.stubGlobal("navigator", {
-  userAgent: "Mozilla/5.0 Test Browser",
-  language: "en-US",
-});
-
-vi.stubGlobal("screen", {
-  width: 1920,
-  height: 1080,
+  return {
+    db: {
+      encryptionKey: {
+        get: vi.fn(async (id: string) => storage.get(id)),
+        add: vi.fn(async (record: { id: string; key: CryptoKey }) => {
+          storage.set(record.id, record);
+        }),
+      },
+    },
+    // Reset storage for tests
+    __resetStorage: () => {
+      storage = new Map();
+    },
+  };
 });
 
 describe("encryptionService", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     clearEncryptionCache();
-    localStorage.clear();
-  });
-
-  afterEach(() => {
-    vi.clearAllMocks();
+    const dbModule = (await import("./db")) as typeof import("./db") & {
+      __resetStorage: () => void;
+    };
+    dbModule.__resetStorage();
   });
 
   describe("encryptValue", () => {
@@ -47,7 +42,6 @@ describe("encryptionService", () => {
 
       expect(encrypted).toBeTruthy();
       expect(encrypted).not.toBe(plaintext);
-      // Base64 encoded string should only contain valid characters
       expect(encrypted).toMatch(/^[A-Za-z0-9+/=]+$/);
     });
 
@@ -57,7 +51,6 @@ describe("encryptionService", () => {
       const encrypted1 = await encryptValue(plaintext);
       const encrypted2 = await encryptValue(plaintext);
 
-      // Different IV means different ciphertext
       expect(encrypted1).not.toBe(encrypted2);
     });
 
@@ -113,20 +106,9 @@ describe("encryptionService", () => {
 
     it("throws for tampered data", async () => {
       const encrypted = await encryptValue("secret");
-      // Tamper with the encrypted data
       const tampered = encrypted.slice(0, -5) + "XXXXX";
 
       await expect(decryptValue(tampered)).rejects.toThrow();
-    });
-  });
-
-  describe("clearEncryptionCache", () => {
-    it("clears localStorage apiKeys", async () => {
-      localStorage.setItem("apiKeys", JSON.stringify({ test: "value" }));
-
-      clearEncryptionCache();
-
-      expect(localStorage.getItem("apiKeys")).toBeNull();
     });
   });
 

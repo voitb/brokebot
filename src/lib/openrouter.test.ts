@@ -1,28 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  createOpenRouterClient,
-  getCategoryFromModel,
-  getStoredApiKeys,
-  storeApiKeys,
-} from "./openrouter";
-import * as encryptionService from "./encryptionService";
+import { createOpenRouterClient, getCategoryFromModel } from "./openrouter";
 
-// Mock fetch globally
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
-
-// Mock encryption service
-vi.mock("./encryptionService", () => ({
-  encryptValue: vi.fn((val: string) => Promise.resolve(`encrypted_${val}`)),
-  decryptValue: vi.fn((val: string) =>
-    Promise.resolve(val.replace("encrypted_", ""))
-  ),
-}));
 
 describe("openrouter", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
   });
 
   afterEach(() => {
@@ -228,61 +212,6 @@ describe("openrouter", () => {
         const result = await stream.next();
         expect(result.value?.error).toBe("stopped");
       });
-    });
-  });
-
-  describe("getStoredApiKeys", () => {
-    it("returns empty object when no keys stored", async () => {
-      const result = await getStoredApiKeys();
-      expect(result).toEqual({});
-    });
-
-    it("returns decrypted keys from localStorage", async () => {
-      localStorage.setItem(
-        "apiKeys",
-        JSON.stringify({ openrouterApiKey: "encrypted_test-key" })
-      );
-
-      const result = await getStoredApiKeys();
-
-      expect(result.openrouterApiKey).toBe("test-key");
-      expect(encryptionService.decryptValue).toHaveBeenCalledWith(
-        "encrypted_test-key"
-      );
-    });
-
-    it("handles invalid JSON in localStorage", async () => {
-      localStorage.setItem("apiKeys", "not-json");
-
-      const result = await getStoredApiKeys();
-
-      expect(result).toEqual({});
-    });
-  });
-
-  describe("storeApiKeys", () => {
-    it("encrypts and stores keys in localStorage", async () => {
-      await storeApiKeys({ openrouterApiKey: "my-api-key" });
-
-      const stored = localStorage.getItem("apiKeys");
-      expect(stored).toBeTruthy();
-
-      const parsed = JSON.parse(stored!);
-      expect(parsed.openrouterApiKey).toBe("encrypted_my-api-key");
-      expect(encryptionService.encryptValue).toHaveBeenCalledWith("my-api-key");
-    });
-
-    it("merges with existing keys", async () => {
-      localStorage.setItem(
-        "apiKeys",
-        JSON.stringify({ openrouterApiKey: "encrypted_old-key" })
-      );
-
-      await storeApiKeys({ openrouterApiKey: "new-key" });
-
-      const stored = localStorage.getItem("apiKeys");
-      const parsed = JSON.parse(stored!);
-      expect(parsed.openrouterApiKey).toBe("encrypted_new-key");
     });
   });
 });

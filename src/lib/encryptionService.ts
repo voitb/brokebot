@@ -1,119 +1,71 @@
+import { db } from "./db";
+
 const ALGORITHM = "AES-GCM";
 const KEY_LENGTH = 256;
 const IV_LENGTH = 12;
+const ENCRYPTION_KEY_ID = "app-data-encryption";
 
-export interface EncryptionService {
-  encryptValue: (plaintext: string) => Promise<string>;
-  decryptValue: (encryptedText: string) => Promise<string>;
-  clearCache: () => void;
+let keyPromise: Promise<CryptoKey> | null = null;
+
+async function getOrCreateKey(): Promise<CryptoKey> {
+  const record = await db.encryptionKey.get(ENCRYPTION_KEY_ID);
+  if (record) return record.key;
+
+  const key = await crypto.subtle.generateKey(
+    { name: ALGORITHM, length: KEY_LENGTH },
+    false,
+    ["encrypt", "decrypt"]
+  );
+
+  await db.encryptionKey.add({ id: ENCRYPTION_KEY_ID, key });
+  return key;
 }
 
-function getBrowserFingerprint(): string {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    ctx.textBaseline = "top";
-    ctx.font = "14px Arial";
-    ctx.fillText("Browser fingerprint", 2, 2);
+function getEncryptionKey(): Promise<CryptoKey> {
+  if (!keyPromise) {
+    keyPromise = getOrCreateKey();
   }
-
-  const fingerprint = [
-    navigator.userAgent,
-    navigator.language,
-    screen.width + "x" + screen.height,
-    new Date().getTimezoneOffset(),
-    canvas.toDataURL(),
-  ].join("|");
-
-  return fingerprint;
+  return keyPromise;
 }
 
-export function createEncryptionService(): EncryptionService {
-  let keyPromise: Promise<CryptoKey> | null = null;
+export async function encryptValue(plaintext: string): Promise<string> {
+  if (!plaintext) return "";
 
-  function getKey(): Promise<CryptoKey> {
-    if (!keyPromise) {
-      keyPromise = deriveKeyInternal();
-    }
-    return keyPromise;
-  }
+  const key = await getEncryptionKey();
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+  const encoder = new TextEncoder();
 
-  async function deriveKeyInternal(): Promise<CryptoKey> {
-    const fingerprint = getBrowserFingerprint();
-    const encoder = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(fingerprint),
-      "PBKDF2",
-      false,
-      ["deriveKey"]
-    );
+  const encrypted = await crypto.subtle.encrypt(
+    { name: ALGORITHM, iv },
+    key,
+    encoder.encode(plaintext)
+  );
 
-    const salt = encoder.encode("brokebot-local-encryption-salt");
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
 
-    return crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        salt,
-        iterations: 100000,
-        hash: "SHA-256",
-      },
-      keyMaterial,
-      { name: ALGORITHM, length: KEY_LENGTH },
-      false,
-      ["encrypt", "decrypt"]
-    );
-  }
-
-  async function encryptValue(plaintext: string): Promise<string> {
-    if (!plaintext) return "";
-
-    const key = await getKey();
-    const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encoder = new TextEncoder();
-
-    const encrypted = await crypto.subtle.encrypt(
-      { name: ALGORITHM, iv },
-      key,
-      encoder.encode(plaintext)
-    );
-
-    const combined = new Uint8Array(iv.length + encrypted.byteLength);
-    combined.set(iv);
-    combined.set(new Uint8Array(encrypted), iv.length);
-
-    return btoa(String.fromCharCode(...combined));
-  }
-
-  async function decryptValue(encryptedText: string): Promise<string> {
-    if (!encryptedText) return "";
-
-    const key = await getKey();
-    const combined = Uint8Array.from(atob(encryptedText), (c) => c.charCodeAt(0));
-
-    const iv = combined.slice(0, IV_LENGTH);
-    const data = combined.slice(IV_LENGTH);
-
-    const decrypted = await crypto.subtle.decrypt(
-      { name: ALGORITHM, iv },
-      key,
-      data
-    );
-
-    return new TextDecoder().decode(decrypted);
-  }
-
-  function clearCache(): void {
-    keyPromise = null;
-    localStorage.removeItem("apiKeys");
-  }
-
-  return { encryptValue, decryptValue, clearCache };
+  return btoa(String.fromCharCode(...combined));
 }
 
-// Default instance for convenience
-const defaultService = createEncryptionService();
+export async function decryptValue(encryptedText: string): Promise<string> {
+  if (!encryptedText) return "";
 
-export const encryptValue = defaultService.encryptValue;
-export const decryptValue = defaultService.decryptValue;
-export const clearEncryptionCache = defaultService.clearCache;
+  const key = await getEncryptionKey();
+  const combined = Uint8Array.from(atob(encryptedText), (c) => c.charCodeAt(0));
+
+  const iv = combined.slice(0, IV_LENGTH);
+  const data = combined.slice(IV_LENGTH);
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: ALGORITHM, iv },
+    key,
+    data
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
+
+export function clearEncryptionCache(): void {
+  keyPromise = null;
+}
