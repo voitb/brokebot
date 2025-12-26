@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -26,7 +25,7 @@ const mockUseConversationItem = {
   handleDeleteConfirm: vi.fn(),
   handleMove: vi.fn(),
   handleCreateFolderAndMove: vi.fn(),
-  getItemStyles: vi.fn(() => "hover:bg-muted/50"),
+  getItemStyles: vi.fn(() => "hover:bg-muted/50" as const),
 };
 
 vi.mock("../hooks/useConversationItem", () => ({
@@ -73,7 +72,7 @@ describe("ConversationItem", () => {
     vi.mocked(useConversationItem).mockReturnValue({
       ...mockUseConversationItem,
       isActive: true,
-      getItemStyles: vi.fn(() => "bg-primary/10 border-primary"),
+      getItemStyles: vi.fn(() => "bg-primary/10 border-primary text-primary font-medium" as const),
     });
 
     const conversation = createMockConversation({ title: "Active Chat" });

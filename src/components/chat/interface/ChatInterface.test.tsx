@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ChatInterface } from "./ChatInterface";
 import { ConversationsProvider } from "../../../providers/ConversationsProvider";
 import { ThemeProvider } from "../../../providers/ThemeProvider";
 import { SidebarProvider } from "../../../components/ui/sidebar";
-import { clearTestDatabase, seedConversationWithMessages } from "../../../test/db-helpers";
+import { clearTestDatabase } from "../../../test/db-helpers";
 import { createMockModelContext, createMockWebLLMContext } from "../../../test/mocks/factories";
 
 const mockModelContext = createMockModelContext();

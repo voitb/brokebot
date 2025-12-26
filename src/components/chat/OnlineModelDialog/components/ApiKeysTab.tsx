@@ -3,7 +3,7 @@ import { ApiKeySection } from "./ApiKeySection";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { OpenRouterIcon } from "../../../ui/ProviderIcons";
-import { OpenRouterClient } from "../../../../lib/openrouter";
+import { createOpenRouterClient } from "../../../../lib/openrouter";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
 import { toast } from "sonner";
 import { TestTube, Loader2 } from "lucide-react";
@@ -25,13 +25,8 @@ export const ApiKeysTab: React.FC = () => {
     setIsTestingConnection(true);
 
     try {
-      const client = new OpenRouterClient({
-        siteUrl: window.location.origin,
-        siteName: "Brokebot",
-        keys: { openrouterApiKey: config.openrouterApiKey },
-      });
-
-      const testResult = await client.testApiKey();
+      const client = createOpenRouterClient(config.openrouterApiKey);
+      const testResult = await client.testConnection();
 
       if (testResult.success) {
         toast.success("OpenRouter API key is working!");

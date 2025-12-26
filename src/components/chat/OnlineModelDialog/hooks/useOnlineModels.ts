@@ -1,10 +1,10 @@
 import { toast } from "sonner";
-import { OpenRouterClient, type OpenRouterModel } from "../../../../lib/openrouter";
+import { type OpenRouterModel } from "../../../../lib/openrouter";
 import { useUserConfig } from "@/hooks/useUserConfig";
 import { useModels } from "../../../../hooks/api/useModels";
 
 export const useOnlineModels = (
-  onModelSelect: (model: OpenRouterModel, client: OpenRouterClient | null) => void,
+  onModelSelect: (model: OpenRouterModel, apiKey: string) => void,
   onOpenChange?: (open: boolean) => void
 ) => {
   const { config } = useUserConfig();
@@ -22,13 +22,7 @@ export const useOnlineModels = (
       return;
     }
 
-    const client = new OpenRouterClient({
-      siteUrl: window.location.origin,
-      siteName: "Brokebot",
-      keys: { openrouterApiKey: config.openrouterApiKey },
-    });
-
-    onModelSelect(model, client);
+    onModelSelect(model, config.openrouterApiKey);
     onOpenChange?.(false);
   };
 

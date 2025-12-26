@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useMessageStream } from "./useMessageStream";
+import { useMessageStream, type StreamResult } from "./useMessageStream";
+
+// Helper to assert stream result is defined after act() completes
+function assertStreamResult(result: StreamResult | null): StreamResult {
+  if (!result) throw new Error("Stream result not initialized");
+  return result;
+}
 
 const mockStreamMessage = vi.fn();
 const mockInterruptGeneration = vi.fn();
@@ -57,12 +63,12 @@ describe("useMessageStream", () => {
       const messages = [{ role: "user" as const, content: "Hi" }];
       const onChunk = vi.fn();
 
-      let streamResult: { content: string; wasAborted: boolean } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(messages, onChunk);
       });
 
-      expect(streamResult?.content).toBe("Hello world");
+      expect(assertStreamResult(streamResult).content).toBe("Hello world");
       expect(result.current.isGenerating).toBe(false);
     });
 
@@ -76,7 +82,7 @@ describe("useMessageStream", () => {
       const { result } = renderHook(() => useMessageStream());
       const onChunk = vi.fn();
 
-      let streamResult: { content: string; wasAborted: boolean } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -87,7 +93,7 @@ describe("useMessageStream", () => {
       expect(onChunk).toHaveBeenCalledWith("Hello");
       expect(onChunk).toHaveBeenCalledWith("Hello world");
       expect(onChunk).toHaveBeenCalledWith("Hello world!");
-      expect(streamResult?.content).toBe("Hello world!");
+      expect(assertStreamResult(streamResult).content).toBe("Hello world!");
     });
 
     it("returns wasAborted as false for normal completion", async () => {
@@ -97,7 +103,7 @@ describe("useMessageStream", () => {
 
       const { result } = renderHook(() => useMessageStream());
 
-      let streamResult: { content: string; wasAborted: boolean } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -105,7 +111,7 @@ describe("useMessageStream", () => {
         );
       });
 
-      expect(streamResult?.wasAborted).toBe(false);
+      expect(assertStreamResult(streamResult).wasAborted).toBe(false);
     });
 
     it("handles errors in stream", async () => {
@@ -116,7 +122,7 @@ describe("useMessageStream", () => {
 
       const { result } = renderHook(() => useMessageStream());
 
-      let streamResult: { content: string; wasAborted: boolean; error?: Error } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -124,8 +130,9 @@ describe("useMessageStream", () => {
         );
       });
 
-      expect(streamResult?.error).toBeDefined();
-      expect(streamResult?.error?.message).toBe("Network error");
+      const result_ = assertStreamResult(streamResult);
+      expect(result_.error).toBeDefined();
+      expect(result_.error?.message).toBe("Network error");
     });
 
     it("handles stopped error gracefully", async () => {
@@ -136,7 +143,7 @@ describe("useMessageStream", () => {
 
       const { result } = renderHook(() => useMessageStream());
 
-      let streamResult: { content: string; wasAborted: boolean; error?: Error } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -144,8 +151,9 @@ describe("useMessageStream", () => {
         );
       });
 
-      expect(streamResult?.error).toBeUndefined();
-      expect(streamResult?.content).toBe("Partial");
+      const result_ = assertStreamResult(streamResult);
+      expect(result_.error).toBeUndefined();
+      expect(result_.content).toBe("Partial");
     });
 
     it("handles thrown errors", async () => {
@@ -156,7 +164,7 @@ describe("useMessageStream", () => {
 
       const { result } = renderHook(() => useMessageStream());
 
-      let streamResult: { content: string; wasAborted: boolean; error?: Error } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -164,7 +172,7 @@ describe("useMessageStream", () => {
         );
       });
 
-      expect(streamResult?.error?.message).toBe("Unexpected error");
+      expect(assertStreamResult(streamResult).error?.message).toBe("Unexpected error");
       expect(result.current.isGenerating).toBe(false);
     });
   });
@@ -201,7 +209,7 @@ describe("useMessageStream", () => {
       const { result } = renderHook(() => useMessageStream());
       const onChunk = vi.fn();
 
-      let streamResult: { content: string; wasAborted: boolean; error?: Error } | null = null;
+      let streamResult: StreamResult | null = null;
       await act(async () => {
         streamResult = await result.current.streamResponse(
           [{ role: "user", content: "Hi" }],
@@ -209,8 +217,9 @@ describe("useMessageStream", () => {
         );
       });
 
-      expect(streamResult?.content).toBe("Partial");
-      expect(streamResult?.error).toBeUndefined();
+      const result_ = assertStreamResult(streamResult);
+      expect(result_.content).toBe("Partial");
+      expect(result_.error).toBeUndefined();
     });
 
     it("stopGeneration can be called at any time", () => {

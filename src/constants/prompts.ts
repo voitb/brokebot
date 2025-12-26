@@ -1,8 +1,8 @@
 /**
- * AI Rules and Instructions for brokebot Application
- * 
- * These rules guide the behavior and responses of AI models within the brokebot application,
- * ensuring consistency, clarity, and adaptability across various user interactions.
+ * AI Prompts and Instructions for Brokebot Application
+ *
+ * These prompts guide the behavior and responses of AI models,
+ * ensuring consistency, clarity, and adaptability across user interactions.
  */
 
 export const AI_SYSTEM_RULES = `

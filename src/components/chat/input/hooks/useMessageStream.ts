@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useModel } from "../../../../providers/ModelProvider";
 import type { OpenRouterMessage } from "../../../../lib/openrouter";
 
-interface StreamResult {
+export interface StreamResult {
   content: string;
   wasAborted: boolean;
   error?: Error;

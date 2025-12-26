@@ -1,7 +1,27 @@
-export const AVAILABLE_MODELS = [
+import { prebuiltAppConfig } from "@mlc-ai/web-llm";
+
+export interface ModelInfo {
+  id: string;
+  name: string;
+  size: string;
+  description: string;
+  ramRequirement: string;
+  downloadSize: string;
+  performance: string;
+  category: "light" | "medium" | "large" | "heavy" | "extreme";
+  modelType: "LLM" | "VLM" | "embedding";
+  supportsImages?: boolean;
+  supportsFunctions?: boolean;
+  specialization?: string;
+  warning?: string;
+  vramRequired?: number;
+}
+
+type ModelMetadata = Omit<ModelInfo, "id" | "vramRequired">;
+
+const MODEL_METADATA: Record<string, ModelMetadata> = {
   // Ultra Light models (0.5-1GB RAM)
-  {
-    id: "SmolLM2-135M-Instruct-q0f16-MLC",
+  "SmolLM2-135M-Instruct-q0f16-MLC": {
     name: "SmolLM2-135M-Instruct",
     size: "135M",
     description: "Ultra-tiny model for basic tasks",
@@ -11,8 +31,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
+  "SmolLM2-360M-Instruct-q4f16_1-MLC": {
     name: "SmolLM2-360M-Instruct",
     size: "360M",
     description: "Compact model for simple conversations",
@@ -22,8 +41,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-0.5B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-0.5B-Instruct",
     size: "0.5B",
     description: "Alibaba's ultra-lightweight model",
@@ -33,8 +51,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "Qwen3-0.6B-q4f16_1-MLC",
+  "Qwen3-0.6B-q4f16_1-MLC": {
     name: "Qwen3-0.6B",
     size: "0.6B",
     description: "Latest Qwen ultra-light model",
@@ -44,8 +61,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC",
+  "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC": {
     name: "TinyLlama-1.1B-Chat",
     size: "1.1B",
     description: "Tiny Llama model for basic chat",
@@ -57,8 +73,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Light models (1-3GB RAM)
-  {
-    id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-1.5B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-1.5B-Instruct",
     size: "1.5B",
     description: "Alibaba's efficient model for general tasks",
@@ -68,8 +83,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "Qwen3-1.7B-q4f16_1-MLC",
+  "Qwen3-1.7B-q4f16_1-MLC": {
     name: "Qwen3-1.7B",
     size: "1.7B",
     description: "Latest Qwen light model",
@@ -79,8 +93,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+  "SmolLM2-1.7B-Instruct-q4f16_1-MLC": {
     name: "SmolLM2-1.7B-Instruct",
     size: "1.7B",
     description: "HuggingFace's compact model",
@@ -90,8 +103,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "stablelm-2-zephyr-1_6b-q4f16_1-MLC",
+  "stablelm-2-zephyr-1_6b-q4f16_1-MLC": {
     name: "StableLM-2-Zephyr-1.6B",
     size: "1.6B",
     description: "Stability AI's efficient chat model",
@@ -101,8 +113,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "gemma-2-2b-it-q4f16_1-MLC",
+  "gemma-2-2b-it-q4f16_1-MLC": {
     name: "Gemma-2-2B-it",
     size: "2B",
     description: "Google's latest lightweight model",
@@ -112,8 +123,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "LLM",
   },
-  {
-    id: "gemma-2b-it-q4f16_1-MLC",
+  "gemma-2b-it-q4f16_1-MLC": {
     name: "Gemma-2B-it (Original)",
     size: "2B",
     description: "Google's original lightweight model",
@@ -125,8 +135,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Medium models (3-6GB RAM)
-  {
-    id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+  "Llama-3.2-3B-Instruct-q4f16_1-MLC": {
     name: "Llama-3.2-3B-Instruct",
     size: "3B",
     description: "Meta's latest compact Llama model",
@@ -136,8 +145,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "Hermes-3-Llama-3.2-3B-q4f16_1-MLC",
+  "Hermes-3-Llama-3.2-3B-q4f16_1-MLC": {
     name: "Hermes-3-Llama-3.2-3B",
     size: "3B",
     description: "Enhanced Llama-3.2 with improved instruction following",
@@ -147,8 +155,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-3B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-3B-Instruct",
     size: "3B",
     description: "Alibaba's balanced model",
@@ -158,8 +165,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "Phi-3-mini-4k-instruct-q4f16_1-MLC",
+  "Phi-3-mini-4k-instruct-q4f16_1-MLC": {
     name: "Phi-3-mini-4k-instruct",
     size: "3.8B",
     description: "Microsoft's efficient model for reasoning",
@@ -169,8 +175,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
+  "Phi-3.5-mini-instruct-q4f16_1-MLC": {
     name: "Phi-3.5-mini-instruct",
     size: "3.8B",
     description: "Microsoft's latest Phi model with improved capabilities",
@@ -180,8 +185,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "Qwen3-4B-q4f16_1-MLC",
+  "Qwen3-4B-q4f16_1-MLC": {
     name: "Qwen3-4B",
     size: "4B",
     description: "Latest Qwen medium model",
@@ -191,8 +195,7 @@ export const AVAILABLE_MODELS = [
     category: "medium",
     modelType: "LLM",
   },
-  {
-    id: "RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC",
+  "RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC": {
     name: "RedPajama-INCITE-Chat-3B",
     size: "3B",
     description: "Together's open-source chat model",
@@ -204,8 +207,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Vision Language Models (VLM)
-  {
-    id: "Phi-3.5-vision-instruct-q4f16_1-MLC",
+  "Phi-3.5-vision-instruct-q4f16_1-MLC": {
     name: "Phi-3.5-Vision-Instruct",
     size: "4.2B",
     description: "Microsoft's vision-language model - can analyze images",
@@ -218,8 +220,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Large models (6-10GB RAM)
-  {
-    id: "Mistral-7B-Instruct-v0.3-q4f16_1-MLC",
+  "Mistral-7B-Instruct-v0.3-q4f16_1-MLC": {
     name: "Mistral-7B-Instruct-v0.3",
     size: "7B",
     description: "Mistral AI's high-quality model",
@@ -229,8 +230,7 @@ export const AVAILABLE_MODELS = [
     category: "large",
     modelType: "LLM",
   },
-  {
-    id: "Qwen2.5-7B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-7B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-7B-Instruct",
     size: "7B",
     description: "Alibaba's advanced model with strong reasoning",
@@ -240,8 +240,7 @@ export const AVAILABLE_MODELS = [
     category: "large",
     modelType: "LLM",
   },
-  {
-    id: "Llama-3-8B-Instruct-q4f16_1-MLC",
+  "Llama-3-8B-Instruct-q4f16_1-MLC": {
     name: "Llama-3-8B-Instruct",
     size: "8B",
     description: "Meta's flagship model",
@@ -251,8 +250,7 @@ export const AVAILABLE_MODELS = [
     category: "large",
     modelType: "LLM",
   },
-  {
-    id: "Qwen3-8B-q4f16_1-MLC",
+  "Qwen3-8B-q4f16_1-MLC": {
     name: "Qwen3-8B",
     size: "8B",
     description: "Latest Qwen large model",
@@ -262,8 +260,7 @@ export const AVAILABLE_MODELS = [
     category: "large",
     modelType: "LLM",
   },
-  {
-    id: "gemma-2-9b-it-q4f16_1-MLC",
+  "gemma-2-9b-it-q4f16_1-MLC": {
     name: "Gemma-2-9B-it",
     size: "9B",
     description: "Google's large model",
@@ -275,8 +272,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Heavy models (8-16GB RAM)
-  {
-    id: "Llama-3.1-8B-Instruct-q4f32_1-MLC",
+  "Llama-3.1-8B-Instruct-q4f32_1-MLC": {
     name: "Llama-3.1-8B-Instruct",
     size: "8B",
     description: "Meta's latest flagship model with 128k context",
@@ -286,8 +282,7 @@ export const AVAILABLE_MODELS = [
     category: "heavy",
     modelType: "LLM",
   },
-  {
-    id: "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+  "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC": {
     name: "Hermes-2-Pro-Llama-3-8B",
     size: "8B",
     description: "Enhanced Llama-3 with function calling support",
@@ -298,8 +293,7 @@ export const AVAILABLE_MODELS = [
     modelType: "LLM",
     supportsFunctions: true,
   },
-  {
-    id: "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+  "Hermes-3-Llama-3.1-8B-q4f16_1-MLC": {
     name: "Hermes-3-Llama-3.1-8B",
     size: "8B",
     description: "Latest Hermes with advanced capabilities",
@@ -310,8 +304,7 @@ export const AVAILABLE_MODELS = [
     modelType: "LLM",
     supportsFunctions: true,
   },
-  {
-    id: "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
+  "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC": {
     name: "DeepSeek-R1-Distill-Qwen-7B",
     size: "7B",
     description: "DeepSeek's reasoning-focused model",
@@ -321,8 +314,7 @@ export const AVAILABLE_MODELS = [
     category: "large",
     modelType: "LLM",
   },
-  {
-    id: "DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC",
+  "DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC": {
     name: "DeepSeek-R1-Distill-Llama-8B",
     size: "8B",
     description: "DeepSeek's advanced reasoning model",
@@ -334,8 +326,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Specialized models
-  {
-    id: "Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-Coder-7B-Instruct",
     size: "7B",
     description: "Specialized for coding tasks",
@@ -346,8 +337,7 @@ export const AVAILABLE_MODELS = [
     modelType: "LLM",
     specialization: "coding",
   },
-  {
-    id: "Qwen2.5-Math-7B-Instruct-q4f16_1-MLC",
+  "Qwen2.5-Math-7B-Instruct-q4f16_1-MLC": {
     name: "Qwen2.5-Math-7B-Instruct",
     size: "7B",
     description: "Specialized for mathematical reasoning",
@@ -358,8 +348,7 @@ export const AVAILABLE_MODELS = [
     modelType: "LLM",
     specialization: "math",
   },
-  {
-    id: "WizardMath-7B-V1.1-q4f16_1-MLC",
+  "WizardMath-7B-V1.1-q4f16_1-MLC": {
     name: "WizardMath-7B-V1.1",
     size: "7B",
     description: "Mathematical problem solving specialist",
@@ -372,8 +361,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Embedding models
-  {
-    id: "snowflake-arctic-embed-m-q0f32-MLC-b4",
+  "snowflake-arctic-embed-m-q0f32-MLC-b4": {
     name: "Snowflake Arctic Embed M",
     size: "110M",
     description: "Text embedding model for semantic search",
@@ -383,8 +371,7 @@ export const AVAILABLE_MODELS = [
     category: "light",
     modelType: "embedding",
   },
-  {
-    id: "snowflake-arctic-embed-s-q0f32-MLC-b4",
+  "snowflake-arctic-embed-s-q0f32-MLC-b4": {
     name: "Snowflake Arctic Embed S",
     size: "33M",
     description: "Small text embedding model",
@@ -396,8 +383,7 @@ export const AVAILABLE_MODELS = [
   },
 
   // Extreme models (16GB+ RAM)
-  {
-    id: "Llama-3.1-70B-Instruct-q3f16_1-MLC",
+  "Llama-3.1-70B-Instruct-q3f16_1-MLC": {
     name: "Llama-3.1-70B-Instruct",
     size: "70B",
     description: "Meta's largest model - requires significant resources",
@@ -408,11 +394,16 @@ export const AVAILABLE_MODELS = [
     modelType: "LLM",
     warning: "Requires high-end hardware",
   },
-] as const;
-
-export type ModelInfo = (typeof AVAILABLE_MODELS)[number] & {
-  supportsImages?: boolean;
-  supportsFunctions?: boolean;
-  specialization?: string;
-  warning?: string;
 };
+
+export function createModelCatalog(): ModelInfo[] {
+  const webllmModels = prebuiltAppConfig.model_list;
+
+  return webllmModels
+    .filter((m) => MODEL_METADATA[m.model_id])
+    .map((m) => ({
+      id: m.model_id,
+      vramRequired: m.vram_required_MB,
+      ...MODEL_METADATA[m.model_id],
+    }));
+}
