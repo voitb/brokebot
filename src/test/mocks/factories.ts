@@ -110,6 +110,7 @@ export function createMockModelContext() {
     },
     isOnlineMode: true,
     isModelLoading: false,
+    isModelSwitching: false,
     modelStatus: "Ready",
     availableOnlineModels: [],
     isLoadingAvailableModels: false,

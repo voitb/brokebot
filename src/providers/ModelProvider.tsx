@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useTransition,
   type ReactNode,
   useEffect,
 } from "react";
@@ -33,6 +34,7 @@ interface ModelProviderState {
   currentModel: UnifiedModel | null;
   isOnlineMode: boolean;
   isModelLoading: boolean;
+  isModelSwitching: boolean;
   modelStatus: string;
   availableOnlineModels: OpenRouterModel[];
   isLoadingAvailableModels: boolean;
@@ -57,14 +59,15 @@ interface ModelProviderProps {
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const webLLM = useWebLLM();
   const { config } = useUserConfig();
-  const { 
-    models: availableOnlineModels, 
-    isLoading: isLoadingAvailableModels, 
-    error: availableModelsError 
+  const {
+    models: availableOnlineModels,
+    isLoading: isLoadingAvailableModels,
+    error: availableModelsError
   } = useModels();
   const [currentModel, setCurrentModelState] = useState<UnifiedModel | null>(
     null
   );
+  const [isModelSwitching, startTransition] = useTransition();
 
   useEffect(() => {
     // Initialize model from localStorage on mount
@@ -110,13 +113,14 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
 
   const setCurrentModel = useCallback(
     (model: UnifiedModel) => {
-      setCurrentModelState(model);
-      localStorage.setItem("unifiedModel", JSON.stringify(model));
+      startTransition(() => {
+        setCurrentModelState(model);
+        localStorage.setItem("unifiedModel", JSON.stringify(model));
 
-      // If switching to local model, update WebLLM
-      if (model.type === "local" && model.localModel) {
-        webLLM.setSelectedModel(model.localModel);
-      }
+        if (model.type === "local" && model.localModel) {
+          webLLM.setSelectedModel(model.localModel);
+        }
+      });
     },
     [webLLM]
   );
@@ -259,6 +263,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     currentModel,
     isOnlineMode: currentModel?.type === "online",
     isModelLoading,
+    isModelSwitching,
     modelStatus,
     availableOnlineModels,
     isLoadingAvailableModels,
