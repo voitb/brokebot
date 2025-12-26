@@ -1,12 +1,12 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SpeechRecognitionService } from "../../../../lib/speech-recognition";
 
 export type TranscriberStatus =
   | "uninitialized"
-  | "loading" // Model is loading
-  | "ready"     // Ready to record
+  | "loading"
+  | "ready"
   | "recording"
-  | "processing"// Transcribing audio
+  | "processing"
   | "error";
 
 export interface UseSpeechToTextResult {
@@ -17,7 +17,6 @@ export interface UseSpeechToTextResult {
   error: string | null;
 }
 
-/** Manages speech-to-text recording and transcription state */
 export const useSpeechToText = (
   onTranscriptReceived: (transcript: string) => void
 ): UseSpeechToTextResult => {
@@ -29,60 +28,68 @@ export const useSpeechToText = (
 
   const isModelLoading = status === "loading";
 
-  // Pre-load the model when the hook is first used.
   useEffect(() => {
     if (status === "uninitialized") {
       setStatus("loading");
-      SpeechRecognitionService.getInstance().then(() => {
-        setStatus("ready");
-      }).catch(() => {
-        setError("Failed to load speech recognition model.");
-        setStatus("error");
-      });
+      SpeechRecognitionService.getInstance()
+        .then(() => setStatus("ready"))
+        .catch(() => {
+          setError("Failed to load speech recognition model.");
+          setStatus("error");
+        });
     }
   }, [status]);
 
-  const handleRecordingStop = useCallback(async () => {
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  const handleRecordingStop = async () => {
     if (audioChunksRef.current.length === 0) {
-        setStatus("ready");
-        return;
+      setStatus("ready");
+      return;
     }
-    
+
     setStatus("processing");
     const audioBlob = new Blob(audioChunksRef.current, {
-        type: mediaRecorderRef.current?.mimeType,
+      type: mediaRecorderRef.current?.mimeType,
     });
     const audioUrl = URL.createObjectURL(audioBlob);
-    audioChunksRef.current = []; // Clear chunks for next recording
+    audioChunksRef.current = [];
 
     try {
-        const recognizer = await SpeechRecognitionService.getInstance();
-        const result = await recognizer(audioUrl, {
-            chunk_length_s: 30,
-            stride_length_s: 5,
-            task: "transcribe",
-        });
+      const recognizer = await SpeechRecognitionService.getInstance();
+      const result = await recognizer(audioUrl, {
+        chunk_length_s: 30,
+        stride_length_s: 5,
+        task: "transcribe",
+      });
 
-        const newTranscript = (result as { text?: string })?.text?.trim() ?? "";
-        if (newTranscript) {
-            onTranscriptReceived(newTranscript);
-        }
+      const newTranscript = (result as { text?: string })?.text?.trim() ?? "";
+      if (newTranscript) {
+        onTranscriptReceived(newTranscript);
+      }
     } catch {
-        setError("An error occurred during transcription.");
+      setError("An error occurred during transcription.");
     } finally {
-        URL.revokeObjectURL(audioUrl);
-        setStatus("ready");
+      URL.revokeObjectURL(audioUrl);
+      setStatus("ready");
     }
-  }, [onTranscriptReceived]);
+  };
 
-  const startRecording = useCallback(async () => {
+  const startRecording = async () => {
     if (status !== "ready") {
       if (status === "uninitialized" || status === "loading") {
-          setError("Model is still loading, please wait.");
+        setError("Model is still loading, please wait.");
       }
       return;
     }
-    
+
     setError(null);
 
     try {
@@ -98,24 +105,22 @@ export const useSpeechToText = (
       };
 
       recorder.onstop = handleRecordingStop;
-      
+
       recorder.start();
       setStatus("recording");
     } catch {
       setError("Could not access microphone. Please check permissions.");
       setStatus("error");
     }
-  }, [status, handleRecordingStop]);
+  };
 
-  const stopRecording = useCallback(() => {
+  const stopRecording = () => {
     if (mediaRecorderRef.current && status === "recording") {
-      mediaRecorderRef.current.stop(); // This will trigger onstop
-      
-      // Manually stop the stream tracks to turn off the mic indicator immediately
+      mediaRecorderRef.current.stop();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-  }, [status]);
+  };
 
   return { status, startRecording, stopRecording, isModelLoading, error };
-}; 
+};

@@ -10,10 +10,7 @@ interface FileUploadProps {
   onFilesChanged?: (files: AttachedFile[]) => void;
 }
 
-/**
- * File upload button component
- */
-export const FileUpload: React.FC<FileUploadProps> = React.memo(({
+export const FileUpload: React.FC<FileUploadProps> = ({
   supportsImages,
   selectedModelName,
   disabled = false,
@@ -66,17 +63,14 @@ export const FileUpload: React.FC<FileUploadProps> = React.memo(({
       </Button>
     </>
   );
-});
+};
 
-/**
- * File preview item component
- */
 interface FilePreviewItemProps {
   file: AttachedFile;
   onRemove: (fileId: string) => void;
 }
 
-const FilePreviewItem: React.FC<FilePreviewItemProps> = React.memo(({
+const FilePreviewItem: React.FC<FilePreviewItemProps> = ({
   file,
   onRemove,
 }) => (
@@ -109,17 +103,14 @@ const FilePreviewItem: React.FC<FilePreviewItemProps> = React.memo(({
       <X className="h-3 w-3" />
     </Button>
   </div>
-));
+);
 
-/**
- * Preview component for attached files
- */
 interface AttachedFilesPreviewProps {
   attachedFiles: AttachedFile[];
   onFileRemoved: (fileId: string) => void;
 }
 
-export const AttachedFilesPreview: React.FC<AttachedFilesPreviewProps> = React.memo(({
+export const AttachedFilesPreview: React.FC<AttachedFilesPreviewProps> = ({
   attachedFiles,
   onFileRemoved,
 }) => {
@@ -136,4 +127,4 @@ export const AttachedFilesPreview: React.FC<AttachedFilesPreviewProps> = React.m
       ))}
     </div>
   );
-});
+};
