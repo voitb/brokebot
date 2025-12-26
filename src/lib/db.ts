@@ -65,7 +65,7 @@ type BrokebotDatabase = Dexie & {
 
 export function createDatabase(): BrokebotDatabase {
   // Keep "LocalGptDB" name for backward compatibility with existing user data
-  const db = new Dexie("LocalGptDB") as BrokebotDatabase;
+  const db = new Dexie("BrokenbotDB") as BrokebotDatabase;
 
   // Version 2: Initial stable schema
   db.version(2).stores({

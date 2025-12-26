@@ -29,11 +29,16 @@ function getBrowserFingerprint(): string {
 }
 
 export function createEncryptionService(): EncryptionService {
-  let cachedKey: CryptoKey | null = null;
+  let keyPromise: Promise<CryptoKey> | null = null;
 
-  async function deriveKey(): Promise<CryptoKey> {
-    if (cachedKey) return cachedKey;
+  function getKey(): Promise<CryptoKey> {
+    if (!keyPromise) {
+      keyPromise = deriveKeyInternal();
+    }
+    return keyPromise;
+  }
 
+  async function deriveKeyInternal(): Promise<CryptoKey> {
     const fingerprint = getBrowserFingerprint();
     const encoder = new TextEncoder();
     const keyMaterial = await crypto.subtle.importKey(
@@ -46,7 +51,7 @@ export function createEncryptionService(): EncryptionService {
 
     const salt = encoder.encode("brokebot-local-encryption-salt");
 
-    cachedKey = await crypto.subtle.deriveKey(
+    return crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
         salt,
@@ -58,14 +63,12 @@ export function createEncryptionService(): EncryptionService {
       false,
       ["encrypt", "decrypt"]
     );
-
-    return cachedKey;
   }
 
   async function encryptValue(plaintext: string): Promise<string> {
     if (!plaintext) return "";
 
-    const key = await deriveKey();
+    const key = await getKey();
     const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
     const encoder = new TextEncoder();
 
@@ -85,7 +88,7 @@ export function createEncryptionService(): EncryptionService {
   async function decryptValue(encryptedText: string): Promise<string> {
     if (!encryptedText) return "";
 
-    const key = await deriveKey();
+    const key = await getKey();
     const combined = Uint8Array.from(atob(encryptedText), (c) => c.charCodeAt(0));
 
     const iv = combined.slice(0, IV_LENGTH);
@@ -101,7 +104,7 @@ export function createEncryptionService(): EncryptionService {
   }
 
   function clearCache(): void {
-    cachedKey = null;
+    keyPromise = null;
     localStorage.removeItem("apiKeys");
   }
 
