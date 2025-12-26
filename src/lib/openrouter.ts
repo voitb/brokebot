@@ -1,9 +1,3 @@
-import { encryptValue, decryptValue } from "./encryptionService";
-
-export interface ApiKeyConfig {
-  openrouterApiKey?: string;
-}
-
 export interface OpenRouterMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -237,52 +231,4 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
   }
 
   return { streamCompletion, sendMessage, testConnection };
-}
-
-export async function getStoredApiKeys(): Promise<ApiKeyConfig> {
-  if (typeof window === "undefined") return {};
-
-  try {
-    const encryptedKeys = localStorage.getItem("apiKeys");
-    if (!encryptedKeys) return {};
-
-    const parsedKeys = JSON.parse(encryptedKeys) as Record<string, string>;
-    const decryptedKeys: ApiKeyConfig = {};
-
-    for (const [provider, encryptedKey] of Object.entries(parsedKeys)) {
-      if (encryptedKey && typeof encryptedKey === "string") {
-        try {
-          const decrypted = await decryptValue(encryptedKey);
-          if (provider === "openrouterApiKey") {
-            decryptedKeys.openrouterApiKey = decrypted;
-          }
-        } catch {
-          console.warn(`Failed to decrypt key for ${provider}`);
-        }
-      }
-    }
-
-    return decryptedKeys;
-  } catch {
-    console.warn("Failed to parse stored API keys");
-    return {};
-  }
-}
-
-export async function storeApiKeys(
-  keys: Partial<ApiKeyConfig>
-): Promise<void> {
-  if (typeof window === "undefined") return;
-
-  const currentKeys = await getStoredApiKeys();
-  const newKeys = { ...currentKeys, ...keys };
-  const encryptedKeys: Record<string, string> = {};
-
-  for (const [provider, key] of Object.entries(newKeys)) {
-    if (key && typeof key === "string") {
-      encryptedKeys[provider] = await encryptValue(key);
-    }
-  }
-
-  localStorage.setItem("apiKeys", JSON.stringify(encryptedKeys));
 }
