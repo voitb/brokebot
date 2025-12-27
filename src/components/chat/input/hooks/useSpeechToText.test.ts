@@ -49,13 +49,13 @@ describe("useSpeechToText", () => {
     vi.clearAllMocks();
 
     // Mock URL
-    originalURL = global.URL;
-    global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
-    global.URL.revokeObjectURL = vi.fn();
+    originalURL = globalThis.URL;
+    globalThis.URL.createObjectURL = vi.fn(() => "blob:mock-url");
+    globalThis.URL.revokeObjectURL = vi.fn();
 
     // Mock MediaRecorder
-    originalMediaRecorder = global.MediaRecorder;
-    global.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
+    originalMediaRecorder = globalThis.MediaRecorder;
+    globalThis.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
 
     // Mock navigator.mediaDevices
     originalMediaDevices = navigator.mediaDevices;
@@ -73,8 +73,8 @@ describe("useSpeechToText", () => {
   });
 
   afterEach(() => {
-    global.MediaRecorder = originalMediaRecorder;
-    global.URL = originalURL;
+    globalThis.MediaRecorder = originalMediaRecorder;
+    globalThis.URL = originalURL;
     Object.defineProperty(navigator, "mediaDevices", {
       value: originalMediaDevices,
       configurable: true,
