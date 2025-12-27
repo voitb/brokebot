@@ -54,7 +54,7 @@ export function buildPrompt(
   isOnline: boolean
 ): OpenRouterMessage[] {
   const filteredMessages = messages.filter(
-    (msg) => !msg.content.startsWith("⚠️")
+    (msg) => !msg.content.startsWith("Error ")
   );
 
   if (isOnline) {

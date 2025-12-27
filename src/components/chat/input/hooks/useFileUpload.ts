@@ -55,12 +55,9 @@ export const useFileUpload = ({
       file.name.endsWith(".md")
     ) {
       type = "text";
-      
-      // Read text content for AI processing
+
       try {
         content = await readFileContent(file);
-        
-        // Save document to IndexedDB
         const savedDocument = await uploadDocument(file);
         if (savedDocument) {
           document = savedDocument;

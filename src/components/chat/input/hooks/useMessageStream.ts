@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useModel } from "../../../../providers/ModelProvider";
 import type { OpenRouterMessage } from "../../../../lib/openrouter";
 
@@ -23,6 +23,12 @@ export function useMessageStream(): UseMessageStreamReturn {
   const wasAbortedRef = useRef(false);
 
   const { streamMessage, interruptGeneration, resetChat } = useModel();
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const stopGeneration = () => {
     if (abortControllerRef.current) {

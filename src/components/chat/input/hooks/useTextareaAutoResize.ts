@@ -29,5 +29,5 @@ export const useTextareaAutoResize = ({
         textarea.style.overflowY = "auto";
       }
     }
-  }, [message, minHeight, maxHeight]);
+  }, [message, minHeight, maxHeight, textareaRef]);
 }; 
