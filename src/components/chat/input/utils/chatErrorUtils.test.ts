@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { parseApiError, showErrorToast } from "./useChatErrors";
+import { parseApiError, showErrorToast } from "./chatErrorUtils";
 import { toast } from "sonner";
 
 vi.mock("sonner", () => ({
@@ -8,7 +8,7 @@ vi.mock("sonner", () => ({
   },
 }));
 
-describe("useChatErrors", () => {
+describe("chatErrorUtils", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
