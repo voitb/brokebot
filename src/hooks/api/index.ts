@@ -1,1 +1,1 @@
-export * from './useModels'; 
+export { useModels } from './useModels'; 

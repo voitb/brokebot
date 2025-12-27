@@ -8,7 +8,7 @@ import {
   seedConversation,
   seedFolder,
 } from "../../../../test/db-helpers";
-import { mockNavigate } from "../../../../test/mocks/modules";
+// mockNavigate is available via global mock in setup.ts
 
 // react-router-dom is globally mocked in setup.ts
 

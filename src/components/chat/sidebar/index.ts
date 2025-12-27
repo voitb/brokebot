@@ -1,1 +1,1 @@
-export * from './ConversationList'; 
+export { ConversationList } from './ConversationList'; 

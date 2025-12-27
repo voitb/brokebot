@@ -1,2 +1,2 @@
-export * from './ModelCategory';
-export * from './ModelItem'; 
+export { ModelCategory } from './ModelCategory';
+export { ModelItem } from './ModelItem'; 

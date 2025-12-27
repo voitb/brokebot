@@ -1,1 +1,1 @@
-export * from "./LocalModelList"; 
+export { LocalModelList } from "./LocalModelList"; 

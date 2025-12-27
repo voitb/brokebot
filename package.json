@@ -3,6 +3,7 @@
   "private": true,
   "version": "4.0.3",
   "type": "module",
+  "sideEffects": false,
   "author": "voitz <v017dev@gmail.com>",
   "scripts": {
     "dev": "vite",

@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import type { CopyToClipboardResult } from "../types";
+
+interface CopyToClipboardResult {
+  copied: boolean;
+  copyToClipboard: (text: string) => Promise<void>;
+}
 
 /**
  * Custom hook for copying text to clipboard with feedback
