@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useLayoutShortcuts } from "./useLayoutShortcuts";
+import { mockNavigate } from "../../../test/mocks/modules";
 
 const mockSetOpen = vi.fn();
 const mockHandleNewChat = vi.fn();
 const mockTogglePinConversation = vi.fn();
-const mockNavigate = vi.fn();
 
 let mockOpen = false;
 let mockConversationId: string | undefined = undefined;
@@ -34,11 +34,16 @@ vi.mock("@/hooks/useConversationId", () => ({
   useConversationId: () => mockConversationId,
 }));
 
+// This file needs custom useSearchParams mock, so we override the global mock
 let mockSearchParams = new URLSearchParams();
-vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
-  useSearchParams: () => [mockSearchParams],
-}));
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useSearchParams: () => [mockSearchParams],
+  };
+});
 
 vi.mock("@/hooks/useKeyboardShortcuts", () => ({
   useKeyboardShortcuts: (shortcuts: Record<string, () => void>) => {
@@ -46,11 +51,7 @@ vi.mock("@/hooks/useKeyboardShortcuts", () => ({
   },
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    success: vi.fn(),
-  },
-}));
+// sonner is globally mocked in setup.ts
 
 describe("useLayoutShortcuts", () => {
   beforeEach(() => {

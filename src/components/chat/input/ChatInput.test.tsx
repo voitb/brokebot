@@ -46,6 +46,11 @@ vi.mock("./hooks", () => ({
     handleDragEnter: vi.fn(),
   })),
   useFileUpload: vi.fn(() => ({
+    attachedFiles: [],
+    handleFilesSelected: vi.fn(),
+    removeFile: vi.fn(),
+    clearFiles: vi.fn(),
+    replaceFiles: vi.fn(),
     processFile: vi.fn(),
   })),
   useSpeechToText: vi.fn(() => ({

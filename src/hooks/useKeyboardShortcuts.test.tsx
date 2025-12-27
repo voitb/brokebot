@@ -3,17 +3,11 @@ import { renderHook, act } from "@testing-library/react";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
+import { mockNavigate } from "../test/mocks/modules";
 
-const mockNavigate = vi.fn();
 let mockConversationId: string | null = null;
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+// react-router-dom is globally mocked in setup.ts
 
 vi.mock("./useConversationId", () => ({
   useConversationId: () => mockConversationId,

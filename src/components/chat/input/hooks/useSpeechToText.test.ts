@@ -1,43 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSpeechToText } from "./useSpeechToText";
+import { MockMediaRecorder, MockMediaStream } from "../../../../test/mocks/modules";
 
 const mockGetTranscriber = vi.fn();
 
 vi.mock("../../../../lib/transcriber", () => ({
   getTranscriber: () => mockGetTranscriber(),
 }));
-
-// Mock MediaRecorder
-class MockMediaRecorder {
-  state = "inactive";
-  ondataavailable: ((event: { data: Blob }) => void) | null = null;
-  onstop: (() => void) | null = null;
-  mimeType = "audio/webm";
-
-  start() {
-    this.state = "recording";
-  }
-
-  stop() {
-    this.state = "inactive";
-    if (this.ondataavailable) {
-      this.ondataavailable({ data: new Blob(["audio"], { type: "audio/webm" }) });
-    }
-    if (this.onstop) {
-      this.onstop();
-    }
-  }
-}
-
-// Mock MediaStream
-class MockMediaStream {
-  private tracks: Array<{ stop: () => void }> = [{ stop: vi.fn() }];
-
-  getTracks() {
-    return this.tracks;
-  }
-}
 
 describe("useSpeechToText", () => {
   const mockOnTranscriptReceived = vi.fn();
@@ -371,4 +341,6 @@ describe("useSpeechToText", () => {
       expect(mockOnTranscriptReceived).not.toHaveBeenCalled();
     });
   });
+
+  // Toast notifications are now handled by ChatInput component, not the hook
 });

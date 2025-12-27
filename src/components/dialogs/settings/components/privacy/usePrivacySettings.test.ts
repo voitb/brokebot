@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { usePrivacySettings } from "./usePrivacySettings";
-import { toast } from "sonner";
+import { mockNavigate, mockToast } from "../../../../../test/mocks/modules";
 
-const mockNavigate = vi.fn();
 const mockResetConfig = vi.fn();
 const mockClearAllData = vi.fn();
 const mockExportConversations = vi.fn();
@@ -11,9 +10,8 @@ const mockImportConversations = vi.fn();
 
 let mockConfig = { theme: "dark" };
 
-vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
-}));
+// react-router-dom is globally mocked in setup.ts
+// sonner is globally mocked in setup.ts
 
 vi.mock("../../../../../hooks/useUserConfig", () => ({
   useUserConfig: () => ({
@@ -23,13 +21,6 @@ vi.mock("../../../../../hooks/useUserConfig", () => ({
     exportConversations: mockExportConversations,
     importConversations: mockImportConversations,
   }),
-}));
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
 }));
 
 describe("usePrivacySettings", () => {
@@ -89,7 +80,7 @@ describe("usePrivacySettings", () => {
       });
 
       expect(mockClearAllData).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith("All data cleared successfully");
+      expect(mockToast.success).toHaveBeenCalledWith("All data cleared successfully");
       expect(result.current.showClearDataDialog).toBe(false);
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
@@ -108,7 +99,7 @@ describe("usePrivacySettings", () => {
       });
 
       expect(mockResetConfig).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith("Settings reset to defaults");
+      expect(mockToast.success).toHaveBeenCalledWith("Settings reset to defaults");
       expect(result.current.showResetSettingsDialog).toBe(false);
     });
   });
@@ -122,7 +113,7 @@ describe("usePrivacySettings", () => {
       });
 
       expect(mockExportConversations).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith("Conversations exported successfully");
+      expect(mockToast.success).toHaveBeenCalledWith("Conversations exported successfully");
     });
   });
 
@@ -169,7 +160,7 @@ describe("usePrivacySettings", () => {
       });
 
       expect(mockImportConversations).toHaveBeenCalledWith(validData);
-      expect(toast.success).toHaveBeenCalledWith("Successfully imported 5 conversation(s)");
+      expect(mockToast.success).toHaveBeenCalledWith("Successfully imported 5 conversation(s)");
     });
 
     it("rejects non-JSON files", async () => {
@@ -188,7 +179,7 @@ describe("usePrivacySettings", () => {
         await result.current.handleFileImport(event);
       });
 
-      expect(toast.error).toHaveBeenCalledWith("Please select a valid JSON file");
+      expect(mockToast.error).toHaveBeenCalledWith("Please select a valid JSON file");
       expect(mockImportConversations).not.toHaveBeenCalled();
     });
 
@@ -210,7 +201,7 @@ describe("usePrivacySettings", () => {
         await result.current.handleFileImport(event);
       });
 
-      expect(toast.error).toHaveBeenCalledWith("Invalid conversation file format");
+      expect(mockToast.error).toHaveBeenCalledWith("Invalid conversation file format");
       expect(mockImportConversations).not.toHaveBeenCalled();
     });
 
@@ -244,7 +235,7 @@ describe("usePrivacySettings", () => {
         await result.current.handleFileImport(event);
       });
 
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         "Failed to import conversations. Please check the file format."
       );
     });

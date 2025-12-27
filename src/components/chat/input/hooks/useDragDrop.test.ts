@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDragDrop } from "./useDragDrop";
+import { createMockFile, createMockFileList } from "../../../../test/mocks/modules";
 
 function createMockDragEvent(type: string, options: {
   files?: File[];
@@ -20,26 +21,6 @@ function createMockDragEvent(type: string, options: {
     stopPropagation,
     dataTransfer,
   } as unknown as React.DragEvent;
-}
-
-function createMockFile(name: string, type = "text/plain"): File {
-  return new File(["content"], name, { type });
-}
-
-function createMockFileList(files: File[]): FileList {
-  const fileList = {
-    length: files.length,
-    item: (index: number) => files[index] || null,
-    [Symbol.iterator]: function* () {
-      for (const file of files) {
-        yield file;
-      }
-    },
-  };
-  files.forEach((file, index) => {
-    (fileList as Record<number, File>)[index] = file;
-  });
-  return fileList as unknown as FileList;
 }
 
 describe("useDragDrop", () => {

@@ -1,13 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../ui/tooltip";
 import { useModel } from "../../../providers/ModelProvider";
-import {
-  useDragDrop,
-  useFileUpload,
-  useSpeechToText,
-  useTranscriberToasts,
-  type AttachedFile,
-} from "./hooks";
+import { useDragDrop, useFileUpload, useSpeechToText } from "./hooks";
 import { Button } from "../../ui/button";
 import { Textarea } from "../../ui/textarea";
 import { Send, Square } from "lucide-react";
@@ -20,7 +14,6 @@ import {
   ModelStatus,
   SpeechToTextButton,
 } from "./components";
-import type { QualityLevel } from "../../../types";
 import { ScrollArea } from "@/components/ui";
 
 interface ChatInputProps {
@@ -30,7 +23,6 @@ interface ChatInputProps {
   isGenerating: boolean;
   onSend: (message?: string) => Promise<void>;
   onStopGeneration: () => void;
-  quality?: QualityLevel;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -55,9 +47,50 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setMessage(message ? `${message} ${transcript}` : transcript);
   });
 
-  useTranscriberToasts(transcriberStatus, transcriberError);
+  // Handle speech-to-text status toasts (moved from hook for separation of concerns)
+  const STT_TOAST_ID = "stt-toast";
+  useEffect(() => {
+    if (transcriberError) {
+      toast.error(transcriberError, { id: STT_TOAST_ID });
+      return;
+    }
 
-  const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+    switch (transcriberStatus) {
+      case "loading":
+        toast.loading("Loading speech model...", { id: STT_TOAST_ID });
+        break;
+      case "processing":
+        toast.loading("Transcribing audio...", { id: STT_TOAST_ID });
+        break;
+      case "recording":
+        toast.message("Recording...", {
+          description: "Click the mic icon to stop.",
+          id: STT_TOAST_ID,
+        });
+        break;
+      case "ready":
+      case "uninitialized":
+      case "error":
+        toast.dismiss(STT_TOAST_ID);
+        break;
+    }
+  }, [transcriberStatus, transcriberError]);
+
+  // For now, assume models don't support images unless we implement VLM support
+  const supportsImages = false;
+
+  // Use the hook's state management instead of local state
+  const {
+    attachedFiles,
+    handleFilesSelected,
+    removeFile,
+    clearFiles,
+    replaceFiles,
+  } = useFileUpload({
+    supportsImages,
+    selectedModelName: currentModel?.name || "Model",
+  });
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleMicClick = () => {
@@ -72,50 +105,23 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.altKey && event.key === 'm') {
         event.preventDefault();
-        handleMicClick();
+        if (transcriberStatus === "recording") {
+          stopRecording();
+        } else {
+          startRecording();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [transcriberStatus]);
+  }, [transcriberStatus, startRecording, stopRecording]);
 
-  // For now, assume models don't support images unless we implement VLM support
-  const supportsImages = false;
   const isModelError = modelStatus.toLowerCase().includes("error");
   const isModelReady = !!currentModel && !isModelLoading;
 
   const handleRetryModel = async () => {
     toast.info("Model retry is not yet implemented for unified models");
-  };
-
-  // Initialize useFileUpload hook at the top level
-  const { processFile } = useFileUpload({
-    supportsImages,
-    selectedModelName: currentModel?.name || "Model",
-  });
-
-  const handleFilesSelected = async (files: FileList) => {
-    // Convert FileList to array and process files
-    const fileArray = Array.from(files);
-    const processedFiles: AttachedFile[] = [];
-    
-    for (const file of fileArray) {
-      try {
-        const processedFile = await processFile(file);
-        processedFiles.push(processedFile);
-      } catch {
-        toast.error(`Failed to process file: ${file.name}`);
-      }
-    }
-
-    if (processedFiles.length > 0) {
-      setAttachedFiles(prev => [...prev, ...processedFiles]);
-    }
-  };
-
-  const removeFile = (fileId: string) => {
-    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -133,7 +139,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     // Clear input immediately for better UX
     setMessage("");
-    setAttachedFiles([]);
+    clearFiles();
 
     let fullMessage = messageToSend;
 
@@ -151,7 +157,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       await onSend(fullMessage);
     } catch {
       setMessage(messageToSend);
-      setAttachedFiles(filesToSend);
+      replaceFiles(filesToSend);
       toast.error("Failed to send message. Please try again.");
     }
   };
@@ -230,7 +236,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   isLoading ||
                   isWhisperModelLoading
                 }
-                onFilesChanged={setAttachedFiles}
+                onFilesChanged={replaceFiles}
               />
               <div className="ml-1">
                 {isGenerating ? (

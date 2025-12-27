@@ -20,7 +20,6 @@ interface UseMessageStreamReturn {
 export function useMessageStream(): UseMessageStreamReturn {
   const [isGenerating, setIsGenerating] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const wasAbortedRef = useRef(false);
 
   const { streamMessage, interruptGeneration, resetChat } = useModel();
 
@@ -32,7 +31,6 @@ export function useMessageStream(): UseMessageStreamReturn {
 
   const stopGeneration = () => {
     if (abortControllerRef.current) {
-      wasAbortedRef.current = true;
       abortControllerRef.current.abort();
       interruptGeneration();
     }
@@ -44,7 +42,6 @@ export function useMessageStream(): UseMessageStreamReturn {
     onChunk: (content: string) => void
   ): Promise<StreamResult> => {
     abortControllerRef.current = new AbortController();
-    wasAbortedRef.current = false;
     setIsGenerating(true);
 
     let accumulatedContent = "";
@@ -77,21 +74,21 @@ export function useMessageStream(): UseMessageStreamReturn {
 
       return {
         content: accumulatedContent,
-        wasAborted: wasAbortedRef.current,
+        wasAborted: abortControllerRef.current.signal.aborted,
       };
     } catch (error) {
       return {
         content: accumulatedContent,
-        wasAborted: wasAbortedRef.current,
+        wasAborted: abortControllerRef.current?.signal.aborted ?? false,
         error: error instanceof Error ? error : new Error(String(error)),
       };
     } finally {
       setIsGenerating(false);
+      const wasAborted = abortControllerRef.current?.signal.aborted ?? false;
       abortControllerRef.current = null;
 
-      if (wasAbortedRef.current) {
+      if (wasAborted) {
         await resetChat();
-        wasAbortedRef.current = false;
       }
     }
   };
