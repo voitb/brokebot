@@ -36,6 +36,7 @@ export {
   createMockDocument,
   createMockUserConfig,
   createMockModel,
+  createMockOpenRouterModel,
   createMockLocalModel,
   createMockWebLLMContext,
   createMockModelContext,
