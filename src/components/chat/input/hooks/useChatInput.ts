@@ -4,7 +4,7 @@ import { useConversations, useConversation } from "../../../../hooks/useConversa
 import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
 import { toast } from "sonner";
-import { buildPrompt } from "./chatInputUtils";
+import { buildPrompt } from "../utils/chatInputUtils";
 import { showErrorToast } from "./useChatErrors";
 import { useMessageStream } from "./useMessageStream";
 

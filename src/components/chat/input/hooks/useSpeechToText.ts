@@ -25,20 +25,22 @@ export const useSpeechToText = (
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const initStartedRef = useRef(false);
 
   const isModelLoading = status === "loading";
 
   useEffect(() => {
-    if (status === "uninitialized") {
-      setStatus("loading");
-      getTranscriber()
-        .then(() => setStatus("ready"))
-        .catch(() => {
-          setError("Failed to load speech recognition model.");
-          setStatus("error");
-        });
-    }
-  }, [status]);
+    if (initStartedRef.current) return;
+    initStartedRef.current = true;
+
+    setStatus("loading");
+    getTranscriber()
+      .then(() => setStatus("ready"))
+      .catch(() => {
+        setError("Failed to load speech recognition model.");
+        setStatus("error");
+      });
+  }, []);
 
   useEffect(() => {
     return () => {

@@ -20,11 +20,6 @@ export const useDocuments = (): UseDocumentsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load documents on mount
-  useEffect(() => {
-    loadDocuments();
-  }, []);
-
   const loadDocuments = async () => {
     try {
       setIsLoading(true);
@@ -37,6 +32,12 @@ export const useDocuments = (): UseDocumentsReturn => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadDocuments();
+    // Only run on mount - loadDocuments is stable (no external deps)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const uploadDocument = async (file: File): Promise<Document | null> => {
     try {

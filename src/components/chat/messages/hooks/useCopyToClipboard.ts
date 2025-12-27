@@ -1,4 +1,4 @@
-import { useState,   } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import type { CopyToClipboardResult } from "../types";
 
@@ -7,15 +7,23 @@ import type { CopyToClipboardResult } from "../types";
  */
 export const useCopyToClipboard = (): CopyToClipboardResult => {
   const [copied, setCopied] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const copyToClipboard = async (text: string) => {
     try {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
       await navigator.clipboard.writeText(text);
       setCopied(true);
       toast.success("Copied to clipboard");
-      
-      // Reset copied state after 2 seconds
-      setTimeout(() => {
+
+      timeoutRef.current = setTimeout(() => {
         setCopied(false);
       }, 2000);
     } catch {

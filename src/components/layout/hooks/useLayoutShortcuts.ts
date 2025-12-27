@@ -3,7 +3,7 @@ import { useSidebar } from "../../ui/sidebar";
 import { useConversationList } from "@/components/chat/sidebar/hooks/useConversationList";
 import { useConversations } from "@/providers/ConversationsProvider";
 import { useConversationId } from "@/hooks/useConversationId";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export const useLayoutShortcuts = () => {
@@ -12,6 +12,7 @@ export const useLayoutShortcuts = () => {
   const { togglePinConversation } = useConversations();
   const conversationId = useConversationId();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useAppKeyboardShortcuts({
     onToggleSidebar: () => setOpen(!open),
@@ -31,10 +32,16 @@ export const useLayoutShortcuts = () => {
       }
     },
     onShowShortcuts: () => {
-      navigate({ search: "?modal=shortcuts" });
+      const modal = searchParams.get("modal");
+      if (modal === "shortcuts") {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete("modal");
+        navigate({ search: newSearchParams.toString() }, { replace: true });
+      } else {
+        navigate({ search: "?modal=shortcuts" }, { replace: true });
+      }
     },
     onRenameChat: () => {
-      // This is also a hack, a better event system should be in place
       document.dispatchEvent(new CustomEvent("conversation:rename"));
     },
   });

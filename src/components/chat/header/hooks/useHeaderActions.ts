@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useUserConfig } from "../../../../hooks/useUserConfig";
 import { type Conversation} from "../../../../lib/db";
@@ -33,11 +33,10 @@ interface UseHeaderActionsReturn {
 }
  
 
-export function useHeaderActions({ 
-  conversationId 
+export function useHeaderActions({
+  conversationId
 }: UseHeaderActionsOptions): UseHeaderActionsReturn {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const {
     conversations,
     togglePinConversation,
@@ -78,8 +77,8 @@ export function useHeaderActions({
   // Event listener for renaming chat via shortcut
   useEffect(() => {
     const handleRename = () => {
-      if (conversationId) {
-        handleTitleClick();
+      if (conversationId && currentConversation) {
+        setIsEditingTitle(true);
       }
     };
 
@@ -87,37 +86,7 @@ export function useHeaderActions({
     return () => {
       document.removeEventListener("conversation:rename", handleRename);
     };
-  }, [conversationId]); // Dependency on conversationId ensures we don't trigger on null
-
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
-        // Only if not typing in input/textarea
-        if (
-          !(e.target instanceof HTMLInputElement) &&
-          !(e.target instanceof HTMLTextAreaElement)
-        ) {
-          e.preventDefault();
-          const modal = searchParams.get("modal");
-          if (modal === "shortcuts") {
-            // This is a bit of a hack, but it works for now
-            // We are creating a new search param object and deleting the modal
-            // to close it.
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.delete("modal");
-            navigate({ search: newSearchParams.toString() }, { replace: true });
-
-          } else {
-            navigate({ search: "?modal=shortcuts" }, { replace: true });
-          }
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [searchParams, navigate]);
+  }, [conversationId, currentConversation]);
 
   // Actions
   const handleNewChat = async () => {
