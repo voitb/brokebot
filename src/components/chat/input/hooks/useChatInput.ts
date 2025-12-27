@@ -5,7 +5,7 @@ import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
 import { toast } from "sonner";
 import { buildPrompt } from "../utils/chatInputUtils";
-import { showErrorToast } from "./useChatErrors";
+import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
 interface UseChatInputReturn {

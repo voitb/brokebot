@@ -49,7 +49,7 @@ vi.mock("./useMessageStream", () => ({
   }),
 }));
 
-vi.mock("./useChatErrors", () => ({
+vi.mock("../utils/chatErrorUtils", () => ({
   showErrorToast: vi.fn(),
 }));
 
