@@ -4,27 +4,13 @@ import { useConversations, useConversation } from "../../../../hooks/useConversa
 import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
 import { toast } from "sonner";
-import { buildPrompt } from "../utils/chatInputUtils";
+import { buildPrompt, findLastMessageByRole, truncateTitle } from "../utils/chatInputUtils";
 import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
-const TITLE_MAX_LENGTH = 50;
 const ERROR_GENERATING = "Error generating response. Please try regenerating or check your API key configuration.";
 const ERROR_SENDING = "Error sending message. Please check your configuration and try again.";
 const ERROR_REGENERATING = "Error regenerating response. Please try again.";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
-
-function findLastMessageByRole(
-  messages: Message[],
-  role: "user" | "assistant"
-): Message | undefined {
-  return messages.slice().reverse().find((msg) => msg.role === role);
-}
 
 interface UseChatInputReturn {
   message: string;
@@ -86,9 +72,7 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       if (isNewConversation) {
-        const title =
-          messageContent.slice(0, TITLE_MAX_LENGTH) +
-          (messageContent.length > TITLE_MAX_LENGTH ? "..." : "");
+        const title = truncateTitle(messageContent);
         await updateConversationTitle(currentConversationId, title);
       }
 

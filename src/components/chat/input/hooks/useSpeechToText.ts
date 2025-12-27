@@ -12,6 +12,10 @@ export type TranscriberStatus =
   | "processing"
   | "error";
 
+interface TranscriberResult {
+  text?: string;
+}
+
 export interface UseSpeechToTextResult {
   status: TranscriberStatus;
   startRecording: () => void;
@@ -80,7 +84,7 @@ export const useSpeechToText = (
         task: "transcribe",
       });
 
-      const newTranscript = (result as { text?: string })?.text?.trim() ?? "";
+      const newTranscript = (result as TranscriberResult)?.text?.trim() ?? "";
       if (newTranscript) {
         onTranscriptReceivedRef.current(newTranscript);
       }

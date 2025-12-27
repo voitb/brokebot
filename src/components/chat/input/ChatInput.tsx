@@ -78,7 +78,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }, [transcriberStatus]);
 
   // For now, assume models don't support images unless we implement VLM support
   const supportsImages = false;

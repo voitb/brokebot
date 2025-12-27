@@ -1,6 +1,28 @@
 import type { OpenRouterMessage } from "@/lib/openrouter";
 import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/constants/prompts";
 
+const TITLE_MAX_LENGTH = 50;
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function findLastMessageByRole(
+  messages: Message[],
+  role: "user" | "assistant"
+): Message | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === role) return messages[i];
+  }
+  return undefined;
+}
+
+export function truncateTitle(message: string, maxLength: number = TITLE_MAX_LENGTH): string {
+  return message.slice(0, maxLength) + (message.length > maxLength ? "..." : "");
+}
+
 /**
  * Summarizes long conversations by keeping recent messages and adding earlier context as a summary
  */
