@@ -1,5 +1,6 @@
+import type React from "react";
 import { vi } from "vitest";
-import type { Conversation, UserConfig } from "../../lib/db";
+import type { Conversation, Folder, UserConfig } from "../../lib/db";
 import { createMockUserConfig, createMockConversation } from "./factories";
 
 /**
@@ -121,4 +122,90 @@ export function createMockConversationHook(options: MockConversationHookOptions 
  */
 export function createMockConversationIdHook(id: string | undefined = "test-conversation-id") {
   return id;
+}
+
+export interface MockSmartAutoScrollHookOptions {
+  scrollAreaRef?: { current: HTMLElement | null };
+  showScrollButton?: boolean;
+  handleScrollToBottomClick?: () => void;
+}
+
+export function createMockSmartAutoScrollHook(options: MockSmartAutoScrollHookOptions = {}) {
+  return {
+    scrollAreaRef: options.scrollAreaRef ?? { current: null },
+    showScrollButton: options.showScrollButton ?? false,
+    handleScrollToBottomClick: options.handleScrollToBottomClick ?? vi.fn(),
+  };
+}
+
+type ItemStyle = "hover:bg-muted/50" | "bg-primary/10 border-primary text-primary font-medium" | "bg-muted/70";
+
+export interface MockConversationItemHookOptions {
+  isEditing?: boolean;
+  isMenuOpen?: boolean;
+  deleteDialogOpen?: boolean;
+  isCreateFolderDialogOpen?: boolean;
+  isPinned?: boolean;
+  isActive?: boolean;
+  folders?: Folder[];
+  setIsMenuOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  setDeleteDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  setCreateFolderDialogOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  handleConversationClick?: () => void;
+  handlePinToggle?: (e: React.MouseEvent) => Promise<void>;
+  handleRename?: (e: React.MouseEvent) => void;
+  handleSaveRename?: (newTitle: string) => Promise<void>;
+  handleCancelRename?: () => void;
+  handleDelete?: (e: React.MouseEvent) => void;
+  handleDeleteConfirm?: () => Promise<void>;
+  handleMove?: (folderId: string | null) => Promise<void>;
+  handleCreateFolderAndMove?: (folderName: string) => Promise<void>;
+  getItemStyles?: () => ItemStyle;
+}
+
+export function createMockConversationItemHook(options: MockConversationItemHookOptions = {}) {
+  return {
+    isEditing: options.isEditing ?? false,
+    isMenuOpen: options.isMenuOpen ?? false,
+    deleteDialogOpen: options.deleteDialogOpen ?? false,
+    isCreateFolderDialogOpen: options.isCreateFolderDialogOpen ?? false,
+    isPinned: options.isPinned ?? false,
+    isActive: options.isActive ?? false,
+    folders: options.folders ?? [],
+    setIsMenuOpen: options.setIsMenuOpen ?? vi.fn<React.Dispatch<React.SetStateAction<boolean>>>(),
+    setDeleteDialogOpen: options.setDeleteDialogOpen ?? vi.fn<React.Dispatch<React.SetStateAction<boolean>>>(),
+    setCreateFolderDialogOpen: options.setCreateFolderDialogOpen ?? vi.fn<React.Dispatch<React.SetStateAction<boolean>>>(),
+    handleConversationClick: options.handleConversationClick ?? vi.fn<() => void>(),
+    handlePinToggle: options.handlePinToggle ?? vi.fn<(e: React.MouseEvent) => Promise<void>>(),
+    handleRename: options.handleRename ?? vi.fn<(e: React.MouseEvent) => void>(),
+    handleSaveRename: options.handleSaveRename ?? vi.fn<(newTitle: string) => Promise<void>>(),
+    handleCancelRename: options.handleCancelRename ?? vi.fn<() => void>(),
+    handleDelete: options.handleDelete ?? vi.fn<(e: React.MouseEvent) => void>(),
+    handleDeleteConfirm: options.handleDeleteConfirm ?? vi.fn<() => Promise<void>>(),
+    handleMove: options.handleMove ?? vi.fn<(folderId: string | null) => Promise<void>>(),
+    handleCreateFolderAndMove: options.handleCreateFolderAndMove ?? vi.fn<(folderName: string) => Promise<void>>(),
+    getItemStyles: options.getItemStyles ?? vi.fn<() => ItemStyle>().mockReturnValue("hover:bg-muted/50"),
+  };
+}
+
+export interface MockConversationListHookOptions {
+  searchTerm?: string;
+  isSearching?: boolean;
+  pinnedConversations?: Conversation[];
+  foldersWithConversations?: Array<Folder & { conversations: Conversation[] }>;
+  unfoldedConversations?: Conversation[];
+  setSearchTerm?: (term: string) => void;
+  handleNewChat?: (folderId?: string) => Promise<void>;
+}
+
+export function createMockConversationListHook(options: MockConversationListHookOptions = {}) {
+  return {
+    searchTerm: options.searchTerm ?? "",
+    isSearching: options.isSearching ?? false,
+    pinnedConversations: options.pinnedConversations ?? [],
+    foldersWithConversations: options.foldersWithConversations ?? [],
+    unfoldedConversations: options.unfoldedConversations ?? [],
+    setSearchTerm: options.setSearchTerm ?? vi.fn<(term: string) => void>(),
+    handleNewChat: options.handleNewChat ?? vi.fn<(folderId?: string) => Promise<void>>(),
+  };
 }

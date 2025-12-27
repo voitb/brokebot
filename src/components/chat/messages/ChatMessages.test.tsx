@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { render } from "../../../test/utils";
 import { ChatMessages } from "./ChatMessages";
-import { createMockMessage, createMockConversation } from "../../../test/mocks/factories";
+import {
+  createMockMessage,
+  createMockConversation,
+  createMockSmartAutoScrollHook,
+} from "../../../test/mocks";
 
 vi.mock("../../../hooks/useConversations", () => ({
   useConversation: vi.fn(() => ({
@@ -20,13 +24,10 @@ vi.mock("../../../providers/WebLLMProvider", async () => {
   return createMinimalWebLLMProvider();
 });
 
-vi.mock("../../../hooks/useSmartAutoScroll", () => ({
-  useSmartAutoScroll: vi.fn(() => ({
-    scrollAreaRef: { current: null },
-    showScrollButton: false,
-    handleScrollToBottomClick: vi.fn(),
-  })),
-}));
+vi.mock("../../../hooks/useSmartAutoScroll", async () => {
+  const { createMockSmartAutoScrollHook } = await import("../../../test/mocks/hooks");
+  return { useSmartAutoScroll: vi.fn(() => createMockSmartAutoScrollHook()) };
+});
 
 import { useConversation } from "../../../hooks/useConversations";
 import { useWebLLM } from "../../../providers/WebLLMProvider";
@@ -93,11 +94,9 @@ describe("ChatMessages", () => {
   });
 
   it("shows scroll to bottom button when showScrollButton is true", () => {
-    vi.mocked(useSmartAutoScroll).mockReturnValue({
-      scrollAreaRef: { current: null },
-      showScrollButton: true,
-      handleScrollToBottomClick: vi.fn(),
-    });
+    vi.mocked(useSmartAutoScroll).mockReturnValue(
+      createMockSmartAutoScrollHook({ showScrollButton: true })
+    );
 
     vi.mocked(useConversation).mockReturnValue({
       messages: [createMockMessage()],
@@ -111,11 +110,9 @@ describe("ChatMessages", () => {
   });
 
   it("hides scroll to bottom button when showScrollButton is false", () => {
-    vi.mocked(useSmartAutoScroll).mockReturnValue({
-      scrollAreaRef: { current: null },
-      showScrollButton: false,
-      handleScrollToBottomClick: vi.fn(),
-    });
+    vi.mocked(useSmartAutoScroll).mockReturnValue(
+      createMockSmartAutoScrollHook({ showScrollButton: false })
+    );
 
     vi.mocked(useConversation).mockReturnValue({
       messages: [createMockMessage()],

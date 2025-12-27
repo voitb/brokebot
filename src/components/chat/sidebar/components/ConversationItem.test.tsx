@@ -3,30 +3,13 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "../../../../test/utils";
 import { ConversationItem } from "./ConversationItem";
-import { createMockConversation, createMockFolder } from "../../../../test/mocks/factories";
+import {
+  createMockConversation,
+  createMockFolder,
+  createMockConversationItemHook,
+} from "../../../../test/mocks";
 
-const mockUseConversationItem = {
-  isEditing: false,
-  isMenuOpen: false,
-  deleteDialogOpen: false,
-  isCreateFolderDialogOpen: false,
-  isPinned: false,
-  isActive: false,
-  folders: [],
-  setIsMenuOpen: vi.fn(),
-  setDeleteDialogOpen: vi.fn(),
-  setCreateFolderDialogOpen: vi.fn(),
-  handleConversationClick: vi.fn(),
-  handlePinToggle: vi.fn(),
-  handleRename: vi.fn(),
-  handleSaveRename: vi.fn(),
-  handleCancelRename: vi.fn(),
-  handleDelete: vi.fn(),
-  handleDeleteConfirm: vi.fn(),
-  handleMove: vi.fn(),
-  handleCreateFolderAndMove: vi.fn(),
-  getItemStyles: vi.fn(() => "hover:bg-muted/50" as const),
-};
+const mockUseConversationItem = createMockConversationItemHook();
 
 vi.mock("../hooks/useConversationItem", () => ({
   useConversationItem: vi.fn(() => mockUseConversationItem),
@@ -56,11 +39,12 @@ describe("ConversationItem", () => {
   });
 
   it("applies active styling when isActive is true", () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isActive: true,
-      getItemStyles: vi.fn(() => "bg-primary/10 border-primary text-primary font-medium" as const),
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({
+        isActive: true,
+        getItemStyles: () => "bg-primary/10 border-primary text-primary font-medium",
+      })
+    );
 
     const conversation = createMockConversation({ title: "Active Chat" });
 
@@ -72,10 +56,9 @@ describe("ConversationItem", () => {
 
   it("calls handleConversationClick when clicked", async () => {
     const handleClick = vi.fn();
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      handleConversationClick: handleClick,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ handleConversationClick: handleClick })
+    );
 
     const conversation = createMockConversation({ title: "Clickable Chat" });
 
@@ -96,10 +79,9 @@ describe("ConversationItem", () => {
   });
 
   it("opens dropdown menu when menu button is clicked", async () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isMenuOpen: true,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ isMenuOpen: true })
+    );
 
     const conversation = createMockConversation({ title: "Menu Chat" });
 
@@ -110,10 +92,9 @@ describe("ConversationItem", () => {
   });
 
   it("shows editable title input when editing", () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isEditing: true,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ isEditing: true })
+    );
 
     const conversation = createMockConversation({ title: "Editable Chat" });
 
@@ -123,10 +104,9 @@ describe("ConversationItem", () => {
   });
 
   it("shows delete confirmation dialog when deleteDialogOpen is true", () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      deleteDialogOpen: true,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ deleteDialogOpen: true })
+    );
 
     const conversation = createMockConversation({ title: "Delete Me" });
 
@@ -137,11 +117,9 @@ describe("ConversationItem", () => {
   });
 
   it("displays pinned state in menu when open", () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isMenuOpen: true,
-      isPinned: false,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ isMenuOpen: true, isPinned: false })
+    );
 
     const conversation = createMockConversation({ title: "Unpinned Chat" });
 
@@ -151,11 +129,9 @@ describe("ConversationItem", () => {
   });
 
   it("displays remove from favourites when pinned", () => {
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isMenuOpen: true,
-      isPinned: true,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ isMenuOpen: true, isPinned: true })
+    );
 
     const conversation = createMockConversation({ title: "Pinned Chat" });
 
@@ -170,11 +146,9 @@ describe("ConversationItem", () => {
       createMockFolder({ id: "folder-2", name: "Personal" }),
     ];
 
-    vi.mocked(useConversationItem).mockReturnValue({
-      ...mockUseConversationItem,
-      isMenuOpen: true,
-      folders,
-    });
+    vi.mocked(useConversationItem).mockReturnValue(
+      createMockConversationItemHook({ isMenuOpen: true, folders })
+    );
 
     const conversation = createMockConversation({ title: "Movable Chat" });
 

@@ -3,17 +3,13 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "../../../test/utils";
 import { ConversationList } from "./ConversationList";
-import { createMockConversation, createMockFolder } from "../../../test/mocks/factories";
+import {
+  createMockConversation,
+  createMockFolder,
+  createMockConversationListHook,
+} from "../../../test/mocks";
 
-const mockUseConversationList = {
-  searchTerm: "",
-  isSearching: false,
-  pinnedConversations: [],
-  foldersWithConversations: [],
-  unfoldedConversations: [],
-  setSearchTerm: vi.fn(),
-  handleNewChat: vi.fn(),
-};
+const mockUseConversationList = createMockConversationListHook();
 
 vi.mock("./hooks/useConversationList", () => ({
   useConversationList: vi.fn(() => mockUseConversationList),
