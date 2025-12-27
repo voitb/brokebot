@@ -270,4 +270,53 @@ describe("useMessageStream", () => {
       expect(result.current.isGenerating).toBe(false);
     });
   });
+
+  describe("stopGeneration", () => {
+    it("properly aborts mid-stream and returns partial content", async () => {
+      let yieldControl: (() => void) | null = null;
+      const waitForAbort = new Promise<void>((resolve) => {
+        yieldControl = resolve;
+      });
+
+      mockStreamMessage.mockImplementation(async function* () {
+        yield { content: "Hello", isComplete: false };
+        await waitForAbort;
+        yield { content: "Hello world", isComplete: true };
+      });
+
+      const { result } = renderHook(() => useMessageStream());
+      const onChunk = vi.fn();
+
+      let streamPromise: Promise<StreamResult>;
+      act(() => {
+        streamPromise = result.current.streamResponse(
+          [{ role: "user", content: "Hi" }],
+          onChunk
+        );
+      });
+
+      // Wait for first chunk
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 10));
+      });
+
+      expect(result.current.isGenerating).toBe(true);
+      expect(onChunk).toHaveBeenCalledWith("Hello");
+
+      // Abort mid-stream
+      act(() => {
+        result.current.stopGeneration();
+      });
+
+      // Release the mock to complete
+      yieldControl!();
+
+      await act(async () => {
+        await streamPromise!;
+      });
+
+      expect(result.current.isGenerating).toBe(false);
+      expect(mockInterruptGeneration).toHaveBeenCalled();
+    });
+  });
 });

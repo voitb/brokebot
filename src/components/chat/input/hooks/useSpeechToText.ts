@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { getTranscriber } from "../../../../lib/transcriber";
+
+const CHUNK_LENGTH_S = 30;
+const STRIDE_LENGTH_S = 5;
 
 export type TranscriberStatus =
   | "uninitialized"
@@ -26,6 +29,11 @@ export const useSpeechToText = (
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const initStartedRef = useRef(false);
+  const onTranscriptReceivedRef = useRef(onTranscriptReceived);
+
+  useLayoutEffect(() => {
+    onTranscriptReceivedRef.current = onTranscriptReceived;
+  }, [onTranscriptReceived]);
 
   const isModelLoading = status === "loading";
 
@@ -67,14 +75,14 @@ export const useSpeechToText = (
     try {
       const recognizer = await getTranscriber();
       const result = await recognizer(audioUrl, {
-        chunk_length_s: 30,
-        stride_length_s: 5,
+        chunk_length_s: CHUNK_LENGTH_S,
+        stride_length_s: STRIDE_LENGTH_S,
         task: "transcribe",
       });
 
       const newTranscript = (result as { text?: string })?.text?.trim() ?? "";
       if (newTranscript) {
-        onTranscriptReceived(newTranscript);
+        onTranscriptReceivedRef.current(newTranscript);
       }
     } catch {
       setError("An error occurred during transcription.");

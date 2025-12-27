@@ -336,4 +336,40 @@ describe("useSpeechToText", () => {
       expect(mockStop).toHaveBeenCalled();
     });
   });
+
+  describe("transcription errors", () => {
+    it("handles transcription API failure", async () => {
+      const mockRecognizer = vi.fn().mockRejectedValue(new Error("Transcription failed"));
+      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+
+      const mockStop = vi.fn();
+      const mockStream = {
+        getTracks: () => [{ stop: mockStop }],
+      };
+      (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockStream
+      );
+
+      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("ready");
+      });
+
+      await act(async () => {
+        await result.current.startRecording();
+      });
+
+      await act(async () => {
+        result.current.stopRecording();
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe("An error occurred during transcription.");
+        expect(result.current.status).toBe("ready");
+      });
+
+      expect(mockOnTranscriptReceived).not.toHaveBeenCalled();
+    });
+  });
 });
