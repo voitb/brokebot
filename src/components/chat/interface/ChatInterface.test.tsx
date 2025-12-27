@@ -25,10 +25,10 @@ vi.mock("../../../providers/WebLLMProvider", async () => {
   };
 });
 
-vi.mock("../../../lib/transcriber", () => ({
-  getTranscriber: vi.fn().mockResolvedValue(() => Promise.resolve({ text: "" })),
-  disposeTranscriber: vi.fn().mockResolvedValue(undefined),
-}));
+vi.mock("../../../lib/transcriber", async () => {
+  const { createMockTranscriber } = await import("../../../test/mocks/hooks");
+  return createMockTranscriber();
+});
 
 function renderChatInterface(conversationId?: string) {
   const initialPath = conversationId ? `/conversation/${conversationId}` : "/conversation/new";

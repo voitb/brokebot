@@ -11,12 +11,15 @@ let mockOpen = false;
 let mockConversationId: string | undefined = undefined;
 let capturedShortcuts: Record<string, () => void> = {};
 
-vi.mock("../../ui/sidebar", () => ({
-  useSidebar: () => ({
-    open: mockOpen,
-    setOpen: mockSetOpen,
-  }),
-}));
+vi.mock("../../ui/sidebar", async () => {
+  const { createMockSidebarHook } = await import("../../../test/mocks/hooks");
+  return {
+    useSidebar: () => createMockSidebarHook({
+      open: mockOpen,
+      setOpen: mockSetOpen,
+    }),
+  };
+});
 
 vi.mock("@/components/chat/sidebar/hooks/useConversationList", () => ({
   useConversationList: () => ({
