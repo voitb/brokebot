@@ -10,7 +10,7 @@ import {
 } from "../../../ui/dropdown-menu";
 
 interface HeaderActionsMenuProps {
-  conversationId: string | null;
+  conversationId?: string;
   onOpenSettings: () => void;
   onOpenShortcuts: () => void;
   onOpenExport: () => void;

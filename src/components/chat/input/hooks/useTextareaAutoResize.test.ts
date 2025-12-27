@@ -1,24 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useTextareaAutoResize } from "./useTextareaAutoResize";
 import { useRef } from "react";
+
+function createMockTextarea(scrollHeight: number): HTMLTextAreaElement {
+  const style = { height: "", overflowY: "" };
+  return {
+    style,
+    get scrollHeight() {
+      return scrollHeight;
+    },
+  } as unknown as HTMLTextAreaElement;
+}
 
 describe("useTextareaAutoResize", () => {
   let mockTextarea: HTMLTextAreaElement;
 
   beforeEach(() => {
-    mockTextarea = {
-      style: {
-        height: "",
-        overflowY: "",
-      },
-      scrollHeight: 100,
-    } as unknown as HTMLTextAreaElement;
+    mockTextarea = createMockTextarea(100);
   });
 
   describe("height adjustment", () => {
     it("sets height based on scrollHeight", () => {
-      const { result } = renderHook(() => {
+      renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
         useTextareaAutoResize({
           textareaRef,
@@ -34,7 +38,7 @@ describe("useTextareaAutoResize", () => {
     });
 
     it("respects minimum height constraint", () => {
-      mockTextarea.scrollHeight = 30;
+      mockTextarea = createMockTextarea(30);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
@@ -51,7 +55,7 @@ describe("useTextareaAutoResize", () => {
     });
 
     it("respects maximum height constraint", () => {
-      mockTextarea.scrollHeight = 300;
+      mockTextarea = createMockTextarea(300);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
@@ -68,7 +72,7 @@ describe("useTextareaAutoResize", () => {
     });
 
     it("enables scroll when content exceeds maxHeight", () => {
-      mockTextarea.scrollHeight = 300;
+      mockTextarea = createMockTextarea(300);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
@@ -85,7 +89,7 @@ describe("useTextareaAutoResize", () => {
     });
 
     it("hides scroll when content fits within maxHeight", () => {
-      mockTextarea.scrollHeight = 150;
+      mockTextarea = createMockTextarea(150);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
@@ -104,7 +108,7 @@ describe("useTextareaAutoResize", () => {
 
   describe("default values", () => {
     it("uses default minHeight of 60", () => {
-      mockTextarea.scrollHeight = 20;
+      mockTextarea = createMockTextarea(20);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);
@@ -119,7 +123,7 @@ describe("useTextareaAutoResize", () => {
     });
 
     it("uses default maxHeight of 200", () => {
-      mockTextarea.scrollHeight = 500;
+      mockTextarea = createMockTextarea(500);
 
       renderHook(() => {
         const textareaRef = useRef<HTMLTextAreaElement>(mockTextarea);

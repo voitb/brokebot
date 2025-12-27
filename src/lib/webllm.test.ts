@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { createModelCatalog, ModelInfo } from "./webllm";
+import { createModelCatalog, type ModelInfo } from "./webllm";
 
 describe("webllm", () => {
   describe("createModelCatalog", () => {
