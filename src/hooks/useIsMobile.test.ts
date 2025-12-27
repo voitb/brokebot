@@ -1,30 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useIsMobile } from "./useIsMobile";
+import { createMockMatchMedia } from "../test/mocks/dom-helpers";
 
 describe("useIsMobile", () => {
   const originalInnerWidth = window.innerWidth;
-  let matchMediaListeners: Array<() => void> = [];
-  let mockMatches = false;
-
-  const mockMatchMedia = vi.fn((query: string) => ({
-    matches: mockMatches,
-    media: query,
-    onchange: null,
-    addEventListener: (_event: string, listener: () => void) => {
-      matchMediaListeners.push(listener);
-    },
-    removeEventListener: (_event: string, listener: () => void) => {
-      matchMediaListeners = matchMediaListeners.filter((l) => l !== listener);
-    },
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  }));
+  let mockMatchMedia: ReturnType<typeof createMockMatchMedia>;
 
   beforeEach(() => {
-    matchMediaListeners = [];
-    mockMatches = false;
+    mockMatchMedia = createMockMatchMedia(false);
     vi.stubGlobal("matchMedia", mockMatchMedia);
   });
 
@@ -102,7 +86,7 @@ describe("useIsMobile", () => {
         configurable: true,
         value: 500,
       });
-      matchMediaListeners.forEach((listener) => listener());
+      mockMatchMedia.listeners.forEach((listener) => listener());
     });
 
     expect(result.current).toBe(true);
@@ -129,11 +113,11 @@ describe("useIsMobile", () => {
 
     const { unmount } = renderHook(() => useIsMobile());
 
-    expect(matchMediaListeners.length).toBe(1);
+    expect(mockMatchMedia.listeners.length).toBe(1);
 
     unmount();
 
-    expect(matchMediaListeners.length).toBe(0);
+    expect(mockMatchMedia.listeners.length).toBe(0);
   });
 
   it("handles initial state calculation correctly", () => {

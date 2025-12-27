@@ -209,3 +209,63 @@ export function createMockConversationListHook(options: MockConversationListHook
     handleNewChat: options.handleNewChat ?? vi.fn<(folderId?: string) => Promise<void>>(),
   };
 }
+
+export function createMockThemeHook(theme = "dark") {
+  return { theme, setTheme: vi.fn() };
+}
+
+export interface MockDragDropHookOptions {
+  isDragOver?: boolean;
+  handleDrop?: ReturnType<typeof vi.fn>;
+  handleDragOver?: ReturnType<typeof vi.fn>;
+  handleDragLeave?: ReturnType<typeof vi.fn>;
+  handleDragEnter?: ReturnType<typeof vi.fn>;
+}
+
+export function createMockDragDropHook(options: MockDragDropHookOptions = {}) {
+  return {
+    isDragOver: options.isDragOver ?? false,
+    handleDrop: options.handleDrop ?? vi.fn(),
+    handleDragOver: options.handleDragOver ?? vi.fn(),
+    handleDragLeave: options.handleDragLeave ?? vi.fn(),
+    handleDragEnter: options.handleDragEnter ?? vi.fn(),
+  };
+}
+
+export interface MockFileUploadHookOptions {
+  attachedFiles?: File[];
+  handleFilesSelected?: ReturnType<typeof vi.fn>;
+  removeFile?: ReturnType<typeof vi.fn>;
+  clearFiles?: ReturnType<typeof vi.fn>;
+  replaceFiles?: ReturnType<typeof vi.fn>;
+  processFile?: ReturnType<typeof vi.fn>;
+}
+
+export function createMockFileUploadHook(options: MockFileUploadHookOptions = {}) {
+  return {
+    attachedFiles: options.attachedFiles ?? [],
+    handleFilesSelected: options.handleFilesSelected ?? vi.fn(),
+    removeFile: options.removeFile ?? vi.fn(),
+    clearFiles: options.clearFiles ?? vi.fn(),
+    replaceFiles: options.replaceFiles ?? vi.fn(),
+    processFile: options.processFile ?? vi.fn(),
+  };
+}
+
+export interface MockSpeechToTextHookOptions {
+  status?: "ready" | "recording" | "processing";
+  startRecording?: ReturnType<typeof vi.fn>;
+  stopRecording?: ReturnType<typeof vi.fn>;
+  isModelLoading?: boolean;
+  error?: string | null;
+}
+
+export function createMockSpeechToTextHook(options: MockSpeechToTextHookOptions = {}) {
+  return {
+    status: options.status ?? ("ready" as const),
+    startRecording: options.startRecording ?? vi.fn(),
+    stopRecording: options.stopRecording ?? vi.fn(),
+    isModelLoading: options.isModelLoading ?? false,
+    error: options.error ?? null,
+  };
+}

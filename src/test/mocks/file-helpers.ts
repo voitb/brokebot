@@ -52,3 +52,21 @@ export function createMockDataTransfer(files: File[]): DataTransfer {
     types: ["Files"],
   } as unknown as DataTransfer;
 }
+
+/**
+ * Creates a mock DragEvent for testing drag-drop handlers
+ */
+export function createMockDragEvent(
+  type: string,
+  options: { files?: File[]; types?: string[] } = {}
+): React.DragEvent {
+  return {
+    type,
+    preventDefault: vi.fn(),
+    stopPropagation: vi.fn(),
+    dataTransfer: {
+      files: options.files || [],
+      types: options.types || ["Files"],
+    },
+  } as unknown as React.DragEvent;
+}

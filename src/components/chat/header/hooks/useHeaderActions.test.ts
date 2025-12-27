@@ -3,7 +3,6 @@ import { renderHook, act } from "@testing-library/react";
 import { useHeaderActions } from "./useHeaderActions";
 import { mockNavigate, mockToast } from "../../../../test/mocks/modules";
 
-const mockSearchParams = new URLSearchParams();
 const mockTogglePinConversation = vi.fn();
 const mockUpdateConversationTitle = vi.fn();
 const mockCreateEmptyConversation = vi.fn();
@@ -15,15 +14,7 @@ let mockConversations = [
 ];
 let mockConversation = { id: "conv-1", title: "Test Conversation", messages: [] };
 
-// This file needs custom useSearchParams mock, so we override the global mock
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useSearchParams: () => [mockSearchParams],
-  };
-});
+// react-router-dom is globally mocked in setup.ts
 
 vi.mock("../../../../hooks/useConversations", () => ({
   useConversations: () => ({

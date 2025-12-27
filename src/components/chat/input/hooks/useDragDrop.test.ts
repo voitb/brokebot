@@ -1,27 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDragDrop } from "./useDragDrop";
-import { createMockFile, createMockFileList } from "../../../../test/mocks/modules";
-
-function createMockDragEvent(type: string, options: {
-  files?: File[];
-  types?: string[];
-} = {}): React.DragEvent {
-  const preventDefault = vi.fn();
-  const stopPropagation = vi.fn();
-
-  const dataTransfer = {
-    files: options.files || [],
-    types: options.types || ["Files"],
-  };
-
-  return {
-    type,
-    preventDefault,
-    stopPropagation,
-    dataTransfer,
-  } as unknown as React.DragEvent;
-}
+import { createMockFile, createMockFileList, createMockDragEvent } from "../../../../test/mocks/modules";
 
 describe("useDragDrop", () => {
   beforeEach(() => {

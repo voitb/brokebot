@@ -4,7 +4,15 @@ import { vi } from "vitest";
 export { MOCK_LOCAL_MODEL, MOCK_AVAILABLE_MODELS, MOCK_ONLINE_MODEL } from "./constants";
 
 // Re-export file helpers for DRY test utilities
-export { createMockFile, createMockFileList, createMockDataTransfer } from "./file-helpers";
+export { createMockFile, createMockFileList, createMockDataTransfer, createMockDragEvent } from "./file-helpers";
+
+// Re-export DOM helpers for element mocking
+export {
+  createMockTextarea,
+  createMockViewport,
+  createMockMutationObserver,
+  createMockMatchMedia,
+} from "./dom-helpers";
 
 // Re-export media mocks for audio/video testing
 export { MockMediaRecorder, MockMediaStream, setupMediaMocks } from "./media";
@@ -26,6 +34,10 @@ export {
   createMockSmartAutoScrollHook,
   createMockConversationItemHook,
   createMockConversationListHook,
+  createMockThemeHook,
+  createMockDragDropHook,
+  createMockFileUploadHook,
+  createMockSpeechToTextHook,
 } from "./hooks";
 
 // Re-export factory functions for data creation
@@ -40,6 +52,7 @@ export {
   createMockLocalModel,
   createMockWebLLMContext,
   createMockModelContext,
+  createMockStream,
 } from "./factories";
 
 /**
@@ -62,6 +75,24 @@ export const mockToast = {
 export const mockNavigate = vi.fn();
 
 /**
+ * Centralized mock for react-router-dom useSearchParams
+ * Automatically mocked globally in setup.ts - use this for URL query params
+ */
+export const mockSearchParams = new URLSearchParams();
+
+/**
+ * Setup a mock fetch for API tests
+ * Returns the mock function and a restore helper
+ */
+export function setupFetchMock(mockFn = vi.fn()) {
+  vi.stubGlobal("fetch", mockFn);
+  return {
+    mockFetch: mockFn,
+    restore: () => vi.unstubAllGlobals(),
+  };
+}
+
+/**
  * Reset all centralized mocks - called automatically in afterEach via setup.ts
  */
 export function resetMocks() {
@@ -72,4 +103,8 @@ export function resetMocks() {
   mockToast.dismiss.mockClear();
   mockToast.info.mockClear();
   mockNavigate.mockClear();
+  // Clear URLSearchParams by deleting all keys
+  for (const key of [...mockSearchParams.keys()]) {
+    mockSearchParams.delete(key);
+  }
 }

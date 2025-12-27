@@ -1,40 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useSmartAutoScroll } from "./useSmartAutoScroll";
-
-function createMockViewport(overrides: Partial<HTMLElement> = {}) {
-  return {
-    scrollTop: 0,
-    scrollHeight: 1000,
-    clientHeight: 500,
-    scrollTo: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    querySelector: vi.fn(),
-    ...overrides,
-  } as unknown as HTMLElement;
-}
+import { createMockViewport, createMockMutationObserver } from "../test/mocks/dom-helpers";
 
 describe("useSmartAutoScroll", () => {
-  let mockObserver: {
-    observe: ReturnType<typeof vi.fn>;
-    disconnect: ReturnType<typeof vi.fn>;
-    takeRecords: ReturnType<typeof vi.fn>;
-  };
+  let mockObserver: ReturnType<typeof createMockMutationObserver>;
 
   beforeEach(() => {
     vi.useFakeTimers();
-
-    mockObserver = {
-      observe: vi.fn(),
-      disconnect: vi.fn(),
-      takeRecords: vi.fn(),
-    };
-
-    vi.stubGlobal(
-      "MutationObserver",
-      vi.fn(() => mockObserver)
-    );
+    mockObserver = createMockMutationObserver();
+    vi.stubGlobal("MutationObserver", vi.fn(() => mockObserver));
   });
 
   afterEach(() => {

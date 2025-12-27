@@ -2,7 +2,7 @@ import "@testing-library/jest-dom";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "fake-indexeddb/auto";
-import { mockToast, mockNavigate, resetMocks } from "./mocks/modules";
+import { mockToast, mockNavigate, mockSearchParams, resetMocks } from "./mocks/modules";
 
 // Mock @xenova/transformers to avoid sharp native module issues
 vi.mock("@xenova/transformers", () => ({
@@ -19,12 +19,13 @@ vi.mock("sonner", () => ({
   toast: mockToast,
 }));
 
-// Global react-router-dom mock - accessible via mockNavigate from test/mocks/modules
+// Global react-router-dom mock - accessible via mockNavigate/mockSearchParams from test/mocks/modules
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    useSearchParams: () => [mockSearchParams],
   };
 });
 

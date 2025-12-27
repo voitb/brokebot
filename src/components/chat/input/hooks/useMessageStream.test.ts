@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useMessageStream, type StreamResult } from "./useMessageStream";
+import { createMockStream } from "../../../../test/mocks/factories";
 
-// Helper to assert stream result is defined after act() completes
 function assertStreamResult(result: StreamResult | null): StreamResult {
   if (!result) throw new Error("Stream result not initialized");
   return result;
@@ -19,12 +19,6 @@ vi.mock("../../../../providers/ModelProvider", () => ({
     resetChat: mockResetChat,
   }),
 }));
-
-async function* createMockStream(chunks: Array<{ content: string; isComplete?: boolean; error?: string }>) {
-  for (const chunk of chunks) {
-    yield chunk;
-  }
-}
 
 describe("useMessageStream", () => {
   beforeEach(() => {
