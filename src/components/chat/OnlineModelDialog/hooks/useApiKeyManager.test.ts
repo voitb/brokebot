@@ -1,17 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useApiKeyManager } from "./useApiKeyManager";
+import type { UserConfig } from "../../../../lib/db";
 
 const mockUpdateConfig = vi.fn();
 
-let mockConfig: { openrouterApiKey?: string } | null = null;
+let mockConfig: Partial<UserConfig> | null = null;
 
-vi.mock("../../../../hooks/useUserConfig", () => ({
-  useUserConfig: () => ({
-    config: mockConfig,
-    updateConfig: mockUpdateConfig,
-  }),
-}));
+vi.mock("../../../../hooks/useUserConfig", async () => {
+  const { createMockUserConfigHook } = await import("../../../../test/mocks/hooks");
+  return {
+    useUserConfig: () => createMockUserConfigHook({
+      config: mockConfig,
+      updateConfig: mockUpdateConfig,
+    }),
+  };
+});
 
 describe("useApiKeyManager", () => {
   beforeEach(() => {

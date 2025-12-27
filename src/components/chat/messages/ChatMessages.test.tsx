@@ -8,16 +8,19 @@ import {
   createMockSmartAutoScrollHook,
 } from "../../../test/mocks";
 
-vi.mock("../../../hooks/useConversations", () => ({
-  useConversation: vi.fn(() => ({
-    messages: [],
-    conversation: null,
-  })),
-}));
+vi.mock("../../../hooks/useConversations", async () => {
+  const { createMockConversationHook } = await import("../../../test/mocks/hooks");
+  return {
+    useConversation: vi.fn(() => createMockConversationHook()),
+  };
+});
 
-vi.mock("../../../hooks/useConversationId", () => ({
-  useConversationId: vi.fn(() => "test-conversation-id"),
-}));
+vi.mock("../../../hooks/useConversationId", async () => {
+  const { createMockConversationIdHook } = await import("../../../test/mocks/hooks");
+  return {
+    useConversationId: vi.fn(() => createMockConversationIdHook()),
+  };
+});
 
 vi.mock("../../../providers/WebLLMProvider", async () => {
   const { createMinimalWebLLMProvider } = await import("../../../test/mocks/providers");

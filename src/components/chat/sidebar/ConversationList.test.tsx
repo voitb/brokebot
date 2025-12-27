@@ -15,11 +15,14 @@ vi.mock("./hooks/useConversationList", () => ({
   useConversationList: vi.fn(() => mockUseConversationList),
 }));
 
-vi.mock("../../../providers/ConversationsProvider", () => ({
-  useConversations: vi.fn(() => ({
-    createFolder: vi.fn(),
-  })),
-}));
+vi.mock("../../../providers/ConversationsProvider", async () => {
+  const { createMockConversationsHook } = await import("../../../test/mocks/hooks");
+  return {
+    useConversations: vi.fn(() => createMockConversationsHook({
+      createFolder: vi.fn(),
+    })),
+  };
+});
 
 vi.mock("../../../providers/WebLLMProvider", async () => {
   const { createMinimalWebLLMProvider } = await import("../../../test/mocks/providers");

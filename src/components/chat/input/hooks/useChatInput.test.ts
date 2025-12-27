@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useChatInput } from "./useChatInput";
 import { mockNavigate } from "../../../../test/mocks/modules";
+import { createMockModel, createMockModelContext } from "../../../../test/mocks/factories";
+import { useModel } from "../../../../providers/ModelProvider";
+import type { UnifiedModel } from "../../../../providers/ModelProvider";
 
 const mockCreateEmptyConversation = vi.fn();
 const mockAddMessage = vi.fn();
@@ -12,32 +15,38 @@ const mockStopGeneration = vi.fn();
 
 let mockConversationId: string | undefined = undefined;
 let mockMessages: Array<{ id: string; role: string; content: string }> = [];
-let mockCurrentModel: { type: string } | null = { type: "online" };
+let mockCurrentModel: UnifiedModel | null = createMockModel("online");
 let mockIsGenerating = false;
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("../../../../hooks/useConversations", () => ({
-  useConversations: () => ({
-    createEmptyConversation: mockCreateEmptyConversation,
-    addMessage: mockAddMessage,
-    updateMessage: mockUpdateMessage,
-    updateConversationTitle: mockUpdateConversationTitle,
-  }),
-  useConversation: () => ({
-    messages: mockMessages,
-  }),
-}));
+vi.mock("../../../../hooks/useConversations", async () => {
+  const { createMockConversationsHook, createMockConversationHook } = await import(
+    "../../../../test/mocks/hooks"
+  );
+  return {
+    useConversations: () =>
+      createMockConversationsHook({
+        createEmptyConversation: mockCreateEmptyConversation,
+        addMessage: mockAddMessage,
+        updateMessage: mockUpdateMessage,
+        updateConversationTitle: mockUpdateConversationTitle,
+      }),
+    useConversation: () =>
+      createMockConversationHook({
+        messages: mockMessages,
+      }),
+  };
+});
 
 vi.mock("../../../../hooks/useConversationId", () => ({
   useConversationId: () => mockConversationId,
 }));
 
-vi.mock("../../../../providers/ModelProvider", () => ({
-  useModel: () => ({
-    currentModel: mockCurrentModel,
-  }),
-}));
+vi.mock("../../../../providers/ModelProvider", async () => {
+  const { createMinimalModelProvider } = await import("../../../../test/mocks/providers");
+  return createMinimalModelProvider();
+});
 
 vi.mock("./useMessageStream", () => ({
   useMessageStream: () => ({
@@ -56,12 +65,19 @@ describe("useChatInput", () => {
     vi.clearAllMocks();
     mockConversationId = undefined;
     mockMessages = [];
-    mockCurrentModel = { type: "online" };
+    mockCurrentModel = createMockModel("online");
     mockIsGenerating = false;
     mockStreamResponse.mockResolvedValue({ content: "AI response", wasAborted: false });
     mockCreateEmptyConversation.mockResolvedValue("new-conversation-id");
     mockAddMessage.mockResolvedValue("message-id");
+    
+    vi.mocked(useModel).mockImplementation(() => createMockModelContext({
+      currentModel: mockCurrentModel,
+      isModelLoading: false,
+      modelStatus: "Ready",
+    }) as ReturnType<typeof useModel>);
   });
+
 
   describe("initial state", () => {
     it("returns empty message initially", () => {
