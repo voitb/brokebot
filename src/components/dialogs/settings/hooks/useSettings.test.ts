@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSettings } from "./useSettings";
 import { mockToast } from "../../../../test/mocks/modules";
-import { createMockUserConfig } from "../../../../test/mocks/factories";
 import type { UserConfig } from "../../../../lib/db";
 
 const mockUpdateConfig = vi.fn();
@@ -34,12 +33,12 @@ describe("useSettings", () => {
     });
 
     it("syncs settings from config when available", async () => {
-      mockConfig = { theme: "dark", language: "en" };
+      mockConfig = { theme: "dark", username: "test" };
 
       const { result } = renderHook(() => useSettings());
 
       await waitFor(() => {
-        expect(result.current.settings).toEqual({ theme: "dark", language: "en" });
+        expect(result.current.settings).toEqual({ theme: "dark", username: "test" });
       });
     });
   });
@@ -62,19 +61,19 @@ describe("useSettings", () => {
     });
 
     it("preserves other fields when updating one", async () => {
-      mockConfig = { theme: "light", language: "en" };
+      mockConfig = { theme: "light", username: "test" };
 
       const { result } = renderHook(() => useSettings());
 
       await waitFor(() => {
-        expect(result.current.settings).toEqual({ theme: "light", language: "en" });
+        expect(result.current.settings).toEqual({ theme: "light", username: "test" });
       });
 
       act(() => {
         result.current.handleFieldChange("theme", "dark");
       });
 
-      expect(result.current.settings).toEqual({ theme: "dark", language: "en" });
+      expect(result.current.settings).toEqual({ theme: "dark", username: "test" });
     });
   });
 

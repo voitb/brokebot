@@ -8,7 +8,7 @@ const mockClearAllData = vi.fn();
 const mockExportConversations = vi.fn();
 const mockImportConversations = vi.fn();
 
-let mockConfig = { theme: "dark" };
+let mockConfig: { theme: "dark" | "light" | "system" } = { theme: "dark" };
 
 // react-router-dom is globally mocked in setup.ts
 // sonner is globally mocked in setup.ts

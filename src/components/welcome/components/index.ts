@@ -1,4 +1,4 @@
-export * from "./FeatureGrid";
-export * from "./GettingStarted";
-export * from "./WelcomeHeader";
-export * from "./PrivacyNotice"; 
+export { FeatureGrid } from "./FeatureGrid";
+export { GettingStarted } from "./GettingStarted";
+export { WelcomeHeader } from "./WelcomeHeader";
+export { PrivacyNotice } from "./PrivacyNotice"; 

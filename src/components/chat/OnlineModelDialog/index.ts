@@ -1,1 +1,1 @@
-export * from "./OnlineModelDialog"; 
+export { OnlineModelDialog } from "./OnlineModelDialog"; 

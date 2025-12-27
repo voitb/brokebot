@@ -1,1 +1,1 @@
-export * from "./SimpleModelSelector"; 
+export { SimpleModelSelector } from "./SimpleModelSelector"; 
