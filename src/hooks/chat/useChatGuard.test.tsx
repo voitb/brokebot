@@ -5,10 +5,10 @@ import { MemoryRouter } from "react-router-dom";
 import { useChatGuard } from "./useChatGuard";
 import { ConversationsProvider } from "../../providers/ConversationsProvider";
 import { clearTestDatabase, seedConversation } from "../../test/db-helpers";
-import { mockNavigate } from "../../test/mocks/modules";
+import { mockNavigate, mockToast } from "../../test/mocks/modules";
 
-// sonner is globally mocked in setup.ts
-// react-router-dom is globally mocked in setup.ts
+// sonner is globally mocked in setup.ts - use mockToast for assertions
+// react-router-dom is globally mocked in setup.ts - use mockNavigate for assertions
 
 describe("useChatGuard", () => {
   beforeEach(async () => {
@@ -53,7 +53,6 @@ describe("useChatGuard", () => {
   });
 
   it("clears timeout when conversation is found before timeout", async () => {
-    const { toast } = await import("sonner");
     const conv = await seedConversation({ title: "Found Conversation" });
 
     const { result } = renderHook(
@@ -68,7 +67,7 @@ describe("useChatGuard", () => {
     // Wait longer than timeout to ensure it was cleared
     await new Promise((resolve) => setTimeout(resolve, 150));
 
-    expect(toast.error).not.toHaveBeenCalled();
+    expect(mockToast.error).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
@@ -98,7 +97,6 @@ describe("useChatGuard timeout behavior", () => {
       useConversation: mockUseConversation,
     }));
 
-    const { toast } = await import("sonner");
     const { useChatGuard: useChatGuardMocked } = await import("./useChatGuard");
 
     renderHook(
@@ -108,7 +106,7 @@ describe("useChatGuard timeout behavior", () => {
 
     await vi.advanceTimersByTimeAsync(100);
 
-    expect(toast.error).toHaveBeenCalledWith("Conversation not found", {
+    expect(mockToast.error).toHaveBeenCalledWith("Conversation not found", {
       description: "The requested conversation does not exist.",
       duration: 4000,
     });
@@ -122,7 +120,6 @@ describe("useChatGuard timeout behavior", () => {
       useConversation: mockUseConversation,
     }));
 
-    const { toast } = await import("sonner");
     const { useChatGuard: useChatGuardMocked } = await import("./useChatGuard");
 
     renderHook(
@@ -131,10 +128,10 @@ describe("useChatGuard timeout behavior", () => {
     );
 
     await vi.advanceTimersByTimeAsync(500);
-    expect(toast.error).not.toHaveBeenCalled();
+    expect(mockToast.error).not.toHaveBeenCalled();
 
     await vi.advanceTimersByTimeAsync(500);
-    expect(toast.error).toHaveBeenCalled();
+    expect(mockToast.error).toHaveBeenCalled();
 
     vi.doUnmock("../useConversations");
   });

@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { v4 as uuidv4 } from "uuid";
 import type { Conversation, Message, Folder, Document, UserConfig } from "../../lib/db";
 
@@ -86,41 +87,68 @@ export function createMockLocalModel() {
   };
 }
 
-export function createMockWebLLMContext() {
+export interface MockWebLLMContextOverrides {
+  engine?: unknown;
+  isLoading?: boolean;
+  progress?: number;
+  status?: string;
+  selectedModel?: ReturnType<typeof createMockLocalModel>;
+  availableModels?: ReturnType<typeof createMockLocalModel>[];
+  setSelectedModel?: ReturnType<typeof vi.fn>;
+  loadModel?: ReturnType<typeof vi.fn>;
+}
+
+export function createMockWebLLMContext(overrides: MockWebLLMContextOverrides = {}) {
   const mockModel = createMockLocalModel();
   return {
-    engine: null,
-    isLoading: false,
-    progress: 1,
-    status: "Ready",
-    selectedModel: mockModel,
-    availableModels: [mockModel],
-    setSelectedModel: () => {},
-    loadModel: () => Promise.resolve(),
+    engine: overrides.engine ?? null,
+    isLoading: overrides.isLoading ?? false,
+    progress: overrides.progress ?? 1,
+    status: overrides.status ?? "Ready",
+    selectedModel: overrides.selectedModel ?? mockModel,
+    availableModels: overrides.availableModels ?? [mockModel],
+    setSelectedModel: overrides.setSelectedModel ?? vi.fn(),
+    loadModel: overrides.loadModel ?? vi.fn().mockResolvedValue(undefined),
   };
 }
 
-export function createMockModelContext() {
+export interface MockModelContextOverrides {
+  currentModel?: { id: string; name: string; type: "local" | "online"; description?: string } | null;
+  isOnlineMode?: boolean;
+  isModelLoading?: boolean;
+  isModelSwitching?: boolean;
+  modelStatus?: string;
+  availableOnlineModels?: unknown[];
+  isLoadingAvailableModels?: boolean;
+  availableModelsError?: Error | null;
+  setCurrentModel?: ReturnType<typeof vi.fn>;
+  sendMessage?: ReturnType<typeof vi.fn>;
+  streamMessage?: () => AsyncGenerator<{ content: string; isComplete: boolean }, void, unknown>;
+  interruptGeneration?: ReturnType<typeof vi.fn>;
+  resetChat?: ReturnType<typeof vi.fn>;
+}
+
+export function createMockModelContext(overrides: MockModelContextOverrides = {}) {
   return {
-    currentModel: {
+    currentModel: overrides.currentModel !== undefined ? overrides.currentModel : {
       id: "test-model",
       name: "Test Model",
       type: "online" as const,
       description: "A test model for unit tests",
     },
-    isOnlineMode: true,
-    isModelLoading: false,
-    isModelSwitching: false,
-    modelStatus: "Ready",
-    availableOnlineModels: [],
-    isLoadingAvailableModels: false,
-    availableModelsError: null,
-    setCurrentModel: () => {},
-    sendMessage: () => Promise.resolve("Test response"),
-    streamMessage: async function* () {
+    isOnlineMode: overrides.isOnlineMode ?? true,
+    isModelLoading: overrides.isModelLoading ?? false,
+    isModelSwitching: overrides.isModelSwitching ?? false,
+    modelStatus: overrides.modelStatus ?? "Ready",
+    availableOnlineModels: overrides.availableOnlineModels ?? [],
+    isLoadingAvailableModels: overrides.isLoadingAvailableModels ?? false,
+    availableModelsError: overrides.availableModelsError ?? null,
+    setCurrentModel: overrides.setCurrentModel ?? vi.fn(),
+    sendMessage: overrides.sendMessage ?? vi.fn().mockResolvedValue("Test response"),
+    streamMessage: overrides.streamMessage ?? async function* () {
       yield { content: "Test", isComplete: true };
     },
-    interruptGeneration: () => {},
-    resetChat: () => Promise.resolve(),
+    interruptGeneration: overrides.interruptGeneration ?? vi.fn(),
+    resetChat: overrides.resetChat ?? vi.fn().mockResolvedValue(undefined),
   };
 }

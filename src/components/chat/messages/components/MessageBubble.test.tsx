@@ -2,25 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { render } from "../../../../test/utils";
 import { MessageBubble } from "./MessageBubble";
-import { createMockMessage } from "../../../../test/mocks/factories";
+import { createMockMessage } from "../../../../test/mocks/modules";
 
-vi.mock("../../../../providers/WebLLMProvider", () => ({
-  useWebLLM: vi.fn(() => ({
-    isLoading: false,
-    status: "Ready",
-  })),
-  AVAILABLE_MODELS: [{
-    id: "test-model",
-    name: "Test Model",
-    size: "1B",
-    description: "Test model",
-    ramRequirement: "1GB",
-    downloadSize: "~500MB",
-    performance: "Fast",
-    category: "light",
-    modelType: "LLM",
-  }],
-}));
+vi.mock("../../../../providers/WebLLMProvider", async () => {
+  const { createMinimalWebLLMProvider } = await import("../../../../test/mocks/providers");
+  return createMinimalWebLLMProvider();
+});
 
 import { useWebLLM } from "../../../../providers/WebLLMProvider";
 
