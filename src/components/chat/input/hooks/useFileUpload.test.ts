@@ -264,7 +264,7 @@ describe("useFileUpload", () => {
     });
   });
 
-  describe("setAttachedFiles", () => {
+  describe("clearFiles", () => {
     it("allows clearing all files", async () => {
       const { result } = renderHook(() =>
         useFileUpload({ supportsImages: true, selectedModelName: "GPT-4" })
@@ -278,10 +278,42 @@ describe("useFileUpload", () => {
       });
 
       act(() => {
-        result.current.setAttachedFiles([]);
+        result.current.clearFiles();
       });
 
       expect(result.current.attachedFiles).toHaveLength(0);
+    });
+  });
+
+  describe("replaceFiles", () => {
+    it("allows replacing all files", async () => {
+      const { result } = renderHook(() =>
+        useFileUpload({ supportsImages: true, selectedModelName: "GPT-4" })
+      );
+
+      const file1 = createMockFile("test1.txt", "Content 1");
+      const file2 = createMockFile("test2.txt", "Content 2");
+      const fileList = createMockFileList([file1, file2]);
+
+      await act(async () => {
+        await result.current.handleFilesSelected(fileList);
+      });
+
+      expect(result.current.attachedFiles).toHaveLength(2);
+
+      const newFile: AttachedFile = {
+        id: "new-id",
+        file: createMockFile("new.txt", "New content"),
+        type: "text",
+        content: "New content",
+      };
+
+      act(() => {
+        result.current.replaceFiles([newFile]);
+      });
+
+      expect(result.current.attachedFiles).toHaveLength(1);
+      expect(result.current.attachedFiles[0].id).toBe("new-id");
     });
   });
 

@@ -3,17 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "../../../../hooks/useConversations";
 import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
-import { toast } from "sonner";
 import {
   findLastMessageByRole,
   buildPrompt,
   truncateTitle,
+  ERROR_MESSAGE_PREFIX,
 } from "../utils/chatInputUtils";
 import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
-const ERROR_GENERATING = "Error generating response. Please try regenerating or check your API key configuration.";
-const ERROR_REGENERATING = "Error regenerating response. Please try again.";
+const ERROR_GENERATING = `${ERROR_MESSAGE_PREFIX}Error generating response. Please try regenerating or check your API key configuration.`;
+const ERROR_REGENERATING = `${ERROR_MESSAGE_PREFIX}Error regenerating response. Please try again.`;
 
 interface UseChatInputReturn {
   message: string;
@@ -68,14 +68,14 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       if (error) {
-        showErrorToast(error, () => handleMessageSubmit(content), navigate);
+        showErrorToast(error, { onRetry: () => handleMessageSubmit(content), navigate });
         updateMessage(activeConversationId, responseId, ERROR_GENERATING);
         return;
       }
 
       await updateMessage(activeConversationId, responseId, response);
     } catch (error) {
-      showErrorToast(error, undefined, navigate);
+      showErrorToast(error, { navigate });
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +88,7 @@ export function useChatInput(): UseChatInputReturn {
     const lastUser = findLastMessageByRole(messages, "user");
     if (!lastAssistant || !lastUser || !currentModel) return;
 
-    updateMessage(conversationId, lastAssistant.id, "");
+    await updateMessage(conversationId, lastAssistant.id, "");
 
     try {
       const prompt = buildPrompt(
@@ -102,11 +102,11 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       if (error) {
-        toast.error(ERROR_REGENERATING);
+        showErrorToast(error, { onRetry: () => regenerateLastResponse(), navigate });
         updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
       }
     } catch (error) {
-      showErrorToast(error, undefined, navigate);
+      showErrorToast(error, { navigate });
       updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
     }
   };

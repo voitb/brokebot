@@ -107,17 +107,17 @@ describe("chatInputUtils", () => {
       expect(result[result.length - 1].content).toBe("New question");
     });
 
-    it("filters out error messages starting with Error prefix", () => {
+    it("filters out error messages starting with ERROR_MESSAGE_PREFIX", () => {
       const messages: OpenRouterMessage[] = [
         { role: "user", content: "Hello" },
-        { role: "assistant", content: "Error generating response. Please try again." },
+        { role: "assistant", content: "[ERROR]: Error generating response. Please try again." },
         { role: "user", content: "Retry" },
       ];
 
       const result = buildPrompt(messages, "New message", { mode: "online" });
 
       const allContent = result.map((m) => m.content).join(" ");
-      expect(allContent).not.toContain("Error generating");
+      expect(allContent).not.toContain("[ERROR]:");
     });
 
     it("limits conversation history to last 10 messages for online", () => {
