@@ -8,12 +8,9 @@ import {
   seedConversation,
   seedFolder,
 } from "../../../../test/db-helpers";
+import { mockNavigate } from "../../../../test/mocks/modules";
 
-const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return { ...actual, useNavigate: () => mockNavigate };
-});
+// react-router-dom is globally mocked in setup.ts
 
 describe("useConversationList", () => {
   beforeEach(async () => {

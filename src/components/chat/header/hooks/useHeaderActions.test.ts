@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useHeaderActions } from "./useHeaderActions";
-import { toast } from "sonner";
+import { mockNavigate, mockToast } from "../../../../test/mocks/modules";
 
-const mockNavigate = vi.fn();
 const mockSearchParams = new URLSearchParams();
 const mockTogglePinConversation = vi.fn();
 const mockUpdateConversationTitle = vi.fn();
@@ -16,10 +15,15 @@ let mockConversations = [
 ];
 let mockConversation = { id: "conv-1", title: "Test Conversation", messages: [] };
 
-vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
-  useSearchParams: () => [mockSearchParams],
-}));
+// This file needs custom useSearchParams mock, so we override the global mock
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    useSearchParams: () => [mockSearchParams],
+  };
+});
 
 vi.mock("../../../../hooks/useConversations", () => ({
   useConversations: () => ({
@@ -40,13 +44,7 @@ vi.mock("../../../../hooks/useUserConfig", () => ({
   }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-    info: vi.fn(),
-  },
-}));
+// sonner is globally mocked in setup.ts, use mockToast for assertions
 
 describe("useHeaderActions", () => {
   beforeEach(() => {
@@ -234,7 +232,7 @@ describe("useHeaderActions", () => {
       });
 
       expect(mockDeleteConversation).toHaveBeenCalledWith("conv-1");
-      expect(toast.success).toHaveBeenCalledWith("Conversation deleted successfully.");
+      expect(mockToast.success).toHaveBeenCalledWith("Conversation deleted successfully.");
       expect(mockNavigate).toHaveBeenCalledWith("/chat");
     });
 
@@ -249,7 +247,7 @@ describe("useHeaderActions", () => {
         await result.current.handleDeleteConfirm();
       });
 
-      expect(toast.error).toHaveBeenCalledWith("Failed to delete conversation.");
+      expect(mockToast.error).toHaveBeenCalledWith("Failed to delete conversation.");
     });
   });
 

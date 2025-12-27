@@ -5,16 +5,10 @@ import { MemoryRouter } from "react-router-dom";
 import { useChatGuard } from "./useChatGuard";
 import { ConversationsProvider } from "../../providers/ConversationsProvider";
 import { clearTestDatabase, seedConversation } from "../../test/db-helpers";
+import { mockNavigate } from "../../test/mocks/modules";
 
-vi.mock("sonner", () => ({
-  toast: { error: vi.fn() },
-}));
-
-const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return { ...actual, useNavigate: () => mockNavigate };
-});
+// sonner is globally mocked in setup.ts
+// react-router-dom is globally mocked in setup.ts
 
 describe("useChatGuard", () => {
   beforeEach(async () => {

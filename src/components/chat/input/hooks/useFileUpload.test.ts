@@ -1,19 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useFileUpload, type AttachedFile } from "./useFileUpload";
+import { mockToast, createMockFile, createMockFileList } from "../../../../test/mocks/modules";
 
 // Helper to assert file result is defined after act() completes
 function assertFile(file: AttachedFile | null): AttachedFile {
   if (!file) throw new Error("File not initialized");
   return file;
 }
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
 
 const mockUploadDocument = vi.fn();
 
@@ -22,31 +16,6 @@ vi.mock("../../../../hooks/useDocuments", () => ({
     uploadDocument: mockUploadDocument,
   }),
 }));
-
-function createMockFile(name: string, content: string, type = "text/plain", size?: number): File {
-  const blob = new Blob([content], { type });
-  const file = new File([blob], name, { type });
-  if (size !== undefined) {
-    Object.defineProperty(file, "size", { value: size });
-  }
-  return file;
-}
-
-function createMockFileList(files: File[]): FileList {
-  const fileList = {
-    length: files.length,
-    item: (index: number) => files[index] || null,
-    [Symbol.iterator]: function* () {
-      for (const file of files) {
-        yield file;
-      }
-    },
-  };
-  files.forEach((file, index) => {
-    (fileList as Record<number, File>)[index] = file;
-  });
-  return fileList as unknown as FileList;
-}
 
 describe("useFileUpload", () => {
   beforeEach(() => {
@@ -115,7 +84,6 @@ describe("useFileUpload", () => {
     });
 
     it("rejects image files when not supported", async () => {
-      const { toast } = await import("sonner");
       const { result } = renderHook(() =>
         useFileUpload({ supportsImages: false, selectedModelName: "GPT-3.5" })
       );
@@ -128,13 +96,12 @@ describe("useFileUpload", () => {
       });
 
       expect(result.current.attachedFiles).toHaveLength(0);
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         expect.stringContaining("Images are only supported by vision models")
       );
     });
 
     it("rejects files larger than 10MB", async () => {
-      const { toast } = await import("sonner");
       const { result } = renderHook(() =>
         useFileUpload({ supportsImages: true, selectedModelName: "GPT-4" })
       );
@@ -147,7 +114,7 @@ describe("useFileUpload", () => {
       });
 
       expect(result.current.attachedFiles).toHaveLength(0);
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         expect.stringContaining("too large")
       );
     });

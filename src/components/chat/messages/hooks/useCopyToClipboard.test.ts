@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCopyToClipboard } from "./useCopyToClipboard";
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
+import { mockToast } from "../../../../test/mocks/modules";
 
 describe("useCopyToClipboard", () => {
   const mockWriteText = vi.fn();
@@ -50,14 +44,13 @@ describe("useCopyToClipboard", () => {
   });
 
   it("shows success toast on copy", async () => {
-    const { toast } = await import("sonner");
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
       await result.current.copyToClipboard("Test");
     });
 
-    expect(toast.success).toHaveBeenCalledWith("Copied to clipboard");
+    expect(mockToast.success).toHaveBeenCalledWith("Copied to clipboard");
   });
 
   it("resets copied state after 2 seconds", async () => {
@@ -78,14 +71,13 @@ describe("useCopyToClipboard", () => {
 
   it("shows error toast on failure", async () => {
     mockWriteText.mockRejectedValueOnce(new Error("Clipboard error"));
-    const { toast } = await import("sonner");
     const { result } = renderHook(() => useCopyToClipboard());
 
     await act(async () => {
       await result.current.copyToClipboard("Test");
     });
 
-    expect(toast.error).toHaveBeenCalledWith("Failed to copy to clipboard");
+    expect(mockToast.error).toHaveBeenCalledWith("Failed to copy to clipboard");
   });
 
   it("does not set copied state on failure", async () => {

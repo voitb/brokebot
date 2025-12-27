@@ -3,18 +3,7 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useDocuments } from "./useDocuments";
 import { db, type Document } from "../lib/db";
 import { clearTestDatabase } from "../test/db-helpers";
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
-function createMockFile(name: string, content: string, type = "text/plain"): File {
-  const blob = new Blob([content], { type });
-  return new File([blob], name, { type });
-}
+import { mockToast, createMockFile } from "../test/mocks/modules";
 
 describe("useDocuments", () => {
   beforeEach(async () => {
@@ -97,7 +86,6 @@ describe("useDocuments", () => {
 
     it("rejects unsupported file types", async () => {
       const { result } = renderHook(() => useDocuments());
-      const { toast } = await import("sonner");
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -111,14 +99,13 @@ describe("useDocuments", () => {
       });
 
       expect(uploadedDoc).toBeNull();
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         "Unsupported file type. Only .txt and .md files are supported."
       );
     });
 
     it("rejects files larger than 10MB", async () => {
       const { result } = renderHook(() => useDocuments());
-      const { toast } = await import("sonner");
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -133,12 +120,11 @@ describe("useDocuments", () => {
       });
 
       expect(uploadedDoc).toBeNull();
-      expect(toast.error).toHaveBeenCalledWith("File too large. Maximum size is 10MB.");
+      expect(mockToast.error).toHaveBeenCalledWith("File too large. Maximum size is 10MB.");
     });
 
     it("rejects empty files", async () => {
       const { result } = renderHook(() => useDocuments());
-      const { toast } = await import("sonner");
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -152,7 +138,7 @@ describe("useDocuments", () => {
       });
 
       expect(uploadedDoc).toBeNull();
-      expect(toast.error).toHaveBeenCalledWith("File appears to be empty.");
+      expect(mockToast.error).toHaveBeenCalledWith("File appears to be empty.");
     });
 
     it("adds document to local state", async () => {

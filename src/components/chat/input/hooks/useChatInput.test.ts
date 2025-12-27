@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useChatInput } from "./useChatInput";
+import { mockNavigate } from "../../../../test/mocks/modules";
 
-const mockNavigate = vi.fn();
 const mockCreateEmptyConversation = vi.fn();
 const mockAddMessage = vi.fn();
 const mockUpdateMessage = vi.fn();
@@ -15,9 +15,7 @@ let mockMessages: Array<{ id: string; role: string; content: string }> = [];
 let mockCurrentModel: { type: string } | null = { type: "online" };
 let mockIsGenerating = false;
 
-vi.mock("react-router-dom", () => ({
-  useNavigate: () => mockNavigate,
-}));
+// react-router-dom is globally mocked in setup.ts
 
 vi.mock("../../../../hooks/useConversations", () => ({
   useConversations: () => ({
@@ -51,12 +49,6 @@ vi.mock("./useMessageStream", () => ({
 
 vi.mock("../utils/chatErrorUtils", () => ({
   showErrorToast: vi.fn(),
-}));
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-  },
 }));
 
 describe("useChatInput", () => {

@@ -5,13 +5,10 @@ import { MemoryRouter } from "react-router-dom";
 import { useConversationItem } from "./useConversationItem";
 import { ConversationsProvider } from "../../../../providers/ConversationsProvider";
 import { clearTestDatabase, seedConversation } from "../../../../test/db-helpers";
+import { mockNavigate } from "../../../../test/mocks/modules";
 import type { Conversation } from "../../../../lib/db";
 
-const mockNavigate = vi.fn();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return { ...actual, useNavigate: () => mockNavigate };
-});
+// react-router-dom is globally mocked in setup.ts
 
 describe("useConversationItem", () => {
   let testConversation: Conversation;

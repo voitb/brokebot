@@ -4,13 +4,6 @@ import { useUserConfig } from "./useUserConfig";
 import { db, DEFAULT_USER_CONFIG } from "../lib/db";
 import { clearTestDatabase, seedConversation, seedFolder, seedDocument } from "../test/db-helpers";
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
 vi.mock("../lib/encryptionService", () => ({
   encryptValue: vi.fn((val: string) => Promise.resolve(`encrypted_${val}`)),
   decryptValue: vi.fn((val: string) => Promise.resolve(val.replace("encrypted_", ""))),
