@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSpeechToText } from "./useSpeechToText";
-import { MockMediaRecorder, MockMediaStream } from "../../../../test/mocks/modules";
+import { setupMediaMocks } from "../../../../test/mocks/modules";
 
 const mockGetTranscriber = vi.fn();
 
@@ -11,30 +11,11 @@ vi.mock("../../../../lib/transcriber", () => ({
 
 describe("useSpeechToText", () => {
   const mockOnTranscriptReceived = vi.fn();
-  let originalMediaDevices: typeof navigator.mediaDevices;
-  let originalMediaRecorder: typeof MediaRecorder;
-  let originalURL: typeof URL;
+  let cleanupMediaMocks: () => void;
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock URL
-    originalURL = globalThis.URL;
-    globalThis.URL.createObjectURL = vi.fn(() => "blob:mock-url");
-    globalThis.URL.revokeObjectURL = vi.fn();
-
-    // Mock MediaRecorder
-    originalMediaRecorder = globalThis.MediaRecorder;
-    globalThis.MediaRecorder = MockMediaRecorder as unknown as typeof MediaRecorder;
-
-    // Mock navigator.mediaDevices
-    originalMediaDevices = navigator.mediaDevices;
-    Object.defineProperty(navigator, "mediaDevices", {
-      value: {
-        getUserMedia: vi.fn().mockResolvedValue(new MockMediaStream()),
-      },
-      configurable: true,
-    });
+    cleanupMediaMocks = setupMediaMocks();
 
     // Default: transcriber loads successfully
     mockGetTranscriber.mockResolvedValue(
@@ -43,12 +24,7 @@ describe("useSpeechToText", () => {
   });
 
   afterEach(() => {
-    globalThis.MediaRecorder = originalMediaRecorder;
-    globalThis.URL = originalURL;
-    Object.defineProperty(navigator, "mediaDevices", {
-      value: originalMediaDevices,
-      configurable: true,
-    });
+    cleanupMediaMocks();
   });
 
   describe("initialization", () => {

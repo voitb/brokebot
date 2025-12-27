@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { parseApiError, showErrorToast } from "./chatErrorUtils";
-import { toast } from "sonner";
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}));
+import { mockToast } from "../../../../test/mocks/modules";
 
 describe("chatErrorUtils", () => {
   beforeEach(() => {
@@ -124,7 +118,7 @@ describe("chatErrorUtils", () => {
 
       showErrorToast(error);
 
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         expect.stringContaining("API key error"),
         expect.objectContaining({
           action: expect.objectContaining({
@@ -140,7 +134,7 @@ describe("chatErrorUtils", () => {
 
       showErrorToast(error, { onRetry: retryFn });
 
-      expect(toast.error).toHaveBeenCalledWith(
+      expect(mockToast.error).toHaveBeenCalledWith(
         expect.stringContaining("Network error"),
         expect.objectContaining({
           action: expect.objectContaining({
@@ -156,7 +150,7 @@ describe("chatErrorUtils", () => {
 
       showErrorToast(error, { navigate: navigateFn });
 
-      expect(toast.error).toHaveBeenCalled();
+      expect(mockToast.error).toHaveBeenCalled();
     });
   });
 });
