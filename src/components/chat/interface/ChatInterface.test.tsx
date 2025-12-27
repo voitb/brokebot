@@ -16,24 +16,14 @@ vi.mock("../../../providers/ModelProvider", () => ({
   ModelProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("../../../providers/WebLLMProvider", () => ({
-  useWebLLM: () => mockWebLLMContext,
-  WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
-  AVAILABLE_MODELS: [
-    {
-      id: "test-model",
-      name: "Test Model",
-      size: "1B",
-      description: "Test model",
-      ramRequirement: "2GB",
-      downloadSize: "~500MB",
-      performance: "Fast",
-      category: "light",
-      modelType: "LLM",
-      specialization: "general",
-    },
-  ],
-}));
+vi.mock("../../../providers/WebLLMProvider", async () => {
+  const { MOCK_AVAILABLE_MODELS } = await import("../../../test/mocks/constants");
+  return {
+    useWebLLM: () => mockWebLLMContext,
+    WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
+    AVAILABLE_MODELS: MOCK_AVAILABLE_MODELS,
+  };
+});
 
 vi.mock("../../../lib/transcriber", () => ({
   getTranscriber: vi.fn().mockResolvedValue(() => Promise.resolve({ text: "" })),

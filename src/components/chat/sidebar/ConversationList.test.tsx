@@ -25,23 +25,10 @@ vi.mock("../../../providers/ConversationsProvider", () => ({
   })),
 }));
 
-vi.mock("../../../providers/WebLLMProvider", () => ({
-  useWebLLM: vi.fn(() => ({
-    isLoading: false,
-    status: "Ready",
-  })),
-  AVAILABLE_MODELS: [{
-    id: "test-model",
-    name: "Test Model",
-    size: "1B",
-    description: "Test model",
-    ramRequirement: "1GB",
-    downloadSize: "~500MB",
-    performance: "Fast",
-    category: "light",
-    modelType: "LLM",
-  }],
-}));
+vi.mock("../../../providers/WebLLMProvider", async () => {
+  const { createMinimalWebLLMProvider } = await import("../../../test/mocks/providers");
+  return createMinimalWebLLMProvider();
+});
 
 import { useConversationList } from "./hooks/useConversationList";
 import { useConversations } from "../../../providers/ConversationsProvider";

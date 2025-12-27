@@ -2,39 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ChatInput } from "./ChatInput";
 
-vi.mock("../../../providers/ModelProvider", () => ({
-  useModel: vi.fn(() => ({
-    currentModel: { name: "Test Model", type: "online" },
-    isModelLoading: false,
-    modelStatus: "Ready",
-  })),
-}));
+vi.mock("../../../providers/ModelProvider", async () => {
+  const { createMinimalModelProvider } = await import("../../../test/mocks/providers");
+  return createMinimalModelProvider();
+});
 
-vi.mock("../../../providers/WebLLMProvider", () => {
-  const mockModel = {
-    id: "test-model",
-    name: "Test Model",
-    size: "1B",
-    description: "Test model",
-    ramRequirement: "1GB",
-    downloadSize: "~500MB",
-    performance: "Fast",
-    category: "light",
-    modelType: "LLM",
-  };
-  return {
-    useWebLLM: vi.fn(() => ({
-      engine: null,
-      isLoading: false,
-      progress: 1,
-      status: "Ready",
-      selectedModel: mockModel,
-      availableModels: [mockModel],
-      setSelectedModel: vi.fn(),
-      loadModel: vi.fn(),
-    })),
-    AVAILABLE_MODELS: [mockModel],
-  };
+vi.mock("../../../providers/WebLLMProvider", async () => {
+  const { createMockWebLLMProvider } = await import("../../../test/mocks/providers");
+  return createMockWebLLMProvider();
 });
 
 vi.mock("./hooks", () => ({
