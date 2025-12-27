@@ -8,9 +8,6 @@ interface UseDragDropReturn {
   handleDragEnter: (e: React.DragEvent) => void;
 }
 
-/**
- * Hook for drag and drop functionality with proper overlay handling
- */
 export function useDragDrop(): UseDragDropReturn {
   const [isDragOver, setIsDragOver] = useState(false);
   const dragCounter = useRef(0);
@@ -19,9 +16,8 @@ export function useDragDrop(): UseDragDropReturn {
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current++;
-    
-    // Check if we're dragging files
-    if (e.dataTransfer.types.includes('Files')) {
+
+    if (e.dataTransfer.types.includes("Files")) {
       setIsDragOver(true);
     }
   };

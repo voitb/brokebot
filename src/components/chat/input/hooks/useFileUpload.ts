@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { useDocuments } from "../../../../hooks/useDocuments";
 import type { Document } from "../../../../lib/db";
 
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
 export interface AttachedFile {
   id: string;
   file: File;
@@ -25,9 +27,6 @@ interface UseFileUploadReturn {
   processFile: (file: File) => Promise<AttachedFile>;
 }
 
-/**
- * Custom hook for file upload management
- */
 export const useFileUpload = ({
   supportsImages,
   selectedModelName,
@@ -47,6 +46,7 @@ export const useFileUpload = ({
       preview = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => resolve(undefined);
         reader.readAsDataURL(file);
       });
     } else if (
@@ -73,7 +73,6 @@ export const useFileUpload = ({
     return { id, file, preview, type, content, document };
   };
 
-  // Helper function to read file content
   const readFileContent = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -88,18 +87,14 @@ export const useFileUpload = ({
   };
 
   const handleFilesSelected = async (files: FileList) => {
-    const newFiles: AttachedFile[] = [];
+    const validFiles: File[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-
-      // Check file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+    for (const file of Array.from(files)) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
         toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
         continue;
       }
 
-      // For images, check if model supports them
       if (file.type.startsWith("image/") && !supportsImages) {
         toast.error(
           `Images are only supported by vision models. Current model: ${selectedModelName}`
@@ -107,11 +102,11 @@ export const useFileUpload = ({
         continue;
       }
 
-      const processedFile = await processFile(file);
-      newFiles.push(processedFile);
+      validFiles.push(file);
     }
 
-    setAttachedFiles((prev) => [...prev, ...newFiles]);
+    const processedFiles = await Promise.all(validFiles.map(processFile));
+    setAttachedFiles((prev) => [...prev, ...processedFiles]);
   };
 
   const removeFile = (fileId: string) => {

@@ -8,6 +8,8 @@ import { buildPrompt } from "../utils/chatInputUtils";
 import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
+const TITLE_MAX_LENGTH = 50;
+
 interface UseChatInputReturn {
   message: string;
   setMessage: (message: string) => void;
@@ -69,34 +71,37 @@ export function useChatInput(): UseChatInputReturn {
 
       if (isNewConversation) {
         const title =
-          messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
+          messageContent.slice(0, TITLE_MAX_LENGTH) +
+          (messageContent.length > TITLE_MAX_LENGTH ? "..." : "");
         await updateConversationTitle(currentConversationId, title);
       }
 
-      if (currentModel) {
-        const conversationMessages = buildPrompt(
-          messages,
-          messageContent,
-          currentModel.type === "online"
+      if (!responseMessageId || !currentConversationId || !currentModel) {
+        throw new Error("Failed to create response message");
+      }
+
+      const conversationMessages = buildPrompt(
+        messages,
+        messageContent,
+        currentModel.type === "online"
+      );
+
+      const result = await streamResponse(conversationMessages, (content) => {
+        updateMessage(currentConversationId as string, responseMessageId as string, content);
+      });
+
+      if (result.error) {
+        showErrorToast(result.error, () => handleMessageSubmit(messageContent), navigate);
+        updateMessage(
+          currentConversationId,
+          responseMessageId,
+          "⚠️ Error generating response. Please try regenerating or check your API key configuration."
         );
-
-        const result = await streamResponse(conversationMessages, (content) => {
-          updateMessage(currentConversationId!, responseMessageId!, content);
-        });
-
-        if (result.error) {
-          showErrorToast(result.error, () => handleMessageSubmit(messageContent));
-          updateMessage(
-            currentConversationId,
-            responseMessageId,
-            "⚠️ Error generating response. Please try regenerating or check your API key configuration."
-          );
-        } else {
-          await updateMessage(currentConversationId, responseMessageId, result.content);
-        }
+      } else {
+        await updateMessage(currentConversationId, responseMessageId, result.content);
       }
     } catch (error) {
-      showErrorToast(error);
+      showErrorToast(error, undefined, navigate);
       if (currentConversationId && responseMessageId) {
         updateMessage(
           currentConversationId,
@@ -126,28 +131,37 @@ export function useChatInput(): UseChatInputReturn {
 
     updateMessage(conversationId, lastAiMessage.id, "");
 
-    if (currentModel) {
-      const messagesToProcess = messages.slice(0, -1);
-      const conversationMessages = buildPrompt(
-        messagesToProcess,
-        lastUserMessage.content,
-        currentModel.type === "online"
-      );
-
-      const result = await streamResponse(conversationMessages, (content) => {
-        updateMessage(conversationId, lastAiMessage.id, content);
-      });
-
-      if (result.error) {
-        toast.error("Failed to regenerate response. Please try again.");
-        updateMessage(
-          conversationId,
-          lastAiMessage.id,
-          "⚠️ Error regenerating response. Please try again."
+    try {
+      if (currentModel) {
+        const messagesToProcess = messages.slice(0, -1);
+        const conversationMessages = buildPrompt(
+          messagesToProcess,
+          lastUserMessage.content,
+          currentModel.type === "online"
         );
-      } else {
-        await updateMessage(conversationId, lastAiMessage.id, result.content);
+
+        const result = await streamResponse(conversationMessages, (content) => {
+          updateMessage(conversationId, lastAiMessage.id, content);
+        });
+
+        if (result.error) {
+          toast.error("Failed to regenerate response. Please try again.");
+          updateMessage(
+            conversationId,
+            lastAiMessage.id,
+            "⚠️ Error regenerating response. Please try again."
+          );
+        } else {
+          await updateMessage(conversationId, lastAiMessage.id, result.content);
+        }
       }
+    } catch (error) {
+      showErrorToast(error, undefined, navigate);
+      updateMessage(
+        conversationId,
+        lastAiMessage.id,
+        "⚠️ Error regenerating response. Please try again."
+      );
     }
   };
 

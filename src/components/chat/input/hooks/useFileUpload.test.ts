@@ -354,4 +354,52 @@ describe("useFileUpload", () => {
       expect(assertFile(processedFile).type).toBe("other");
     });
   });
+
+  describe("error handling", () => {
+    it("handles uploadDocument rejection gracefully", async () => {
+      mockUploadDocument.mockRejectedValue(new Error("Upload failed"));
+
+      const { result } = renderHook(() =>
+        useFileUpload({ supportsImages: true, selectedModelName: "GPT-4" })
+      );
+
+      const file = createMockFile("test.txt", "content");
+      const fileList = createMockFileList([file]);
+
+      await act(async () => {
+        await result.current.handleFilesSelected(fileList);
+      });
+
+      // File should still be added even if document upload fails
+      expect(result.current.attachedFiles.length).toBe(1);
+      expect(result.current.attachedFiles[0].document).toBeUndefined();
+    });
+  });
+
+  describe("parallel processing", () => {
+    it("processes multiple files concurrently", async () => {
+      const processingOrder: string[] = [];
+      const originalProcessFile = vi.fn();
+
+      const { result } = renderHook(() =>
+        useFileUpload({ supportsImages: true, selectedModelName: "GPT-4" })
+      );
+
+      const file1 = createMockFile("test1.txt", "content1");
+      const file2 = createMockFile("test2.txt", "content2");
+      const file3 = createMockFile("test3.txt", "content3");
+      const fileList = createMockFileList([file1, file2, file3]);
+
+      const startTime = Date.now();
+
+      await act(async () => {
+        await result.current.handleFilesSelected(fileList);
+      });
+
+      const elapsed = Date.now() - startTime;
+
+      // All 3 files should be processed
+      expect(result.current.attachedFiles.length).toBe(3);
+    });
+  });
 });

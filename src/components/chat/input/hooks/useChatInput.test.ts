@@ -368,4 +368,88 @@ describe("useChatInput", () => {
       expect(mockStopGeneration).toHaveBeenCalled();
     });
   });
+
+  describe("concurrent submission prevention", () => {
+    it("does not allow double-submit while loading", async () => {
+      mockConversationId = "test-id";
+      let resolveStream: (value: { content: string; wasAborted: boolean }) => void;
+      mockStreamResponse.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStream = resolve;
+          })
+      );
+
+      const { result } = renderHook(() => useChatInput());
+
+      act(() => {
+        result.current.setMessage("First message");
+      });
+
+      // Start first submission (don't await)
+      let submitPromise: Promise<void>;
+      act(() => {
+        submitPromise = result.current.handleMessageSubmit();
+      });
+
+      // Try to submit again while first is loading
+      act(() => {
+        result.current.setMessage("Second message");
+      });
+
+      await act(async () => {
+        await result.current.handleMessageSubmit();
+      });
+
+      // Should only have been called once
+      expect(mockAddMessage).toHaveBeenCalledTimes(2); // user + assistant for first
+
+      // Resolve the stream
+      await act(async () => {
+        resolveStream!({ content: "Response", wasAborted: false });
+        await submitPromise!;
+      });
+    });
+
+    it("does not allow submit while generating", async () => {
+      mockConversationId = "test-id";
+      mockIsGenerating = true;
+
+      const { result } = renderHook(() => useChatInput());
+
+      act(() => {
+        result.current.setMessage("Test message");
+      });
+
+      await act(async () => {
+        await result.current.handleMessageSubmit();
+      });
+
+      expect(mockAddMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("error handling in regenerateLastResponse", () => {
+    it("handles streamResponse errors gracefully", async () => {
+      mockConversationId = "test-id";
+      mockMessages = [
+        { id: "1", role: "user", content: "Hello" },
+        { id: "2", role: "assistant", content: "Hi there" },
+      ];
+      mockStreamResponse.mockRejectedValue(new Error("Stream failed"));
+
+      const { result } = renderHook(() => useChatInput());
+
+      await act(async () => {
+        await result.current.regenerateLastResponse();
+      });
+
+      // Should update message with error
+      expect(mockUpdateMessage).toHaveBeenCalledWith(
+        "test-id",
+        "2",
+        "⚠️ Error regenerating response. Please try again."
+      );
+    });
+  });
 });

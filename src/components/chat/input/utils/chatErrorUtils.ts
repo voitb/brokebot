@@ -1,5 +1,7 @@
 import { toast } from "sonner";
 
+type NavigateFn = (options: { search: string }) => void;
+
 export interface ErrorAction {
   label: string;
   onClick: () => void;
@@ -10,12 +12,30 @@ export interface ParsedError {
   action: ErrorAction;
 }
 
-/**
- * Parses API errors and returns user-friendly messages with appropriate actions
- */
+function navigateToSettings(navigate?: NavigateFn) {
+  if (navigate) {
+    navigate({ search: "modal=settings" });
+  } else {
+    const url = new URL(window.location.href);
+    url.searchParams.set("modal", "settings");
+    window.location.href = url.toString();
+  }
+}
+
+function navigateToModelSelector(navigate?: NavigateFn) {
+  if (navigate) {
+    navigate({ search: "modal=model-selector" });
+  } else {
+    const url = new URL(window.location.href);
+    url.searchParams.set("modal", "model-selector");
+    window.location.href = url.toString();
+  }
+}
+
 export function parseApiError(
   error: unknown,
-  retryCallback?: () => void
+  retryCallback?: () => void,
+  navigate?: NavigateFn
 ): ParsedError {
   const defaultAction: ErrorAction = {
     label: "Retry",
@@ -40,35 +60,21 @@ export function parseApiError(
       message: "API key error. Please check your API key configuration in Settings.",
       action: {
         label: "Open Settings",
-        onClick: () => {
-          const settingsButton = document.querySelector("[data-settings-trigger]");
-          if (settingsButton) {
-            (settingsButton as HTMLElement).click();
-          } else {
-            window.location.reload();
-          }
-        },
+        onClick: () => navigateToSettings(navigate),
       },
     };
   }
 
   if (
     errorMsg.includes("model not found") ||
-    errorMsg.includes("model") ||
+    errorMsg.includes("invalid model") ||
     errorMsg.includes("unsupported")
   ) {
     return {
       message: "Model configuration error. Please select a different model or check your settings.",
       action: {
         label: "Select Model",
-        onClick: () => {
-          const modelSelector = document.querySelector("[data-model-selector]");
-          if (modelSelector) {
-            (modelSelector as HTMLElement).click();
-          } else {
-            window.location.reload();
-          }
-        },
+        onClick: () => navigateToModelSelector(navigate),
       },
     };
   }
@@ -103,11 +109,12 @@ export function parseApiError(
   };
 }
 
-/**
- * Shows an error toast with the parsed error information
- */
-export function showErrorToast(error: unknown, retryCallback?: () => void): void {
-  const parsed = parseApiError(error, retryCallback);
+export function showErrorToast(
+  error: unknown,
+  retryCallback?: () => void,
+  navigate?: NavigateFn
+): void {
+  const parsed = parseApiError(error, retryCallback, navigate);
   toast.error(parsed.message, {
     action: {
       label: parsed.action.label,
