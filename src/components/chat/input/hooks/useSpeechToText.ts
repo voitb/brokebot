@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getTranscriber } from "../../../../lib/transcriber";
 
 const CHUNK_LENGTH_S = 30;
@@ -32,26 +32,32 @@ export const useSpeechToText = (
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const initStartedRef = useRef(false);
   const onTranscriptReceivedRef = useRef(onTranscriptReceived);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     onTranscriptReceivedRef.current = onTranscriptReceived;
   }, [onTranscriptReceived]);
 
   const isModelLoading = status === "loading";
 
   useEffect(() => {
-    if (initStartedRef.current) return;
-    initStartedRef.current = true;
+    let cancelled = false;
 
     setStatus("loading");
     getTranscriber()
-      .then(() => setStatus("ready"))
+      .then(() => {
+        if (!cancelled) setStatus("ready");
+      })
       .catch(() => {
-        setError("Failed to load speech recognition model.");
-        setStatus("error");
+        if (!cancelled) {
+          setError("Failed to load speech recognition model.");
+          setStatus("error");
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -107,6 +113,10 @@ export const useSpeechToText = (
     setError(null);
 
     try {
+      if (!window.MediaRecorder) {
+        throw new Error("MediaRecorder not supported");
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const recorder = new MediaRecorder(stream);
@@ -122,8 +132,12 @@ export const useSpeechToText = (
 
       recorder.start();
       setStatus("recording");
-    } catch {
-      setError("Could not access microphone. Please check permissions.");
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.includes("not supported")
+          ? "Audio recording is not supported in your browser."
+          : "Could not access microphone. Please check permissions.";
+      setError(message);
       setStatus("error");
     }
   };

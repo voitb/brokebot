@@ -86,7 +86,7 @@ describe("chatInputUtils", () => {
         { role: "assistant", content: "Previous answer" },
       ];
 
-      const result = buildPrompt(messages, "New question", true);
+      const result = buildPrompt(messages, "New question", { mode: "online" });
 
       expect(result).toHaveLength(2);
       expect(result[0].role).toBe("system");
@@ -100,7 +100,7 @@ describe("chatInputUtils", () => {
         { role: "assistant", content: "Previous answer" },
       ];
 
-      const result = buildPrompt(messages, "New question", false);
+      const result = buildPrompt(messages, "New question", { mode: "local" });
 
       expect(result.length).toBeGreaterThanOrEqual(3);
       expect(result[0].role).toBe("system");
@@ -114,7 +114,7 @@ describe("chatInputUtils", () => {
         { role: "user", content: "Retry" },
       ];
 
-      const result = buildPrompt(messages, "New message", true);
+      const result = buildPrompt(messages, "New message", { mode: "online" });
 
       const allContent = result.map((m) => m.content).join(" ");
       expect(allContent).not.toContain("Error generating");
@@ -126,7 +126,7 @@ describe("chatInputUtils", () => {
         content: `Message ${i}`,
       }));
 
-      const result = buildPrompt(messages, "Final", true);
+      const result = buildPrompt(messages, "Final", { mode: "online" });
 
       expect(result[0].content).toContain("Message 19");
       expect(result[0].content).not.toContain("Message 0");
@@ -138,7 +138,7 @@ describe("chatInputUtils", () => {
         content: `Message ${i}`,
       }));
 
-      const result = buildPrompt(messages, "Final", false);
+      const result = buildPrompt(messages, "Final", { mode: "local" });
 
       // Should be summarized to roughly 12 messages + system + new message
       expect(result.length).toBeLessThanOrEqual(15);

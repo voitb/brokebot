@@ -4,12 +4,15 @@ import { useConversations, useConversation } from "../../../../hooks/useConversa
 import { useConversationId } from "../../../../hooks/useConversationId";
 import { useModel } from "../../../../providers/ModelProvider";
 import { toast } from "sonner";
-import { buildPrompt, findLastMessageByRole, truncateTitle } from "../utils/chatInputUtils";
+import {
+  findLastMessageByRole,
+  buildPrompt,
+  truncateTitle,
+} from "../utils/chatInputUtils";
 import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
 const ERROR_GENERATING = "Error generating response. Please try regenerating or check your API key configuration.";
-const ERROR_SENDING = "Error sending message. Please check your configuration and try again.";
 const ERROR_REGENERATING = "Error regenerating response. Please try again.";
 
 interface UseChatInputReturn {
@@ -39,68 +42,40 @@ export function useChatInput(): UseChatInputReturn {
   const { isGenerating, streamResponse, stopGeneration } = useMessageStream();
 
   const handleMessageSubmit = async (customMessage?: string) => {
-    const messageContent = (customMessage || message).trim();
-    if (!messageContent || isLoading || isGenerating) return;
+    const content = (customMessage || message).trim();
+    if (!content || isLoading || isGenerating) return;
+    if (!currentModel) return;
 
     setIsLoading(true);
     setMessage("");
 
-    let currentConversationId = conversationId;
-    let responseMessageId: string | undefined;
-    let isNewConversation = false;
-
     try {
-      if (!currentConversationId) {
-        const newConversationId = await createEmptyConversation();
-        if (newConversationId) {
-          currentConversationId = newConversationId;
-          isNewConversation = true;
-          navigate(`/chat/${newConversationId}`);
-        } else {
-          throw new Error("Failed to create conversation");
-        }
-      }
+      const activeConversationId = conversationId ?? await createEmptyConversation();
+      if (!activeConversationId) throw new Error("Failed to create conversation");
 
-      await addMessage(currentConversationId, {
-        role: "user",
-        content: messageContent,
+      const isNew = !conversationId;
+      if (isNew) navigate(`/chat/${activeConversationId}`);
+
+      await addMessage(activeConversationId, { role: "user", content });
+      const responseId = await addMessage(activeConversationId, { role: "assistant", content: "" });
+      if (!responseId) throw new Error("Failed to create response message");
+
+      if (isNew) await updateConversationTitle(activeConversationId, truncateTitle(content));
+
+      const prompt = buildPrompt(messages, content, { mode: currentModel.type === "online" ? "online" : "local" });
+      const { content: response, error } = await streamResponse(prompt, (chunk) => {
+        updateMessage(activeConversationId, responseId, chunk);
       });
 
-      responseMessageId = await addMessage(currentConversationId, {
-        role: "assistant",
-        content: "",
-      });
-
-      if (isNewConversation) {
-        const title = truncateTitle(messageContent);
-        await updateConversationTitle(currentConversationId, title);
+      if (error) {
+        showErrorToast(error, () => handleMessageSubmit(content), navigate);
+        updateMessage(activeConversationId, responseId, ERROR_GENERATING);
+        return;
       }
 
-      if (!responseMessageId || !currentConversationId || !currentModel) {
-        throw new Error("Failed to create response message");
-      }
-
-      const conversationMessages = buildPrompt(
-        messages,
-        messageContent,
-        currentModel.type === "online"
-      );
-
-      const result = await streamResponse(conversationMessages, (content) => {
-        updateMessage(currentConversationId as string, responseMessageId as string, content);
-      });
-
-      if (result.error) {
-        showErrorToast(result.error, () => handleMessageSubmit(messageContent), navigate);
-        updateMessage(currentConversationId, responseMessageId, ERROR_GENERATING);
-      } else {
-        await updateMessage(currentConversationId, responseMessageId, result.content);
-      }
+      await updateMessage(activeConversationId, responseId, response);
     } catch (error) {
       showErrorToast(error, undefined, navigate);
-      if (currentConversationId && responseMessageId) {
-        updateMessage(currentConversationId, responseMessageId, ERROR_SENDING);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -109,37 +84,30 @@ export function useChatInput(): UseChatInputReturn {
   const regenerateLastResponse = async () => {
     if (!conversationId || messages.length < 2 || isLoading || isGenerating) return;
 
-    const lastAiMessage = findLastMessageByRole(messages, "assistant");
-    if (!lastAiMessage) return;
+    const lastAssistant = findLastMessageByRole(messages, "assistant");
+    const lastUser = findLastMessageByRole(messages, "user");
+    if (!lastAssistant || !lastUser || !currentModel) return;
 
-    const lastUserMessage = findLastMessageByRole(messages, "user");
-    if (!lastUserMessage) return;
-
-    updateMessage(conversationId, lastAiMessage.id, "");
+    updateMessage(conversationId, lastAssistant.id, "");
 
     try {
-      if (currentModel) {
-        const messagesToProcess = messages.slice(0, -1);
-        const conversationMessages = buildPrompt(
-          messagesToProcess,
-          lastUserMessage.content,
-          currentModel.type === "online"
-        );
+      const prompt = buildPrompt(
+        messages.slice(0, -1),
+        lastUser.content,
+        { mode: currentModel.type === "online" ? "online" : "local" }
+      );
 
-        const result = await streamResponse(conversationMessages, (content) => {
-          updateMessage(conversationId, lastAiMessage.id, content);
-        });
+      const { error } = await streamResponse(prompt, (chunk) => {
+        updateMessage(conversationId, lastAssistant.id, chunk);
+      });
 
-        if (result.error) {
-          toast.error("Failed to regenerate response. Please try again.");
-          updateMessage(conversationId, lastAiMessage.id, ERROR_REGENERATING);
-        } else {
-          await updateMessage(conversationId, lastAiMessage.id, result.content);
-        }
+      if (error) {
+        toast.error(ERROR_REGENERATING);
+        updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
       }
     } catch (error) {
       showErrorToast(error, undefined, navigate);
-      updateMessage(conversationId, lastAiMessage.id, ERROR_REGENERATING);
+      updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
     }
   };
 

@@ -1,18 +1,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useDocuments } from "../../../../hooks/useDocuments";
-import type { Document } from "../../../../lib/db";
-
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
-
-export interface AttachedFile {
-  id: string;
-  file: File;
-  preview?: string;
-  type: "image" | "text" | "other";
-  document?: Document; // Reference to saved document
-  content?: string; // File content for AI processing
-}
+import {
+  processFile as processFileUtil,
+  validateFile,
+  type AttachedFile,
+} from "../utils/fileUploadUtils";
 
 interface UseFileUploadProps {
   supportsImages: boolean;
@@ -34,75 +27,21 @@ export const useFileUpload = ({
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const { uploadDocument } = useDocuments();
 
-  const processFile = async (file: File): Promise<AttachedFile> => {
-    const id = crypto.randomUUID();
-    let type: AttachedFile["type"] = "other";
-    let preview: string | undefined;
-    let content: string | undefined;
-    let document: Document | undefined;
-
-    if (file.type.startsWith("image/")) {
-      type = "image";
-      preview = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = () => resolve(undefined);
-        reader.readAsDataURL(file);
-      });
-    } else if (
-      file.type === "text/plain" ||
-      file.name.endsWith(".txt") ||
-      file.name.endsWith(".md")
-    ) {
-      type = "text";
-
-      try {
-        content = await readFileContent(file);
-        const savedDocument = await uploadDocument(file);
-        if (savedDocument) {
-          document = savedDocument;
-        }
-      } catch {
-        toast.error("Failed to process text file");
-      }
-    }
-
-    return { id, file, preview, type, content, document };
-  };
-
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        resolve(e.target?.result as string);
-      };
-      reader.onerror = () => {
-        reject(new Error("Failed to read file"));
-      };
-      reader.readAsText(file);
-    });
-  };
-
   const handleFilesSelected = async (files: FileList) => {
     const validFiles: File[] = [];
 
     for (const file of Array.from(files)) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+      const validation = validateFile(file, supportsImages, selectedModelName);
+      if (!validation.valid) {
+        toast.error(validation.error!);
         continue;
       }
-
-      if (file.type.startsWith("image/") && !supportsImages) {
-        toast.error(
-          `Images are only supported by vision models. Current model: ${selectedModelName}`
-        );
-        continue;
-      }
-
       validFiles.push(file);
     }
 
-    const processedFiles = await Promise.all(validFiles.map(processFile));
+    const processedFiles = await Promise.all(
+      validFiles.map((file) => processFileUtil(file, uploadDocument))
+    );
     setAttachedFiles((prev) => [...prev, ...processedFiles]);
   };
 
@@ -115,6 +54,6 @@ export const useFileUpload = ({
     setAttachedFiles,
     handleFilesSelected,
     removeFile,
-    processFile,
+    processFile: (file: File) => processFileUtil(file, uploadDocument),
   };
 }; 
