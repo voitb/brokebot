@@ -66,14 +66,20 @@ export async function processFile(
   return { id, file, preview, type, content, document };
 }
 
+export interface ValidateFileOptions {
+  supportsImages: boolean;
+  modelName: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  error?: string;
+}
+
 /**
  * Validates a file for size and type constraints
  */
-export function validateFile(
-  file: File,
-  supportsImages: boolean,
-  selectedModelName: string
-): { valid: boolean; error?: string } {
+export function validateFile(file: File, options: ValidateFileOptions): ValidationResult {
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return {
       valid: false,
@@ -81,10 +87,10 @@ export function validateFile(
     };
   }
 
-  if (file.type.startsWith("image/") && !supportsImages) {
+  if (file.type.startsWith("image/") && !options.supportsImages) {
     return {
       valid: false,
-      error: `Images are only supported by vision models. Current model: ${selectedModelName}`,
+      error: `Images are only supported by vision models. Current model: ${options.modelName}`,
     };
   }
 

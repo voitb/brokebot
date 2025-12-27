@@ -444,11 +444,11 @@ describe("useChatInput", () => {
         await result.current.regenerateLastResponse();
       });
 
-      // Should update message with error
+      // Should update message with error (prefixed for filtering from prompts)
       expect(mockUpdateMessage).toHaveBeenCalledWith(
         "test-id",
         "2",
-        "Error regenerating response. Please try again."
+        "[ERROR]: Error regenerating response. Please try again."
       );
     });
   });

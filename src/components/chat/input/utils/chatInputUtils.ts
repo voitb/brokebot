@@ -3,6 +3,9 @@ import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/constants/promp
 
 const TITLE_MAX_LENGTH = 50;
 
+/** Prefix used to mark error messages that should be filtered from AI prompts */
+export const ERROR_MESSAGE_PREFIX = "[ERROR]: ";
+
 export type PromptMode = "online" | "local";
 
 interface Message {
@@ -78,7 +81,7 @@ export function buildPrompt(
   options: { mode: PromptMode }
 ): OpenRouterMessage[] {
   const filteredMessages = messages.filter(
-    (msg) => !msg.content.startsWith("Error ")
+    (msg) => !msg.content.startsWith(ERROR_MESSAGE_PREFIX)
   );
 
   if (options.mode === "online") {

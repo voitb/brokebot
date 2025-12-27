@@ -7,6 +7,8 @@ import {
   type AttachedFile,
 } from "../utils/fileUploadUtils";
 
+export type { AttachedFile };
+
 interface UseFileUploadProps {
   supportsImages: boolean;
   selectedModelName: string;
@@ -14,7 +16,8 @@ interface UseFileUploadProps {
 
 interface UseFileUploadReturn {
   attachedFiles: AttachedFile[];
-  setAttachedFiles: React.Dispatch<React.SetStateAction<AttachedFile[]>>;
+  clearFiles: () => void;
+  replaceFiles: (files: AttachedFile[]) => void;
   handleFilesSelected: (files: FileList) => Promise<void>;
   removeFile: (fileId: string) => void;
   processFile: (file: File) => Promise<AttachedFile>;
@@ -31,9 +34,9 @@ export const useFileUpload = ({
     const validFiles: File[] = [];
 
     for (const file of Array.from(files)) {
-      const validation = validateFile(file, supportsImages, selectedModelName);
-      if (!validation.valid) {
-        toast.error(validation.error!);
+      const validation = validateFile(file, { supportsImages, modelName: selectedModelName });
+      if (!validation.valid && validation.error) {
+        toast.error(validation.error);
         continue;
       }
       validFiles.push(file);
@@ -49,9 +52,14 @@ export const useFileUpload = ({
     setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
+  const clearFiles = () => setAttachedFiles([]);
+
+  const replaceFiles = (files: AttachedFile[]) => setAttachedFiles(files);
+
   return {
     attachedFiles,
-    setAttachedFiles,
+    clearFiles,
+    replaceFiles,
     handleFilesSelected,
     removeFile,
     processFile: (file: File) => processFileUtil(file, uploadDocument),

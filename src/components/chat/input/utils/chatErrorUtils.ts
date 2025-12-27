@@ -2,50 +2,59 @@ import { toast } from "sonner";
 
 type NavigateFn = (options: { search: string }) => void;
 
-export interface ErrorAction {
-  label: string;
-  onClick: () => void;
-}
+/** Action types that can be returned from error parsing - caller handles execution */
+export type ErrorActionType =
+  | { type: "retry"; delay?: number }
+  | { type: "navigate"; target: "settings" | "model-selector" }
+  | { type: "reload" };
 
 export interface ParsedError {
   message: string;
-  action: ErrorAction;
+  actionType: ErrorActionType;
+  actionLabel: string;
 }
 
-function navigateToSettings(navigate?: NavigateFn) {
-  if (navigate) {
-    navigate({ search: "modal=settings" });
-  } else {
-    const url = new URL(window.location.href);
-    url.searchParams.set("modal", "settings");
-    window.location.href = url.toString();
+export interface ParseErrorOptions {
+  onRetry?: () => void;
+  navigate?: NavigateFn;
+}
+
+function executeAction(actionType: ErrorActionType, options: ParseErrorOptions): void {
+  switch (actionType.type) {
+    case "retry":
+      if (options.onRetry) {
+        if (actionType.delay) {
+          setTimeout(options.onRetry, actionType.delay);
+        } else {
+          options.onRetry();
+        }
+      } else {
+        window.location.reload();
+      }
+      break;
+    case "navigate":
+      if (options.navigate) {
+        options.navigate({ search: `modal=${actionType.target}` });
+      } else {
+        const url = new URL(window.location.href);
+        url.searchParams.set("modal", actionType.target);
+        window.location.href = url.toString();
+      }
+      break;
+    case "reload":
+      window.location.reload();
+      break;
   }
 }
 
-function navigateToModelSelector(navigate?: NavigateFn) {
-  if (navigate) {
-    navigate({ search: "modal=model-selector" });
-  } else {
-    const url = new URL(window.location.href);
-    url.searchParams.set("modal", "model-selector");
-    window.location.href = url.toString();
-  }
-}
-
-export function parseApiError(
-  error: unknown,
-  retryCallback?: () => void,
-  navigate?: NavigateFn
-): ParsedError {
-  const defaultAction: ErrorAction = {
-    label: "Retry",
-    onClick: () => window.location.reload(),
-  };
+export function parseApiError(error: unknown, options?: ParseErrorOptions): ParsedError {
+  const hasRetry = options?.onRetry !== undefined;
 
   if (!(error instanceof Error)) {
     return {
       message: "Failed to generate response. Please try again.",
-      action: defaultAction,
+      actionType: hasRetry ? { type: "retry" } : { type: "reload" },
+      actionLabel: "Retry",
     };
   }
 
@@ -58,10 +67,8 @@ export function parseApiError(
   ) {
     return {
       message: "API key error. Please check your API key configuration in Settings.",
-      action: {
-        label: "Open Settings",
-        onClick: () => navigateToSettings(navigate),
-      },
+      actionType: { type: "navigate", target: "settings" },
+      actionLabel: "Open Settings",
     };
   }
 
@@ -72,19 +79,16 @@ export function parseApiError(
   ) {
     return {
       message: "Model configuration error. Please select a different model or check your settings.",
-      action: {
-        label: "Select Model",
-        onClick: () => navigateToModelSelector(navigate),
-      },
+      actionType: { type: "navigate", target: "model-selector" },
+      actionLabel: "Select Model",
     };
   }
 
   if (errorMsg.includes("timeout") || errorMsg.includes("network")) {
     return {
       message: "Network error. Please check your connection and try again.",
-      action: retryCallback
-        ? { label: "Retry", onClick: retryCallback }
-        : defaultAction,
+      actionType: hasRetry ? { type: "retry" } : { type: "reload" },
+      actionLabel: "Retry",
     };
   }
 
@@ -95,30 +99,24 @@ export function parseApiError(
   ) {
     return {
       message: "API rate limit exceeded. Please wait a moment and try again.",
-      action: retryCallback
-        ? { label: "Retry in 10s", onClick: () => setTimeout(retryCallback, 10000) }
-        : defaultAction,
+      actionType: hasRetry ? { type: "retry", delay: 10000 } : { type: "reload" },
+      actionLabel: hasRetry ? "Retry in 10s" : "Retry",
     };
   }
 
   return {
     message: "Failed to generate response. Please try again.",
-    action: retryCallback
-      ? { label: "Retry", onClick: retryCallback }
-      : defaultAction,
+    actionType: hasRetry ? { type: "retry" } : { type: "reload" },
+    actionLabel: "Retry",
   };
 }
 
-export function showErrorToast(
-  error: unknown,
-  retryCallback?: () => void,
-  navigate?: NavigateFn
-): void {
-  const parsed = parseApiError(error, retryCallback, navigate);
+export function showErrorToast(error: unknown, options?: ParseErrorOptions): void {
+  const parsed = parseApiError(error, options);
   toast.error(parsed.message, {
     action: {
-      label: parsed.action.label,
-      onClick: parsed.action.onClick,
+      label: parsed.actionLabel,
+      onClick: () => executeAction(parsed.actionType, options ?? {}),
     },
   });
 }

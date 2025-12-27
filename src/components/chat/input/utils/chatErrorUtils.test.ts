@@ -18,7 +18,8 @@ describe("chatErrorUtils", () => {
       const result = parseApiError("string error");
 
       expect(result.message).toBe("Failed to generate response. Please try again.");
-      expect(result.action.label).toBe("Retry");
+      expect(result.actionLabel).toBe("Retry");
+      expect(result.actionType).toEqual({ type: "reload" });
     });
 
     it("handles API key errors", () => {
@@ -27,7 +28,8 @@ describe("chatErrorUtils", () => {
       const result = parseApiError(error);
 
       expect(result.message).toContain("API key error");
-      expect(result.action.label).toBe("Open Settings");
+      expect(result.actionLabel).toBe("Open Settings");
+      expect(result.actionType).toEqual({ type: "navigate", target: "settings" });
     });
 
     it("handles 401 unauthorized errors", () => {
@@ -36,6 +38,7 @@ describe("chatErrorUtils", () => {
       const result = parseApiError(error);
 
       expect(result.message).toContain("API key error");
+      expect(result.actionType).toEqual({ type: "navigate", target: "settings" });
     });
 
     it("handles model not found errors", () => {
@@ -44,7 +47,8 @@ describe("chatErrorUtils", () => {
       const result = parseApiError(error);
 
       expect(result.message).toContain("Model configuration error");
-      expect(result.action.label).toBe("Select Model");
+      expect(result.actionLabel).toBe("Select Model");
+      expect(result.actionType).toEqual({ type: "navigate", target: "model-selector" });
     });
 
     it("handles unsupported model errors", () => {
@@ -53,19 +57,18 @@ describe("chatErrorUtils", () => {
       const result = parseApiError(error);
 
       expect(result.message).toContain("Model configuration error");
+      expect(result.actionType).toEqual({ type: "navigate", target: "model-selector" });
     });
 
     it("handles network errors with retry callback", () => {
       const retryFn = vi.fn();
       const error = new Error("Network timeout");
 
-      const result = parseApiError(error, retryFn);
+      const result = parseApiError(error, { onRetry: retryFn });
 
       expect(result.message).toContain("Network error");
-      expect(result.action.label).toBe("Retry");
-
-      result.action.onClick();
-      expect(retryFn).toHaveBeenCalled();
+      expect(result.actionLabel).toBe("Retry");
+      expect(result.actionType).toEqual({ type: "retry" });
     });
 
     it("handles rate limit errors without callback", () => {
@@ -74,18 +77,19 @@ describe("chatErrorUtils", () => {
       const result = parseApiError(error);
 
       expect(result.message).toContain("rate limit");
-      // Without retry callback, falls back to default Retry action
-      expect(result.action.label).toBe("Retry");
+      expect(result.actionLabel).toBe("Retry");
+      expect(result.actionType).toEqual({ type: "reload" });
     });
 
     it("handles rate limit errors with retry callback", () => {
       const retryFn = vi.fn();
       const error = new Error("Rate limit exceeded");
 
-      const result = parseApiError(error, retryFn);
+      const result = parseApiError(error, { onRetry: retryFn });
 
       expect(result.message).toContain("rate limit");
-      expect(result.action.label).toBe("Retry in 10s");
+      expect(result.actionLabel).toBe("Retry in 10s");
+      expect(result.actionType).toEqual({ type: "retry", delay: 10000 });
     });
 
     it("handles 429 quota errors", () => {
@@ -96,28 +100,21 @@ describe("chatErrorUtils", () => {
       expect(result.message).toContain("rate limit");
     });
 
-    it("provides delayed retry for rate limit with callback", () => {
-      vi.useFakeTimers();
-      const retryFn = vi.fn();
-      const error = new Error("Rate limit");
-
-      const result = parseApiError(error, retryFn);
-
-      result.action.onClick();
-      expect(retryFn).not.toHaveBeenCalled();
-
-      vi.advanceTimersByTime(10000);
-      expect(retryFn).toHaveBeenCalled();
-
-      vi.useRealTimers();
-    });
-
     it("returns generic error for unknown errors", () => {
       const error = new Error("Something completely unexpected");
 
       const result = parseApiError(error);
 
       expect(result.message).toBe("Failed to generate response. Please try again.");
+    });
+
+    it("returns retry action type when onRetry is provided", () => {
+      const retryFn = vi.fn();
+      const error = new Error("Something unexpected");
+
+      const result = parseApiError(error, { onRetry: retryFn });
+
+      expect(result.actionType).toEqual({ type: "retry" });
     });
   });
 
@@ -137,11 +134,11 @@ describe("chatErrorUtils", () => {
       );
     });
 
-    it("passes retry callback to parseApiError", () => {
+    it("passes retry callback via options to parseApiError", () => {
       const retryFn = vi.fn();
       const error = new Error("Network timeout");
 
-      showErrorToast(error, retryFn);
+      showErrorToast(error, { onRetry: retryFn });
 
       expect(toast.error).toHaveBeenCalledWith(
         expect.stringContaining("Network error"),
@@ -151,6 +148,15 @@ describe("chatErrorUtils", () => {
           }),
         })
       );
+    });
+
+    it("passes navigate via options", () => {
+      const navigateFn = vi.fn();
+      const error = new Error("API key invalid");
+
+      showErrorToast(error, { navigate: navigateFn });
+
+      expect(toast.error).toHaveBeenCalled();
     });
   });
 });
