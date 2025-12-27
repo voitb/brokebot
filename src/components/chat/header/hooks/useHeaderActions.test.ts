@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useHeaderActions } from "./useHeaderActions";
 import { mockNavigate, mockToast } from "../../../../test/mocks/modules";
+import { createMockConversation } from "../../../../test/mocks/factories";
+import type { Conversation } from "../../../../lib/db";
 
 const mockTogglePinConversation = vi.fn();
 const mockUpdateConversationTitle = vi.fn();
@@ -9,31 +11,41 @@ const mockCreateEmptyConversation = vi.fn();
 const mockDeleteConversation = vi.fn();
 const mockImportConversations = vi.fn();
 
-let mockConversations = [
-  { id: "conv-1", title: "Test Conversation", pinned: false },
+let mockConversations: Conversation[] = [
+  createMockConversation({ id: "conv-1", title: "Test Conversation", pinned: false }),
 ];
-let mockConversation = { id: "conv-1", title: "Test Conversation", messages: [] };
+let mockConversation: Conversation = createMockConversation({ id: "conv-1", title: "Test Conversation" });
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("../../../../hooks/useConversations", () => ({
-  useConversations: () => ({
-    conversations: mockConversations,
-    togglePinConversation: mockTogglePinConversation,
-    updateConversationTitle: mockUpdateConversationTitle,
-    createEmptyConversation: mockCreateEmptyConversation,
-    deleteConversation: mockDeleteConversation,
-  }),
-  useConversation: () => ({
-    conversation: mockConversation,
-  }),
-}));
+vi.mock("../../../../hooks/useConversations", async () => {
+  const { createMockConversationsHook, createMockConversationHook } = await import(
+    "../../../../test/mocks/hooks"
+  );
+  return {
+    useConversations: () =>
+      createMockConversationsHook({
+        conversations: mockConversations,
+        togglePinConversation: mockTogglePinConversation,
+        updateConversationTitle: mockUpdateConversationTitle,
+        createEmptyConversation: mockCreateEmptyConversation,
+        deleteConversation: mockDeleteConversation,
+      }),
+    useConversation: () =>
+      createMockConversationHook({
+        conversation: mockConversation,
+      }),
+  };
+});
 
-vi.mock("../../../../hooks/useUserConfig", () => ({
-  useUserConfig: () => ({
-    importConversations: mockImportConversations,
-  }),
-}));
+vi.mock("../../../../hooks/useUserConfig", async () => {
+  const { createMockUserConfigHook } = await import("../../../../test/mocks/hooks");
+  return {
+    useUserConfig: () => createMockUserConfigHook({
+      importConversations: mockImportConversations,
+    }),
+  };
+});
 
 // sonner is globally mocked in setup.ts, use mockToast for assertions
 
@@ -41,9 +53,9 @@ describe("useHeaderActions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConversations = [
-      { id: "conv-1", title: "Test Conversation", pinned: false },
+      createMockConversation({ id: "conv-1", title: "Test Conversation", pinned: false }),
     ];
-    mockConversation = { id: "conv-1", title: "Test Conversation", messages: [] };
+    mockConversation = createMockConversation({ id: "conv-1", title: "Test Conversation" });
     mockCreateEmptyConversation.mockResolvedValue("new-conv-id");
     mockDeleteConversation.mockResolvedValue(undefined);
     mockImportConversations.mockResolvedValue(1);
@@ -75,7 +87,7 @@ describe("useHeaderActions", () => {
 
     it("shows pinned state correctly", () => {
       mockConversations = [
-        { id: "conv-1", title: "Pinned Conv", pinned: true },
+        createMockConversation({ id: "conv-1", title: "Pinned Conv", pinned: true }),
       ];
 
       const { result } = renderHook(() =>

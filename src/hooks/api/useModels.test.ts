@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useModels } from "./useModels";
 
-const mockFetch = vi.fn();
-vi.stubGlobal("fetch", mockFetch);
+import { setupFetchMock } from "../../test/mocks/modules";
+
+const { mockFetch } = setupFetchMock();
 
 describe("useModels", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFetch.mockClear();
   });
 
   afterEach(() => {

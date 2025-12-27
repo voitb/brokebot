@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createOpenRouterClient, getCategoryFromModel } from "./openrouter";
+import { setupFetchMock } from "../test/mocks/modules";
 
-const mockFetch = vi.fn();
-vi.stubGlobal("fetch", mockFetch);
+const { mockFetch } = setupFetchMock();
 
 describe("openrouter", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFetch.mockClear();
   });
 
   afterEach(() => {

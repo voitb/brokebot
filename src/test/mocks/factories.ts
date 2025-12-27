@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import { v4 as uuidv4 } from "uuid";
 import type { Conversation, Message, Folder, Document, UserConfig } from "../../lib/db";
+import type { OpenRouterModel } from "../../lib/openrouter";
 
 export function createMockMessage(overrides: Partial<Message> = {}): Message {
   return {
@@ -63,12 +64,14 @@ export function createMockModel(type: "local" | "online" = "online") {
       id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
       name: "Llama 3.2 1B",
       type: "local" as const,
+      description: "Fast and efficient local model",
     };
   }
   return {
     id: "openai/gpt-4",
     name: "GPT-4",
     type: "online" as const,
+    description: "OpenAI GPT-4 model",
   };
 }
 
@@ -128,12 +131,12 @@ export function createMockWebLLMContext(overrides: MockWebLLMContextOverrides = 
 }
 
 export interface MockModelContextOverrides {
-  currentModel?: { id: string; name: string; type: "local" | "online"; description?: string } | null;
+  currentModel?: { id: string; name: string; type: "local" | "online"; description: string } | null;
   isOnlineMode?: boolean;
   isModelLoading?: boolean;
   isModelSwitching?: boolean;
   modelStatus?: string;
-  availableOnlineModels?: unknown[];
+  availableOnlineModels?: OpenRouterModel[];
   isLoadingAvailableModels?: boolean;
   availableModelsError?: Error | null;
   setCurrentModel?: ReturnType<typeof vi.fn>;
@@ -155,7 +158,7 @@ export function createMockModelContext(overrides: MockModelContextOverrides = {}
     isModelLoading: overrides.isModelLoading ?? false,
     isModelSwitching: overrides.isModelSwitching ?? false,
     modelStatus: overrides.modelStatus ?? "Ready",
-    availableOnlineModels: overrides.availableOnlineModels ?? [],
+    availableOnlineModels: overrides.availableOnlineModels ?? ([] as OpenRouterModel[]),
     isLoadingAvailableModels: overrides.isLoadingAvailableModels ?? false,
     availableModelsError: overrides.availableModelsError ?? null,
     setCurrentModel: overrides.setCurrentModel ?? vi.fn(),

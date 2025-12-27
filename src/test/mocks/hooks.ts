@@ -269,3 +269,31 @@ export function createMockSpeechToTextHook(options: MockSpeechToTextHookOptions 
     error: options.error ?? null,
   };
 }
+
+/**
+ * Options for creating a useMessageStream mock
+ */
+export interface MockMessageStreamHookOptions {
+  isGenerating?: boolean;
+  streamResponse?: ReturnType<typeof vi.fn>;
+  stopGeneration?: ReturnType<typeof vi.fn>;
+}
+
+/**
+ * Creates a useMessageStream hook mock return value
+ *
+ * @example
+ * vi.mock("./useMessageStream", async () => {
+ *   const { createMockMessageStreamHook } = await import("../../../../test/mocks/hooks");
+ *   return {
+ *     useMessageStream: () => createMockMessageStreamHook({ isGenerating: false }),
+ *   };
+ * });
+ */
+export function createMockMessageStreamHook(options: MockMessageStreamHookOptions = {}) {
+  return {
+    isGenerating: options.isGenerating ?? false,
+    streamResponse: options.streamResponse ?? vi.fn().mockResolvedValue({ content: "AI response", wasAborted: false }),
+    stopGeneration: options.stopGeneration ?? vi.fn(),
+  };
+}

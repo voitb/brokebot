@@ -24,11 +24,15 @@ vi.mock("@/components/chat/sidebar/hooks/useConversationList", () => ({
   }),
 }));
 
-vi.mock("@/providers/ConversationsProvider", () => ({
-  useConversations: () => ({
-    togglePinConversation: mockTogglePinConversation,
-  }),
-}));
+vi.mock("@/providers/ConversationsProvider", async () => {
+  const { createMockConversationsHook } = await import("../../../test/mocks/hooks");
+  return {
+    useConversations: () =>
+      createMockConversationsHook({
+        togglePinConversation: mockTogglePinConversation,
+      }),
+  };
+});
 
 vi.mock("@/hooks/useConversationId", () => ({
   useConversationId: () => mockConversationId,
