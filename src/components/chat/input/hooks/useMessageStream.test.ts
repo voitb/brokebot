@@ -255,6 +255,7 @@ describe("useMessageStream", () => {
 
     it("resets isGenerating after error", async () => {
       mockStreamMessage.mockImplementation(async function* () {
+        yield { content: "", isComplete: false };
         throw new Error("Error");
       });
 

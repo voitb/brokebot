@@ -448,7 +448,7 @@ describe("useChatInput", () => {
       expect(mockUpdateMessage).toHaveBeenCalledWith(
         "test-id",
         "2",
-        "⚠️ Error regenerating response. Please try again."
+        "Error regenerating response. Please try again."
       );
     });
   });

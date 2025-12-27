@@ -9,6 +9,22 @@ import { showErrorToast } from "../utils/chatErrorUtils";
 import { useMessageStream } from "./useMessageStream";
 
 const TITLE_MAX_LENGTH = 50;
+const ERROR_GENERATING = "Error generating response. Please try regenerating or check your API key configuration.";
+const ERROR_SENDING = "Error sending message. Please check your configuration and try again.";
+const ERROR_REGENERATING = "Error regenerating response. Please try again.";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+function findLastMessageByRole(
+  messages: Message[],
+  role: "user" | "assistant"
+): Message | undefined {
+  return messages.slice().reverse().find((msg) => msg.role === role);
+}
 
 interface UseChatInputReturn {
   message: string;
@@ -92,22 +108,14 @@ export function useChatInput(): UseChatInputReturn {
 
       if (result.error) {
         showErrorToast(result.error, () => handleMessageSubmit(messageContent), navigate);
-        updateMessage(
-          currentConversationId,
-          responseMessageId,
-          "⚠️ Error generating response. Please try regenerating or check your API key configuration."
-        );
+        updateMessage(currentConversationId, responseMessageId, ERROR_GENERATING);
       } else {
         await updateMessage(currentConversationId, responseMessageId, result.content);
       }
     } catch (error) {
       showErrorToast(error, undefined, navigate);
       if (currentConversationId && responseMessageId) {
-        updateMessage(
-          currentConversationId,
-          responseMessageId,
-          "⚠️ Error sending message. Please check your configuration and try again."
-        );
+        updateMessage(currentConversationId, responseMessageId, ERROR_SENDING);
       }
     } finally {
       setIsLoading(false);
@@ -117,16 +125,10 @@ export function useChatInput(): UseChatInputReturn {
   const regenerateLastResponse = async () => {
     if (!conversationId || messages.length < 2 || isLoading || isGenerating) return;
 
-    const lastAiMessage = messages
-      .slice()
-      .reverse()
-      .find((msg) => msg.role === "assistant");
+    const lastAiMessage = findLastMessageByRole(messages, "assistant");
     if (!lastAiMessage) return;
 
-    const lastUserMessage = messages
-      .slice()
-      .reverse()
-      .find((msg) => msg.role === "user");
+    const lastUserMessage = findLastMessageByRole(messages, "user");
     if (!lastUserMessage) return;
 
     updateMessage(conversationId, lastAiMessage.id, "");
@@ -146,22 +148,14 @@ export function useChatInput(): UseChatInputReturn {
 
         if (result.error) {
           toast.error("Failed to regenerate response. Please try again.");
-          updateMessage(
-            conversationId,
-            lastAiMessage.id,
-            "⚠️ Error regenerating response. Please try again."
-          );
+          updateMessage(conversationId, lastAiMessage.id, ERROR_REGENERATING);
         } else {
           await updateMessage(conversationId, lastAiMessage.id, result.content);
         }
       }
     } catch (error) {
       showErrorToast(error, undefined, navigate);
-      updateMessage(
-        conversationId,
-        lastAiMessage.id,
-        "⚠️ Error regenerating response. Please try again."
-      );
+      updateMessage(conversationId, lastAiMessage.id, ERROR_REGENERATING);
     }
   };
 
