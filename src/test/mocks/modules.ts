@@ -38,6 +38,9 @@ export {
   createMockDragDropHook,
   createMockFileUploadHook,
   createMockSpeechToTextHook,
+  createMockSidebarHook,
+  createMockTranscriber,
+  createMockDocumentsHook,
 } from "./hooks";
 
 // Re-export factory functions for data creation

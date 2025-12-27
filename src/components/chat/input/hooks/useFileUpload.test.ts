@@ -11,11 +11,14 @@ function assertFile(file: AttachedFile | null): AttachedFile {
 
 const mockUploadDocument = vi.fn();
 
-vi.mock("../../../../hooks/useDocuments", () => ({
-  useDocuments: () => ({
-    uploadDocument: mockUploadDocument,
-  }),
-}));
+vi.mock("../../../../hooks/useDocuments", async () => {
+  const { createMockDocumentsHook } = await import("../../../../test/mocks/hooks");
+  return {
+    useDocuments: () => createMockDocumentsHook({
+      uploadDocument: mockUploadDocument,
+    }),
+  };
+});
 
 describe("useFileUpload", () => {
   beforeEach(() => {

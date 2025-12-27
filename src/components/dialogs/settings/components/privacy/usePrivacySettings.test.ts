@@ -13,15 +13,18 @@ let mockConfig = { theme: "dark" };
 // react-router-dom is globally mocked in setup.ts
 // sonner is globally mocked in setup.ts
 
-vi.mock("../../../../../hooks/useUserConfig", () => ({
-  useUserConfig: () => ({
-    config: mockConfig,
-    resetConfig: mockResetConfig,
-    clearAllData: mockClearAllData,
-    exportConversations: mockExportConversations,
-    importConversations: mockImportConversations,
-  }),
-}));
+vi.mock("../../../../../hooks/useUserConfig", async () => {
+  const { createMockUserConfigHook } = await import("../../../../../test/mocks/hooks");
+  return {
+    useUserConfig: () => createMockUserConfigHook({
+      config: mockConfig,
+      resetConfig: mockResetConfig,
+      clearAllData: mockClearAllData,
+      exportConversations: mockExportConversations,
+      importConversations: mockImportConversations,
+    }),
+  };
+});
 
 describe("usePrivacySettings", () => {
   beforeEach(() => {

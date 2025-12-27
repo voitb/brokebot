@@ -297,3 +297,57 @@ export function createMockMessageStreamHook(options: MockMessageStreamHookOption
     stopGeneration: options.stopGeneration ?? vi.fn(),
   };
 }
+
+/**
+ * Options for creating a useSidebar mock
+ */
+export interface MockSidebarHookOptions {
+  open?: boolean;
+  setOpen?: ReturnType<typeof vi.fn>;
+}
+
+/**
+ * Creates a useSidebar hook mock return value
+ */
+export function createMockSidebarHook(options: MockSidebarHookOptions = {}) {
+  return {
+    open: options.open ?? false,
+    setOpen: options.setOpen ?? vi.fn(),
+  };
+}
+
+/**
+ * Options for creating a transcriber mock
+ */
+export interface MockTranscriberOptions {
+  getTranscriber?: ReturnType<typeof vi.fn>;
+  disposeTranscriber?: ReturnType<typeof vi.fn>;
+}
+
+/**
+ * Creates a transcriber mock for lib/transcriber
+ */
+export function createMockTranscriber(options: MockTranscriberOptions = {}) {
+  return {
+    getTranscriber: options.getTranscriber ?? vi.fn().mockResolvedValue(
+      vi.fn().mockResolvedValue({ text: "" })
+    ),
+    disposeTranscriber: options.disposeTranscriber ?? vi.fn().mockResolvedValue(undefined),
+  };
+}
+
+/**
+ * Options for creating a useDocuments mock
+ */
+export interface MockDocumentsHookOptions {
+  uploadDocument?: ReturnType<typeof vi.fn>;
+}
+
+/**
+ * Creates a useDocuments hook mock return value
+ */
+export function createMockDocumentsHook(options: MockDocumentsHookOptions = {}) {
+  return {
+    uploadDocument: options.uploadDocument ?? vi.fn().mockResolvedValue({ id: 1, filename: "test.txt" }),
+  };
+}
