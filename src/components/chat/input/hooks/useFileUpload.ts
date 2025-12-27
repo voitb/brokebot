@@ -36,7 +36,7 @@ export const useFileUpload = ({
   const { uploadDocument } = useDocuments();
 
   const processFile = async (file: File): Promise<AttachedFile> => {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = crypto.randomUUID();
     let type: AttachedFile["type"] = "other";
     let preview: string | undefined;
     let content: string | undefined;
