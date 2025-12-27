@@ -12,31 +12,16 @@ vi.mock("../../../providers/WebLLMProvider", async () => {
   return createMockWebLLMProvider();
 });
 
-vi.mock("./hooks", () => ({
-  useDragDrop: vi.fn(() => ({
-    isDragOver: false,
-    handleDrop: vi.fn(),
-    handleDragOver: vi.fn(),
-    handleDragLeave: vi.fn(),
-    handleDragEnter: vi.fn(),
-  })),
-  useFileUpload: vi.fn(() => ({
-    attachedFiles: [],
-    handleFilesSelected: vi.fn(),
-    removeFile: vi.fn(),
-    clearFiles: vi.fn(),
-    replaceFiles: vi.fn(),
-    processFile: vi.fn(),
-  })),
-  useSpeechToText: vi.fn(() => ({
-    status: "ready",
-    startRecording: vi.fn(),
-    stopRecording: vi.fn(),
-    isModelLoading: false,
-    error: null,
-  })),
-  useTranscriberToasts: vi.fn(),
-}));
+vi.mock("./hooks", async () => {
+  const { createMockDragDropHook, createMockFileUploadHook, createMockSpeechToTextHook } =
+    await import("../../../test/mocks/hooks");
+  return {
+    useDragDrop: vi.fn(() => createMockDragDropHook()),
+    useFileUpload: vi.fn(() => createMockFileUploadHook()),
+    useSpeechToText: vi.fn(() => createMockSpeechToTextHook()),
+    useTranscriberToasts: vi.fn(),
+  };
+});
 
 import { useModel } from "../../../providers/ModelProvider";
 

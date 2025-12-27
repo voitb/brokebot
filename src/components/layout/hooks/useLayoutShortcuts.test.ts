@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useLayoutShortcuts } from "./useLayoutShortcuts";
-import { mockNavigate } from "../../../test/mocks/modules";
+import { mockNavigate, mockSearchParams } from "../../../test/mocks/modules";
 
 const mockSetOpen = vi.fn();
 const mockHandleNewChat = vi.fn();
@@ -34,16 +34,7 @@ vi.mock("@/hooks/useConversationId", () => ({
   useConversationId: () => mockConversationId,
 }));
 
-// This file needs custom useSearchParams mock, so we override the global mock
-let mockSearchParams = new URLSearchParams();
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-    useSearchParams: () => [mockSearchParams],
-  };
-});
+// react-router-dom is globally mocked in setup.ts
 
 vi.mock("@/hooks/useKeyboardShortcuts", () => ({
   useKeyboardShortcuts: (shortcuts: Record<string, () => void>) => {
@@ -58,7 +49,6 @@ describe("useLayoutShortcuts", () => {
     vi.clearAllMocks();
     mockOpen = false;
     mockConversationId = undefined;
-    mockSearchParams = new URLSearchParams();
     capturedShortcuts = {};
   });
 
@@ -165,7 +155,6 @@ describe("useLayoutShortcuts", () => {
 
   describe("onShowShortcuts", () => {
     it("opens shortcuts modal when not open", () => {
-      mockSearchParams = new URLSearchParams();
       renderHook(() => useLayoutShortcuts());
 
       capturedShortcuts.onShowShortcuts?.();
@@ -177,7 +166,7 @@ describe("useLayoutShortcuts", () => {
     });
 
     it("closes shortcuts modal when already open", () => {
-      mockSearchParams = new URLSearchParams("modal=shortcuts");
+      mockSearchParams.set("modal", "shortcuts");
       renderHook(() => useLayoutShortcuts());
 
       capturedShortcuts.onShowShortcuts?.();

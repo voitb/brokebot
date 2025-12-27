@@ -167,3 +167,9 @@ export function createMockModelContext(overrides: MockModelContextOverrides = {}
     resetChat: overrides.resetChat ?? vi.fn().mockResolvedValue(undefined),
   };
 }
+
+export async function* createMockStream<T>(chunks: T[]) {
+  for (const chunk of chunks) {
+    yield chunk;
+  }
+}

@@ -2,16 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useTextareaAutoResize } from "./useTextareaAutoResize";
 import { useRef } from "react";
-
-function createMockTextarea(scrollHeight: number): HTMLTextAreaElement {
-  const style = { height: "", overflowY: "" };
-  return {
-    style,
-    get scrollHeight() {
-      return scrollHeight;
-    },
-  } as unknown as HTMLTextAreaElement;
-}
+import { createMockTextarea } from "../../../../test/mocks/dom-helpers";
 
 describe("useTextareaAutoResize", () => {
   let mockTextarea: HTMLTextAreaElement;
