@@ -1,23 +1,17 @@
 import React from "react";
 import { useNavigate, createSearchParams } from "react-router-dom";
-import { MoreHorizontal, Star, Sun, Moon, Settings, Keyboard, Download, Upload, Trash2 } from "lucide-react";
+import { Star, Sun, Moon } from "lucide-react";
 import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { Button } from "../../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
 import { useTheme } from "../../../providers/ThemeProvider";
 import { useConversationId } from "../../../hooks/useConversationId";
 import {
   BreadcrumbNavigation,
+  HeaderActionsMenu,
   NewChatButton,
 } from "./components";
-import { useHeaderActions } from "./hooks/useHeaderActions"; 
+import { useHeaderActions } from "./hooks/useHeaderActions";
 import { DeleteConversationDialog } from "../sidebar/components/DeleteConversationDialog";
 
 /**
@@ -73,49 +67,6 @@ export const ChatHeader: React.FC = () => {
     });
   };
 
-  // Context menu items component
-  const ContextMenu = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <MoreHorizontal className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={handleOpenSettings}>
-          <Settings className="w-4 h-4 mr-2" />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleOpenShortcuts}>
-          <Keyboard className="w-4 h-4 mr-2" />
-          Shortcuts
-        </DropdownMenuItem>
-        
-        {conversationId && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleOpenExport}>
-              <Download className="w-4 h-4 mr-2" />
-              Export conversation
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleImportConversation}>
-              <Upload className="w-4 h-4 mr-2" />
-              Import conversation
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="focus:bg-destructive/10"
-              onClick={handleDeleteConversation}
-            >
-              <Trash2 className="w-4 h-4 mr-2 text-destructive" />
-              <span className="text-destructive">Delete conversation</span>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-
   return (
     <TooltipProvider>
       <header className="p-4 flex justify-between items-center gap-4">
@@ -158,7 +109,14 @@ export const ChatHeader: React.FC = () => {
             )}
 
             {/* Context menu */}
-            <ContextMenu />
+            <HeaderActionsMenu
+              conversationId={conversationId}
+              onOpenSettings={handleOpenSettings}
+              onOpenShortcuts={handleOpenShortcuts}
+              onOpenExport={handleOpenExport}
+              onImportConversation={handleImportConversation}
+              onDeleteConversation={handleDeleteConversation}
+            />
           </div>
         </div>
 
@@ -215,7 +173,14 @@ export const ChatHeader: React.FC = () => {
           )}
 
           {/* Context menu */}
-          <ContextMenu />
+          <HeaderActionsMenu
+            conversationId={conversationId}
+            onOpenSettings={handleOpenSettings}
+            onOpenShortcuts={handleOpenShortcuts}
+            onOpenExport={handleOpenExport}
+            onImportConversation={handleImportConversation}
+            onDeleteConversation={handleDeleteConversation}
+          />
         </div>
       </header>
 

@@ -8,7 +8,7 @@ export interface KeyboardShortcutGroup {
   shortcuts: KeyboardShortcut[];
 }
 
-const SHORTCUTS: KeyboardShortcutGroup[] = [
+export const KEYBOARD_SHORTCUTS: KeyboardShortcutGroup[] = [
   {
     title: "General",
     shortcuts: [
@@ -28,7 +28,3 @@ const SHORTCUTS: KeyboardShortcutGroup[] = [
     ],
   },
 ];
-
-export const useKeyboardShortcuts = (): KeyboardShortcutGroup[] => {
-  return SHORTCUTS;
-}; 

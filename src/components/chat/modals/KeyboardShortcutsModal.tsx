@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../ui/dialog";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { KEYBOARD_SHORTCUTS } from "./hooks/useKeyboardShortcuts";
 import { ShortcutGroup } from "./components";
 
 interface KeyboardShortcutsModalProps {
@@ -21,7 +21,6 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = Rea
   open,
   onOpenChange,
 }) => {
-  const shortcutGroups = useKeyboardShortcuts();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,7 +34,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = Rea
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {shortcutGroups.map((group) => (
+            {KEYBOARD_SHORTCUTS.map((group) => (
               <ShortcutGroup key={group.title} group={group} />
             ))}
           </div>

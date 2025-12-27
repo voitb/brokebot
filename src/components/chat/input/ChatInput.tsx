@@ -60,8 +60,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea 
-
   const handleMicClick = () => {
     if (transcriberStatus === "recording") {
       stopRecording();
@@ -141,7 +139,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (filesToSend.length > 0) {
       const fileContents = filesToSend
-        .map((f) => `<file name="${f.file.name}">\n${f.content}\n</file>`)
+        .map((f) => {
+          const safeName = f.file.name.replace(/[<>&"']/g, '');
+          return `<file name="${safeName}">\n${f.content}\n</file>`;
+        })
         .join("\n\n");
       fullMessage = `${messageToSend}\n\n${fileContents}`.trim();
     }
