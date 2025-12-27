@@ -82,10 +82,9 @@ describe("useSpeechToText", () => {
   });
 
   describe("initialization", () => {
-    it("starts in uninitialized status", () => {
+    it("transitions to loading status on mount", () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-      // Note: immediately transitions to loading
-      expect(["uninitialized", "loading"]).toContain(result.current.status);
+      expect(result.current.status).toBe("loading");
     });
 
     it("loads transcriber on mount", async () => {
