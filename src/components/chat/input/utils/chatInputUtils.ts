@@ -3,6 +3,8 @@ import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/constants/promp
 
 const TITLE_MAX_LENGTH = 50;
 
+export type PromptMode = "online" | "local";
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -73,13 +75,13 @@ export function summarizeConversation(
 export function buildPrompt(
   messages: OpenRouterMessage[],
   messageContent: string,
-  isOnline: boolean
+  options: { mode: PromptMode }
 ): OpenRouterMessage[] {
   const filteredMessages = messages.filter(
     (msg) => !msg.content.startsWith("Error ")
   );
 
-  if (isOnline) {
+  if (options.mode === "online") {
     const history = filteredMessages
       .slice(-10)
       .map(
