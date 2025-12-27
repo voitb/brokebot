@@ -42,13 +42,15 @@ export function useChatInput(): UseChatInputReturn {
     setMessage("");
 
     let currentConversationId = conversationId;
-    let aiMessageId: string | undefined;
+    let responseMessageId: string | undefined;
+    let isNewConversation = false;
 
     try {
       if (!currentConversationId) {
         const newConversationId = await createEmptyConversation();
         if (newConversationId) {
           currentConversationId = newConversationId;
+          isNewConversation = true;
           navigate(`/chat/${newConversationId}`);
         } else {
           throw new Error("Failed to create conversation");
@@ -60,12 +62,12 @@ export function useChatInput(): UseChatInputReturn {
         content: messageContent,
       });
 
-      aiMessageId = await addMessage(currentConversationId, {
+      responseMessageId = await addMessage(currentConversationId, {
         role: "assistant",
         content: "",
       });
 
-      if (messages.length === 0) {
+      if (isNewConversation) {
         const title =
           messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
         await updateConversationTitle(currentConversationId, title);
@@ -79,26 +81,26 @@ export function useChatInput(): UseChatInputReturn {
         );
 
         const result = await streamResponse(conversationMessages, (content) => {
-          updateMessage(currentConversationId!, aiMessageId!, content);
+          updateMessage(currentConversationId!, responseMessageId!, content);
         });
 
         if (result.error) {
           showErrorToast(result.error, () => handleMessageSubmit(messageContent));
           updateMessage(
             currentConversationId,
-            aiMessageId,
+            responseMessageId,
             "⚠️ Error generating response. Please try regenerating or check your API key configuration."
           );
         } else {
-          await updateMessage(currentConversationId, aiMessageId, result.content);
+          await updateMessage(currentConversationId, responseMessageId, result.content);
         }
       }
     } catch (error) {
       showErrorToast(error);
-      if (currentConversationId && aiMessageId) {
+      if (currentConversationId && responseMessageId) {
         updateMessage(
           currentConversationId,
-          aiMessageId,
+          responseMessageId,
           "⚠️ Error sending message. Please check your configuration and try again."
         );
       }
