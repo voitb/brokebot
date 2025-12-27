@@ -34,8 +34,10 @@ vi.mock("@/hooks/useConversationId", () => ({
   useConversationId: () => mockConversationId,
 }));
 
+let mockSearchParams = new URLSearchParams();
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
+  useSearchParams: () => [mockSearchParams],
 }));
 
 vi.mock("@/hooks/useKeyboardShortcuts", () => ({
@@ -55,6 +57,7 @@ describe("useLayoutShortcuts", () => {
     vi.clearAllMocks();
     mockOpen = false;
     mockConversationId = undefined;
+    mockSearchParams = new URLSearchParams();
     capturedShortcuts = {};
   });
 
@@ -160,12 +163,28 @@ describe("useLayoutShortcuts", () => {
   });
 
   describe("onShowShortcuts", () => {
-    it("navigates to shortcuts modal", () => {
+    it("opens shortcuts modal when not open", () => {
+      mockSearchParams = new URLSearchParams();
       renderHook(() => useLayoutShortcuts());
 
       capturedShortcuts.onShowShortcuts?.();
 
-      expect(mockNavigate).toHaveBeenCalledWith({ search: "?modal=shortcuts" });
+      expect(mockNavigate).toHaveBeenCalledWith(
+        { search: "?modal=shortcuts" },
+        { replace: true }
+      );
+    });
+
+    it("closes shortcuts modal when already open", () => {
+      mockSearchParams = new URLSearchParams("modal=shortcuts");
+      renderHook(() => useLayoutShortcuts());
+
+      capturedShortcuts.onShowShortcuts?.();
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        { search: "" },
+        { replace: true }
+      );
     });
   });
 

@@ -122,6 +122,8 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
 
   useEffect(() => {
     loadModel(selectedModel.id);
+    // Only run on mount - setSelectedModel handles model changes directly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const contextValue: EngineState = {
