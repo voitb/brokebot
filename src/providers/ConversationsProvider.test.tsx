@@ -5,13 +5,6 @@ import { db } from "../lib/db";
 import { clearTestDatabase, seedConversation, seedFolder } from "../test/db-helpers";
 import { createMockMessage } from "../test/mocks/factories";
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
 // Type-safe helper to access context after it's been verified as defined
 function assertContext(context: ReturnType<typeof useConversations> | undefined): ReturnType<typeof useConversations> {
   if (!context) throw new Error("Context not initialized - ensure waitFor check passed");

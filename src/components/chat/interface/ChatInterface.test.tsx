@@ -35,16 +35,6 @@ vi.mock("../../../providers/WebLLMProvider", () => ({
   ],
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-    info: vi.fn(),
-    dismiss: vi.fn(),
-    loading: vi.fn(),
-  },
-}));
-
 vi.mock("../../../lib/transcriber", () => ({
   getTranscriber: vi.fn().mockResolvedValue(() => Promise.resolve({ text: "" })),
   disposeTranscriber: vi.fn().mockResolvedValue(undefined),

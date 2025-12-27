@@ -13,13 +13,6 @@ vi.mock("../../../../hooks/useUserConfig", () => ({
   }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
 describe("useApiKeyManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();

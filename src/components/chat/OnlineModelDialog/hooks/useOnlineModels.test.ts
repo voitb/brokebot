@@ -38,13 +38,6 @@ vi.mock("../../../../hooks/api/useModels", () => ({
   useModels: () => mockUseModelsReturn,
 }));
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}));
-
 describe("useOnlineModels", () => {
   const mockOnModelSelect = vi.fn();
   const mockOnOpenChange = vi.fn();

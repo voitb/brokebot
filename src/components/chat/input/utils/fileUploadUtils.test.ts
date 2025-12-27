@@ -1,21 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { validateFile, processFile, readFileContent, type ValidateFileOptions } from "./fileUploadUtils";
-
-// Mock toast
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-  },
-}));
-
-function createMockFile(name: string, content: string, type = "text/plain", size?: number): File {
-  const blob = new Blob([content], { type });
-  const file = new File([blob], name, { type });
-  if (size !== undefined) {
-    Object.defineProperty(file, "size", { value: size });
-  }
-  return file;
-}
+import { createMockFile } from "../../../../test/mocks/modules";
 
 describe("fileUploadUtils", () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSettings } from "./useSettings";
-import { toast } from "sonner";
+import { mockToast } from "../../../../test/mocks/modules";
 
 const mockUpdateConfig = vi.fn();
 let mockConfig: { theme?: string; language?: string } | null = null;
@@ -11,13 +11,6 @@ vi.mock("@/hooks/useUserConfig", () => ({
     config: mockConfig,
     updateConfig: mockUpdateConfig,
   }),
-}));
-
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
 }));
 
 describe("useSettings", () => {
@@ -99,7 +92,7 @@ describe("useSettings", () => {
       });
 
       expect(mockUpdateConfig).toHaveBeenCalledWith({ theme: "dark" });
-      expect(toast.success).toHaveBeenCalledWith("Settings saved successfully!");
+      expect(mockToast.success).toHaveBeenCalledWith("Settings saved successfully!");
       expect(result.current.isSaving).toBe(false);
     });
 
@@ -117,7 +110,7 @@ describe("useSettings", () => {
         await result.current.handleSaveChanges();
       });
 
-      expect(toast.error).toHaveBeenCalledWith("Failed to save settings.");
+      expect(mockToast.error).toHaveBeenCalledWith("Failed to save settings.");
       expect(result.current.isSaving).toBe(false);
     });
 
