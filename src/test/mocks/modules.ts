@@ -23,6 +23,9 @@ export {
   createMockConversationsHook,
   createMockConversationHook,
   createMockConversationIdHook,
+  createMockSmartAutoScrollHook,
+  createMockConversationItemHook,
+  createMockConversationListHook,
 } from "./hooks";
 
 // Re-export factory functions for data creation
