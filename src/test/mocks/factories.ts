@@ -72,6 +72,21 @@ export function createMockModel(type: "local" | "online" = "online") {
   };
 }
 
+export function createMockOpenRouterModel(overrides: {
+  id: string;
+  name: string;
+  isFree: boolean;
+}) {
+  return {
+    ...overrides,
+    description: "A test model",
+    provider: "test-provider",
+    category: "general",
+    contextLength: 4096,
+    pricing: { prompt: "0.0001", completion: "0.0002" },
+  };
+}
+
 export function createMockLocalModel() {
   return {
     id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",

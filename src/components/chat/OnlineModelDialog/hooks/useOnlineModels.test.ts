@@ -1,27 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useOnlineModels } from "./useOnlineModels";
+import { createMockOpenRouterModel } from "../../../../test/mocks";
 
 const mockConfig = {
   openrouterApiKey: "test-api-key-12345",
 };
 
-function createMockModel(overrides: { id: string; name: string; isFree: boolean }) {
-  return {
-    ...overrides,
-    description: "A test model",
-    provider: "test-provider",
-    category: "general",
-    contextLength: 4096,
-    pricing: { prompt: "0.0001", completion: "0.0002" },
-  };
-}
-
 const mockModels = [
-  createMockModel({ id: "free-model-1", name: "Free Model 1", isFree: true }),
-  createMockModel({ id: "free-model-2", name: "Free Model 2", isFree: true }),
-  createMockModel({ id: "paid-model-1", name: "Paid Model 1", isFree: false }),
-  createMockModel({ id: "paid-model-2", name: "Paid Model 2", isFree: false }),
+  createMockOpenRouterModel({ id: "free-model-1", name: "Free Model 1", isFree: true }),
+  createMockOpenRouterModel({ id: "free-model-2", name: "Free Model 2", isFree: true }),
+  createMockOpenRouterModel({ id: "paid-model-1", name: "Paid Model 1", isFree: false }),
+  createMockOpenRouterModel({ id: "paid-model-2", name: "Paid Model 2", isFree: false }),
 ];
 
 let mockUseModelsReturn = {
