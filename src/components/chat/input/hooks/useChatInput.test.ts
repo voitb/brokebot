@@ -194,8 +194,8 @@ describe("useChatInput", () => {
       });
     });
 
-    it("sets conversation title on first message", async () => {
-      mockConversationId = "test-id";
+    it("sets conversation title when creating new conversation", async () => {
+      mockConversationId = undefined;
       mockMessages = [];
       const { result } = renderHook(() => useChatInput());
 
@@ -208,13 +208,13 @@ describe("useChatInput", () => {
       });
 
       expect(mockUpdateConversationTitle).toHaveBeenCalledWith(
-        "test-id",
+        "new-conversation-id",
         "This is my first message"
       );
     });
 
     it("truncates long titles to 50 chars", async () => {
-      mockConversationId = "test-id";
+      mockConversationId = undefined;
       mockMessages = [];
       const longMessage = "A".repeat(100);
       const { result } = renderHook(() => useChatInput());
@@ -228,7 +228,7 @@ describe("useChatInput", () => {
       });
 
       expect(mockUpdateConversationTitle).toHaveBeenCalledWith(
-        "test-id",
+        "new-conversation-id",
         "A".repeat(50) + "..."
       );
     });
