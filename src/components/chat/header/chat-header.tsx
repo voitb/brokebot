@@ -9,7 +9,7 @@ import { useConversationId } from "@/hooks/use-conversation-id";
 import { BreadcrumbNavigation } from "./components/breadcrumb-navigation";
 import { HeaderActionsMenu } from "./components/header-actions-menu";
 import { NewChatButton } from "./components/new-chat-button";
-import { useHeaderActions } from "./hooks/use-header-actions";
+import { useHeaderActions } from "@/components/chat/hooks/use-header-actions";
 import { DeleteConversationDialog } from "../sidebar/components/delete-conversation-dialog";
 
 /**

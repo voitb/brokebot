@@ -8,8 +8,8 @@ import {
   buildPrompt,
   truncateTitle,
   ERROR_MESSAGE_PREFIX,
-} from "../utils/chat-input-utils";
-import { showErrorToast } from "../utils/chat-error-utils";
+} from "@/components/chat/input/utils/chat-input-utils";
+import { showErrorToast } from "@/components/chat/input/utils/chat-error-utils";
 import { useMessageStream } from "./use-message-stream";
 
 const ERROR_GENERATING = `${ERROR_MESSAGE_PREFIX}Error generating response. Please try regenerating or check your API key configuration.`;

@@ -5,7 +5,7 @@ import {
   processFile as processFileUtil,
   validateFile,
   type AttachedFile,
-} from "../utils/file-upload-utils";
+} from "@/components/chat/input/utils/file-upload-utils";
 
 export type { AttachedFile };
 

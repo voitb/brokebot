@@ -2,7 +2,7 @@ import React from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { TranscriberStatus } from "../hooks/use-speech-to-text";
+import type { TranscriberStatus } from "@/components/chat/hooks/use-speech-to-text";
 
 interface SpeechToTextButtonProps {
   status: TranscriberStatus;

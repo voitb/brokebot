@@ -1,6 +1,6 @@
 import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useConversationList } from "@/components/chat/sidebar/hooks/use-conversation-list";
+import { useConversationList } from "@/components/chat/hooks/use-conversation-list";
 import { useConversations } from "@/providers/conversations-provider";
 import { useConversationId } from "@/hooks/use-conversation-id";
 import { useNavigate, useSearchParams } from "react-router-dom";
