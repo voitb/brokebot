@@ -9,9 +9,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ModelSelector } from "@/components/chat/model-selector";
-import { useWebLLM } from "@/providers/WebLLMProvider";
-import type { QualityLevel } from "@/types";
+import { ModelSelector } from "@/components/chat/model-selector/model-selector";
+import { useWebLLM } from "@/providers/web-llm-provider";
+import type { QualityLevel } from "@/types/models";
 
 interface OptionsBarProps {
   quality: QualityLevel;

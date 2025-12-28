@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import { AVAILABLE_MODELS } from "@/providers/WebLLMProvider";
+import { AVAILABLE_MODELS } from "@/providers/web-llm-provider";
 
 export interface Message {
   id: string;

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { useConversationList } from "./useConversationList";
-import { ConversationsProvider } from "@/providers/ConversationsProvider";
+import { useConversationList } from "./use-conversation-list";
+import { ConversationsProvider } from "@/providers/conversations-provider";
 import {
   clearTestDatabase,
   seedConversation,

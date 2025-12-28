@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useIsMobile } from "./useIsMobile";
+import { useIsMobile } from "./use-is-mobile";
 import { createMockMatchMedia } from "../test/mocks/dom-helpers";
 
 describe("useIsMobile", () => {

@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '../providers/ThemeProvider';
-import { ConversationsProvider } from '../providers/ConversationsProvider';
+import { ThemeProvider } from '../providers/theme-provider';
+import { ConversationsProvider } from '../providers/conversations-provider';
 
 interface WrapperProps {
   children: React.ReactNode;

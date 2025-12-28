@@ -1,16 +1,14 @@
 import React from "react";
 import type { Message } from "@/lib/db";
-import { useWebLLM } from "@/providers/WebLLMProvider";
-import { parseMessage } from "../utils";
-import { 
-  MessageAvatar, 
-  ThinkingSection, 
-  MessageActions,
-  MessageContent,
-  MessageTimestamp, 
-  GeneratingIndicator,
-  AttachmentBadge,
-} from "./";
+import { useWebLLM } from "@/providers/web-llm-provider";
+import { parseMessage } from "../utils/parse-message";
+import { MessageAvatar } from "./message-avatar";
+import { ThinkingSection } from "./thinking-section";
+import { MessageActions } from "./message-actions";
+import { MessageContent } from "./message-content";
+import { MessageTimestamp } from "./message-timestamp";
+import { GeneratingIndicator } from "./generating-indicator";
+import { AttachmentBadge } from "./attachment-badge";
 
 interface MessageBubbleProps {
   message: Message;

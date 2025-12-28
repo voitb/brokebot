@@ -8,7 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "../ui";
+import { ScrollArea } from "../ui/scroll-area";
 
 const OnboardingContent = () => (
     <div className="space-y-4 [&_strong]:font-semibold [&_strong]:text-foreground [&_p]:text-muted-foreground">

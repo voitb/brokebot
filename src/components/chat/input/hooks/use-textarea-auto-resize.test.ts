@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useTextareaAutoResize } from "./useTextareaAutoResize";
+import { useTextareaAutoResize } from "./use-textarea-auto-resize";
 import { useRef } from "react";
 import { createMockTextarea } from "@/test/mocks/dom-helpers";
 

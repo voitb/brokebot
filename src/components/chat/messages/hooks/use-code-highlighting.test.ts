@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useCodeHighlighting } from "./useCodeHighlighting";
+import { useCodeHighlighting } from "./use-code-highlighting";
 
 let mockTheme = "dark";
 
-vi.mock("@/providers/ThemeProvider", () => ({
+vi.mock("@/providers/theme-provider", () => ({
   useTheme: () => ({
     theme: mockTheme,
   }),

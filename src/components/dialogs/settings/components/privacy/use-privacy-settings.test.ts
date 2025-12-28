@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { usePrivacySettings } from "./usePrivacySettings";
+import { usePrivacySettings } from "./use-privacy-settings";
 import { mockNavigate, mockToast } from "@/test/mocks/modules";
 
 const mockResetConfig = vi.fn();
@@ -13,7 +13,7 @@ let mockConfig: { theme: "dark" | "light" | "system" } = { theme: "dark" };
 // react-router-dom is globally mocked in setup.ts
 // sonner is globally mocked in setup.ts
 
-vi.mock("@/hooks/useUserConfig", async () => {
+vi.mock("@/hooks/use-user-config", async () => {
   const { createMockUserConfigHook } = await import("@/test/mocks/hooks");
   return {
     useUserConfig: () => createMockUserConfigHook({

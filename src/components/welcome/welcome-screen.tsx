@@ -1,13 +1,11 @@
 import React from "react";
-import { ScrollArea } from "../ui";
-import { ChatHeader } from "../chat/header";
-import {
-  GettingStarted,
-  WelcomeHeader,
-  FeatureGrid,
-  PrivacyNotice,
-} from "./components";
-import { SEOMetadata } from "../common/SEOMetadata";
+import { ScrollArea } from "../ui/scroll-area";
+import { ChatHeader } from "../chat/header/chat-header";
+import { GettingStarted } from "./components/getting-started";
+import { WelcomeHeader } from "./components/welcome-header";
+import { FeatureGrid } from "./components/feature-grid";
+import { PrivacyNotice } from "./components/privacy-notice";
+import { SEOMetadata } from "../common/seo-metadata";
 
 export const WelcomeScreen: React.FC = () => { 
   return (

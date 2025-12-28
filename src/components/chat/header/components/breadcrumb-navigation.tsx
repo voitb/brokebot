@@ -9,8 +9,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { EditableConversationTitle } from "@/components/chat/sidebar/components";
-import { Logo } from "@/components/ui/Logo";
+import { EditableConversationTitle } from "@/components/chat/sidebar/components/editable-conversation-title";
+import { Logo } from "@/components/ui/logo";
 
 interface BreadcrumbNavigationProps {
   conversationTitle?: string;

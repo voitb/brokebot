@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useSmartAutoScroll } from "./useSmartAutoScroll";
+import { useSmartAutoScroll } from "./use-smart-auto-scroll";
 import { createMockViewport, createMockMutationObserver } from "../test/mocks/dom-helpers";
 
 describe("useSmartAutoScroll", () => {

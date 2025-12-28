@@ -9,10 +9,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { type OpenRouterModel } from "@/lib/openrouter";
-import { ApiKeysTab } from "./components/ApiKeysTab";
-import { ModelList } from "./components/ModelList";
-import { ScrollArea } from "@/components/ui";
-import { useOnlineModels } from "./hooks/useOnlineModels";
+import { ApiKeysTab } from "./components/api-keys-tab";
+import { ModelList } from "./components/model-list";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useOnlineModels } from "./hooks/use-online-models";
 
 interface OnlineModelDialogProps {
   onModelSelect: (model: OpenRouterModel, apiKey: string) => void;

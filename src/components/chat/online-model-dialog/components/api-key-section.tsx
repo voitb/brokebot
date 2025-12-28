@@ -1,6 +1,6 @@
 import React from "react";
 import { Save, Trash2, Edit, X } from "lucide-react";
-import { useApiKeyManager } from "../hooks/useApiKeyManager";
+import { useApiKeyManager } from "../hooks/use-api-key-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

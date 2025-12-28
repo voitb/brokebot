@@ -1,6 +1,6 @@
 import React from "react";
-import { ShortcutItem } from "./ShortcutItem";
-import type { KeyboardShortcutGroup } from "@/constants/keyboardShortcuts";
+import { ShortcutItem } from "./shortcut-item";
+import type { KeyboardShortcutGroup } from "@/constants/keyboard-shortcuts";
 
 interface ShortcutGroupProps {
   group: KeyboardShortcutGroup;

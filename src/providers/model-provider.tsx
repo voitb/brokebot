@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
   useEffect,
 } from "react";
-import { useWebLLM, type ModelInfo } from "./WebLLMProvider";
+import { useWebLLM, type ModelInfo } from "./web-llm-provider";
 import {
   createOpenRouterClient,
   type OpenRouterClient,
@@ -14,8 +14,8 @@ import {
   type OpenRouterMessage,
   type StreamResponse,
 } from "@/lib/openrouter";
-import { useUserConfig } from "@/hooks/useUserConfig";
-import { useModels  } from "@/hooks/api";
+import { useUserConfig } from "@/hooks/use-user-config";
+import { useModels } from "@/hooks/api/use-models";
 
 export type ModelType = "local" | "online";
 

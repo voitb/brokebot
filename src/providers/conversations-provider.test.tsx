@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
-import { ConversationsProvider, useConversations } from "./ConversationsProvider";
+import { ConversationsProvider, useConversations } from "./conversations-provider";
 import { db } from "../lib/db";
 import { clearTestDatabase, seedConversation, seedFolder } from "../test/db-helpers";
 import { createMockMessage } from "../test/mocks/factories";

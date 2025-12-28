@@ -1,29 +1,36 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { ChatInput } from "./ChatInput";
+import { ChatInput } from "./chat-input";
 
-vi.mock("@/providers/ModelProvider", async () => {
+vi.mock("@/providers/model-provider", async () => {
   const { createMinimalModelProvider } = await import("@/test/mocks/providers");
   return createMinimalModelProvider();
 });
 
-vi.mock("@/providers/WebLLMProvider", async () => {
+vi.mock("@/providers/web-llm-provider", async () => {
   const { createMockWebLLMProvider } = await import("@/test/mocks/providers");
   return createMockWebLLMProvider();
 });
 
-vi.mock("./hooks", async () => {
-  const { createMockDragDropHook, createMockFileUploadHook, createMockSpeechToTextHook } =
-    await import("@/test/mocks/hooks");
+vi.mock("./hooks/use-drag-drop", async () => {
+  const { createMockDragDropHook } = await import("@/test/mocks/hooks");
+  return { useDragDrop: vi.fn(() => createMockDragDropHook()) };
+});
+
+vi.mock("./hooks/use-file-upload", async () => {
+  const { createMockFileUploadHook } = await import("@/test/mocks/hooks");
+  return { useFileUpload: vi.fn(() => createMockFileUploadHook()) };
+});
+
+vi.mock("./hooks/use-speech-to-text", async () => {
+  const { createMockSpeechToTextHook } = await import("@/test/mocks/hooks");
   return {
-    useDragDrop: vi.fn(() => createMockDragDropHook()),
-    useFileUpload: vi.fn(() => createMockFileUploadHook()),
     useSpeechToText: vi.fn(() => createMockSpeechToTextHook()),
     useTranscriberToasts: vi.fn(),
   };
 });
 
-import { useModel } from "@/providers/ModelProvider";
+import { useModel } from "@/providers/model-provider";
 
 const defaultProps = {
   message: "",

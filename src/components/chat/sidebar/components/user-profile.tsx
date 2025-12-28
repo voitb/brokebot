@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-import { useUserConfig } from "@/hooks/useUserConfig";
+import { useUserConfig } from "@/hooks/use-user-config";
 
 const UserProfileMenu: React.FC = () => {
   const { config } = useUserConfig();

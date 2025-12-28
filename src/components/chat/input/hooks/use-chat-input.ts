@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations, useConversation } from "@/hooks/useConversations";
-import { useConversationId } from "@/hooks/useConversationId";
-import { useModel } from "@/providers/ModelProvider";
+import { useConversations, useConversation } from "@/hooks/use-conversations";
+import { useConversationId } from "@/hooks/use-conversation-id";
+import { useModel } from "@/providers/model-provider";
 import {
   findLastMessageByRole,
   buildPrompt,
   truncateTitle,
   ERROR_MESSAGE_PREFIX,
-} from "../utils/chatInputUtils";
-import { showErrorToast } from "../utils/chatErrorUtils";
-import { useMessageStream } from "./useMessageStream";
+} from "../utils/chat-input-utils";
+import { showErrorToast } from "../utils/chat-error-utils";
+import { useMessageStream } from "./use-message-stream";
 
 const ERROR_GENERATING = `${ERROR_MESSAGE_PREFIX}Error generating response. Please try regenerating or check your API key configuration.`;
 const ERROR_REGENERATING = `${ERROR_MESSAGE_PREFIX}Error regenerating response. Please try again.`;

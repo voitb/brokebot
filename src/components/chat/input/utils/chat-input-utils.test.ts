@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { summarizeConversation, buildPrompt } from "./chatInputUtils";
+import { summarizeConversation, buildPrompt } from "./chat-input-utils";
 import type { OpenRouterMessage } from "@/lib/openrouter";
 
 describe("chatInputUtils", () => {

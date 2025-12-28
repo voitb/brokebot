@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useConversation } from "../useConversations";
+import { useConversation } from "../use-conversations";
 
 interface UseChatGuardOptions {
   conversationId?: string;

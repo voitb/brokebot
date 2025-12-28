@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Loader2 } from "lucide-react";
-import { createMarkdownComponents } from "../utils/markdownComponents";
+import { createMarkdownComponents } from "../utils/markdown-components";
 
 interface MessageContentProps {
   content: string;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "./use-keyboard-shortcuts";
 import { BrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 import { mockNavigate } from "../test/mocks/modules";
@@ -9,7 +9,7 @@ let mockConversationId: string | null = null;
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("./useConversationId", () => ({
+vi.mock("./use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 

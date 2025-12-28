@@ -1,20 +1,19 @@
 import React, { useRef, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import { useModel } from "@/providers/ModelProvider";
-import { useDragDrop, useFileUpload, useSpeechToText } from "./hooks";
+import { useModel } from "@/providers/model-provider";
+import { useDragDrop } from "./hooks/use-drag-drop";
+import { useFileUpload } from "./hooks/use-file-upload";
+import { useSpeechToText } from "./hooks/use-speech-to-text";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Square } from "lucide-react";
 import { toast } from "sonner";
-import {
-  FileUpload,
-  AttachedFilesPreview,
-  DragDropOverlay,
-  ModelError,
-  ModelStatus,
-  SpeechToTextButton,
-} from "./components";
-import { ScrollArea } from "@/components/ui";
+import { FileUpload, AttachedFilesPreview } from "./components/file-upload";
+import { DragDropOverlay } from "./components/drag-drop-overlay";
+import { ModelError } from "./components/model-error";
+import { ModelStatus } from "./components/model-status";
+import { SpeechToTextButton } from "./components/speech-to-text-button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatInputProps {
   message: string;

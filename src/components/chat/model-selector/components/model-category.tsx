@@ -5,9 +5,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { type ModelInfo } from "@/providers/WebLLMProvider";
-import { ModelItem } from "./ModelItem";
-import { getCategoryIcon, getCategoryLabel, getCategoryTooltip } from "../utils/modelUtils";
+import { type ModelInfo } from "@/providers/web-llm-provider";
+import { ModelItem } from "./model-item";
+import { getCategoryIcon, getCategoryLabel, getCategoryTooltip } from "../utils/model-utils";
 
 interface ModelCategoryProps {
   category: string;

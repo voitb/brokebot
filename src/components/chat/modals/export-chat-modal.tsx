@@ -9,9 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useConversation } from "@/hooks/useConversations";
+import { useConversation } from "@/hooks/use-conversations";
 import { toast } from "sonner";
-import { generateHTML, generateMarkdown, downloadFile } from "@/lib/exportUtils";
+import { generateHTML, generateMarkdown, downloadFile } from "@/lib/export-utils";
 
 interface ExportChatModalProps {
   open: boolean;

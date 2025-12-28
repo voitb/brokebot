@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OpenRouterIcon } from "@/components/ui/ProviderIcons";
+import { OpenRouterIcon } from "@/components/ui/provider-icons";
 import { type UserConfig } from "@/lib/db";
-import { useTheme } from "@/providers/ThemeProvider";
-import { ApiKeySection } from "@/components/chat/OnlineModelDialog/components/ApiKeySection";
+import { useTheme } from "@/providers/theme-provider";
+import { ApiKeySection } from "@/components/chat/online-model-dialog/components/api-key-section";
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;

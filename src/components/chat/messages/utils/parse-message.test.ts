@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseMessage } from "./parseMessage";
+import { parseMessage } from "./parse-message";
 
 describe("parseMessage", () => {
   describe("basic content", () => {

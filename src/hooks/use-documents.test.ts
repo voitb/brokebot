@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useDocuments } from "./useDocuments";
+import { useDocuments } from "./use-documents";
 import { db, type Document } from "../lib/db";
 import { clearTestDatabase } from "../test/db-helpers";
 import { mockToast, createMockFile } from "../test/mocks/modules";

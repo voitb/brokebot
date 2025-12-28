@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useUserConfig } from "./useUserConfig";
+import { useUserConfig } from "./use-user-config";
 import { db, DEFAULT_USER_CONFIG } from "../lib/db";
 import { clearTestDatabase, seedConversation, seedFolder, seedDocument } from "../test/db-helpers";
 
-vi.mock("../lib/encryptionService", () => ({
+vi.mock("../lib/encryption-service", () => ({
   encryptValue: vi.fn((val: string) => Promise.resolve(`encrypted_${val}`)),
   decryptValue: vi.fn((val: string) => Promise.resolve(val.replace("encrypted_", ""))),
 }));

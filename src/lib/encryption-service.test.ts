@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { encryptValue, decryptValue, clearEncryptionCache } from "./encryptionService";
+import { encryptValue, decryptValue, clearEncryptionCache } from "./encryption-service";
 
 // Mock the db module
 vi.mock("./db", () => {

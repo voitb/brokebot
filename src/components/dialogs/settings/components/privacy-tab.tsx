@@ -1,13 +1,10 @@
 import { Separator } from "@/components/ui/separator";
-import {
-  DataStorageSection,
-  LegalSection,
-  DataManagementSection,
-  DangerZoneSection,
-  ClearAllDataDialog,
-  ResetSettingsDialog,
-  usePrivacySettings,
-} from "./privacy";
+import { DataStorageSection } from "./privacy/data-storage-section";
+import { LegalSection } from "./privacy/legal-section";
+import { DataManagementSection } from "./privacy/data-management-section";
+import { DangerZoneSection } from "./privacy/danger-zone-section";
+import { ClearAllDataDialog, ResetSettingsDialog } from "./privacy/confirmation-dialogs";
+import { usePrivacySettings } from "./privacy/use-privacy-settings";
 
 interface PrivacyTabProps {
   hasConversations?: boolean;

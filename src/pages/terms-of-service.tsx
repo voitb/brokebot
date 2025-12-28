@@ -1,5 +1,5 @@
 import React from "react";
-import { SEOMetadata } from "../components/common/SEOMetadata";
+import { SEOMetadata } from "../components/common/seo-metadata";
 
 export const TermsOfService: React.FC = () => {
   return (

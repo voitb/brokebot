@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { render } from "@/test/utils";
-import { MessageBubble } from "./MessageBubble";
+import { MessageBubble } from "./message-bubble";
 import { createMockMessage } from "@/test/mocks/modules";
 
-vi.mock("@/providers/WebLLMProvider", async () => {
+vi.mock("@/providers/web-llm-provider", async () => {
   const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 
-import { useWebLLM } from "@/providers/WebLLMProvider";
+import { useWebLLM } from "@/providers/web-llm-provider";
 
 describe("MessageBubble", () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { CopyButton } from "@/components/ui";
+import { CopyButton } from "@/components/ui/copy-button";
 import { RefreshCw, Square } from "lucide-react";
 
 interface MessageActionsProps {

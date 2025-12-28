@@ -3,8 +3,8 @@ import { AlertTriangle } from "lucide-react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { type ModelInfo } from "@/providers/WebLLMProvider";
-import { getModelTypeIcon, getSpecializationIcon, getPerformanceBadgeVariant } from "../utils/modelUtils";
+import { type ModelInfo } from "@/providers/web-llm-provider";
+import { getModelTypeIcon, getSpecializationIcon, getPerformanceBadgeVariant } from "../utils/model-utils";
 
 interface ModelItemProps {
   model: ModelInfo;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations, useConversation } from "@/hooks/useConversations";
-import { useUserConfig } from "@/hooks/useUserConfig";
+import { useConversations, useConversation } from "@/hooks/use-conversations";
+import { useUserConfig } from "@/hooks/use-user-config";
 import { type Conversation } from "@/lib/db";
 import { toast } from "sonner";
 

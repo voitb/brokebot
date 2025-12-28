@@ -17,10 +17,10 @@ export const MOCK_AVAILABLE_MODELS = [createMockLocalModel()];
  * Creates a complete WebLLMProvider mock suitable for vi.mock()
  *
  * @example
- * vi.mock("../providers/WebLLMProvider", () => createMockWebLLMProvider());
+ * vi.mock("../providers/web-llm-provider", () => createMockWebLLMProvider());
  *
  * @example with overrides
- * vi.mock("../providers/WebLLMProvider", () =>
+ * vi.mock("../providers/web-llm-provider", () =>
  *   createMockWebLLMProvider({ isLoading: true, status: "Loading..." })
  * );
  */
@@ -36,7 +36,7 @@ export function createMockWebLLMProvider(overrides: MockWebLLMContextOverrides =
  * For tests that only check loading state
  *
  * @example
- * vi.mock("../providers/WebLLMProvider", () => createMinimalWebLLMProvider());
+ * vi.mock("../providers/web-llm-provider", () => createMinimalWebLLMProvider());
  */
 export function createMinimalWebLLMProvider(
   overrides: Pick<MockWebLLMContextOverrides, "isLoading" | "status"> = {}
@@ -54,10 +54,10 @@ export function createMinimalWebLLMProvider(
  * Creates a complete ModelProvider mock suitable for vi.mock()
  *
  * @example
- * vi.mock("../providers/ModelProvider", () => createMockModelProvider());
+ * vi.mock("../providers/model-provider", () => createMockModelProvider());
  *
  * @example with overrides
- * vi.mock("../providers/ModelProvider", () =>
+ * vi.mock("../providers/model-provider", () =>
  *   createMockModelProvider({ isModelLoading: true, modelStatus: "Loading..." })
  * );
  */
@@ -72,7 +72,7 @@ export function createMockModelProvider(overrides: MockModelContextOverrides = {
  * For tests that only check model name and loading state
  *
  * @example
- * vi.mock("../providers/ModelProvider", () => createMinimalModelProvider());
+ * vi.mock("../providers/model-provider", () => createMinimalModelProvider());
  */
 export function createMinimalModelProvider(
   overrides: Pick<MockModelContextOverrides, "currentModel" | "isModelLoading" | "modelStatus"> = {}
