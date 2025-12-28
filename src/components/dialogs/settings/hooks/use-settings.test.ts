@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useSettings } from "./useSettings";
+import { useSettings } from "./use-settings";
 import { mockToast } from "@/test/mocks/modules";
 import type { UserConfig } from "@/lib/db";
 
 const mockUpdateConfig = vi.fn();
 let mockConfig: Partial<UserConfig> | null = null;
 
-vi.mock("@/hooks/useUserConfig", async () => {
+vi.mock("@/hooks/use-user-config", async () => {
   const { createMockUserConfigHook } = await import("@/test/mocks/hooks");
   return {
     useUserConfig: () => createMockUserConfigHook({

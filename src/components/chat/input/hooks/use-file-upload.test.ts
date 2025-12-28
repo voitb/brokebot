@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useFileUpload, type AttachedFile } from "./useFileUpload";
+import { useFileUpload, type AttachedFile } from "./use-file-upload";
 import { mockToast, createMockFile, createMockFileList } from "@/test/mocks/modules";
 
 // Helper to assert file result is defined after act() completes
@@ -11,7 +11,7 @@ function assertFile(file: AttachedFile | null): AttachedFile {
 
 const mockUploadDocument = vi.fn();
 
-vi.mock("@/hooks/useDocuments", async () => {
+vi.mock("@/hooks/use-documents", async () => {
   const { createMockDocumentsHook } = await import("@/test/mocks/hooks");
   return {
     useDocuments: () => createMockDocumentsHook({

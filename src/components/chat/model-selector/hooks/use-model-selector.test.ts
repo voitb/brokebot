@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useModelSelector } from "./useModelSelector";
-import type { ModelInfo } from "@/providers/WebLLMProvider";
+import { useModelSelector } from "./use-model-selector";
+import type { ModelInfo } from "@/providers/web-llm-provider";
 
 const createMockModelInfo = (
   overrides: Partial<ModelInfo> = {}

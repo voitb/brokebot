@@ -32,13 +32,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  GeneralTab,
-  DocumentsTab,
-  PrivacyTab,
-} from "./components";
-import { useSettings, type SettingsTab } from "./hooks/useSettings";
-import { useConversations } from "@/hooks/useConversations";
+import { GeneralTab } from "./components/general-tab";
+import { DocumentsTab } from "./components/documents-tab";
+import { PrivacyTab } from "./components/privacy-tab";
+import { useSettings, type SettingsTab } from "./hooks/use-settings";
+import { useConversations } from "@/hooks/use-conversations";
 
 interface SettingsDialogProps {
   open: boolean;

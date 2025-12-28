@@ -2,25 +2,25 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@/test/utils";
-import { ConversationItem } from "./ConversationItem";
+import { ConversationItem } from "./conversation-item";
 import {
   createMockConversation,
   createMockFolder,
   createMockConversationItemHook,
-} from "@/test/mocks";
+} from "@/test/mocks/modules";
 
 const mockUseConversationItem = createMockConversationItemHook();
 
-vi.mock("../hooks/useConversationItem", () => ({
+vi.mock("../hooks/use-conversation-item", () => ({
   useConversationItem: vi.fn(() => mockUseConversationItem),
 }));
 
-vi.mock("@/providers/WebLLMProvider", async () => {
+vi.mock("@/providers/web-llm-provider", async () => {
   const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 
-import { useConversationItem } from "../hooks/useConversationItem";
+import { useConversationItem } from "../hooks/use-conversation-item";
 
 describe("ConversationItem", () => {
   const user = userEvent.setup();

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useOnboarding } from "./useOnboarding";
+import { useOnboarding } from "./use-onboarding";
 
 describe("useOnboarding", () => {
   const STORAGE_KEY = "onboardingCompleted-v1";

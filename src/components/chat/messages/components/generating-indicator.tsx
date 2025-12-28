@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { MessageAvatar } from "./MessageAvatar";
+import { MessageAvatar } from "./message-avatar";
 
 /**
  * Indicator shown when AI is generating but has no content yet

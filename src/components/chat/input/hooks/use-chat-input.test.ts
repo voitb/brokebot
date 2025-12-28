@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useChatInput } from "./useChatInput";
+import { useChatInput } from "./use-chat-input";
 import { mockNavigate } from "@/test/mocks/modules";
 import { createMockModel, createMockModelContext } from "@/test/mocks/factories";
-import { useModel } from "@/providers/ModelProvider";
-import type { UnifiedModel } from "@/providers/ModelProvider";
+import { useModel } from "@/providers/model-provider";
+import type { UnifiedModel } from "@/providers/model-provider";
 
 const mockCreateEmptyConversation = vi.fn();
 const mockAddMessage = vi.fn();
@@ -20,7 +20,7 @@ let mockIsGenerating = false;
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("@/hooks/useConversations", async () => {
+vi.mock("@/hooks/use-conversations", async () => {
   const { createMockConversationsHook, createMockConversationHook } = await import(
     "@/test/mocks/hooks"
   );
@@ -39,16 +39,16 @@ vi.mock("@/hooks/useConversations", async () => {
   };
 });
 
-vi.mock("@/hooks/useConversationId", () => ({
+vi.mock("@/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 
-vi.mock("@/providers/ModelProvider", async () => {
+vi.mock("@/providers/model-provider", async () => {
   const { createMinimalModelProvider } = await import("@/test/mocks/providers");
   return createMinimalModelProvider();
 });
 
-vi.mock("./useMessageStream", () => ({
+vi.mock("./use-message-stream", () => ({
   useMessageStream: () => ({
     isGenerating: mockIsGenerating,
     streamResponse: mockStreamResponse,
@@ -56,7 +56,7 @@ vi.mock("./useMessageStream", () => ({
   }),
 }));
 
-vi.mock("../utils/chatErrorUtils", () => ({
+vi.mock("../utils/chat-error-utils", () => ({
   showErrorToast: vi.fn(),
 }));
 

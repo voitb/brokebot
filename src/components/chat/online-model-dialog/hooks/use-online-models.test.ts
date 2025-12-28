@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useOnlineModels } from "./useOnlineModels";
-import { createMockOpenRouterModel, createMockUserConfig } from "@/test/mocks";
+import { useOnlineModels } from "./use-online-models";
+import { createMockOpenRouterModel, createMockUserConfig } from "@/test/mocks/modules";
 
 const mockConfig = createMockUserConfig({
   openrouterApiKey: "test-api-key-12345",
@@ -20,14 +20,14 @@ let mockUseModelsReturn = {
   error: null as Error | null,
 };
 
-vi.mock("@/hooks/useUserConfig", async () => {
+vi.mock("@/hooks/use-user-config", async () => {
   const { createMockUserConfigHook } = await import("@/test/mocks/hooks");
   return {
     useUserConfig: () => createMockUserConfigHook({ config: mockConfig }),
   };
 });
 
-vi.mock("@/hooks/api/useModels", () => ({
+vi.mock("@/hooks/api/use-models", () => ({
   useModels: () => mockUseModelsReturn,
 }));
 

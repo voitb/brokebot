@@ -6,4 +6,18 @@ export type {
   OpenRouterClient,
 } from '../lib/openrouter';
 
-export type { ModelType, UnifiedModel } from '../providers/ModelProvider';
+export type { ModelType, UnifiedModel } from '../providers/model-provider';
+
+// UI-specific types
+export interface ConversationGroup {
+  label: string;
+  conversations: Array<{
+    id: number;
+    title: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isPinned?: boolean;
+  }>;
+}
+
+export type QualityLevel = "high" | "medium" | "low";

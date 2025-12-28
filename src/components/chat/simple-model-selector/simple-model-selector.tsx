@@ -10,17 +10,17 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useWebLLM, type ModelInfo } from "@/providers/WebLLMProvider";
+import { useWebLLM, type ModelInfo } from "@/providers/web-llm-provider";
 import {
   useModel,
   createLocalModel,
   createOnlineModel,
-} from "@/providers/ModelProvider";
-import { OnlineModelDialog } from "../OnlineModelDialog";
+} from "@/providers/model-provider";
+import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
 import { type OpenRouterModel } from "@/lib/openrouter";
 import { toast } from "sonner";
-import { LocalModelList } from "./components/LocalModelList";
-import { useUserConfig } from "@/hooks/useUserConfig";
+import { LocalModelList } from "./components/local-model-list";
+import { useUserConfig } from "@/hooks/use-user-config";
 
 interface SimpleModelSelectorProps {
   disabled?: boolean;

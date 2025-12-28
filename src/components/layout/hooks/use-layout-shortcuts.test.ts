@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useLayoutShortcuts } from "./useLayoutShortcuts";
+import { useLayoutShortcuts } from "./use-layout-shortcuts";
 import { mockNavigate, mockSearchParams } from "@/test/mocks/modules";
 
 const mockSetOpen = vi.fn();
@@ -21,13 +21,13 @@ vi.mock("@/components/ui/sidebar", async () => {
   };
 });
 
-vi.mock("@/components/chat/sidebar/hooks/useConversationList", () => ({
+vi.mock("@/components/chat/sidebar/hooks/use-conversation-list", () => ({
   useConversationList: () => ({
     handleNewChat: mockHandleNewChat,
   }),
 }));
 
-vi.mock("@/providers/ConversationsProvider", async () => {
+vi.mock("@/providers/conversations-provider", async () => {
   const { createMockConversationsHook } = await import("@/test/mocks/hooks");
   return {
     useConversations: () =>
@@ -37,13 +37,13 @@ vi.mock("@/providers/ConversationsProvider", async () => {
   };
 });
 
-vi.mock("@/hooks/useConversationId", () => ({
+vi.mock("@/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("@/hooks/useKeyboardShortcuts", () => ({
+vi.mock("@/hooks/use-keyboard-shortcuts", () => ({
   useKeyboardShortcuts: (shortcuts: Record<string, () => void>) => {
     capturedShortcuts = shortcuts;
   },

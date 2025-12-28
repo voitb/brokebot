@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { formatMessageTime } from "../utils";
+import { formatMessageTime } from "../utils/format-message-time";
 
 interface MessageTimestampProps {
   timestamp: Date;

@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { KEYBOARD_SHORTCUTS } from "@/constants/keyboardShortcuts";
-import { ShortcutGroup } from "./components";
+import { KEYBOARD_SHORTCUTS } from "@/constants/keyboard-shortcuts";
+import { ShortcutGroup } from "./components/shortcut-group";
 
 interface KeyboardShortcutsModalProps {
   open: boolean;

@@ -8,11 +8,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useWebLLM, type ModelInfo } from "@/providers/WebLLMProvider";
-import { OnlineModelDialog } from "../OnlineModelDialog";
+import { useWebLLM, type ModelInfo } from "@/providers/web-llm-provider";
+import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
 import { type OpenRouterModel } from "@/lib/openrouter";
-import { useModelSelector } from "./hooks/useModelSelector";
-import { ModelCategory } from "./components/ModelCategory";
+import { useModelSelector } from "./hooks/use-model-selector";
+import { ModelCategory } from "./components/model-category";
 
 interface ModelSelectorProps {
   disabled?: boolean;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useUserConfig } from "@/hooks/useUserConfig";
+import { useUserConfig } from "@/hooks/use-user-config";
 
 function maskApiKey(key: string): string {
   if (!key || key.length < 8) return "";

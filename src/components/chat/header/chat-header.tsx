@@ -4,15 +4,13 @@ import { Star, Sun, Moon } from "lucide-react";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/providers/ThemeProvider";
-import { useConversationId } from "@/hooks/useConversationId";
-import {
-  BreadcrumbNavigation,
-  HeaderActionsMenu,
-  NewChatButton,
-} from "./components";
-import { useHeaderActions } from "./hooks/useHeaderActions";
-import { DeleteConversationDialog } from "../sidebar/components/DeleteConversationDialog";
+import { useTheme } from "@/providers/theme-provider";
+import { useConversationId } from "@/hooks/use-conversation-id";
+import { BreadcrumbNavigation } from "./components/breadcrumb-navigation";
+import { HeaderActionsMenu } from "./components/header-actions-menu";
+import { NewChatButton } from "./components/new-chat-button";
+import { useHeaderActions } from "./hooks/use-header-actions";
+import { DeleteConversationDialog } from "../sidebar/components/delete-conversation-dialog";
 
 /**
  * Main chat header component with responsive layout

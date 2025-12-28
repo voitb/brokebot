@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { ChatInterface } from "./ChatInterface";
-import { ConversationsProvider } from "@/providers/ConversationsProvider";
-import { ThemeProvider } from "@/providers/ThemeProvider";
+import { ChatInterface } from "./chat-interface";
+import { ConversationsProvider } from "@/providers/conversations-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { clearTestDatabase } from "@/test/db-helpers";
 import { createMockModelContext, createMockWebLLMContext } from "@/test/mocks/factories";
@@ -11,12 +11,12 @@ import { createMockModelContext, createMockWebLLMContext } from "@/test/mocks/fa
 const mockModelContext = createMockModelContext();
 const mockWebLLMContext = createMockWebLLMContext();
 
-vi.mock("@/providers/ModelProvider", () => ({
+vi.mock("@/providers/model-provider", () => ({
   useModel: () => mockModelContext,
   ModelProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/providers/WebLLMProvider", async () => {
+vi.mock("@/providers/web-llm-provider", async () => {
   const { MOCK_AVAILABLE_MODELS } = await import("@/test/mocks/constants");
   return {
     useWebLLM: () => mockWebLLMContext,

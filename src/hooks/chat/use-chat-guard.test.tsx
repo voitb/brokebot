@@ -2,8 +2,8 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { useChatGuard } from "./useChatGuard";
-import { ConversationsProvider } from "@/providers/ConversationsProvider";
+import { useChatGuard } from "./use-chat-guard";
+import { ConversationsProvider } from "@/providers/conversations-provider";
 import { clearTestDatabase, seedConversation } from "@/test/db-helpers";
 import { mockNavigate, mockToast } from "@/test/mocks/modules";
 
@@ -93,11 +93,11 @@ describe("useChatGuard timeout behavior", () => {
   );
 
   it("shows error toast and navigates when conversation not found after timeout", async () => {
-    vi.doMock("../useConversations", () => ({
+    vi.doMock("../use-conversations", () => ({
       useConversation: mockUseConversation,
     }));
 
-    const { useChatGuard: useChatGuardMocked } = await import("./useChatGuard");
+    const { useChatGuard: useChatGuardMocked } = await import("./use-chat-guard");
 
     renderHook(
       () => useChatGuardMocked({ conversationId: "nonexistent-id", timeoutMs: 100 }),
@@ -112,15 +112,15 @@ describe("useChatGuard timeout behavior", () => {
     });
     expect(mockNavigate).toHaveBeenCalledWith("/chat", { replace: true });
 
-    vi.doUnmock("../useConversations");
+    vi.doUnmock("../use-conversations");
   });
 
   it("respects custom timeoutMs", async () => {
-    vi.doMock("../useConversations", () => ({
+    vi.doMock("../use-conversations", () => ({
       useConversation: mockUseConversation,
     }));
 
-    const { useChatGuard: useChatGuardMocked } = await import("./useChatGuard");
+    const { useChatGuard: useChatGuardMocked } = await import("./use-chat-guard");
 
     renderHook(
       () => useChatGuardMocked({ conversationId: "nonexistent-id", timeoutMs: 1000 }),
@@ -133,6 +133,6 @@ describe("useChatGuard timeout behavior", () => {
     await vi.advanceTimersByTimeAsync(500);
     expect(mockToast.error).toHaveBeenCalled();
 
-    vi.doUnmock("../useConversations");
+    vi.doUnmock("../use-conversations");
   });
 });

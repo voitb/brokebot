@@ -1,10 +1,12 @@
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useConversation } from "@/hooks/useConversations";
-import { useConversationId } from "@/hooks/useConversationId";
-import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
-import { useWebLLM } from "@/providers/WebLLMProvider";
-import { MessageBubble, EmptyState, ScrollToBottomButton } from "./components";
+import { useConversation } from "@/hooks/use-conversations";
+import { useConversationId } from "@/hooks/use-conversation-id";
+import { useSmartAutoScroll } from "@/hooks/use-smart-auto-scroll";
+import { useWebLLM } from "@/providers/web-llm-provider";
+import { MessageBubble } from "./components/message-bubble";
+import { EmptyState } from "./components/empty-state";
+import { ScrollToBottomButton } from "./components/scroll-to-bottom-button";
 
 interface ChatMessagesProps {
   isLoading?: boolean;

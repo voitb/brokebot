@@ -12,11 +12,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-import { EditableConversationTitle } from "./EditableConversationTitle";
-import { DeleteConversationDialog } from "./DeleteConversationDialog";
-import { useConversationItem } from "../hooks/useConversationItem";
+import { EditableConversationTitle } from "./editable-conversation-title";
+import { DeleteConversationDialog } from "./delete-conversation-dialog";
+import { useConversationItem } from "../hooks/use-conversation-item";
 import type { Conversation } from "@/lib/db";
-import { InputDialog } from "@/components/dialogs/InputDialog";
+import { InputDialog } from "@/components/dialogs/input-dialog";
 
 interface ConversationItemProps {
   conversation: Conversation;

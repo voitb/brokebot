@@ -1,40 +1,40 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import { render } from "@/test/utils";
-import { ChatMessages } from "./ChatMessages";
+import { ChatMessages } from "./chat-messages";
 import {
   createMockMessage,
   createMockConversation,
   createMockSmartAutoScrollHook,
-} from "@/test/mocks";
+} from "@/test/mocks/modules";
 
-vi.mock("@/hooks/useConversations", async () => {
+vi.mock("@/hooks/use-conversations", async () => {
   const { createMockConversationHook } = await import("@/test/mocks/hooks");
   return {
     useConversation: vi.fn(() => createMockConversationHook()),
   };
 });
 
-vi.mock("@/hooks/useConversationId", async () => {
+vi.mock("@/hooks/use-conversation-id", async () => {
   const { createMockConversationIdHook } = await import("@/test/mocks/hooks");
   return {
     useConversationId: vi.fn(() => createMockConversationIdHook()),
   };
 });
 
-vi.mock("@/providers/WebLLMProvider", async () => {
+vi.mock("@/providers/web-llm-provider", async () => {
   const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 
-vi.mock("@/hooks/useSmartAutoScroll", async () => {
+vi.mock("@/hooks/use-smart-auto-scroll", async () => {
   const { createMockSmartAutoScrollHook } = await import("@/test/mocks/hooks");
   return { useSmartAutoScroll: vi.fn(() => createMockSmartAutoScrollHook()) };
 });
 
-import { useConversation } from "@/hooks/useConversations";
-import { useWebLLM } from "@/providers/WebLLMProvider";
-import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
+import { useConversation } from "@/hooks/use-conversations";
+import { useWebLLM } from "@/providers/web-llm-provider";
+import { useSmartAutoScroll } from "@/hooks/use-smart-auto-scroll";
 
 const defaultProps = {
   onRegenerate: vi.fn(),

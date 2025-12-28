@@ -1,8 +1,8 @@
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { CopyButton } from "@/components/ui";
-import { ScrollArea, ScrollBar } from "@/components/ui";
-import { useCodeHighlighting } from "../hooks";
+import { CopyButton } from "@/components/ui/copy-button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useCodeHighlighting } from "../hooks/use-code-highlighting";
 
 interface CodeBlockProps {
   className?: string;

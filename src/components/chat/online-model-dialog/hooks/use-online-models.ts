@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { type OpenRouterModel } from "@/lib/openrouter";
-import { useUserConfig } from "@/hooks/useUserConfig";
-import { useModels } from "@/hooks/api/useModels";
+import { useUserConfig } from "@/hooks/use-user-config";
+import { useModels } from "@/hooks/api/use-models";
 
 export const useOnlineModels = (
   onModelSelect: (model: OpenRouterModel, apiKey: string) => void,

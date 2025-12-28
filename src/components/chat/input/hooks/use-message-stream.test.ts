@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useMessageStream, type StreamResult } from "./useMessageStream";
+import { useMessageStream, type StreamResult } from "./use-message-stream";
 import { createMockStream } from "@/test/mocks/factories";
 
 function assertStreamResult(result: StreamResult | null): StreamResult {
@@ -12,7 +12,7 @@ const mockStreamMessage = vi.fn();
 const mockInterruptGeneration = vi.fn();
 const mockResetChat = vi.fn();
 
-vi.mock("@/providers/ModelProvider", () => ({
+vi.mock("@/providers/model-provider", () => ({
   useModel: () => ({
     streamMessage: mockStreamMessage,
     interruptGeneration: mockInterruptGeneration,

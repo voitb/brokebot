@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocuments } from "@/hooks/use-documents";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, Trash2, RefreshCw, Calendar } from "lucide-react";

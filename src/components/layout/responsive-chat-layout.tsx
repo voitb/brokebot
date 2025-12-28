@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ChatSidebar } from "./ChatSidebar";
+import { ChatSidebar } from "./chat-sidebar";
 import React from "react";
 import {
   Sidebar,
@@ -7,9 +7,9 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "../ui/sidebar";
-import { useLayoutShortcuts } from "./hooks/useLayoutShortcuts";
-import { useOnboarding } from "../onboarding/hooks/useOnboarding";
-import { OnboardingDialog } from "../onboarding/OnboardingDialog";
+import { useLayoutShortcuts } from "./hooks/use-layout-shortcuts";
+import { useOnboarding } from "../onboarding/hooks/use-onboarding";
+import { OnboardingDialog } from "../onboarding/onboarding-dialog";
 
 interface ResponsiveChatLayoutProps {
   children: ReactNode;

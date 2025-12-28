@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUserConfig } from "@/hooks/useUserConfig";
+import { useUserConfig } from "@/hooks/use-user-config";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
 

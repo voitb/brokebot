@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { type ModelInfo } from "@/providers/WebLLMProvider";
+import { type ModelInfo } from "@/providers/web-llm-provider";
 
 interface LocalModelListProps {
   availableModels: ModelInfo[];

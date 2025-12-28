@@ -1,6 +1,6 @@
 import React from "react";
 import type { ReactNode } from "react";
-import { ChatSidebar } from "./ChatSidebar";
+import { ChatSidebar } from "./chat-sidebar";
 
 interface ChatLayoutProps {
   children: ReactNode;

@@ -1,11 +1,11 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { ChatHeader } from "../header";
-import { ChatMessages } from "../messages";
-import { ChatInput } from "../input";
-import { useConversation } from "@/hooks/useConversations";
-import { useConversationId } from "@/hooks/useConversationId";
-import { useChatInput } from "../input/hooks";
+import { ChatHeader } from "../header/chat-header";
+import { ChatMessages } from "../messages/chat-messages";
+import { ChatInput } from "../input/chat-input";
+import { useConversation } from "@/hooks/use-conversations";
+import { useConversationId } from "@/hooks/use-conversation-id";
+import { useChatInput } from "../input/hooks/use-chat-input";
 
 /**
  * Main chat interface component combining header, messages, and input
