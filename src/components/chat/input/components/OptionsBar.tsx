@@ -6,12 +6,12 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { Badge } from "../../../ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { ModelSelector } from "../../model-selector";
-import { useWebLLM } from "../../../../providers/WebLLMProvider";
-import type { QualityLevel } from "../../../../types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ModelSelector } from "@/components/chat/model-selector";
+import { useWebLLM } from "@/providers/WebLLMProvider";
+import type { QualityLevel } from "@/types";
 
 interface OptionsBarProps {
   quality: QualityLevel;

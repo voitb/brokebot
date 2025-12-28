@@ -6,12 +6,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../ui/dialog";
-import { Button } from "../../ui/button";
-import { ScrollArea } from "../../ui/scroll-area";
-import { useConversation } from "../../../hooks/useConversations";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useConversation } from "@/hooks/useConversations";
 import { toast } from "sonner";
-import { generateHTML, generateMarkdown, downloadFile } from "../../../lib/exportUtils";
+import { generateHTML, generateMarkdown, downloadFile } from "@/lib/exportUtils";
 
 interface ExportChatModalProps {
   open: boolean;

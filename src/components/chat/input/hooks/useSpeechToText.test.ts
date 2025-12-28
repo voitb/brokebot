@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSpeechToText } from "./useSpeechToText";
-import { setupMediaMocks } from "../../../../test/mocks/modules";
+import { setupMediaMocks } from "@/test/mocks/modules";
 
 const mockGetTranscriber = vi.fn();
 
-vi.mock("../../../../lib/transcriber", () => ({
+vi.mock("@/lib/transcriber", () => ({
   getTranscriber: () => mockGetTranscriber(),
 }));
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { CopyButton } from "../../../ui";
+import { CopyButton } from "@/components/ui";
 import { ScrollArea, ScrollBar } from "@/components/ui";
 import { useCodeHighlighting } from "../hooks";
 

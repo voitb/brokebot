@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { db, type Document } from "../lib/db";
+import { db, type Document } from "@/lib/db";
 import { toast } from "sonner";
 
 export interface UseDocumentsReturn {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { summarizeConversation, buildPrompt } from "./chatInputUtils";
-import type { OpenRouterMessage } from "../../../../lib/openrouter";
+import type { OpenRouterMessage } from "@/lib/openrouter";
 
 describe("chatInputUtils", () => {
   describe("summarizeConversation", () => {

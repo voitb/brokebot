@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { ApiKeySection } from "./ApiKeySection";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { Button } from "../../../ui/button";
-import { OpenRouterIcon } from "../../../ui/ProviderIcons";
-import { createOpenRouterClient } from "../../../../lib/openrouter";
-import { useUserConfig } from "../../../../hooks/useUserConfig";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { OpenRouterIcon } from "@/components/ui/ProviderIcons";
+import { createOpenRouterClient } from "@/lib/openrouter";
+import { useUserConfig } from "@/hooks/useUserConfig";
 import { toast } from "sonner";
 import { TestTube, Loader2 } from "lucide-react";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { type ModelInfo } from "../../../../providers/WebLLMProvider";
+import { type ModelInfo } from "@/providers/WebLLMProvider";
 
 const CATEGORY_ORDER = ["light", "medium", "large", "heavy", "extreme"];
 

@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type Conversation, type Message, type Folder } from "../lib/db";
+import { db, type Conversation, type Message, type Folder } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 

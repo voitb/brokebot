@@ -1,6 +1,6 @@
 // src/hooks/useConversations.ts
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../lib/db";
+import { db } from "@/lib/db";
 
 // The main hook is now a context consumer, managed by ConversationsProvider
 export { useConversations } from "@/providers/ConversationsProvider";

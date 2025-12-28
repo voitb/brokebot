@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useHeaderActions } from "./useHeaderActions";
-import { mockNavigate, mockToast } from "../../../../test/mocks/modules";
-import { createMockConversation } from "../../../../test/mocks/factories";
-import type { Conversation } from "../../../../lib/db";
+import { mockNavigate, mockToast } from "@/test/mocks/modules";
+import { createMockConversation } from "@/test/mocks/factories";
+import type { Conversation } from "@/lib/db";
 
 const mockTogglePinConversation = vi.fn();
 const mockUpdateConversationTitle = vi.fn();
@@ -18,9 +18,9 @@ let mockConversation: Conversation = createMockConversation({ id: "conv-1", titl
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("../../../../hooks/useConversations", async () => {
+vi.mock("@/hooks/useConversations", async () => {
   const { createMockConversationsHook, createMockConversationHook } = await import(
-    "../../../../test/mocks/hooks"
+    "@/test/mocks/hooks"
   );
   return {
     useConversations: () =>
@@ -38,8 +38,8 @@ vi.mock("../../../../hooks/useConversations", async () => {
   };
 });
 
-vi.mock("../../../../hooks/useUserConfig", async () => {
-  const { createMockUserConfigHook } = await import("../../../../test/mocks/hooks");
+vi.mock("@/hooks/useUserConfig", async () => {
+  const { createMockUserConfigHook } = await import("@/test/mocks/hooks");
   return {
     useUserConfig: () => createMockUserConfigHook({
       importConversations: mockImportConversations,

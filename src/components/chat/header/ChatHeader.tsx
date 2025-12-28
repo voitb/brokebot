@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate, createSearchParams } from "react-router-dom";
 import { Star, Sun, Moon } from "lucide-react";
-import { SidebarTrigger, useSidebar } from "../../ui/sidebar";
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
-import { Button } from "../../ui/button";
-import { useTheme } from "../../../providers/ThemeProvider";
-import { useConversationId } from "../../../hooks/useConversationId";
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/providers/ThemeProvider";
+import { useConversationId } from "@/hooks/useConversationId";
 import {
   BreadcrumbNavigation,
   HeaderActionsMenu,

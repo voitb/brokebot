@@ -1,7 +1,7 @@
 import { useState, useTransition, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations } from "../../../../providers/ConversationsProvider";
-import type { Conversation, Folder } from "../../../../lib/db";
+import { useConversations } from "@/providers/ConversationsProvider";
+import type { Conversation, Folder } from "@/lib/db";
 
 export interface FolderWithConversations extends Folder {
   conversations: Conversation[];

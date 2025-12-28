@@ -1,5 +1,5 @@
 import React from "react";
-import { type OpenRouterModel } from "../../../../lib/openrouter";
+import { type OpenRouterModel } from "@/lib/openrouter";
 import { ModelCard } from "./ModelCard";
 
 interface ApiKeys {

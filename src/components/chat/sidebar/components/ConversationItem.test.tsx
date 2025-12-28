@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "../../../../test/utils";
+import { render } from "@/test/utils";
 import { ConversationItem } from "./ConversationItem";
 import {
   createMockConversation,
   createMockFolder,
   createMockConversationItemHook,
-} from "../../../../test/mocks";
+} from "@/test/mocks";
 
 const mockUseConversationItem = createMockConversationItemHook();
 
@@ -15,8 +15,8 @@ vi.mock("../hooks/useConversationItem", () => ({
   useConversationItem: vi.fn(() => mockUseConversationItem),
 }));
 
-vi.mock("../../../../providers/WebLLMProvider", async () => {
-  const { createMinimalWebLLMProvider } = await import("../../../../test/mocks/providers");
+vi.mock("@/providers/WebLLMProvider", async () => {
+  const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 

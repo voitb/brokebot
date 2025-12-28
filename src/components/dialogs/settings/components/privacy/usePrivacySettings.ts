@@ -1,6 +1,6 @@
 import { useState, useRef, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserConfig } from "../../../../../hooks/useUserConfig";
+import { useUserConfig } from "@/hooks/useUserConfig";
 import { toast } from "sonner";
 
 export const usePrivacySettings = (hasConversations = false) => {

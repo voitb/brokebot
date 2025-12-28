@@ -8,8 +8,8 @@ import {
   Download,
   Upload,
 } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ActionButtonsProps {
   theme: string;

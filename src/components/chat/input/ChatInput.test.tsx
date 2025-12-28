@@ -2,19 +2,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ChatInput } from "./ChatInput";
 
-vi.mock("../../../providers/ModelProvider", async () => {
-  const { createMinimalModelProvider } = await import("../../../test/mocks/providers");
+vi.mock("@/providers/ModelProvider", async () => {
+  const { createMinimalModelProvider } = await import("@/test/mocks/providers");
   return createMinimalModelProvider();
 });
 
-vi.mock("../../../providers/WebLLMProvider", async () => {
-  const { createMockWebLLMProvider } = await import("../../../test/mocks/providers");
+vi.mock("@/providers/WebLLMProvider", async () => {
+  const { createMockWebLLMProvider } = await import("@/test/mocks/providers");
   return createMockWebLLMProvider();
 });
 
 vi.mock("./hooks", async () => {
   const { createMockDragDropHook, createMockFileUploadHook, createMockSpeechToTextHook } =
-    await import("../../../test/mocks/hooks");
+    await import("@/test/mocks/hooks");
   return {
     useDragDrop: vi.fn(() => createMockDragDropHook()),
     useFileUpload: vi.fn(() => createMockFileUploadHook()),
@@ -23,7 +23,7 @@ vi.mock("./hooks", async () => {
   };
 });
 
-import { useModel } from "../../../providers/ModelProvider";
+import { useModel } from "@/providers/ModelProvider";
 
 const defaultProps = {
   message: "",

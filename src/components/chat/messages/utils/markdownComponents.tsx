@@ -1,7 +1,6 @@
-
 import type { Components } from "react-markdown";
 import { CodeBlock } from "../components/CodeBlock";
-import { ScrollArea } from "../../../ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**
  * Creates markdown components configuration for ReactMarkdown

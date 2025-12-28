@@ -2,22 +2,22 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ChatInterface } from "./ChatInterface";
-import { ConversationsProvider } from "../../../providers/ConversationsProvider";
-import { ThemeProvider } from "../../../providers/ThemeProvider";
-import { SidebarProvider } from "../../../components/ui/sidebar";
-import { clearTestDatabase } from "../../../test/db-helpers";
-import { createMockModelContext, createMockWebLLMContext } from "../../../test/mocks/factories";
+import { ConversationsProvider } from "@/providers/ConversationsProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { clearTestDatabase } from "@/test/db-helpers";
+import { createMockModelContext, createMockWebLLMContext } from "@/test/mocks/factories";
 
 const mockModelContext = createMockModelContext();
 const mockWebLLMContext = createMockWebLLMContext();
 
-vi.mock("../../../providers/ModelProvider", () => ({
+vi.mock("@/providers/ModelProvider", () => ({
   useModel: () => mockModelContext,
   ModelProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("../../../providers/WebLLMProvider", async () => {
-  const { MOCK_AVAILABLE_MODELS } = await import("../../../test/mocks/constants");
+vi.mock("@/providers/WebLLMProvider", async () => {
+  const { MOCK_AVAILABLE_MODELS } = await import("@/test/mocks/constants");
   return {
     useWebLLM: () => mockWebLLMContext,
     WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -25,8 +25,8 @@ vi.mock("../../../providers/WebLLMProvider", async () => {
   };
 });
 
-vi.mock("../../../lib/transcriber", async () => {
-  const { createMockTranscriber } = await import("../../../test/mocks/hooks");
+vi.mock("@/lib/transcriber", async () => {
+  const { createMockTranscriber } = await import("@/test/mocks/hooks");
   return createMockTranscriber();
 });
 

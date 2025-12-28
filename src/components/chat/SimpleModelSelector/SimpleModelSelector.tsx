@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, Cpu, Cloud, Key } from "lucide-react";
-import { Button } from "../../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,19 +8,19 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuLabel,
-} from "../../ui/dropdown-menu";
-import { Badge } from "../../ui/badge";
-import { useWebLLM, type ModelInfo } from "../../../providers/WebLLMProvider";
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useWebLLM, type ModelInfo } from "@/providers/WebLLMProvider";
 import {
   useModel,
   createLocalModel,
   createOnlineModel,
-} from "../../../providers/ModelProvider";
+} from "@/providers/ModelProvider";
 import { OnlineModelDialog } from "../OnlineModelDialog";
-import { type OpenRouterModel } from "../../../lib/openrouter";
+import { type OpenRouterModel } from "@/lib/openrouter";
 import { toast } from "sonner";
 import { LocalModelList } from "./components/LocalModelList";
-import { useUserConfig } from "../../../hooks/useUserConfig";
+import { useUserConfig } from "@/hooks/useUserConfig";
 
 interface SimpleModelSelectorProps {
   disabled?: boolean;

@@ -1,6 +1,6 @@
 import React from "react";
 import { ConversationItem } from "./ConversationItem";
-import type { Conversation } from "../../../../lib/db";
+import type { Conversation } from "@/lib/db";
 
 interface ConversationGroupProps {
   title: string;

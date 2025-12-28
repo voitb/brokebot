@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "../lib/db";
-import { encryptValue, decryptValue } from "../lib/encryptionService";
+import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONFIG } from "@/lib/db";
+import { encryptValue, decryptValue } from "@/lib/encryptionService";
 import { toast } from "sonner";
 
 export function useUserConfig() {

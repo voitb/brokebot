@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations, useConversation } from "../../../../hooks/useConversations";
-import { useUserConfig } from "../../../../hooks/useUserConfig";
-import { type Conversation} from "../../../../lib/db";
+import { useConversations, useConversation } from "@/hooks/useConversations";
+import { useUserConfig } from "@/hooks/useUserConfig";
+import { type Conversation } from "@/lib/db";
 import { toast } from "sonner";
 
 interface UseHeaderActionsOptions {

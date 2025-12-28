@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
-import { useDocuments } from "../../hooks/useDocuments";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { useDocuments } from "@/hooks/useDocuments";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, Trash2, RefreshCw, Calendar } from "lucide-react";
 // Note: date-fns not available, using native Date
 // import { formatDistanceToNow } from "date-fns";

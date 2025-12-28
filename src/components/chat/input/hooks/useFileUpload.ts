@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useDocuments } from "../../../../hooks/useDocuments";
+import { useDocuments } from "@/hooks/useDocuments";
 import {
   processFile as processFileUtil,
   validateFile,

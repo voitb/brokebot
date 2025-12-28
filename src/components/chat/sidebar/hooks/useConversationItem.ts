@@ -1,8 +1,8 @@
 import { useState, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations } from "../../../../providers/ConversationsProvider";
-import { useConversationId } from "../../../../hooks/useConversationId";
-import type { Conversation } from "../../../../lib/db";
+import { useConversations } from "@/providers/ConversationsProvider";
+import { useConversationId } from "@/hooks/useConversationId";
+import type { Conversation } from "@/lib/db";
 
 export const useConversationItem = (conversation: Conversation) => {
   const navigate = useNavigate();

@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useChatGuard } from "./useChatGuard";
-import { ConversationsProvider } from "../../providers/ConversationsProvider";
-import { clearTestDatabase, seedConversation } from "../../test/db-helpers";
-import { mockNavigate, mockToast } from "../../test/mocks/modules";
+import { ConversationsProvider } from "@/providers/ConversationsProvider";
+import { clearTestDatabase, seedConversation } from "@/test/db-helpers";
+import { mockNavigate, mockToast } from "@/test/mocks/modules";
 
 // sonner is globally mocked in setup.ts - use mockToast for assertions
 // react-router-dom is globally mocked in setup.ts - use mockNavigate for assertions
