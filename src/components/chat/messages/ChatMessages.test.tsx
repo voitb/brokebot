@@ -1,40 +1,40 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
-import { render } from "../../../test/utils";
+import { render } from "@/test/utils";
 import { ChatMessages } from "./ChatMessages";
 import {
   createMockMessage,
   createMockConversation,
   createMockSmartAutoScrollHook,
-} from "../../../test/mocks";
+} from "@/test/mocks";
 
-vi.mock("../../../hooks/useConversations", async () => {
-  const { createMockConversationHook } = await import("../../../test/mocks/hooks");
+vi.mock("@/hooks/useConversations", async () => {
+  const { createMockConversationHook } = await import("@/test/mocks/hooks");
   return {
     useConversation: vi.fn(() => createMockConversationHook()),
   };
 });
 
-vi.mock("../../../hooks/useConversationId", async () => {
-  const { createMockConversationIdHook } = await import("../../../test/mocks/hooks");
+vi.mock("@/hooks/useConversationId", async () => {
+  const { createMockConversationIdHook } = await import("@/test/mocks/hooks");
   return {
     useConversationId: vi.fn(() => createMockConversationIdHook()),
   };
 });
 
-vi.mock("../../../providers/WebLLMProvider", async () => {
-  const { createMinimalWebLLMProvider } = await import("../../../test/mocks/providers");
+vi.mock("@/providers/WebLLMProvider", async () => {
+  const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 
-vi.mock("../../../hooks/useSmartAutoScroll", async () => {
-  const { createMockSmartAutoScrollHook } = await import("../../../test/mocks/hooks");
+vi.mock("@/hooks/useSmartAutoScroll", async () => {
+  const { createMockSmartAutoScrollHook } = await import("@/test/mocks/hooks");
   return { useSmartAutoScroll: vi.fn(() => createMockSmartAutoScrollHook()) };
 });
 
-import { useConversation } from "../../../hooks/useConversations";
-import { useWebLLM } from "../../../providers/WebLLMProvider";
-import { useSmartAutoScroll } from "../../../hooks/useSmartAutoScroll";
+import { useConversation } from "@/hooks/useConversations";
+import { useWebLLM } from "@/providers/WebLLMProvider";
+import { useSmartAutoScroll } from "@/hooks/useSmartAutoScroll";
 
 const defaultProps = {
   onRegenerate: vi.fn(),

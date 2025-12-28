@@ -1,6 +1,6 @@
 import React from "react";
-import type { Conversation } from "../../../../lib/db";
-import { Logo } from "../../../ui/Logo";
+import type { Conversation } from "@/lib/db";
+import { Logo } from "@/components/ui/Logo";
 
 interface EmptyStateProps {
   conversation?: Conversation;

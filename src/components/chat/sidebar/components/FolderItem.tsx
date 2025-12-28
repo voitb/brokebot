@@ -3,16 +3,16 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import { ChevronRight, Folder as FolderIcon, MoreHorizontal, Edit, Trash2, MessageSquarePlus } from "lucide-react";
 import { ConversationItem } from "./ConversationItem";
 import type { FolderWithConversations } from "../hooks/useConversationList";
-import { Button } from "../../../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../../ui/dropdown-menu";
-import { useConversations } from "../../../../providers/ConversationsProvider";
+} from "@/components/ui/dropdown-menu";
+import { useConversations } from "@/providers/ConversationsProvider";
 import { useConversationList } from "../hooks/useConversationList";
-import { InputDialog } from "../../../dialogs/InputDialog";
+import { InputDialog } from "@/components/dialogs/InputDialog";
 
 interface FolderItemProps {
   folder: FolderWithConversations;

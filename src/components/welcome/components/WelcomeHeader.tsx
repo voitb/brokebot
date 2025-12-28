@@ -1,5 +1,5 @@
 import React from "react";
-import { Logo } from "../../ui/Logo";
+import { Logo } from "@/components/ui/Logo";
 
 export const WelcomeHeader: React.FC = () => (
   <div className="space-y-4">

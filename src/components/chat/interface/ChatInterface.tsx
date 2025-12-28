@@ -3,8 +3,8 @@ import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header";
 import { ChatMessages } from "../messages";
 import { ChatInput } from "../input";
-import { useConversation } from "../../../hooks/useConversations";
-import { useConversationId } from "../../../hooks/useConversationId";
+import { useConversation } from "@/hooks/useConversations";
+import { useConversationId } from "@/hooks/useConversationId";
 import { useChatInput } from "../input/hooks";
 
 /**

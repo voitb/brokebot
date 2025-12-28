@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useTextareaAutoResize } from "./useTextareaAutoResize";
 import { useRef } from "react";
-import { createMockTextarea } from "../../../../test/mocks/dom-helpers";
+import { createMockTextarea } from "@/test/mocks/dom-helpers";
 
 describe("useTextareaAutoResize", () => {
   let mockTextarea: HTMLTextAreaElement;

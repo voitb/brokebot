@@ -1,7 +1,7 @@
 // components/ScrollToBottomButton.tsx
 import React from "react";
 import { ChevronDown } from "lucide-react";
-import { Button } from "../../../ui/button";
+import { Button } from "@/components/ui/button";
 
 interface ScrollToBottomButtonProps {
   onClick: () => void;

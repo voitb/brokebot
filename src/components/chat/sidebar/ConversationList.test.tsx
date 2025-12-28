@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "../../../test/utils";
+import { render } from "@/test/utils";
 import { ConversationList } from "./ConversationList";
 import {
   createMockConversation,
   createMockFolder,
   createMockConversationListHook,
-} from "../../../test/mocks";
+} from "@/test/mocks";
 
 const mockUseConversationList = createMockConversationListHook();
 
@@ -15,8 +15,8 @@ vi.mock("./hooks/useConversationList", () => ({
   useConversationList: vi.fn(() => mockUseConversationList),
 }));
 
-vi.mock("../../../providers/ConversationsProvider", async () => {
-  const { createMockConversationsHook } = await import("../../../test/mocks/hooks");
+vi.mock("@/providers/ConversationsProvider", async () => {
+  const { createMockConversationsHook } = await import("@/test/mocks/hooks");
   return {
     useConversations: vi.fn(() => createMockConversationsHook({
       createFolder: vi.fn(),
@@ -24,13 +24,13 @@ vi.mock("../../../providers/ConversationsProvider", async () => {
   };
 });
 
-vi.mock("../../../providers/WebLLMProvider", async () => {
-  const { createMinimalWebLLMProvider } = await import("../../../test/mocks/providers");
+vi.mock("@/providers/WebLLMProvider", async () => {
+  const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 
 import { useConversationList } from "./hooks/useConversationList";
-import { useConversations } from "../../../providers/ConversationsProvider";
+import { useConversations } from "@/providers/ConversationsProvider";
 
 describe("ConversationList", () => {
   const user = userEvent.setup();

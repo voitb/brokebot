@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useCopyToClipboard } from "./useCopyToClipboard";
-import { mockToast } from "../../../../test/mocks/modules";
+import { mockToast } from "@/test/mocks/modules";
 
 describe("useCopyToClipboard", () => {
   const mockWriteText = vi.fn();

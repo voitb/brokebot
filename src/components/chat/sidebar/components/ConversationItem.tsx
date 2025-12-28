@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
-import { Button } from "../../../ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +11,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuPortal,
-} from "../../../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { EditableConversationTitle } from "./EditableConversationTitle";
 import { DeleteConversationDialog } from "./DeleteConversationDialog";
 import { useConversationItem } from "../hooks/useConversationItem";
-import type { Conversation } from "../../../../lib/db";
-import { InputDialog } from "../../../dialogs/InputDialog";
+import type { Conversation } from "@/lib/db";
+import { InputDialog } from "@/components/dialogs/InputDialog";
 
 interface ConversationItemProps {
   conversation: Conversation;

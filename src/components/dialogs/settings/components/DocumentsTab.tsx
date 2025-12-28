@@ -1,5 +1,5 @@
 import React from "react";
-import { DocumentManager } from "../../../documents/DocumentManager";
+import { DocumentManager } from "@/components/documents/DocumentManager";
 
 export const DocumentsTab: React.FC = () => {
   return (

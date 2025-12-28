@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { Search, Loader2 } from "lucide-react";
-import { Input } from "../../../ui/input";
+import { Input } from "@/components/ui/input";
 
 interface SearchBarProps {
   searchTerm: string;

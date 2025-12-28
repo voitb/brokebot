@@ -1,5 +1,5 @@
 import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useSidebar } from "../../ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useConversationList } from "@/components/chat/sidebar/hooks/useConversationList";
 import { useConversations } from "@/providers/ConversationsProvider";
 import { useConversationId } from "@/hooks/useConversationId";

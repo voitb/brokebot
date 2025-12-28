@@ -1,8 +1,8 @@
 import React from "react";
 import { Plus } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { SidebarTrigger } from "../../../ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface NewChatButtonProps {
   onNewChat: () => void;

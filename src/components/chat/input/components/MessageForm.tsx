@@ -1,8 +1,8 @@
 import React from "react";
 import { Send } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { AutosizeTextarea } from "../../../ui/auto-size-textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { AutosizeTextarea } from "@/components/ui/auto-size-textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MessageFormProps {
   onSubmit: (message: string) => void;

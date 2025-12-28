@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useConversationList } from "./useConversationList";
-import { ConversationsProvider } from "../../../../providers/ConversationsProvider";
+import { ConversationsProvider } from "@/providers/ConversationsProvider";
 import {
   clearTestDatabase,
   seedConversation,
   seedFolder,
-} from "../../../../test/db-helpers";
+} from "@/test/db-helpers";
 // mockNavigate is available via global mock in setup.ts
 
 // react-router-dom is globally mocked in setup.ts

@@ -4,7 +4,7 @@ import { useCodeHighlighting } from "./useCodeHighlighting";
 
 let mockTheme = "dark";
 
-vi.mock("../../../../providers/ThemeProvider", () => ({
+vi.mock("@/providers/ThemeProvider", () => ({
   useTheme: () => ({
     theme: mockTheme,
   }),

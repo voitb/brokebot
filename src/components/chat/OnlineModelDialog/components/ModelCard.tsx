@@ -1,14 +1,14 @@
 import React from "react";
 import { Brain, Eye, Zap, Cloud, Code, AlertTriangle } from "lucide-react";
-import { Badge } from "../../../ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../../../ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../../../ui/tooltip";
-import { type OpenRouterModel } from "../../../../lib/openrouter";
+} from "@/components/ui/tooltip";
+import { type OpenRouterModel } from "@/lib/openrouter";
 
 interface ModelCardProps {
   model: OpenRouterModel;

@@ -1,6 +1,6 @@
 import React from "react";
-import type { Message } from "../../../../lib/db";
-import { useWebLLM } from "../../../../providers/WebLLMProvider";
+import type { Message } from "@/lib/db";
+import { useWebLLM } from "@/providers/WebLLMProvider";
 import { parseMessage } from "../utils";
 import { 
   MessageAvatar, 

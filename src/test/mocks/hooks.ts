@@ -1,6 +1,6 @@
 import type React from "react";
 import { vi } from "vitest";
-import type { Conversation, Folder, UserConfig } from "../../lib/db";
+import type { Conversation, Folder, UserConfig } from "@/lib/db";
 import { createMockUserConfig, createMockConversation } from "./factories";
 
 /**
@@ -284,7 +284,7 @@ export interface MockMessageStreamHookOptions {
  *
  * @example
  * vi.mock("./useMessageStream", async () => {
- *   const { createMockMessageStreamHook } = await import("../../../../test/mocks/hooks");
+ *   const { createMockMessageStreamHook } = await import("@/test/mocks/hooks");
  *   return {
  *     useMessageStream: () => createMockMessageStreamHook({ isGenerating: false }),
  *   };

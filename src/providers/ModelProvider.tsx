@@ -13,8 +13,8 @@ import {
   type OpenRouterModel,
   type OpenRouterMessage,
   type StreamResponse,
-} from "../lib/openrouter";
-import { useUserConfig } from "../hooks/useUserConfig";
+} from "@/lib/openrouter";
+import { useUserConfig } from "@/hooks/useUserConfig";
 import { useModels  } from "@/hooks/api";
 
 export type ModelType = "local" | "online";

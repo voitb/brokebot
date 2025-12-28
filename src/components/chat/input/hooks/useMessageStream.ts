@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { useModel } from "../../../../providers/ModelProvider";
-import type { OpenRouterMessage } from "../../../../lib/openrouter";
+import { useModel } from "@/providers/ModelProvider";
+import type { OpenRouterMessage } from "@/lib/openrouter";
 
 export interface StreamResult {
   content: string;

@@ -1,9 +1,9 @@
 import React from "react";
 import { AlertTriangle } from "lucide-react";
-import { DropdownMenuItem } from "../../../ui/dropdown-menu";
-import { Badge } from "../../../ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { type ModelInfo } from "../../../../providers/WebLLMProvider";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { type ModelInfo } from "@/providers/WebLLMProvider";
 import { getModelTypeIcon, getSpecializationIcon, getPerformanceBadgeVariant } from "../utils/modelUtils";
 
 interface ModelItemProps {

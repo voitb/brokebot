@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../ui/card";
+} from "@/components/ui/card";
 import { MessageSquare, Zap, Shield, Cpu, type LucideIcon } from "lucide-react";
 
 interface Feature {

@@ -2,10 +2,10 @@ import React from "react";
 import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "../../../ui/dropdown-menu";
-import { Badge } from "../../../ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../../ui/tooltip";
-import { type ModelInfo } from "../../../../providers/WebLLMProvider";
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { type ModelInfo } from "@/providers/WebLLMProvider";
 import { ModelItem } from "./ModelItem";
 import { getCategoryIcon, getCategoryLabel, getCategoryTooltip } from "../utils/modelUtils";
 

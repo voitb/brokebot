@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
-import { Input } from "../../../ui/input";
-import { ScrollArea } from "../../../ui/scroll-area";
-import { Badge } from "../../../ui/badge";
-import { DropdownMenuItem } from "../../../ui/dropdown-menu";
-import { type ModelInfo } from "../../../../providers/WebLLMProvider";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { type ModelInfo } from "@/providers/WebLLMProvider";
 
 interface LocalModelListProps {
   availableModels: ModelInfo[];

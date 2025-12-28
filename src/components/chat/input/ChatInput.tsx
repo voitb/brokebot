@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "../../ui/tooltip";
-import { useModel } from "../../../providers/ModelProvider";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { useModel } from "@/providers/ModelProvider";
 import { useDragDrop, useFileUpload, useSpeechToText } from "./hooks";
-import { Button } from "../../ui/button";
-import { Textarea } from "../../ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Send, Square } from "lucide-react";
 import { toast } from "sonner";
 import {

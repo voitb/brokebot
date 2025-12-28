@@ -1,6 +1,6 @@
 import React from "react";
-import { Label } from "../../../../ui/label";
-import { Button } from "../../../../ui/button";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
 export const LegalSection: React.FC = () => {

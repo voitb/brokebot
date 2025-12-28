@@ -5,10 +5,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "../../ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "../../ui/alert";
-import { type OpenRouterModel } from "../../../lib/openrouter";
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { type OpenRouterModel } from "@/lib/openrouter";
 import { ApiKeysTab } from "./components/ApiKeysTab";
 import { ModelList } from "./components/ModelList";
 import { ScrollArea } from "@/components/ui";

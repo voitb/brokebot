@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../ui/dialog";
+} from "@/components/ui/dialog";
 import { KEYBOARD_SHORTCUTS } from "@/constants/keyboardShortcuts";
 import { ShortcutGroup } from "./components";
 

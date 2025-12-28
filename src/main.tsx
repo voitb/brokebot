@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { router } from "./router";
-import { TooltipProvider } from "./components/ui/tooltip";
-import { ThemeProvider } from "./providers/ThemeProvider";
-import { WebLLMProvider } from "./providers/WebLLMProvider";
-import { ModelProvider } from "./providers/ModelProvider";
-import { ConversationsProvider } from "./providers/ConversationsProvider";
+import { router } from "@/router";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { WebLLMProvider } from "@/providers/WebLLMProvider";
+import { ModelProvider } from "@/providers/ModelProvider";
+import { ConversationsProvider } from "@/providers/ConversationsProvider";
 import "./index.css";
 
 const rootElement = document.getElementById("root");

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { type OpenRouterModel, getCategoryFromModel } from '../../lib/openrouter';
+import { type OpenRouterModel, getCategoryFromModel } from '@/lib/openrouter';
 
 interface OpenRouterApiModel {
   id: string;

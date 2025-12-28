@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { ChevronDown, Cpu, Search } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-import { ScrollArea } from "../../ui/scroll-area";
-import { useWebLLM, type ModelInfo } from "../../../providers/WebLLMProvider";
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useWebLLM, type ModelInfo } from "@/providers/WebLLMProvider";
 import { OnlineModelDialog } from "../OnlineModelDialog";
-import { type OpenRouterModel } from "../../../lib/openrouter";
+import { type OpenRouterModel } from "@/lib/openrouter";
 import { useModelSelector } from "./hooks/useModelSelector";
 import { ModelCategory } from "./components/ModelCategory";
 

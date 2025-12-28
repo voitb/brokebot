@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { SimpleModelSelector } from "../../SimpleModelSelector";
+import { SimpleModelSelector } from "@/components/chat/SimpleModelSelector";
 
 interface ModelStatusProps {
   selectedModel: {

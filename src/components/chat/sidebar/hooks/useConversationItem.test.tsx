@@ -3,10 +3,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useConversationItem } from "./useConversationItem";
-import { ConversationsProvider } from "../../../../providers/ConversationsProvider";
-import { clearTestDatabase, seedConversation } from "../../../../test/db-helpers";
-import { mockNavigate } from "../../../../test/mocks/modules";
-import type { Conversation } from "../../../../lib/db";
+import { ConversationsProvider } from "@/providers/ConversationsProvider";
+import { clearTestDatabase, seedConversation } from "@/test/db-helpers";
+import { mockNavigate } from "@/test/mocks/modules";
+import type { Conversation } from "@/lib/db";
 
 // react-router-dom is globally mocked in setup.ts
 

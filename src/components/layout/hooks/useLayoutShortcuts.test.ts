@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useLayoutShortcuts } from "./useLayoutShortcuts";
-import { mockNavigate, mockSearchParams } from "../../../test/mocks/modules";
+import { mockNavigate, mockSearchParams } from "@/test/mocks/modules";
 
 const mockSetOpen = vi.fn();
 const mockHandleNewChat = vi.fn();
@@ -11,8 +11,8 @@ let mockOpen = false;
 let mockConversationId: string | undefined = undefined;
 let capturedShortcuts: Record<string, () => void> = {};
 
-vi.mock("../../ui/sidebar", async () => {
-  const { createMockSidebarHook } = await import("../../../test/mocks/hooks");
+vi.mock("@/components/ui/sidebar", async () => {
+  const { createMockSidebarHook } = await import("@/test/mocks/hooks");
   return {
     useSidebar: () => createMockSidebarHook({
       open: mockOpen,
@@ -28,7 +28,7 @@ vi.mock("@/components/chat/sidebar/hooks/useConversationList", () => ({
 }));
 
 vi.mock("@/providers/ConversationsProvider", async () => {
-  const { createMockConversationsHook } = await import("../../../test/mocks/hooks");
+  const { createMockConversationsHook } = await import("@/test/mocks/hooks");
   return {
     useConversations: () =>
       createMockConversationsHook({

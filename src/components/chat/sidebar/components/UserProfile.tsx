@@ -7,8 +7,8 @@ import {
   Settings,
   Shield,
 } from "lucide-react";
-import { Button } from "../../../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +21,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   DropdownMenuPortal,
-} from "../../../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { useUserConfig } from "@/hooks/useUserConfig";
 
 const UserProfileMenu: React.FC = () => {
