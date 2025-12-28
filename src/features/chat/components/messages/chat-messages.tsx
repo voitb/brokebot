@@ -1,8 +1,8 @@
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useConversation } from "@/shared/hooks/use-conversations";
-import { useConversationId } from "@/shared/hooks/use-conversation-id";
-import { useSmartAutoScroll } from "@/shared/hooks/use-smart-auto-scroll";
+import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
+import { useSmartAutoScroll } from "@/features/chat/hooks/use-smart-auto-scroll";
 import { useWebLLM } from "@/app/providers/web-llm-provider";
 import { MessageBubble } from "./components/message-bubble";
 import { EmptyState } from "./components/empty-state";

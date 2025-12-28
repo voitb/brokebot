@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { type OpenRouterModel } from "@/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { ApiKeysTab } from "./components/api-keys-tab";
 import { ModelList } from "./components/model-list";
 import { ScrollArea } from "@/components/ui/scroll-area";

@@ -9,7 +9,7 @@ let mockConversationId: string | null = null;
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("./use-conversation-id", () => ({
+vi.mock("@/features/chat/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 

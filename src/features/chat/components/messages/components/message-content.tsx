@@ -1,7 +1,7 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Loader2 } from "lucide-react";
-import { createMarkdownComponents } from "@/features/chat/utils/markdown-components";
+import { createMarkdownComponents } from "@/features/chat/components/markdown/markdown-components";
 
 interface MessageContentProps {
   content: string;

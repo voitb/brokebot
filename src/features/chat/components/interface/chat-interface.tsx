@@ -4,7 +4,7 @@ import { ChatHeader } from "../header/chat-header";
 import { ChatMessages } from "../messages/chat-messages";
 import { ChatInput } from "../input/chat-input";
 import { useConversation } from "@/shared/hooks/use-conversations";
-import { useConversationId } from "@/shared/hooks/use-conversation-id";
+import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
 import { useChatInput } from "@/features/chat/hooks/use-chat-input";
 
 /**

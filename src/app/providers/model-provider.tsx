@@ -13,7 +13,7 @@ import {
   type OpenRouterModel,
   type OpenRouterMessage,
   type StreamResponse,
-} from "@/lib/openrouter";
+} from "@/features/chat/lib/openrouter";
 import { useUserConfig } from "@/shared/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
 

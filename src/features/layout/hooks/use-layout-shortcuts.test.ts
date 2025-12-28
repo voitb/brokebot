@@ -37,7 +37,7 @@ vi.mock("@/app/providers/conversations-provider", async () => {
   };
 });
 
-vi.mock("@/shared/hooks/use-conversation-id", () => ({
+vi.mock("@/features/chat/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 

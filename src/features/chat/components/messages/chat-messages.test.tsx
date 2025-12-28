@@ -15,7 +15,7 @@ vi.mock("@/shared/hooks/use-conversations", async () => {
   };
 });
 
-vi.mock("@/shared/hooks/use-conversation-id", async () => {
+vi.mock("@/features/chat/hooks/use-conversation-id", async () => {
   const { createMockConversationIdHook } = await import("@/test/mocks/hooks");
   return {
     useConversationId: vi.fn(() => createMockConversationIdHook()),
@@ -27,14 +27,14 @@ vi.mock("@/app/providers/web-llm-provider", async () => {
   return createMinimalWebLLMProvider();
 });
 
-vi.mock("@/shared/hooks/use-smart-auto-scroll", async () => {
+vi.mock("@/features/chat/hooks/use-smart-auto-scroll", async () => {
   const { createMockSmartAutoScrollHook } = await import("@/test/mocks/hooks");
   return { useSmartAutoScroll: vi.fn(() => createMockSmartAutoScrollHook()) };
 });
 
 import { useConversation } from "@/shared/hooks/use-conversations";
 import { useWebLLM } from "@/app/providers/web-llm-provider";
-import { useSmartAutoScroll } from "@/shared/hooks/use-smart-auto-scroll";
+import { useSmartAutoScroll } from "@/features/chat/hooks/use-smart-auto-scroll";
 
 const defaultProps = {
   onRegenerate: vi.fn(),

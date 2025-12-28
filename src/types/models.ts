@@ -4,7 +4,7 @@ export type {
   StreamResponse,
   OpenRouterModel,
   OpenRouterClient,
-} from '@/lib/openrouter';
+} from '@/features/chat/lib/openrouter';
 
 export type { ModelType, UnifiedModel } from '@/app/providers/model-provider';
 

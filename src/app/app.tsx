@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { ResponsiveChatLayout } from "@/features/layout/components/responsive-chat-layout";
 import { Toaster } from "@/components/ui/sonner";
-import { ModalRoot } from "@/shared/components/modals/modal-root";
+import { ModalRoot } from "@/app/modals/modal-root";
 import { Seo } from "@/shared/components/common/seo";
 import { PerformanceSEO } from "@/shared/components/common/performance-seo";
 

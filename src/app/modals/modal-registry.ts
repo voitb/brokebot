@@ -1,7 +1,6 @@
 import type { FC } from "react";
 import { SettingsDialog } from "@/features/settings/components/settings-dialog";
-import { ExportChatModal } from "@/features/chat/components/modals/export-chat-modal";
-import { KeyboardShortcutsModal } from "@/features/chat/components/modals/keyboard-shortcuts-modal";
+import { KeyboardShortcutsDialog } from "@/features/chat/components/modals/keyboard-shortcuts-dialog";
 
 export interface ModalProps {
   open: boolean;
@@ -11,8 +10,7 @@ export interface ModalProps {
 
 export const MODAL_REGISTRY: Record<string, FC<ModalProps>> = {
   settings: SettingsDialog,
-  export: ExportChatModal,
-  shortcuts: KeyboardShortcutsModal,
+  shortcuts: KeyboardShortcutsDialog,
 };
 
 export type ModalType = keyof typeof MODAL_REGISTRY;

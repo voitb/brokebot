@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type OpenRouterModel } from "@/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 
 interface ModelCardProps {
   model: OpenRouterModel;
