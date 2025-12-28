@@ -16,10 +16,10 @@ interface UseCodeHighlightingReturn {
   syntaxStyle: { [key: string]: React.CSSProperties };
 }
 
-export const useCodeHighlighting = ({
+export function useCodeHighlighting({
   className,
   children,
-}: UseCodeHighlightingProps): UseCodeHighlightingReturn => {
+}: UseCodeHighlightingProps): UseCodeHighlightingReturn {
   const { theme } = useTheme();
 
   const match = /language-(\w+)/.exec(className || "");
@@ -29,4 +29,4 @@ export const useCodeHighlighting = ({
   const syntaxStyle = theme === "dark" ? oneDark : oneLight;
 
   return { language, code, isInline, syntaxStyle };
-}; 
+} 

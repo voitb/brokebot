@@ -15,7 +15,7 @@ export interface UseDocumentsReturn {
 /**
  * Hook for managing documents in IndexedDB
  */
-export const useDocuments = (): UseDocumentsReturn => {
+export function useDocuments(): UseDocumentsReturn {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export const useDocuments = (): UseDocumentsReturn => {
     getDocumentContent,
     refreshDocuments,
   };
-};
+}
 
 // Helper functions
 const getFileType = (file: File): "txt" | "md" | null => {

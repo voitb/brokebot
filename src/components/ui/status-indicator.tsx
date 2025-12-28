@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader2, AlertCircle, CheckCircle, Clock } from "lucide-react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/lib/cn";
 
 interface StatusIndicatorProps {
   status: "loading" | "success" | "error" | "warning" | "idle";

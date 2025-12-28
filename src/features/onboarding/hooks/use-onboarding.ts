@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 
 const ONBOARDING_COMPLETED_KEY = "onboardingCompleted-v1";
 
-export const useOnboarding = () => {
+export interface UseOnboardingReturn {
+  showOnboarding: boolean;
+  completeOnboarding: () => void;
+}
+
+export function useOnboarding(): UseOnboardingReturn {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -21,4 +26,4 @@ export const useOnboarding = () => {
     showOnboarding,
     completeOnboarding,
   };
-}; 
+} 

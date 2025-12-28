@@ -1,9 +1,25 @@
-import { useState, useRef, type ChangeEvent } from "react";
+import { useState, useRef, type ChangeEvent, type RefObject } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserConfig } from "@/shared/hooks/use-user-config";
 import { toast } from "sonner";
+import type { UserConfig } from "@/lib/db";
 
-export const usePrivacySettings = (hasConversations = false) => {
+export interface UsePrivacySettingsReturn {
+  config: UserConfig;
+  hasConversations: boolean;
+  showClearDataDialog: boolean;
+  showResetSettingsDialog: boolean;
+  fileInputRef: RefObject<HTMLInputElement | null>;
+  handleClearAllDataConfirm: () => Promise<void>;
+  handleResetSettingsConfirm: () => Promise<void>;
+  handleExportConversations: () => Promise<void>;
+  handleImportClick: () => void;
+  handleFileImport: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
+  setShowClearDataDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowResetSettingsDialog: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function usePrivacySettings(hasConversations = false): UsePrivacySettingsReturn {
   const {
     config,
     resetConfig,
@@ -92,4 +108,4 @@ export const usePrivacySettings = (hasConversations = false) => {
     setShowClearDataDialog,
     setShowResetSettingsDialog,
   };
-}; 
+} 

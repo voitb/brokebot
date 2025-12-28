@@ -1,11 +1,17 @@
-import { useState, useRef, useEffect, type DependencyList } from "react";
+import { useState, useRef, useEffect, type DependencyList, type RefObject } from "react";
 
 const BUTTON_VISIBILITY_OFFSET = 100;
 const AUTOSCROLL_LOCK_OFFSET = 10;
 
+export interface UseSmartAutoScrollReturn<T extends HTMLElement> {
+  scrollAreaRef: RefObject<T | null>;
+  showScrollButton: boolean;
+  handleScrollToBottomClick: () => void;
+}
+
 export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   dependencies: DependencyList = []
-) {
+): UseSmartAutoScrollReturn<T> {
   const scrollAreaRef = useRef<T>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);

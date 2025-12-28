@@ -2,9 +2,32 @@ import { useState, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/app/providers/conversations-provider";
 import { useConversationId } from "@/shared/hooks/use-conversation-id";
-import type { Conversation } from "@/lib/db";
+import type { Conversation, Folder } from "@/lib/db";
 
-export const useConversationItem = (conversation: Conversation) => {
+export interface UseConversationItemReturn {
+  isEditing: boolean;
+  isMenuOpen: boolean;
+  deleteDialogOpen: boolean;
+  isCreateFolderDialogOpen: boolean;
+  isActive: boolean;
+  isPinned: boolean;
+  folders: Folder[];
+  setIsMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setDeleteDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setCreateFolderDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleConversationClick: () => void;
+  handlePinToggle: (e: React.MouseEvent) => Promise<void>;
+  handleRename: (e: React.MouseEvent) => void;
+  handleSaveRename: (newTitle: string) => Promise<void>;
+  handleCancelRename: () => void;
+  handleDelete: (e: React.MouseEvent) => void;
+  handleDeleteConfirm: () => Promise<void>;
+  handleMove: (folderId: string | null) => Promise<void>;
+  handleCreateFolderAndMove: (folderName: string) => Promise<void>;
+  getItemStyles: () => string;
+}
+
+export function useConversationItem(conversation: Conversation): UseConversationItemReturn {
   const navigate = useNavigate();
   const currentConversationId = useConversationId();
   const {
@@ -119,4 +142,4 @@ export const useConversationItem = (conversation: Conversation) => {
     handleCreateFolderAndMove,
     getItemStyles,
   };
-}; 
+} 

@@ -4,7 +4,16 @@ import { db, type UserConfig, type Conversation, type Message, DEFAULT_USER_CONF
 import { encryptValue, decryptValue } from "@/lib/encryption-service";
 import { toast } from "sonner";
 
-export function useUserConfig() {
+export interface UseUserConfigReturn {
+  config: UserConfig;
+  updateConfig: (updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>) => Promise<void>;
+  resetConfig: () => Promise<void>;
+  clearAllData: () => Promise<void>;
+  exportConversations: () => Promise<void>;
+  importConversations: (conversations: Conversation[]) => Promise<number>;
+}
+
+export function useUserConfig(): UseUserConfigReturn {
   const rawConfig = useLiveQuery(
     () => db.userConfig.get("user_config"),
     [],

@@ -3,10 +3,22 @@ import { type OpenRouterModel } from "@/lib/openrouter";
 import { useUserConfig } from "@/shared/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
 
-export const useOnlineModels = (
+export interface UseOnlineModelsReturn {
+  storedKeys: { openrouter: string | undefined };
+  freeModels: OpenRouterModel[];
+  paidModels: OpenRouterModel[];
+  isLoading: boolean;
+  error: Error | null;
+  hasOpenRouterKey: boolean;
+  hasPaidKey: boolean;
+  handleModelSelect: (model: OpenRouterModel) => void;
+  handleOpenChange: (isOpen: boolean) => void;
+}
+
+export function useOnlineModels(
   onModelSelect: (model: OpenRouterModel, apiKey: string) => void,
   onOpenChange?: (open: boolean) => void
-) => {
+): UseOnlineModelsReturn {
   const { config } = useUserConfig();
   const { models, isLoading, error } = useModels();
 
@@ -41,4 +53,4 @@ export const useOnlineModels = (
     handleModelSelect,
     handleOpenChange,
   };
-};
+}

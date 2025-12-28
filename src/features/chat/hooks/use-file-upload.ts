@@ -23,10 +23,10 @@ interface UseFileUploadReturn {
   processFile: (file: File) => Promise<AttachedFile>;
 }
 
-export const useFileUpload = ({
+export function useFileUpload({
   supportsImages,
   selectedModelName,
-}: UseFileUploadProps): UseFileUploadReturn => {
+}: UseFileUploadProps): UseFileUploadReturn {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const { uploadDocument } = useDocuments();
 
@@ -64,4 +64,4 @@ export const useFileUpload = ({
     removeFile,
     processFile: (file: File) => processFileUtil(file, uploadDocument),
   };
-}; 
+} 
