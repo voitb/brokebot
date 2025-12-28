@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createOpenRouterClient, getCategoryFromModel } from "./openrouter";
-import { setupFetchMock } from "../test/mocks/modules";
+import { setupFetchMock } from "@/test/mocks/modules";
 
 const { mockFetch } = setupFetchMock();
 

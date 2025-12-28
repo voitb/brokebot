@@ -1,5 +1,5 @@
-import { db } from "../lib/db";
-import type { Conversation, Folder, Document } from "../lib/db";
+import { db } from "@/lib/db";
+import type { Conversation, Folder, Document } from "@/lib/db";
 import { createMockConversation, createMockFolder, createMockDocument } from "./mocks/factories";
 
 export async function clearTestDatabase() {

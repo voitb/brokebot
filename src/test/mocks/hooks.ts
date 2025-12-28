@@ -20,7 +20,7 @@ export interface MockUserConfigHookOptions {
  *
  * @example
  * const mockUpdateConfig = vi.fn();
- * vi.mock("@/hooks/use-user-config", () => ({
+ * vi.mock("@/shared/hooks/use-user-config", () => ({
  *   useUserConfig: () => createMockUserConfigHook({ updateConfig: mockUpdateConfig }),
  * }));
  */
@@ -59,7 +59,7 @@ export interface MockConversationsHookOptions {
  *
  * @example
  * const mockCreateEmptyConversation = vi.fn().mockResolvedValue("new-id");
- * vi.mock("@/hooks/use-conversations", () => ({
+ * vi.mock("@/shared/hooks/use-conversations", () => ({
  *   useConversations: () => createMockConversationsHook({
  *     createEmptyConversation: mockCreateEmptyConversation,
  *   }),
@@ -95,7 +95,7 @@ export interface MockConversationHookOptions {
  * Creates a useConversation hook mock return value (for single conversation)
  *
  * @example
- * vi.mock("@/hooks/use-conversations", () => ({
+ * vi.mock("@/shared/hooks/use-conversations", () => ({
  *   useConversation: () => createMockConversationHook({
  *     conversation: createMockConversation({ title: "Test" }),
  *   }),
@@ -116,7 +116,7 @@ export function createMockConversationHook(options: MockConversationHookOptions 
  * Returns a simple function that returns the provided ID
  *
  * @example
- * vi.mock("@/hooks/use-conversation-id", () => ({
+ * vi.mock("@/shared/hooks/use-conversation-id", () => ({
  *   useConversationId: () => "test-conversation-id",
  * }));
  */

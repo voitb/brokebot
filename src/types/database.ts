@@ -6,4 +6,4 @@ export type {
   Document,
   UserConfig,
   EncryptionKey,
-} from '../lib/db';
+} from '@/lib/db';
