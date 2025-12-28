@@ -4,9 +4,9 @@ export type {
   StreamResponse,
   OpenRouterModel,
   OpenRouterClient,
-} from '../lib/openrouter';
+} from '@/lib/openrouter';
 
-export type { ModelType, UnifiedModel } from '../providers/model-provider';
+export type { ModelType, UnifiedModel } from '@/app/providers/model-provider';
 
 // UI-specific types
 export interface ConversationGroup {

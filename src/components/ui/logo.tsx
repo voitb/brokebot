@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@/providers/theme-provider';
+import { useTheme } from '@/app/providers/theme-provider';
 
 interface LogoProps {
   className?: string;
