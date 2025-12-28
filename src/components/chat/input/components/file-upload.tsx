@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, FileText } from "lucide-react";
-import { useFileUpload, type AttachedFile } from "../hooks/use-file-upload";
+import { useFileUpload, type AttachedFile } from "@/components/chat/hooks/use-file-upload";
 
 interface FileUploadProps {
   supportsImages: boolean;

@@ -1,5 +1,5 @@
 import type { OpenRouterMessage } from "@/lib/openrouter";
-import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/constants/prompts";
+import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/components/chat/constants/prompts";
 
 const TITLE_MAX_LENGTH = 50;
 

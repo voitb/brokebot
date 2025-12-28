@@ -11,7 +11,7 @@ import {
 
 const mockUseConversationList = createMockConversationListHook();
 
-vi.mock("./hooks/use-conversation-list", () => ({
+vi.mock("@/components/chat/hooks/use-conversation-list", () => ({
   useConversationList: vi.fn(() => mockUseConversationList),
 }));
 
@@ -29,7 +29,7 @@ vi.mock("@/providers/web-llm-provider", async () => {
   return createMinimalWebLLMProvider();
 });
 
-import { useConversationList } from "./hooks/use-conversation-list";
+import { useConversationList } from "@/components/chat/hooks/use-conversation-list";
 import { useConversations } from "@/providers/conversations-provider";
 
 describe("ConversationList", () => {

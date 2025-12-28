@@ -12,7 +12,7 @@ import { type OpenRouterModel } from "@/lib/openrouter";
 import { ApiKeysTab } from "./components/api-keys-tab";
 import { ModelList } from "./components/model-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useOnlineModels } from "./hooks/use-online-models";
+import { useOnlineModels } from "@/components/chat/hooks/use-online-models";
 
 interface OnlineModelDialogProps {
   onModelSelect: (model: OpenRouterModel, apiKey: string) => void;

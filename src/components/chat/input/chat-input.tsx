@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useModel } from "@/providers/model-provider";
-import { useDragDrop } from "./hooks/use-drag-drop";
-import { useFileUpload } from "./hooks/use-file-upload";
-import { useSpeechToText } from "./hooks/use-speech-to-text";
+import { useDragDrop } from "@/components/chat/hooks/use-drag-drop";
+import { useFileUpload } from "@/components/chat/hooks/use-file-upload";
+import { useSpeechToText } from "@/components/chat/hooks/use-speech-to-text";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Square } from "lucide-react";

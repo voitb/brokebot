@@ -21,7 +21,7 @@ vi.mock("@/components/ui/sidebar", async () => {
   };
 });
 
-vi.mock("@/components/chat/sidebar/hooks/use-conversation-list", () => ({
+vi.mock("@/components/chat/hooks/use-conversation-list", () => ({
   useConversationList: () => ({
     handleNewChat: mockHandleNewChat,
   }),

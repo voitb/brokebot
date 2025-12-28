@@ -5,7 +5,7 @@ import { ChatMessages } from "../messages/chat-messages";
 import { ChatInput } from "../input/chat-input";
 import { useConversation } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks/use-conversation-id";
-import { useChatInput } from "../input/hooks/use-chat-input";
+import { useChatInput } from "@/components/chat/hooks/use-chat-input";
 
 /**
  * Main chat interface component combining header, messages, and input

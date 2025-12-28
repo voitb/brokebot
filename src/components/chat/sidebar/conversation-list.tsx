@@ -6,7 +6,7 @@ import { SearchBar } from "./components/search-bar";
 import { NewChatButton } from "./components/new-chat-button";
 import { UserProfile } from "./components/user-profile";
 import { FolderItem } from "./components/folder-item";
-import { useConversationList } from "./hooks/use-conversation-list";
+import { useConversationList } from "@/components/chat/hooks/use-conversation-list";
 import { useConversations } from "@/providers/conversations-provider";
 import { Button } from "@/components/ui/button";
 import {

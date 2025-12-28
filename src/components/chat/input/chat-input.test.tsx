@@ -12,17 +12,17 @@ vi.mock("@/providers/web-llm-provider", async () => {
   return createMockWebLLMProvider();
 });
 
-vi.mock("./hooks/use-drag-drop", async () => {
+vi.mock("@/components/chat/hooks/use-drag-drop", async () => {
   const { createMockDragDropHook } = await import("@/test/mocks/hooks");
   return { useDragDrop: vi.fn(() => createMockDragDropHook()) };
 });
 
-vi.mock("./hooks/use-file-upload", async () => {
+vi.mock("@/components/chat/hooks/use-file-upload", async () => {
   const { createMockFileUploadHook } = await import("@/test/mocks/hooks");
   return { useFileUpload: vi.fn(() => createMockFileUploadHook()) };
 });
 
-vi.mock("./hooks/use-speech-to-text", async () => {
+vi.mock("@/components/chat/hooks/use-speech-to-text", async () => {
   const { createMockSpeechToTextHook } = await import("@/test/mocks/hooks");
   return {
     useSpeechToText: vi.fn(() => createMockSpeechToTextHook()),
