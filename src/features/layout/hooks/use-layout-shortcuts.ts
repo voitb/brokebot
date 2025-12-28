@@ -6,7 +6,7 @@ import { useConversationId } from "@/shared/hooks/use-conversation-id";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
-export const useLayoutShortcuts = () => {
+export function useLayoutShortcuts(): void {
   const { open, setOpen } = useSidebar();
   const { handleNewChat } = useConversationList();
   const { togglePinConversation } = useConversations();
@@ -45,4 +45,4 @@ export const useLayoutShortcuts = () => {
       document.dispatchEvent(new CustomEvent("conversation:rename"));
     },
   });
-}; 
+} 

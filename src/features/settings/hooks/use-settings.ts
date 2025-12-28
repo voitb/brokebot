@@ -5,7 +5,14 @@ import { type UserConfig } from "@/lib/db";
 
 export type SettingsTab = "general" | "documents" | "privacy";
 
-export const useSettings = () => {
+export interface UseSettingsReturn {
+  settings: Partial<UserConfig>;
+  isSaving: boolean;
+  handleFieldChange: <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => void;
+  handleSaveChanges: () => Promise<void>;
+}
+
+export function useSettings(): UseSettingsReturn {
   const { config, updateConfig } = useUserConfig();
   const [settings, setSettings] = useState<Partial<UserConfig>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -38,4 +45,4 @@ export const useSettings = () => {
     handleFieldChange,
     handleSaveChanges,
   };
-}; 
+} 

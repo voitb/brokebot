@@ -9,7 +9,7 @@ interface CopyToClipboardResult {
 /**
  * Custom hook for copying text to clipboard with feedback
  */
-export const useCopyToClipboard = (): CopyToClipboardResult => {
+export function useCopyToClipboard(): CopyToClipboardResult {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -39,4 +39,4 @@ export const useCopyToClipboard = (): CopyToClipboardResult => {
     copied,
     copyToClipboard,
   };
-}; 
+} 

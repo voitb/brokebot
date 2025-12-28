@@ -12,6 +12,13 @@ interface UseKeyboardShortcutsProps {
   onShowShortcuts?: () => void;
 }
 
+export interface UseKeyboardShortcutsReturn {
+  createNewChat: () => void;
+  navigateHome: () => void;
+  currentConversationId: string | undefined;
+  onShowShortcuts: (() => void) | undefined;
+}
+
 export function useKeyboardShortcuts({
   onToggleSidebar,
   onNewChat,
@@ -20,7 +27,7 @@ export function useKeyboardShortcuts({
   onRenameChat,
   onDeleteChat,
   onShowShortcuts,
-}: UseKeyboardShortcutsProps = {}) {
+}: UseKeyboardShortcutsProps = {}): UseKeyboardShortcutsReturn {
   const navigate = useNavigate();
   const conversationId = useConversationId();
   const lastKeyRef = useRef<string>('');

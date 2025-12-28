@@ -7,7 +7,18 @@ function maskApiKey(key: string): string {
   return key.slice(0, 4) + "••••••••" + key.slice(-4);
 }
 
-export const useApiKeyManager = (provider: "openrouter") => {
+export interface UseApiKeyManagerReturn {
+  apiKey: string;
+  setApiKey: React.Dispatch<React.SetStateAction<string>>;
+  hasStoredKey: boolean;
+  isEditing: boolean;
+  handleApiKeySave: () => Promise<void>;
+  handleApiKeyRemove: () => Promise<void>;
+  startEditing: () => void;
+  cancelEditing: () => void;
+}
+
+export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn {
   const { config, updateConfig } = useUserConfig();
 
   const [apiKey, setApiKey] = useState("");
@@ -68,4 +79,4 @@ export const useApiKeyManager = (provider: "openrouter") => {
     startEditing,
     cancelEditing,
   };
-};
+}

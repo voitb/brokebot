@@ -3,7 +3,14 @@ import { type ModelInfo } from "@/app/providers/web-llm-provider";
 
 const CATEGORY_ORDER = ["light", "medium", "large", "heavy", "extreme"];
 
-export const useModelSelector = (availableModels: readonly ModelInfo[]) => {
+export interface UseModelSelectorReturn {
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  sortedCategories: string[];
+  modelsByCategory: Record<string, ModelInfo[]>;
+}
+
+export function useModelSelector(availableModels: readonly ModelInfo[]): UseModelSelectorReturn {
   const [searchQuery, setSearchQuery] = useState("");
 
   const query = searchQuery.toLowerCase().trim();
@@ -40,4 +47,4 @@ export const useModelSelector = (availableModels: readonly ModelInfo[]) => {
     sortedCategories,
     modelsByCategory,
   };
-}; 
+} 

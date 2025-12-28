@@ -10,12 +10,12 @@ interface UseTextareaAutoResizeProps {
   maxHeight?: number;
 }
 
-export const useTextareaAutoResize = ({
+export function useTextareaAutoResize({
   textareaRef,
   message,
   minHeight = DEFAULT_MIN_HEIGHT,
   maxHeight = DEFAULT_MAX_HEIGHT,
-}: UseTextareaAutoResizeProps): void => {
+}: UseTextareaAutoResizeProps): void {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -30,4 +30,4 @@ export const useTextareaAutoResize = ({
       }
     }
   }, [message, minHeight, maxHeight, textareaRef]);
-}; 
+} 

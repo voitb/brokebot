@@ -24,9 +24,9 @@ export interface UseSpeechToTextResult {
   error: string | null;
 }
 
-export const useSpeechToText = (
+export function useSpeechToText(
   onTranscriptReceived: (transcript: string) => void
-): UseSpeechToTextResult => {
+): UseSpeechToTextResult {
   const [status, setStatus] = useState<TranscriberStatus>("uninitialized");
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -151,4 +151,4 @@ export const useSpeechToText = (
   };
 
   return { status, startRecording, stopRecording, isModelLoading, error };
-};
+}
