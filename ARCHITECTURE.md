@@ -146,6 +146,18 @@ export function useHookName(props?: UseHookNameProps): UseHookNameReturn {
 | `ThemeProvider` | Theme management |
 | `WebLLMProvider` | Local model engine |
 
+### Automatic Memoization (React Compiler)
+
+This project uses **React Compiler** (`babel-plugin-react-compiler`) which automatically memoizes:
+- Context provider values
+- Component props
+- Function references
+- Computed values
+
+**Source:** [React Compiler docs](https://react.dev/learn/react-compiler)
+
+No manual `useMemo`/`useCallback` is needed unless you require precise control over memoization.
+
 ## Modal System
 
 Modals use a URL-based registry pattern for deep linking:
