@@ -8,7 +8,7 @@ import {
 import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
-import WebLLMWorker from "@/worker.ts?worker";
+import WebLLMWorker from "@/features/chat/lib/webllm/worker.ts?worker";
 import { createModelCatalog, type ModelInfo } from "@/features/chat/lib/webllm";
 
 export { type ModelInfo };
