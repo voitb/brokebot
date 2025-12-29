@@ -1,4 +1,10 @@
-import type { ProgressInfo, TranscribeOptions, TranscribeResult } from "./types";
+import type {
+  ProgressInfo,
+  TranscribeOptions,
+  TranscribeResult,
+  WorkerMessage,
+  WorkerResponse,
+} from "./types";
 
 export type { ProgressInfo, TranscribeOptions, TranscribeResult };
 
@@ -36,31 +42,32 @@ export async function transcribe(
   const audioData = await decodeAudioBlob(audioBlob);
 
   return new Promise((resolve, reject) => {
-    const w = getWorker();
+    const currentWorker = getWorker();
 
-    const handler = (event: MessageEvent) => {
-      const { type, data, error, status, device } = event.data;
+    const handler = (event: MessageEvent<WorkerResponse>) => {
+      const response = event.data;
 
-      switch (type) {
+      switch (response.type) {
         case "status":
-          callbacks?.onStatus?.(status, device);
+          callbacks?.onStatus?.(response.status, response.device);
           break;
         case "progress":
-          callbacks?.onProgress?.(data);
+          callbacks?.onProgress?.(response.data);
           break;
         case "result":
-          w.removeEventListener("message", handler);
-          resolve(data);
+          currentWorker.removeEventListener("message", handler);
+          resolve(response.data);
           break;
         case "error":
-          w.removeEventListener("message", handler);
-          reject(new Error(error));
+          currentWorker.removeEventListener("message", handler);
+          reject(new Error(response.error));
           break;
       }
     };
 
-    w.addEventListener("message", handler);
-    w.postMessage({ type: "transcribe", audioData, options });
+    currentWorker.addEventListener("message", handler);
+    const message: WorkerMessage = { type: "transcribe", audioData, options };
+    currentWorker.postMessage(message);
   });
 }
 
@@ -76,7 +83,7 @@ export async function disposeTranscriber(): Promise<void> {
       resolve();
     }, 10_000);
 
-    const handler = (event: MessageEvent) => {
+    const handler = (event: MessageEvent<WorkerResponse>) => {
       if (event.data.type === "disposed") {
         clearTimeout(timeoutId);
         currentWorker.removeEventListener("message", handler);
@@ -86,6 +93,7 @@ export async function disposeTranscriber(): Promise<void> {
     };
 
     currentWorker.addEventListener("message", handler);
-    currentWorker.postMessage({ type: "dispose" });
+    const message: WorkerMessage = { type: "dispose" };
+    currentWorker.postMessage(message);
   });
 }

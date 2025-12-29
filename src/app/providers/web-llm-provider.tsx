@@ -65,6 +65,11 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
 
   const loadModel = async (modelId: string) => {
     try {
+      // Cleanup old engine before creating new one to prevent memory leak
+      if (engineState.engine) {
+        await engineState.engine.unload();
+      }
+
       setEngineState((prev) => ({
         ...prev,
         isLoading: true,
