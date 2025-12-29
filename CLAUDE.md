@@ -52,7 +52,8 @@ Act as a **senior lead developer** with precision and thoroughness. Before imple
 - Generic names (`data`, `item`, `thing`, `info`)
 
 ## React Best Practices (2025)
-- Remove `useCallback`/`useMemo` unless profiled performance concern exists
+- `useCallback`/`useMemo` are handled automatically by React Compiler
+- Manual memoization is optional for fine-grained control ([React docs](https://react.dev/learn/react-compiler))
 - Prefer `useTransition` for async state updates
 - Prefer module functions over static class methods
 - Static data → module-level constants, not `useMemo(() => [...], [])`

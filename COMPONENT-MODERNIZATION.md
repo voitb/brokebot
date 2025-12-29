@@ -224,6 +224,30 @@ const handleKeyDown = (e: ReactKeyboardEvent) => {
 
 ---
 
+### 4. React Compiler Added
+
+**Date:** 2025-12-29
+
+**Change:** Added `babel-plugin-react-compiler` to automatically memoize all components and providers.
+
+**Impact:**
+- All existing providers (`model-provider.tsx`, `web-llm-provider.tsx`, etc.) are now automatically optimized
+- No manual `useMemo`/`useCallback` needed
+- Context value recreation issue in `model-provider.tsx` is automatically fixed
+
+**Files Modified:**
+- `vite.config.ts` - Added compiler to babel plugins
+- `package.json` - Added `babel-plugin-react-compiler` dev dependency
+
+**Issues Resolved:**
+| Component | Issue | How Compiler Fixes It |
+|-----------|-------|----------------------|
+| `model-provider.tsx` | Context value recreated every render | Auto-memoizes context value object |
+| `model-provider.tsx` | Functions (`sendMessage`, etc.) not memoized | Auto-memoizes function references |
+| All providers | Potential re-render cascades | Auto-optimizes all context values |
+
+---
+
 ## Reviewed (No Issues)
 
 | Component | Status | Notes |
@@ -280,8 +304,8 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 
 ## Remaining Components Queue
 
-- [ ] `model-provider.tsx`
-- [ ] `web-llm-provider.tsx`
+- [x] `model-provider.tsx` ✅ (Fixed by React Compiler)
+- [x] `web-llm-provider.tsx` ✅ (Fixed by React Compiler)
 - [x] `chat-input.tsx` ✅
 - [ ] `chat-messages.tsx`
 - [ ] `conversation-list.tsx`
