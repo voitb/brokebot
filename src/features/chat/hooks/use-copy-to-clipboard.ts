@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
+const COPY_FEEDBACK_DURATION_MS = 2000;
+
 interface CopyToClipboardResult {
   copied: boolean;
   copyToClipboard: (text: string) => Promise<void>;
@@ -29,7 +31,7 @@ export function useCopyToClipboard(): CopyToClipboardResult {
 
       timeoutRef.current = setTimeout(() => {
         setCopied(false);
-      }, 2000);
+      }, COPY_FEEDBACK_DURATION_MS);
     } catch {
       toast.error("Failed to copy to clipboard");
     }

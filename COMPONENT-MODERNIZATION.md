@@ -562,7 +562,7 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-drag-drop.ts` ✅ (Reviewed - Clean)
 - [x] `use-chat-guard.ts` ✅ (Fixed with ref + state pattern)
 - [x] `use-header-actions.ts` ✅ (Fixed with `useEffectEvent`)
-- [ ] `use-copy-to-clipboard.ts` (Magic number + ref pattern)
-- [ ] `use-textarea-auto-resize.ts` (Ref in dependencies)
+- [x] `use-copy-to-clipboard.ts` ✅ (Extracted magic number to constant)
+- [x] `use-textarea-auto-resize.ts` ✅ (Removed ineffective ref from deps)
 - [ ] Remaining hooks in `src/features/chat/hooks/`
 - [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)

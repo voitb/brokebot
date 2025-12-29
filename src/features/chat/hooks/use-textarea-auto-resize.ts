@@ -29,5 +29,5 @@ export function useTextareaAutoResize({
         textarea.style.overflowY = "auto";
       }
     }
-  }, [message, minHeight, maxHeight, textareaRef]);
+  }, [message, minHeight, maxHeight]);
 } 
