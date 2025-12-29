@@ -1,4 +1,4 @@
-import { useRef, useEffect, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useRef, useEffect, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, useEffectEvent } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useModel } from "@/app/providers/model-provider";
 import { useDragDrop } from "@/features/chat/hooks/use-drag-drop";
@@ -14,6 +14,8 @@ import { ModelError } from "./model-error";
 import { ModelStatus } from "./model-status";
 import { SpeechToTextButton } from "./speech-to-text-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+const STT_TOAST_ID = "stt-toast";
 
 interface ChatInputProps {
   message: string;
@@ -47,7 +49,6 @@ export function ChatInput({
   });
 
   // Handle speech-to-text status toasts (moved from hook for separation of concerns)
-  const STT_TOAST_ID = "stt-toast";
   useEffect(() => {
     if (transcriberError) {
       toast.error(transcriberError, { id: STT_TOAST_ID });
@@ -100,21 +101,26 @@ export function ChatInput({
     }
   };
 
+  const onMicToggle = useEffectEvent(() => {
+    if (transcriberStatus === "recording") {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+  // Keyboard shortcut for mic toggle (Alt+M)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === 'm') {
+      if (event.altKey && event.key === "m") {
         event.preventDefault();
-        if (transcriberStatus === "recording") {
-          stopRecording();
-        } else {
-          startRecording();
-        }
+        onMicToggle();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [transcriberStatus, startRecording, stopRecording]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const isModelError = modelStatus.toLowerCase().includes("error");
   const isModelReady = !!currentModel && !isModelLoading;
@@ -123,9 +129,7 @@ export function ChatInput({
     toast.info("Model retry is not yet implemented for unified models");
   };
 
-  const onSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
+  const submitMessage = async () => {
     if (!message.trim() && attachedFiles.length === 0) return;
     if (!isModelReady) {
       toast.error("Model is not ready. Please wait or try reloading.");
@@ -145,7 +149,7 @@ export function ChatInput({
     if (filesToSend.length > 0) {
       const fileContents = filesToSend
         .map((f) => {
-          const safeName = f.file.name.replace(/[<>&"']/g, '');
+          const safeName = f.file.name.replace(/[<>&"']/g, "");
           return `<file name="${safeName}">\n${f.content}\n</file>`;
         })
         .join("\n\n");
@@ -161,10 +165,15 @@ export function ChatInput({
     }
   };
 
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    await submitMessage();
+  };
+
   const handleKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSubmit(e as FormEvent);
+      submitMessage();
     }
   };
 
@@ -280,19 +289,19 @@ export function ChatInput({
             selectedModel={
               currentModel
                 ? {
-                    name: currentModel.name,
-                    modelType:
-                      currentModel.type === "online" ? "Online" : "Local",
-                    supportsImages: false,
-                    specialization:
-                      currentModel.localModel?.specialization ||
-                      currentModel.onlineModel?.category,
-                  }
+                  name: currentModel.name,
+                  modelType:
+                    currentModel.type === "online" ? "Online" : "Local",
+                  supportsImages: false,
+                  specialization:
+                    currentModel.localModel?.specialization ||
+                    currentModel.onlineModel?.category,
+                }
                 : {
-                    name: "Initializing...",
-                    modelType: "None",
-                    supportsImages: false,
-                  }
+                  name: "Initializing...",
+                  modelType: "None",
+                  supportsImages: false,
+                }
             }
             isEngineLoading={isModelLoading}
             isModelError={isModelError}
