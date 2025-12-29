@@ -17,16 +17,16 @@ export function EditableConversationTitle({
   const [title, setTitle] = useState(initialTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto focus when component mounts - faster for breadcrumbs
+  // Auto focus when component mounts
   useEffect(() => {
     if (inputRef.current) {
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         inputRef.current?.focus();
         const textLength = inputRef.current?.value.length;
         if (textLength) {
           inputRef.current?.setSelectionRange(textLength, textLength);
         }
-      }, 100);
+      });
     }
   }, []);
 
