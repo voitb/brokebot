@@ -125,6 +125,105 @@ useSmartAutoScroll({
 
 ---
 
+### 3. `chat-input.tsx`
+
+**File:** `src/features/chat/components/input/chat-input.tsx`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Event listener re-registration | High | `useEffect` with unstable function deps caused listener to re-register every render |
+| Type cast in event handler | Low | `onSubmit(e as FormEvent)` - unsafe type cast |
+| Magic string inside component | Low | `STT_TOAST_ID` defined inside component (recalculated each render) |
+
+**Pattern Applied:** `useEffectEvent` (React 19.2+ stable hook for non-reactive logic in Effects)
+
+**Research:**
+- `useCallback` doesn't solve this - effect still re-runs when deps change
+- `useRef` pattern works but is a pre-React 19.2 workaround
+- `useEffectEvent` is the official React 19.2+ solution for this exact problem
+- See: [React useEffectEvent docs](https://react.dev/reference/react/useEffectEvent)
+
+**Before:**
+```tsx
+const { startRecording, stopRecording } = useSpeechToText(...);
+
+// ❌ Effect re-registers on every render (functions are new refs each time)
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.altKey && event.key === 'm') {
+      event.preventDefault();
+      if (transcriberStatus === "recording") {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [transcriberStatus, startRecording, stopRecording]);
+
+// ❌ Type cast
+const handleKeyDown = (e: ReactKeyboardEvent) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    onSubmit(e as FormEvent);
+  }
+};
+```
+
+**After:**
+```tsx
+import { useEffectEvent } from "react"; // Requires type augmentation (see Patterns Reference)
+
+const STT_TOAST_ID = "stt-toast"; // ✅ Module-level constant
+
+// ✅ Effect Event - always reads latest values without causing re-registration
+const onMicToggle = useEffectEvent(() => {
+  if (transcriberStatus === "recording") {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+});
+
+// ✅ Empty deps - listener registered once
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.altKey && event.key === "m") {
+      event.preventDefault();
+      onMicToggle();
+    }
+  };
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, []);
+
+// ✅ No type cast - extracted submitMessage function
+const submitMessage = async () => { /* ... */ };
+const onSubmit = async (e: FormEvent) => {
+  e.preventDefault();
+  await submitMessage();
+};
+const handleKeyDown = (e: ReactKeyboardEvent) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    submitMessage(); // ✅ No type cast needed
+  }
+};
+```
+
+**Why These Changes:**
+- Event listener is registered only ONCE on mount
+- `onMicToggle()` always reads latest `transcriberStatus`, `startRecording`, `stopRecording`
+- No manual ref management needed
+- ESLint understands `useEffectEvent` (eslint-plugin-react-hooks v6.1.1+)
+- Extracted `submitMessage()` eliminates the type cast
+
+---
+
 ## Reviewed (No Issues)
 
 | Component | Status | Notes |
@@ -145,6 +244,27 @@ useSmartAutoScroll({
 - Layout-dependent operations
 - Replacing arbitrary `setTimeout` timing hacks
 
+### Use `useEffectEvent` for (React 19.2+):
+- Reading latest props/state in Effects without causing re-runs
+- Event handlers inside Effects that need current values
+- Keyboard shortcuts, connection events, analytics logging
+- Replacing the `useRef` workaround pattern for stale closures
+
+**IMPORTANT:** Due to a TypeScript bug in `@types/react@19.2.x`, named import doesn't work out of the box.
+
+**Workaround:** Add a type augmentation file (`src/types/react-extensions.d.ts`):
+```tsx
+import "react";
+declare module "react" {
+  function useEffectEvent<T extends Function>(callback: T): T;
+}
+```
+
+Then use normally:
+```tsx
+import { useEffectEvent } from "react"; // ✅ Works with augmentation
+```
+
 ### For custom hooks that need "triggers":
 - Accept **specific typed options** instead of `DependencyList` parameter
 - Use **primitives** (number, boolean, string) over objects/arrays
@@ -162,6 +282,6 @@ useSmartAutoScroll({
 
 - [ ] `model-provider.tsx`
 - [ ] `web-llm-provider.tsx`
-- [ ] `chat-input.tsx`
+- [x] `chat-input.tsx` ✅
 - [ ] `chat-messages.tsx`
 - [ ] `conversation-list.tsx`
