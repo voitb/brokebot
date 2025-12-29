@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useEffectEvent } from "react";
 import { transcribe } from "@/features/chat/lib/transcriber/transcribe";
 import type { TranscribeResult } from "@/features/chat/lib/transcriber/types";
 
@@ -29,11 +29,10 @@ export function useSpeechToText(
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const onTranscriptReceivedRef = useRef(onTranscriptReceived);
 
-  useEffect(() => {
-    onTranscriptReceivedRef.current = onTranscriptReceived;
-  }, [onTranscriptReceived]);
+  const onTranscript = useEffectEvent((transcript: string) => {
+    onTranscriptReceived(transcript);
+  });
 
   const isModelLoading = false;
 
@@ -78,7 +77,7 @@ export function useSpeechToText(
       const newTranscript = (result as TranscribeResult)?.text?.trim() ?? "";
 
       if (newTranscript) {
-        onTranscriptReceivedRef.current(newTranscript);
+        onTranscript(newTranscript);
       }
     } catch (err) {
       console.error("[STT] Transcription error:", err);

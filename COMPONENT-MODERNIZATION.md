@@ -248,11 +248,129 @@ const handleKeyDown = (e: ReactKeyboardEvent) => {
 
 ---
 
+### 5. `web-llm-provider.tsx`
+
+**File:** `src/app/providers/web-llm-provider.tsx`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| eslint-disable in useEffect | Medium | Mount-only effect with function dependency |
+
+**Pattern Applied:** `useEffectEvent` (React 19.2+)
+
+**Before:**
+```tsx
+useEffect(() => {
+  loadModel(selectedModel.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+```
+
+**After:**
+```tsx
+const onInitialize = useEffectEvent(() => {
+  loadModel(selectedModel.id);
+});
+
+useEffect(() => {
+  onInitialize();
+}, []);
+```
+
+**Why `useEffectEvent` (not `useRef`):**
+- `useEffectEvent` is the official React 19.2+ solution for this pattern
+- Replaces the `useRef` workaround for stale closures
+- `onInitialize()` always reads latest `loadModel` and `selectedModel.id`
+- Empty deps array is valid - effect runs once, always reads current values
+
+---
+
+### 6. `use-documents.ts`
+
+**File:** `src/features/documents/hooks/use-documents.ts`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| eslint-disable in useEffect | Medium | Mount-only effect with function dependency |
+
+**Pattern Applied:** React Compiler auto-memoization
+
+**Before:**
+```tsx
+useEffect(() => {
+  loadDocuments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+```
+
+**After:**
+```tsx
+useEffect(() => {
+  loadDocuments();
+}, [loadDocuments]);
+```
+
+**Why this works:**
+- `loadDocuments` only uses stable values (useState setters + external `db`)
+- React Compiler recognizes this and auto-memoizes the function
+- Function reference stays stable across renders
+- `refreshDocuments()` can still call `loadDocuments()` (shared function)
+
+---
+
+### 7. `use-speech-to-text.ts`
+
+**File:** `src/features/chat/hooks/use-speech-to-text.ts`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Ref workaround pattern | Medium | Manual ref sync for callback prop |
+
+**Pattern Applied:** `useEffectEvent` (React 19.2+)
+
+**Before:**
+```tsx
+const onTranscriptReceivedRef = useRef(onTranscriptReceived);
+
+useEffect(() => {
+  onTranscriptReceivedRef.current = onTranscriptReceived;
+}, [onTranscriptReceived]);
+
+// Later:
+onTranscriptReceivedRef.current(newTranscript);
+```
+
+**After:**
+```tsx
+const onTranscript = useEffectEvent((transcript: string) => {
+  onTranscriptReceived(transcript);
+});
+
+// Later:
+onTranscript(newTranscript);
+```
+
+**Why `useEffectEvent`:**
+- Eliminates manual ref management
+- `onTranscript()` always calls the latest `onTranscriptReceived`
+- Cleaner, more declarative code
+- Official React 19.2+ pattern for this use case
+
+---
+
 ## Reviewed (No Issues)
 
 | Component | Status | Notes |
 |-----------|--------|-------|
 | `conversations-provider.tsx` | Clean | Uses `useLiveQuery` (Dexie) - proper subscription pattern |
+| `use-message-stream.ts` | Clean | Proper ref usage for AbortController |
+| `use-drag-drop.ts` | Clean | No effects, just event handlers |
 
 ---
 
@@ -305,7 +423,13 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 ## Remaining Components Queue
 
 - [x] `model-provider.tsx` ✅ (Fixed by React Compiler)
-- [x] `web-llm-provider.tsx` ✅ (Fixed by React Compiler)
-- [x] `chat-input.tsx` ✅
-- [ ] `chat-messages.tsx`
-- [ ] `conversation-list.tsx`
+- [x] `web-llm-provider.tsx` ✅ (Fixed with `useEffectEvent`)
+- [x] `chat-input.tsx` ✅ (Fixed with `useEffectEvent`)
+- [x] `use-documents.ts` ✅ (Fixed with React Compiler)
+- [x] `chat-messages.tsx` ✅ (Reviewed - Clean)
+- [x] `conversation-list.tsx` ✅ (Reviewed - Clean)
+- [x] `use-speech-to-text.ts` ✅ (Fixed with `useEffectEvent`)
+- [x] `use-message-stream.ts` ✅ (Reviewed - Clean)
+- [x] `use-drag-drop.ts` ✅ (Reviewed - Clean)
+- [ ] Remaining hooks in `src/features/chat/hooks/`
+- [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)
