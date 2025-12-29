@@ -2,7 +2,7 @@ import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/shared/hooks/
 import { useSidebar } from "@/components/ui/sidebar";
 import { useConversationList } from "@/features/chat/hooks/use-conversation-list";
 import { useConversations } from "@/app/providers/conversations-provider";
-import { useConversationId } from "@/shared/hooks/use-conversation-id";
+import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 

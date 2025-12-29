@@ -1,5 +1,5 @@
 import type { Components } from "react-markdown";
-import { CodeBlock } from "../components/messages/components/code-block";
+import { CodeBlock } from "@/features/chat/components/messages/components/code-block";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**

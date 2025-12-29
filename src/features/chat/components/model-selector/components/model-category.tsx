@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type ModelInfo } from "@/app/providers/web-llm-provider";
 import { ModelItem } from "./model-item";
-import { getCategoryIcon, getCategoryLabel, getCategoryTooltip } from "@/features/chat/utils/model-utils";
+import { getCategoryIcon, getCategoryLabel, getCategoryTooltip } from "@/features/chat/components/model-icons/model-utils";
 
 interface ModelCategoryProps {
   category: string;

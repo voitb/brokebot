@@ -25,7 +25,7 @@ vi.mock("@/app/providers/web-llm-provider", async () => {
   };
 });
 
-vi.mock("@/lib/transcriber", async () => {
+vi.mock("@/features/chat/lib/transcriber", async () => {
   const { createMockTranscriber } = await import("@/test/mocks/hooks");
   return createMockTranscriber();
 });

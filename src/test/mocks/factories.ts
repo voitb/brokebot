@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 import { v4 as uuidv4 } from "uuid";
 import type { Conversation, Message, Folder, Document, UserConfig } from "@/lib/db";
-import type { OpenRouterModel } from "@/lib/openrouter";
+import type { OpenRouterModel } from "@/features/chat/lib/openrouter";
 
 export function createMockMessage(overrides: Partial<Message> = {}): Message {
   return {

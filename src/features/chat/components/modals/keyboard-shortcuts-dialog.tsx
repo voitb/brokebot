@@ -9,15 +9,15 @@ import {
 import { KEYBOARD_SHORTCUTS } from "@/constants/keyboard-shortcuts";
 import { ShortcutGroup } from "./components/shortcut-group";
 
-interface KeyboardShortcutsModalProps {
+interface KeyboardShortcutsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 /**
- * Modal showing keyboard shortcuts for the app
+ * Dialog showing keyboard shortcuts for the app
  */
-export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = React.memo(({
+export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = React.memo(({
   open,
   onOpenChange,
 }) => {

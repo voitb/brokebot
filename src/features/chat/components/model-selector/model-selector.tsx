@@ -10,7 +10,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWebLLM, type ModelInfo } from "@/app/providers/web-llm-provider";
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
-import { type OpenRouterModel } from "@/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { useModelSelector } from "@/features/chat/hooks/use-model-selector";
 import { ModelCategory } from "./components/model-category";
 

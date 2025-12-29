@@ -1,3 +1,4 @@
+import React from "react";
 import { Shield, X, Settings, FileText } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -49,7 +50,7 @@ const navigationItems = [
   { id: "privacy" as const, label: "Privacy", icon: Shield },
 ];
 
-export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
+export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onOpenChange }) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const activeTab = (searchParams.get("tab") as SettingsTab) || "general";

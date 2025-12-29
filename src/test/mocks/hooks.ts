@@ -116,7 +116,7 @@ export function createMockConversationHook(options: MockConversationHookOptions 
  * Returns a simple function that returns the provided ID
  *
  * @example
- * vi.mock("@/shared/hooks/use-conversation-id", () => ({
+ * vi.mock("@/features/chat/hooks/use-conversation-id", () => ({
  *   useConversationId: () => "test-conversation-id",
  * }));
  */

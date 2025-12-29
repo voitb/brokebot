@@ -5,7 +5,7 @@ import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/app/providers/theme-provider";
-import { useConversationId } from "@/shared/hooks/use-conversation-id";
+import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
 import { BreadcrumbNavigation } from "./components/breadcrumb-navigation";
 import { HeaderActionsMenu } from "./components/header-actions-menu";
 import { NewChatButton } from "./components/new-chat-button";

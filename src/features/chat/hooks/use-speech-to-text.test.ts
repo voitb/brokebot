@@ -5,7 +5,7 @@ import { setupMediaMocks } from "@/test/mocks/modules";
 
 const mockGetTranscriber = vi.fn();
 
-vi.mock("@/lib/transcriber", () => ({
+vi.mock("@/features/chat/lib/transcriber", () => ({
   getTranscriber: () => mockGetTranscriber(),
 }));
 

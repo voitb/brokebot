@@ -17,7 +17,7 @@ import {
   createOnlineModel,
 } from "@/app/providers/model-provider";
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
-import { type OpenRouterModel } from "@/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { toast } from "sonner";
 import { LocalModelList } from "./components/local-model-list";
 import { useUserConfig } from "@/shared/hooks/use-user-config";

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { getTranscriber } from "@/lib/transcriber";
+import { getTranscriber } from "@/features/chat/lib/transcriber";
 
 const CHUNK_LENGTH_S = 30;
 const STRIDE_LENGTH_S = 5;
