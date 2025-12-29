@@ -17,3 +17,15 @@ export interface TranscribeOptions {
 export interface TranscribeResult {
   text?: string;
 }
+
+// Typed worker messages for type-safe communication
+export type WorkerMessage =
+  | { type: "transcribe"; audioData: Float32Array; options: TranscribeOptions }
+  | { type: "dispose" };
+
+export type WorkerResponse =
+  | { type: "status"; status: string; device?: "webgpu" | "wasm" }
+  | { type: "progress"; data: ProgressInfo }
+  | { type: "result"; data: TranscribeResult }
+  | { type: "error"; error: string }
+  | { type: "disposed" };

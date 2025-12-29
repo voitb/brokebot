@@ -1,6 +1,6 @@
-/// <reference path="./transformers.d.ts" />
 import { pipeline, env } from "@huggingface/transformers";
 import type { AutomaticSpeechRecognitionPipeline } from "@huggingface/transformers";
+import type { WorkerMessage, WorkerResponse } from "./types";
 
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
@@ -8,6 +8,10 @@ env.useBrowserCache = true;
 
 let transcriber: AutomaticSpeechRecognitionPipeline | null = null;
 let device: "webgpu" | "wasm" = "webgpu";
+
+function postResponse(response: WorkerResponse): void {
+  self.postMessage(response);
+}
 
 async function checkWebGPUSupport(): Promise<boolean> {
   if (!navigator.gpu) return false;
@@ -24,7 +28,7 @@ async function getTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
     const hasWebGPU = await checkWebGPUSupport();
     device = hasWebGPU ? "webgpu" : "wasm";
 
-    self.postMessage({ type: "status", status: "loading", device });
+    postResponse({ type: "status", status: "loading", device });
 
     transcriber = await pipeline(
       "automatic-speech-recognition",
@@ -33,6 +37,7 @@ async function getTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
         device,
         dtype: "fp32",
         progress_callback: (progress: unknown) => {
+          // Library callback type is complex, cast to our type
           self.postMessage({ type: "progress", data: progress });
         },
       }
@@ -41,17 +46,19 @@ async function getTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
   return transcriber;
 }
 
-self.onmessage = async (event: MessageEvent) => {
-  const { type, audioData, options } = event.data;
+self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
+  const { type } = event.data;
 
   if (type === "transcribe") {
+    const { audioData, options } = event.data;
     try {
       const recognizer = await getTranscriber();
-      self.postMessage({ type: "status", status: "transcribing", device });
+      postResponse({ type: "status", status: "transcribing", device });
       const result = await recognizer(audioData, options);
+      // Library result type is complex, cast to our type
       self.postMessage({ type: "result", data: result });
     } catch (error) {
-      self.postMessage({ type: "error", error: String(error) });
+      postResponse({ type: "error", error: String(error) });
     }
   }
 
@@ -60,6 +67,6 @@ self.onmessage = async (event: MessageEvent) => {
       await transcriber.dispose();
       transcriber = null;
     }
-    self.postMessage({ type: "disposed" });
+    postResponse({ type: "disposed" });
   }
 };
