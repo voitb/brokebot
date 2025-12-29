@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useConversation } from "@/shared/hooks/use-conversations";
+
+const DEFAULT_TIMEOUT_MS = 500;
 
 interface UseChatGuardOptions {
   conversationId?: string;
@@ -13,45 +15,50 @@ interface UseChatGuardReturn {
   conversationExists: boolean;
 }
 
-export function useChatGuard({ 
-  conversationId, 
-  timeoutMs = 500 
+export function useChatGuard({
+  conversationId,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
 }: UseChatGuardOptions): UseChatGuardReturn {
   const navigate = useNavigate();
   const { conversation } = useConversation(conversationId);
-  const [hasChecked, setHasChecked] = useState(false);
+  const [isChecking, setIsChecking] = useState(!!conversationId);
+  const hasHandledRef = useRef(false);
 
   useEffect(() => {
+    // Reset on conversationId change
+    hasHandledRef.current = false;
+    setIsChecking(!!conversationId);
+
     // Skip validation if no conversationId (for general /chat route)
     if (!conversationId) {
-      setHasChecked(true);
       return;
     }
 
     // Create timeout to check if conversation exists
     const timer = setTimeout(() => {
-      if (conversation === undefined && !hasChecked) {
-        // After timeout, if still undefined, conversation doesn't exist
+      if (!hasHandledRef.current && conversation === undefined) {
+        hasHandledRef.current = true;
         toast.error("Conversation not found", {
           description: "The requested conversation does not exist.",
           duration: 4000,
         });
         navigate("/chat", { replace: true });
+        setIsChecking(false);
       }
-      setHasChecked(true);
     }, timeoutMs);
 
-    // If conversation is found immediately, mark as checked
-    if (conversation !== undefined) {
-      setHasChecked(true);
+    // If conversation is found, mark as handled
+    if (conversation !== undefined && !hasHandledRef.current) {
+      hasHandledRef.current = true;
+      setIsChecking(false);
       clearTimeout(timer);
     }
 
     return () => clearTimeout(timer);
-  }, [conversationId, conversation, navigate, hasChecked, timeoutMs]);
+  }, [conversationId, conversation, navigate, timeoutMs]);
 
   return {
-    isChecking: conversationId ? !hasChecked : false,
+    isChecking,
     conversationExists: conversationId ? conversation !== undefined : true,
   };
 } 
