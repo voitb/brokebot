@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useEffectEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "@/shared/hooks/use-conversations";
 import { useUserConfig } from "@/shared/hooks/use-user-config";
@@ -58,35 +58,44 @@ export function useHeaderActions({
   const isConversationPinned = currentConversation?.pinned || false;
   const isLoadingConversation = conversationId ? conversation === undefined : false;
 
-  // Event listener for deleting chat via shortcut
+  // Effect event for delete - always reads latest conversationId
+  const onDeleteEvent = useEffectEvent((eventConversationId: string) => {
+    if (eventConversationId === conversationId) {
+      setDeleteDialogOpen(true);
+    }
+  });
+
+  // Event listener for deleting chat via shortcut - registered once
   useEffect(() => {
     const handleDelete = (event: Event) => {
-      // We need to check if the event detail matches the current conversation
       const customEvent = event as CustomEvent;
-      if (customEvent.detail?.conversationId === conversationId) {
-        setDeleteDialogOpen(true);
-      }
+      onDeleteEvent(customEvent.detail?.conversationId);
     };
 
     document.addEventListener("conversation:delete", handleDelete);
     return () => {
       document.removeEventListener("conversation:delete", handleDelete);
     };
-  }, [conversationId]);
+  }, []);
 
-  // Event listener for renaming chat via shortcut
+  // Effect event for rename - always reads latest values
+  const onRenameEvent = useEffectEvent(() => {
+    if (conversationId && currentConversation) {
+      setIsEditingTitle(true);
+    }
+  });
+
+  // Event listener for renaming chat via shortcut - registered once
   useEffect(() => {
     const handleRename = () => {
-      if (conversationId && currentConversation) {
-        setIsEditingTitle(true);
-      }
+      onRenameEvent();
     };
 
     document.addEventListener("conversation:rename", handleRename);
     return () => {
       document.removeEventListener("conversation:rename", handleRename);
     };
-  }, [conversationId, currentConversation]);
+  }, []);
 
   // Actions
   const handleNewChat = async () => {
