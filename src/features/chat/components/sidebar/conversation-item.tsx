@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, type MouseEvent } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ export function ConversationItem({
     handleConversationClick,
     handlePinToggle,
     handleRename,
+    startEditing,
     handleSaveRename,
     handleCancelRename,
     handleDelete,
@@ -48,11 +49,10 @@ export function ConversationItem({
     isActive,
   } = useConversationItem(conversation);
 
-  // Effect event for rename - always reads latest isActive and handleRename
+  // Effect event for rename - always reads latest isActive
   const onRenameEvent = useEffectEvent(() => {
     if (isActive) {
-      const dummyEvent = { stopPropagation: () => {}, preventDefault: () => {} } as MouseEvent;
-      handleRename(dummyEvent);
+      startEditing();
     }
   });
 

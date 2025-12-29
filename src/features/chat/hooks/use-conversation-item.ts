@@ -18,6 +18,7 @@ export interface UseConversationItemReturn {
   handleConversationClick: () => void;
   handlePinToggle: (e: React.MouseEvent) => Promise<void>;
   handleRename: (e: React.MouseEvent) => void;
+  startEditing: () => void;
   handleSaveRename: (newTitle: string) => Promise<void>;
   handleCancelRename: () => void;
   handleDelete: (e: React.MouseEvent) => void;
@@ -66,11 +67,15 @@ export function useConversationItem(conversation: Conversation): UseConversation
     await togglePinConversation(conversation.id);
   };
 
+  const startEditing = () => {
+    setIsEditing(true);
+    setIsMenuOpen(false);
+  };
+
   const handleRename = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setIsEditing(true);
-    setIsMenuOpen(false);
+    startEditing();
   };
 
   const handleSaveRename = async (newTitle: string) => {
@@ -134,6 +139,7 @@ export function useConversationItem(conversation: Conversation): UseConversation
     handleConversationClick,
     handlePinToggle,
     handleRename,
+    startEditing,
     handleSaveRename,
     handleCancelRename,
     handleDelete,
