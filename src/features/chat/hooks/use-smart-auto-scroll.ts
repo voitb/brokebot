@@ -1,7 +1,13 @@
-import { useState, useRef, useEffect, type DependencyList, type RefObject } from "react";
+import { useState, useRef, useEffect, type RefObject } from "react";
 
 const BUTTON_VISIBILITY_OFFSET = 100;
 const AUTOSCROLL_LOCK_OFFSET = 10;
+
+export interface UseSmartAutoScrollOptions {
+  messageCount: number;
+  isGenerating: boolean;
+  conversationId: string | null | undefined;
+}
 
 export interface UseSmartAutoScrollReturn<T extends HTMLElement> {
   scrollAreaRef: RefObject<T | null>;
@@ -10,8 +16,9 @@ export interface UseSmartAutoScrollReturn<T extends HTMLElement> {
 }
 
 export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
-  dependencies: DependencyList = []
+  options: UseSmartAutoScrollOptions
 ): UseSmartAutoScrollReturn<T> {
+  const { messageCount, isGenerating, conversationId } = options;
   const scrollAreaRef = useRef<T>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);
@@ -78,15 +85,14 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
 
   useEffect(() => {
     if (isInitialRender.current) {
-      setTimeout(() => scrollToBottom("auto"), 100);
+      requestAnimationFrame(() => scrollToBottom("auto"));
       isInitialRender.current = false;
     } else {
       if (!userHasScrolledUp.current) {
         scrollToBottom("smooth");
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...dependencies]);
+  }, [messageCount, isGenerating, conversationId]);
 
   const handleScrollToBottomClick = () => {
     userHasScrolledUp.current = false;
