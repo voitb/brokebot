@@ -28,7 +28,8 @@ export default defineConfig({
       'sonner',
       'class-variance-authority',
       'clsx',
-      'tailwind-merge'
+      'tailwind-merge',
+      '@huggingface/transformers'
     ],
     exclude: [
       '@mlc-ai/web-llm'
