@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { getTranscriber } from "@/features/chat/lib/transcriber";
+import { transcribe } from "@/features/chat/lib/transcriber/transcribe";
+import type { TranscribeResult } from "@/features/chat/lib/transcriber/types";
 
 const CHUNK_LENGTH_S = 30;
 const STRIDE_LENGTH_S = 5;
@@ -12,10 +13,6 @@ export type TranscriberStatus =
   | "processing"
   | "error";
 
-interface TranscriberResult {
-  text?: string;
-}
-
 export interface UseSpeechToTextResult {
   status: TranscriberStatus;
   startRecording: () => void;
@@ -27,7 +24,7 @@ export interface UseSpeechToTextResult {
 export function useSpeechToText(
   onTranscriptReceived: (transcript: string) => void
 ): UseSpeechToTextResult {
-  const [status, setStatus] = useState<TranscriberStatus>("uninitialized");
+  const [status, setStatus] = useState<TranscriberStatus>("ready");
   const [error, setError] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -38,27 +35,7 @@ export function useSpeechToText(
     onTranscriptReceivedRef.current = onTranscriptReceived;
   }, [onTranscriptReceived]);
 
-  const isModelLoading = status === "loading";
-
-  useEffect(() => {
-    let cancelled = false;
-
-    setStatus("loading");
-    getTranscriber()
-      .then(() => {
-        if (!cancelled) setStatus("ready");
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setError("Failed to load speech recognition model.");
-          setStatus("error");
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const isModelLoading = false;
 
   useEffect(() => {
     return () => {
@@ -79,34 +56,40 @@ export function useSpeechToText(
     const audioBlob = new Blob(audioChunksRef.current, {
       type: mediaRecorderRef.current?.mimeType,
     });
-    const audioUrl = URL.createObjectURL(audioBlob);
     audioChunksRef.current = [];
 
     try {
-      const recognizer = await getTranscriber();
-      const result = await recognizer(audioUrl, {
-        chunk_length_s: CHUNK_LENGTH_S,
-        stride_length_s: STRIDE_LENGTH_S,
-        task: "transcribe",
-      });
+      const result = await transcribe(
+        audioBlob,
+        {
+          chunk_length_s: CHUNK_LENGTH_S,
+          stride_length_s: STRIDE_LENGTH_S,
+          task: "transcribe",
+        },
+        {
+          onStatus: (workerStatus) => {
+            if (workerStatus === "loading") {
+              setStatus("processing");
+            }
+          },
+        }
+      );
 
-      const newTranscript = (result as TranscriberResult)?.text?.trim() ?? "";
+      const newTranscript = (result as TranscribeResult)?.text?.trim() ?? "";
+
       if (newTranscript) {
         onTranscriptReceivedRef.current(newTranscript);
       }
-    } catch {
+    } catch (err) {
+      console.error("[STT] Transcription error:", err);
       setError("An error occurred during transcription.");
     } finally {
-      URL.revokeObjectURL(audioUrl);
       setStatus("ready");
     }
   };
 
   const startRecording = async () => {
     if (status !== "ready") {
-      if (status === "uninitialized" || status === "loading") {
-        setError("Model is still loading, please wait.");
-      }
       return;
     }
 

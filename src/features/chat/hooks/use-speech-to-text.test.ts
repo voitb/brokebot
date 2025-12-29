@@ -3,10 +3,10 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSpeechToText } from "./use-speech-to-text";
 import { setupMediaMocks } from "@/test/mocks/modules";
 
-const mockGetTranscriber = vi.fn();
+const mockTranscribe = vi.fn();
 
-vi.mock("@/features/chat/lib/transcriber", () => ({
-  getTranscriber: () => mockGetTranscriber(),
+vi.mock("@/features/chat/lib/transcriber/transcribe", () => ({
+  transcribe: (...args: unknown[]) => mockTranscribe(...args),
 }));
 
 describe("useSpeechToText", () => {
@@ -17,10 +17,7 @@ describe("useSpeechToText", () => {
     vi.clearAllMocks();
     cleanupMediaMocks = setupMediaMocks();
 
-    // Default: transcriber loads successfully
-    mockGetTranscriber.mockResolvedValue(
-      vi.fn().mockResolvedValue({ text: "Transcribed text" })
-    );
+    mockTranscribe.mockResolvedValue({ text: "Transcribed text" });
   });
 
   afterEach(() => {
@@ -28,64 +25,20 @@ describe("useSpeechToText", () => {
   });
 
   describe("initialization", () => {
-    it("transitions to loading status on mount", () => {
+    it("starts in ready status", () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-      expect(result.current.status).toBe("loading");
+      expect(result.current.status).toBe("ready");
     });
 
-    it("loads transcriber on mount", async () => {
+    it("isModelLoading is false (lazy loading)", () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
-
-      expect(mockGetTranscriber).toHaveBeenCalled();
-    });
-
-    it("sets error status if transcriber fails to load", async () => {
-      mockGetTranscriber.mockRejectedValue(new Error("Failed to load"));
-
-      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("error");
-      });
-
-      expect(result.current.error).toBe("Failed to load speech recognition model.");
-    });
-
-    it("shows isModelLoading during loading", async () => {
-      let resolveTranscriber: (value: unknown) => void;
-      mockGetTranscriber.mockReturnValue(
-        new Promise((resolve) => {
-          resolveTranscriber = resolve;
-        })
-      );
-
-      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.isModelLoading).toBe(true);
-      });
-
-      await act(async () => {
-        resolveTranscriber!(vi.fn());
-      });
-
-      await waitFor(() => {
-        expect(result.current.isModelLoading).toBe(false);
-      });
+      expect(result.current.isModelLoading).toBe(false);
     });
   });
 
   describe("startRecording", () => {
     it("requests microphone access", async () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       await act(async () => {
         await result.current.startRecording();
@@ -97,10 +50,6 @@ describe("useSpeechToText", () => {
     it("sets status to recording", async () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
-
       await act(async () => {
         await result.current.startRecording();
       });
@@ -108,25 +57,8 @@ describe("useSpeechToText", () => {
       expect(result.current.status).toBe("recording");
     });
 
-    it("does nothing if not ready", async () => {
-      mockGetTranscriber.mockReturnValue(new Promise(() => {})); // Never resolves
-
-      const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await act(async () => {
-        await result.current.startRecording();
-      });
-
-      expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
-      expect(result.current.error).toBe("Model is still loading, please wait.");
-    });
-
     it("sets error if microphone access denied", async () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error("Permission denied")
@@ -145,10 +77,6 @@ describe("useSpeechToText", () => {
     it("stops media recorder if recording", async () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
-
       await act(async () => {
         await result.current.startRecording();
       });
@@ -159,7 +87,6 @@ describe("useSpeechToText", () => {
         result.current.stopRecording();
       });
 
-      // After stopping, should process and return to ready
       await waitFor(() => {
         expect(result.current.status).toBe("ready");
       });
@@ -168,11 +95,6 @@ describe("useSpeechToText", () => {
     it("does nothing if not recording", async () => {
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
-
-      // Should not throw
       act(() => {
         result.current.stopRecording();
       });
@@ -183,14 +105,9 @@ describe("useSpeechToText", () => {
 
   describe("transcription", () => {
     it("calls onTranscriptReceived with transcribed text", async () => {
-      const mockRecognizer = vi.fn().mockResolvedValue({ text: "Hello world" });
-      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+      mockTranscribe.mockResolvedValue({ text: "Hello world" });
 
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       await act(async () => {
         await result.current.startRecording();
@@ -208,14 +125,9 @@ describe("useSpeechToText", () => {
     });
 
     it("trims transcript before sending", async () => {
-      const mockRecognizer = vi.fn().mockResolvedValue({ text: "  trimmed text  " });
-      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+      mockTranscribe.mockResolvedValue({ text: "  trimmed text  " });
 
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       await act(async () => {
         await result.current.startRecording();
@@ -231,14 +143,9 @@ describe("useSpeechToText", () => {
     });
 
     it("does not call callback for empty transcript", async () => {
-      const mockRecognizer = vi.fn().mockResolvedValue({ text: "" });
-      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+      mockTranscribe.mockResolvedValue({ text: "" });
 
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       await act(async () => {
         await result.current.startRecording();
@@ -268,10 +175,6 @@ describe("useSpeechToText", () => {
 
       const { result, unmount } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
 
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
-
       await act(async () => {
         await result.current.startRecording();
       });
@@ -284,8 +187,7 @@ describe("useSpeechToText", () => {
 
   describe("transcription errors", () => {
     it("handles transcription API failure", async () => {
-      const mockRecognizer = vi.fn().mockRejectedValue(new Error("Transcription failed"));
-      mockGetTranscriber.mockResolvedValue(mockRecognizer);
+      mockTranscribe.mockRejectedValue(new Error("Transcription failed"));
 
       const mockStop = vi.fn();
       const mockStream = {
@@ -296,10 +198,6 @@ describe("useSpeechToText", () => {
       );
 
       const { result } = renderHook(() => useSpeechToText(mockOnTranscriptReceived));
-
-      await waitFor(() => {
-        expect(result.current.status).toBe("ready");
-      });
 
       await act(async () => {
         await result.current.startRecording();
@@ -317,6 +215,4 @@ describe("useSpeechToText", () => {
       expect(mockOnTranscriptReceived).not.toHaveBeenCalled();
     });
   });
-
-  // Toast notifications are now handled by ChatInput component, not the hook
 });
