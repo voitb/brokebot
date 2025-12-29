@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useEffectEvent,
   type ReactNode,
 } from "react";
 import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
@@ -125,10 +126,12 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     loadModel(model.id);
   };
 
-  useEffect(() => {
+  const onInitialize = useEffectEvent(() => {
     loadModel(selectedModel.id);
-    // Only run on mount - setSelectedModel handles model changes directly
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+
+  useEffect(() => {
+    onInitialize();
   }, []);
 
   const contextValue: EngineState = {
