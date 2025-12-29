@@ -1,4 +1,3 @@
-import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatHeader } from "@/features/chat/components/header/chat-header";
 import { GettingStarted } from "./getting-started";
@@ -7,7 +6,7 @@ import { FeatureGrid } from "./feature-grid";
 import { PrivacyNotice } from "./privacy-notice";
 import { SEOMetadata } from "@/shared/components/common/seo-metadata";
 
-export const WelcomeScreen: React.FC = () => { 
+export function WelcomeScreen() { 
   return (
     <>
       <SEOMetadata
@@ -29,4 +28,4 @@ export const WelcomeScreen: React.FC = () => {
       </div>
     </>
   );
-};
+}

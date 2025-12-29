@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate, createSearchParams } from "react-router-dom";
 import { Star, Sun, Moon } from "lucide-react";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
@@ -6,18 +5,18 @@ import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/comp
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/app/providers/theme-provider";
 import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
-import { BreadcrumbNavigation } from "./components/breadcrumb-navigation";
-import { HeaderActionsMenu } from "./components/header-actions-menu";
-import { NewChatButton } from "./components/new-chat-button";
+import { BreadcrumbNavigation } from "./breadcrumb-navigation";
+import { HeaderActionsMenu } from "./header-actions-menu";
+import { NewChatButton } from "./new-chat-button";
 import { useHeaderActions } from "@/features/chat/hooks/use-header-actions";
-import { DeleteConversationDialog } from "../sidebar/components/delete-conversation-dialog";
+import { DeleteConversationDialog } from "../sidebar/delete-conversation-dialog";
 
 /**
  * Main chat header component with responsive layout
  * Mobile: sidebar trigger + centered title + action buttons
  * Desktop: breadcrumbs/new chat button + action buttons
  */
-export const ChatHeader: React.FC = () => {
+export function ChatHeader() {
   const navigate = useNavigate();
   const conversationId = useConversationId();
   const { open: sidebarOpen } = useSidebar();

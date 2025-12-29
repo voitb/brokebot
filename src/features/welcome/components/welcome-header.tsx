@@ -1,7 +1,7 @@
-import React from "react";
 import { Logo } from "@/components/ui/logo";
 
-export const WelcomeHeader: React.FC = () => (
+export function WelcomeHeader() {
+  return (
   <div className="space-y-4">
     <div className="flex justify-center">
           <Logo size="xl" className="mb-4" />
@@ -14,4 +14,5 @@ export const WelcomeHeader: React.FC = () => (
       data leaves your device, no subscriptions required.
     </p>
   </div>
-); 
+  );
+} 

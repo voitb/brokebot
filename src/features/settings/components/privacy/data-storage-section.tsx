@@ -1,8 +1,7 @@
-import React from "react";
 import { Label } from "@/components/ui/label";
 import { Info } from "lucide-react";
 
-export const DataStorageSection: React.FC = () => {
+export function DataStorageSection() {
   return (
     <>
       <div>

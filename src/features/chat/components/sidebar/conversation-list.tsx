@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FolderPlus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ConversationGroup } from "./components/conversation-group";
-import { SearchBar } from "./components/search-bar";
-import { NewChatButton } from "./components/new-chat-button";
-import { UserProfile } from "./components/user-profile";
-import { FolderItem } from "./components/folder-item";
+import { ConversationGroup } from "./conversation-group";
+import { SearchBar } from "./search-bar";
+import { NewChatButton } from "./new-chat-button";
+import { UserProfile } from "./user-profile";
+import { FolderItem } from "./folder-item";
 import { useConversationList } from "@/features/chat/hooks/use-conversation-list";
 import { useConversations } from "@/app/providers/conversations-provider";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { InputDialog } from "@/shared/components/dialogs/input-dialog";
 /**
  * Main conversation list component with search and grouping
  */
-export const ConversationList: React.FC = () => {
+export function ConversationList() {
   const {
     searchTerm,
     isSearching,

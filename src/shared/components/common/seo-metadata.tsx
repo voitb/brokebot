@@ -1,4 +1,3 @@
-import React from "react";
 import { Helmet } from "react-helmet-async";
 
 interface SEOMetadataProps {
@@ -14,7 +13,7 @@ interface SEOMetadataProps {
   noIndex?: boolean;
 }
 
-export const SEOMetadata: React.FC<SEOMetadataProps> = ({
+export function SEOMetadata({
   title,
   description,
   imageUrl,
@@ -25,7 +24,7 @@ export const SEOMetadata: React.FC<SEOMetadataProps> = ({
   modifiedTime,
   keywords = [],
   noIndex = false,
-}) => {
+}: SEOMetadataProps) {
   const siteName = "brokebot";
   const siteUrl = "https://brokebot.voitz.dev";
   const fullTitle = `${title} | ${siteName}`;
@@ -118,4 +117,4 @@ export const SEOMetadata: React.FC<SEOMetadataProps> = ({
       </script>
     </Helmet>
   );
-}; 
+} 

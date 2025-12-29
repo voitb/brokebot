@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { ChatSidebar } from "./chat-sidebar";
-import React from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,12 +14,12 @@ interface ResponsiveChatLayoutProps {
   children: ReactNode;
 }
 
-const LayoutManager: React.FC = () => {
+function LayoutManager() {
   useLayoutShortcuts();
   const { showOnboarding, completeOnboarding } = useOnboarding();
 
   return <OnboardingDialog isOpen={showOnboarding} onClose={completeOnboarding} />;
-};
+}
 
 export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
   return (

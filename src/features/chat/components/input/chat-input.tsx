@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect, type FormEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useModel } from "@/app/providers/model-provider";
 import { useDragDrop } from "@/features/chat/hooks/use-drag-drop";
@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Square } from "lucide-react";
 import { toast } from "sonner";
-import { FileUpload, AttachedFilesPreview } from "./components/file-upload";
-import { DragDropOverlay } from "./components/drag-drop-overlay";
-import { ModelError } from "./components/model-error";
-import { ModelStatus } from "./components/model-status";
-import { SpeechToTextButton } from "./components/speech-to-text-button";
+import { FileUpload, AttachedFilesPreview } from "./file-upload";
+import { DragDropOverlay } from "./drag-drop-overlay";
+import { ModelError } from "./model-error";
+import { ModelStatus } from "./model-status";
+import { SpeechToTextButton } from "./speech-to-text-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ChatInputProps {
@@ -24,14 +24,14 @@ interface ChatInputProps {
   onStopGeneration: () => void;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
+export function ChatInput({
   message,
   setMessage,
   isLoading,
   isGenerating,
   onSend,
   onStopGeneration,
-}) => {
+}: ChatInputProps) {
   const { currentModel, isModelLoading, modelStatus } = useModel();
   const { isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter } =
     useDragDrop();
@@ -123,7 +123,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     toast.info("Model retry is not yet implemented for unified models");
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!message.trim() && attachedFiles.length === 0) return;
@@ -161,10 +161,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: ReactKeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSubmit(e as React.FormEvent);
+      onSubmit(e as FormEvent);
     }
   };
 

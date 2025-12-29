@@ -1,4 +1,3 @@
-import React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,11 +15,11 @@ interface ClearAllDataDialogProps {
   onCancel: () => void;
 }
 
-export const ClearAllDataDialog: React.FC<ClearAllDataDialogProps> = ({
+export function ClearAllDataDialog({
   open,
   onConfirm,
   onCancel,
-}) => {
+}: ClearAllDataDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
@@ -52,11 +51,11 @@ interface ResetSettingsDialogProps {
   onCancel: () => void;
 }
 
-export const ResetSettingsDialog: React.FC<ResetSettingsDialogProps> = ({
+export function ResetSettingsDialog({
   open,
   onConfirm,
   onCancel,
-}) => {
+}: ResetSettingsDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>

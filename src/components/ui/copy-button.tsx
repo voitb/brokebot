@@ -1,4 +1,4 @@
-import React from "react";
+import type { ReactNode } from "react";
 import { Button } from "./button";
 import { Copy, Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
@@ -11,20 +11,20 @@ interface CopyButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   showTooltip?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 /**
  * Reusable copy button component with clipboard functionality
  */
-export const CopyButton: React.FC<CopyButtonProps> = React.memo(({
+export function CopyButton({
   value,
   className,
   size = "sm",
   variant = "ghost",
   showTooltip = false,
   children,
-}) => {
+}: CopyButtonProps) {
   const { copied, copyToClipboard } = useCopyToClipboard();
 
   const handleCopy = () => {
@@ -62,4 +62,4 @@ export const CopyButton: React.FC<CopyButtonProps> = React.memo(({
   }
 
   return buttonContent;
-}); 
+} 

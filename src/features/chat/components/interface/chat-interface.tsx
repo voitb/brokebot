@@ -1,4 +1,3 @@
-import React from "react";
 import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header/chat-header";
 import { ChatMessages } from "../messages/chat-messages";
@@ -10,7 +9,7 @@ import { useChatInput } from "@/features/chat/hooks/use-chat-input";
 /**
  * Main chat interface component combining header, messages, and input
  */
-export const ChatInterface: React.FC = () => {
+export function ChatInterface() {
   const conversationId = useConversationId();
   const { conversation } = useConversation(conversationId);
   const {

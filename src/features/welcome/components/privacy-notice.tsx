@@ -1,6 +1,4 @@
-import React from "react";
-
-export const PrivacyNotice: React.FC = () => {
+export function PrivacyNotice() {
   return (
     <div className="text-xs text-muted-foreground max-w-2xl mx-auto">
       <p>
@@ -14,4 +12,4 @@ export const PrivacyNotice: React.FC = () => {
       </p>
     </div>
   );
-};
+}

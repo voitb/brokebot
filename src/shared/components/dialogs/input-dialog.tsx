@@ -22,7 +22,7 @@ interface InputDialogProps {
   confirmText?: string;
 }
 
-export const InputDialog: React.FC<InputDialogProps> = ({
+export function InputDialog({
   open,
   onOpenChange,
   title,
@@ -31,7 +31,7 @@ export const InputDialog: React.FC<InputDialogProps> = ({
   initialValue = '',
   onConfirm,
   confirmText = 'Confirm',
-}) => {
+}: InputDialogProps) {
   const [value, setValue] = useState(initialValue);
 
   useEffect(() => {
@@ -82,4 +82,4 @@ export const InputDialog: React.FC<InputDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-}; 
+} 

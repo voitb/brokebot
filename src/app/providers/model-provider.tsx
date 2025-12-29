@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -55,7 +55,7 @@ interface ModelProviderProps {
   children: ReactNode;
 }
 
-export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
+export function ModelProvider({ children }: ModelProviderProps) {
   const webLLM = useWebLLM();
   const { config } = useUserConfig();
   const {
@@ -242,7 +242,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
       {children}
     </ModelContext.Provider>
   );
-};
+}
 
 export const useModel = (): ModelProviderState => {
   const context = useContext(ModelContext);

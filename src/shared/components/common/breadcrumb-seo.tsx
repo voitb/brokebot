@@ -1,4 +1,3 @@
-import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 interface BreadcrumbItem {
@@ -10,7 +9,7 @@ interface BreadcrumbSEOProps {
   items: BreadcrumbItem[];
 }
 
-export const BreadcrumbSEO: React.FC<BreadcrumbSEOProps> = ({ items }) => {
+export function BreadcrumbSEO({ items }: BreadcrumbSEOProps) {
   const baseUrl = 'https://brokebot.voitz.dev';
   
   // Add home as first item if not present
@@ -37,4 +36,4 @@ export const BreadcrumbSEO: React.FC<BreadcrumbSEOProps> = ({ items }) => {
       </script>
     </Helmet>
   );
-}; 
+} 

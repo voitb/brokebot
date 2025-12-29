@@ -107,10 +107,10 @@ interface OnboardingDialogProps {
     onClose: () => void;
 }
 
-export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
+export function OnboardingDialog({
     isOpen,
     onClose,
-}) => {
+}: OnboardingDialogProps) {
     const [hasReadToBottom, setHasReadToBottom] = useState(false); 
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -162,4 +162,4 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
             </DialogContent>
         </Dialog>
     );
-}; 
+} 
