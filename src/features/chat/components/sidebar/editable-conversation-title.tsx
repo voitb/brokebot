@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type KeyboardEvent } from "react";
+import { useState, useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import { Input } from "@/components/ui/input";
 
 interface EditableConversationTitleProps {
@@ -17,16 +17,12 @@ export function EditableConversationTitle({
   const [title, setTitle] = useState(initialTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto focus when component mounts
-  useEffect(() => {
-    if (inputRef.current) {
-      requestAnimationFrame(() => {
-        inputRef.current?.focus();
-        const textLength = inputRef.current?.value.length;
-        if (textLength) {
-          inputRef.current?.setSelectionRange(textLength, textLength);
-        }
-      });
+  // Auto focus when component mounts - useLayoutEffect prevents focus flicker
+  useLayoutEffect(() => {
+    inputRef.current?.focus();
+    const textLength = inputRef.current?.value.length;
+    if (textLength) {
+      inputRef.current?.setSelectionRange(textLength, textLength);
     }
   }, []);
 

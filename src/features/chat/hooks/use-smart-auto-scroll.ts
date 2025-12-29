@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type RefObject } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, type RefObject } from "react";
 
 const BUTTON_VISIBILITY_OFFSET = 100;
 const AUTOSCROLL_LOCK_OFFSET = 10;
@@ -83,16 +83,20 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     };
   }, []);
 
-  useEffect(() => {
+  // Initial scroll - useLayoutEffect prevents flash of content at wrong position
+  useLayoutEffect(() => {
     if (isInitialRender.current) {
-      requestAnimationFrame(() => scrollToBottom("auto"));
+      scrollToBottom("auto");
       isInitialRender.current = false;
-    } else {
-      if (!userHasScrolledUp.current) {
-        scrollToBottom("smooth");
-      }
     }
-  }, [messageCount, isGenerating, conversationId]);
+  }, [conversationId]);
+
+  // Subsequent scrolls on new messages - useEffect for non-blocking smooth scroll
+  useEffect(() => {
+    if (!isInitialRender.current && !userHasScrolledUp.current) {
+      scrollToBottom("smooth");
+    }
+  }, [messageCount, isGenerating]);
 
   const handleScrollToBottomClick = () => {
     userHasScrolledUp.current = false;
