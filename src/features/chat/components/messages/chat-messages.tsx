@@ -24,7 +24,11 @@ export function ChatMessages({
   const { messages, conversation } = useConversation(conversationId);
   const { isLoading: isEngineLoading, status } = useWebLLM();
   const { scrollAreaRef, showScrollButton, handleScrollToBottomClick } =
-    useSmartAutoScroll([messages, isGenerating, conversationId]);
+    useSmartAutoScroll({
+      messageCount: messages.length,
+      isGenerating,
+      conversationId,
+    });
 
   // Check if model is ready
   const isModelReady = status === "Ready" && !isEngineLoading;

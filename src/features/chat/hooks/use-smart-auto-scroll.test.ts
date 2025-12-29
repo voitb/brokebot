@@ -3,6 +3,12 @@ import { renderHook, act } from "@testing-library/react";
 import { useSmartAutoScroll } from "./use-smart-auto-scroll";
 import { createMockViewport, createMockMutationObserver } from "@/test/mocks/dom-helpers";
 
+const defaultOptions = {
+  messageCount: 0,
+  isGenerating: false,
+  conversationId: null,
+};
+
 describe("useSmartAutoScroll", () => {
   let mockObserver: ReturnType<typeof createMockMutationObserver>;
 
@@ -19,20 +25,20 @@ describe("useSmartAutoScroll", () => {
 
   describe("initial state", () => {
     it("returns scrollAreaRef", () => {
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       expect(result.current.scrollAreaRef).toBeDefined();
       expect(result.current.scrollAreaRef.current).toBeNull();
     });
 
     it("starts with showScrollButton as false", () => {
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       expect(result.current.showScrollButton).toBe(false);
     });
 
     it("provides handleScrollToBottomClick function", () => {
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       expect(typeof result.current.handleScrollToBottomClick).toBe("function");
     });
@@ -46,7 +52,7 @@ describe("useSmartAutoScroll", () => {
         clientHeight: 500,
       });
 
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       const scrollAreaElement = document.createElement("div");
       scrollAreaElement.querySelector = vi.fn().mockReturnValue(mockViewport);
@@ -84,7 +90,7 @@ describe("useSmartAutoScroll", () => {
         scrollHeight: 2000,
       });
 
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       const scrollAreaElement = document.createElement("div");
       scrollAreaElement.querySelector = vi.fn().mockReturnValue(mockViewport);
@@ -111,7 +117,7 @@ describe("useSmartAutoScroll", () => {
 
       (mockElement.querySelector as ReturnType<typeof vi.fn>).mockReturnValue(null);
 
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       Object.defineProperty(result.current.scrollAreaRef, "current", {
         value: mockElement,
@@ -135,7 +141,9 @@ describe("useSmartAutoScroll", () => {
         scrollHeight: 2000,
       });
 
-      const { result } = renderHook(() => useSmartAutoScroll([1]));
+      const { result } = renderHook(() =>
+        useSmartAutoScroll({ messageCount: 1, isGenerating: false, conversationId: "test-id" })
+      );
 
       const scrollAreaElement = document.createElement("div");
       scrollAreaElement.querySelector = vi.fn().mockReturnValue(mockViewport);
@@ -153,7 +161,7 @@ describe("useSmartAutoScroll", () => {
 
   describe("cleanup", () => {
     it("cleans up on unmount without errors", () => {
-      const { unmount } = renderHook(() => useSmartAutoScroll());
+      const { unmount } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       expect(() => {
         unmount();
@@ -167,7 +175,7 @@ describe("useSmartAutoScroll", () => {
         scrollHeight: 3000,
       });
 
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       const scrollAreaElement = document.createElement("div");
       scrollAreaElement.querySelector = vi.fn((selector: string) => {
@@ -199,7 +207,7 @@ describe("useSmartAutoScroll", () => {
 
       (containerElement.querySelector as ReturnType<typeof vi.fn>).mockReturnValue(null);
 
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       Object.defineProperty(result.current.scrollAreaRef, "current", {
         value: containerElement,
@@ -219,7 +227,7 @@ describe("useSmartAutoScroll", () => {
 
   describe("null ref handling", () => {
     it("handles null scrollAreaRef gracefully", () => {
-      const { result } = renderHook(() => useSmartAutoScroll());
+      const { result } = renderHook(() => useSmartAutoScroll(defaultOptions));
 
       expect(() => {
         act(() => {
