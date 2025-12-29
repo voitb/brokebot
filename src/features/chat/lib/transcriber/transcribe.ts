@@ -65,19 +65,27 @@ export async function transcribe(
 }
 
 export async function disposeTranscriber(): Promise<void> {
-  if (worker) {
-    const w = worker;
-    return new Promise((resolve) => {
-      const handler = (event: MessageEvent) => {
-        if (event.data.type === "disposed") {
-          w.removeEventListener("message", handler);
-          w.terminate();
-          worker = null;
-          resolve();
-        }
-      };
-      w.addEventListener("message", handler);
-      w.postMessage({ type: "dispose" });
-    });
-  }
+  if (!worker) return;
+
+  const currentWorker = worker;
+  worker = null; // Clear immediately to prevent concurrent calls
+
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
+      currentWorker.terminate();
+      resolve();
+    }, 10_000);
+
+    const handler = (event: MessageEvent) => {
+      if (event.data.type === "disposed") {
+        clearTimeout(timeoutId);
+        currentWorker.removeEventListener("message", handler);
+        currentWorker.terminate();
+        resolve();
+      }
+    };
+
+    currentWorker.addEventListener("message", handler);
+    currentWorker.postMessage({ type: "dispose" });
+  });
 }
