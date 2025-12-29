@@ -1,4 +1,3 @@
-import React from "react";
 import { Cloud, Key, AlertTriangle, TestTube, Settings, Loader } from "lucide-react";
 import {
   Dialog,
@@ -9,8 +8,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
-import { ApiKeysTab } from "./components/api-keys-tab";
-import { ModelList } from "./components/model-list";
+import { ApiKeysTab } from "./api-keys-tab";
+import { ModelList } from "./model-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useOnlineModels } from "@/features/chat/hooks/use-online-models";
 
@@ -24,12 +23,12 @@ interface OnlineModelDialogProps {
 /**
  * Dialog for selecting online AI models from OpenRouter
  */
-export const OnlineModelDialog: React.FC<OnlineModelDialogProps> = ({
+export function OnlineModelDialog({
   onModelSelect,
   selectedModel,
   open,
   onOpenChange,
-}) => {
+}: OnlineModelDialogProps) {
   const {
     storedKeys,
     hasOpenRouterKey,

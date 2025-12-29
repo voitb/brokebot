@@ -1,7 +1,6 @@
-import React from "react";
 import { SEOMetadata } from "@/shared/components/common/seo-metadata";
 
-export const TermsOfService: React.FC = () => {
+export function TermsOfService() {
   return (
     <>
       <SEOMetadata
@@ -317,4 +316,4 @@ export const TermsOfService: React.FC = () => {
       </div>
     </>
   );
-};
+}

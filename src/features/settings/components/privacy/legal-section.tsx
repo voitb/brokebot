@@ -1,9 +1,8 @@
-import React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
-export const LegalSection: React.FC = () => {
+export function LegalSection() {
   return (
     <div>
       <Label className="text-base font-medium">Legal & Terms</Label>

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -37,7 +36,8 @@ const features: Feature[] = [
   },
 ];
 
-const FeatureCard: React.FC<{ feature: Feature }> = ({ feature }) => (
+function FeatureCard({ feature }: { feature: Feature }) {
+  return (
   <Card className="border-muted">
     <CardHeader className="pb-3">
       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -51,12 +51,15 @@ const FeatureCard: React.FC<{ feature: Feature }> = ({ feature }) => (
       </CardDescription>
     </CardContent>
   </Card>
-);
+  );
+}
 
-export const FeatureGrid: React.FC = () => (
+export function FeatureGrid() {
+  return (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
     {features.map((feature, index) => (
       <FeatureCard key={index} feature={feature} />
     ))}
   </div>
-); 
+  );
+} 

@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@/lib/cn";
 
 interface LoadingDotsProps {
@@ -10,14 +9,14 @@ interface LoadingDotsProps {
 /**
  * Animated loading dots component
  */
-export const LoadingDots: React.FC<LoadingDotsProps> = React.memo(({
+export function LoadingDots({
   className,
   size = "md",
   color = "default",
-}) => {
+}: LoadingDotsProps) {
   const sizeClasses = {
     sm: "w-1 h-1",
-    md: "w-2 h-2", 
+    md: "w-2 h-2",
     lg: "w-3 h-3"
   };
 
@@ -40,4 +39,4 @@ export const LoadingDots: React.FC<LoadingDotsProps> = React.memo(({
       <div className={dotClass} />
     </div>
   );
-}); 
+} 

@@ -14,7 +14,7 @@ interface DocumentManagerProps {
 /**
  * Document manager component for uploading and managing text files
  */
-export const DocumentManager: React.FC<DocumentManagerProps> = ({ className }) => {
+export function DocumentManager({ className }: DocumentManagerProps) {
   const { documents, isLoading, uploadDocument, deleteDocument, refreshDocuments } = useDocuments();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -151,4 +151,4 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ className }) =
       </CardContent>
     </Card>
   );
-}; 
+} 

@@ -1,4 +1,3 @@
-import React from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,11 +9,11 @@ interface DangerZoneSectionProps {
   hasConversations?: boolean;
 }
 
-export const DangerZoneSection: React.FC<DangerZoneSectionProps> = ({
+export function DangerZoneSection({
   onClearAllDataClick,
   // onResetSettingsClick,
   hasConversations = false,
-}) => {
+}: DangerZoneSectionProps) {
   return (
     <div>
       <Label className="text-base font-medium text-destructive">

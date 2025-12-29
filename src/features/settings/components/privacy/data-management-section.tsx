@@ -1,23 +1,23 @@
-import React from "react";
+import type { RefObject, ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
 interface DataManagementSectionProps {
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   onExportConversations: () => void;
   onImportClick: () => void;
-  onFileImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileImport: (event: ChangeEvent<HTMLInputElement>) => void;
   hasConversations?: boolean;
 }
 
-export const DataManagementSection: React.FC<DataManagementSectionProps> = ({
+export function DataManagementSection({
   fileInputRef,
   onExportConversations,
   onImportClick,
   onFileImport,
   hasConversations = false,
-}) => {
+}: DataManagementSectionProps) {
   return (
     <div>
       <Label className="text-base font-medium">Data Management</Label>

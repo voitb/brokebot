@@ -1,4 +1,4 @@
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/app/providers/conversations-provider";
 import type { Conversation, Folder } from "@/lib/db";
@@ -31,7 +31,7 @@ export function useConversationList(): UseConversationListReturn {
     });
   };
 
-  const processedData = useMemo(() => {
+  const processedData = (() => {
     if (!conversations || !folders) {
       return {
         pinned: [] as Conversation[],
@@ -114,7 +114,7 @@ export function useConversationList(): UseConversationListReturn {
       foldersWithConversations: finalFolders,
       unfolded,
     };
-  }, [conversations, folders, deferredSearchTerm]);
+  })();
 
   const handleNewChat = async (folderId?: string) => {
     const conversationId = await createEmptyConversation(

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTheme } from '@/app/providers/theme-provider';
 
 interface LogoProps {
@@ -8,12 +7,12 @@ interface LogoProps {
   variant?: 'square' | 'wide';
 }
 
-export const Logo: React.FC<LogoProps> = ({
+export function Logo({
   className = '',
   size = 'md',
   showText = false,
   variant = 'square',
-}) => {
+}: LogoProps) {
   const { theme } = useTheme();
 
   // sprawdzamy preferencję systemu tylko raz – bez nasłuchiwania zmian
@@ -74,4 +73,4 @@ export const Logo: React.FC<LogoProps> = ({
       className={`${sizeClasses[size]} object-contain ${className}`}
     />
   );
-};
+}

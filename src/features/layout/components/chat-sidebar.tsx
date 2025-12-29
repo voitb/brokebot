@@ -1,4 +1,3 @@
-import React from "react"; 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ConversationList } from "@/features/chat/components/sidebar/conversation-list";
 
@@ -6,7 +5,7 @@ import { ConversationList } from "@/features/chat/components/sidebar/conversatio
 /**
  * Chat sidebar containing conversation list
  */
-export const ChatSidebar: React.FC = () => { 
+export function ChatSidebar() { 
 
   return (
     <aside className="w-full h-full flex flex-col bg-background">
@@ -22,4 +21,4 @@ export const ChatSidebar: React.FC = () => {
       </div>
     </aside>
   );
-};
+}

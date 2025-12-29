@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { KEYBOARD_SHORTCUTS } from "@/constants/keyboard-shortcuts";
-import { ShortcutGroup } from "./components/shortcut-group";
+import { ShortcutGroup } from "./shortcut-group";
 
 interface KeyboardShortcutsDialogProps {
   open: boolean;
@@ -17,11 +16,10 @@ interface KeyboardShortcutsDialogProps {
 /**
  * Dialog showing keyboard shortcuts for the app
  */
-export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = React.memo(({
+export function KeyboardShortcutsDialog({
   open,
   onOpenChange,
-}) => {
-
+}: KeyboardShortcutsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
@@ -42,4 +40,4 @@ export const KeyboardShortcutsDialog: React.FC<KeyboardShortcutsDialogProps> = R
       </DialogContent>
     </Dialog>
   );
-});
+}

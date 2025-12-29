@@ -1,4 +1,3 @@
-import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,10 +17,10 @@ interface GeneralSettingsProps {
   ) => void;
 }
 
-export const GeneralSettings: React.FC<GeneralSettingsProps> = ({
+export function GeneralSettings({
   settings,
   onFieldChange,
-}) => {
+}: GeneralSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">

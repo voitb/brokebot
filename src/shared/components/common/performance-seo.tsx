@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 interface PerformanceSEOProps {
@@ -6,10 +6,10 @@ interface PerformanceSEOProps {
   enableWebVitals?: boolean;
 }
 
-export const PerformanceSEO: React.FC<PerformanceSEOProps> = ({ 
+export function PerformanceSEO({
   pageLoadTime,
-  enableWebVitals = true 
-}) => {
+  enableWebVitals = true
+}: PerformanceSEOProps) {
   useEffect(() => {
     if (!enableWebVitals) return;
 
@@ -55,4 +55,4 @@ export const PerformanceSEO: React.FC<PerformanceSEOProps> = ({
       )}
     </Helmet>
   );
-}; 
+} 

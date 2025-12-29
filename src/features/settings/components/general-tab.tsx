@@ -1,4 +1,3 @@
-import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OpenRouterIcon } from "@/components/ui/provider-icons";
 import { type UserConfig } from "@/lib/db";
 import { useTheme } from "@/app/providers/theme-provider";
-import { ApiKeySection } from "@/features/chat/components/online-model-dialog/components/api-key-section";
+import { ApiKeySection } from "@/features/chat/components/online-model-dialog/api-key-section";
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;
@@ -30,10 +29,10 @@ const apiKeyProviders = [
   },
 ] as const;
 
-export const GeneralTab: React.FC<GeneralTabProps> = ({
+export function GeneralTab({
   settings,
   onFieldChange,
-}) => {
+}: GeneralTabProps) {
   const { setTheme } = useTheme();
 
   const handleThemeChange = (theme: "light" | "dark" | "system") => {
@@ -102,4 +101,4 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       </section>
     </div>
   );
-};
+}

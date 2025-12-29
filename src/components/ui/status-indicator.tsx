@@ -1,4 +1,3 @@
-import React from "react";
 import { Loader2, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -12,12 +11,12 @@ interface StatusIndicatorProps {
 /**
  * Status indicator component with icons and animations
  */
-export const StatusIndicator: React.FC<StatusIndicatorProps> = React.memo(({
+export function StatusIndicator({
   status,
   size = "md",
   showIcon = true,
   className,
-}) => {
+}: StatusIndicatorProps) {
   const sizeClasses = {
     sm: "w-3 h-3",
     md: "w-4 h-4",
@@ -34,7 +33,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = React.memo(({
     },
     success: {
       icon: <CheckCircle className={iconSize} />,
-      color: "text-green-600 dark:text-green-400", 
+      color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-100 dark:bg-green-900/20"
     },
     error: {
@@ -58,12 +57,12 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = React.memo(({
 
   if (!showIcon) {
     return (
-      <div 
+      <div
         className={cn(
-          "w-2 h-2 rounded-full", 
+          "w-2 h-2 rounded-full",
           config.bgColor,
           className
-        )} 
+        )}
       />
     );
   }
@@ -73,4 +72,4 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = React.memo(({
       {config.icon}
     </div>
   );
-}); 
+} 

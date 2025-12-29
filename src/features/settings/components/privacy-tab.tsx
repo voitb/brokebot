@@ -1,4 +1,3 @@
-import React from "react";
 import { Separator } from "@/components/ui/separator";
 import { DataStorageSection } from "./privacy/data-storage-section";
 import { LegalSection } from "./privacy/legal-section";
@@ -11,7 +10,7 @@ interface PrivacyTabProps {
   hasConversations?: boolean;
 }
 
-export const PrivacyTab: React.FC<PrivacyTabProps> = ({ hasConversations = false }) => {
+export function PrivacyTab({ hasConversations = false }: PrivacyTabProps) {
   const {
     hasConversations: hasConversationsFromHook,
     showClearDataDialog,

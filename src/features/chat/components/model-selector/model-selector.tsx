@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Cpu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,17 +12,17 @@ import { useWebLLM, type ModelInfo } from "@/app/providers/web-llm-provider";
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
 import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { useModelSelector } from "@/features/chat/hooks/use-model-selector";
-import { ModelCategory } from "./components/model-category";
+import { ModelCategory } from "./model-category";
 
 interface ModelSelectorProps {
   disabled?: boolean;
   onOnlineModelSelect?: (model: OpenRouterModel, apiKey: string) => void;
 }
 
-export const ModelSelector: React.FC<ModelSelectorProps> = ({
+export function ModelSelector({
   disabled = false,
   onOnlineModelSelect,
-}) => {
+}: ModelSelectorProps) {
   const { selectedModel, availableModels, setSelectedModel } = useWebLLM();
   const [selectedOnlineModel, setSelectedOnlineModel] = useState<OpenRouterModel | null>(null);
 

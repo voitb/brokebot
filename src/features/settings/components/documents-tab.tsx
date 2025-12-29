@@ -1,7 +1,6 @@
-import React from "react";
 import { DocumentManager } from "@/features/documents/components/document-manager";
 
-export const DocumentsTab: React.FC = () => {
+export function DocumentsTab() {
   return (
     <div className="space-y-8">
       <section className="space-y-4">
@@ -16,4 +15,4 @@ export const DocumentsTab: React.FC = () => {
       </section>
     </div>
   );
-}; 
+} 

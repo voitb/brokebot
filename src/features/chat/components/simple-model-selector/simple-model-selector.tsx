@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Cpu, Cloud, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,16 +19,16 @@ import {
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
 import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { toast } from "sonner";
-import { LocalModelList } from "./components/local-model-list";
+import { LocalModelList } from "./local-model-list";
 import { useUserConfig } from "@/shared/hooks/use-user-config";
 
 interface SimpleModelSelectorProps {
   disabled?: boolean;
 }
 
-export const SimpleModelSelector: React.FC<SimpleModelSelectorProps> = ({
+export function SimpleModelSelector({
   disabled = false,
-}) => {
+}: SimpleModelSelectorProps) {
   const { selectedModel: webllmModel, availableModels } = useWebLLM();
   const { currentModel, setCurrentModel } = useModel();
   const { config } = useUserConfig();

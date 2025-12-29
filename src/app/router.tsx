@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import App from "@/app/app";
 import { WelcomeScreen } from "@/features/welcome/components/welcome-screen";
 import { ChatInterface } from "@/features/chat/components/interface/chat-interface";
-import { ChatGuard } from "@/features/chat/components/interface/components/chat-guard";
+import { ChatGuard } from "@/features/chat/components/interface/chat-guard";
 import { TermsOfService } from "@/pages/terms-of-service";
 
 export const router = createBrowserRouter([
