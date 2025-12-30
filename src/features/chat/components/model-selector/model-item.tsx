@@ -3,7 +3,7 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type ModelInfo } from "@/app/providers/web-llm-provider";
-import { getModelTypeIcon, getSpecializationIcon, getPerformanceBadgeVariant } from "@/features/chat/components/model-icons/model-utils";
+import { getModelTypeIcon, getSpecializationIcon, getPerformanceBadgeVariant } from "@/features/chat/utils/local-model-utils";
 
 interface ModelItemProps {
   model: ModelInfo;
