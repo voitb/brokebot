@@ -586,6 +586,7 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `chat-input.tsx` ✅ (Major refactor: extracted logic to `useChatInputForm` hook)
 - [x] `model-status.tsx` ✅ (Extracted ternaries to lookup maps)
 - [x] `speech-to-text-button.tsx` ✅ (Extracted switch statements to lookup maps)
+- [x] `folder-item.tsx` ✅ (Hook extraction: `useFolderItem` + `DeleteFolderDialog`)
 
 ---
 
@@ -890,3 +891,117 @@ const getMessageBubbleProps = (message: Message, index: number): MessageBubblePr
 | Inline conditionals | 2 complex | 0 |
 | Testability | Component-only | Hook unit tests |
 | Pattern consistency | Inconsistent | Matches `useChatInputForm` |
+
+---
+
+### 14. `folder-item.tsx` - Presentation/Logic Separation
+
+**File:** `src/features/chat/components/sidebar/folder-item.tsx`
+**New Hook:** `src/features/chat/hooks/use-folder-item.ts`
+**New Dialog:** `src/features/chat/components/sidebar/delete-folder-dialog.tsx`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| `window.confirm()` | High | Used browser confirm dialog instead of proper React dialog component |
+| Inline handlers | Medium | `handleDelete`, `handleRename`, `handleNewChatInFolder` defined inline in component |
+| No hook extraction | Medium | Unlike `ConversationItem`, no `useFolderItem` hook existed |
+| Inconsistent with codebase | Medium | `ConversationItem` uses `DeleteConversationDialog` and `useConversationItem` |
+
+**Research Sources:**
+- [React Docs - Reusing Logic with Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
+- [DhiWise - Separating UI and Logic in React](https://www.dhiwise.com/post/mastering-the-art-of-separating-ui-and-logic-in-react)
+- [Profy.dev - Business Logic Separation](https://profy.dev/article/react-architecture-business-logic-and-dependency-injection)
+
+**Pattern Applied:** Presentation/Logic Separation (matching `useConversationItem` + `DeleteConversationDialog` pattern)
+
+**Before:**
+```tsx
+// folder-item.tsx - 108 lines, mixed concerns
+export function FolderItem({ folder }: FolderItemProps) {
+  const [isOpen, setIsOpen] = useState(true);
+  const [isRenameDialogOpen, setRenameDialogOpen] = useState(false);
+  const { deleteFolder, updateFolderName } = useConversations();
+  const { handleNewChat } = useConversationList();
+
+  // ❌ Uses window.confirm() instead of proper dialog
+  const handleDelete = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete the folder "${folder.name}"?`)) {
+      deleteFolder(folder.id);
+    }
+  };
+
+  // ❌ Inline handlers mixed with presentation
+  const handleRename = (newName: string) => { ... };
+  const handleNewChatInFolder = (e: MouseEvent) => { ... };
+
+  return (
+    <Collapsible.Root>
+      {/* ... mixed concerns ... */}
+    </Collapsible.Root>
+  );
+}
+```
+
+**After:**
+```tsx
+// use-folder-item.ts - ~75 lines of pure logic
+export function useFolderItem(folder: Folder): UseFolderItemReturn {
+  const [isOpen, setIsOpen] = useState(true);
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // ... all state and handlers ...
+  return {
+    isOpen, isDeleteDialogOpen, handleDelete, handleDeleteConfirm,
+    handleRename, handleNewChatInFolder, openRenameDialog, ...
+  };
+}
+
+// delete-folder-dialog.tsx - ~45 lines, proper AlertDialog
+export function DeleteFolderDialog({ open, folderName, onConfirm, onCancel }) {
+  return (
+    <AlertDialog open={open} onOpenChange={(open) => !open && onCancel()}>
+      {/* Proper dialog matching DeleteConversationDialog pattern */}
+    </AlertDialog>
+  );
+}
+
+// folder-item.tsx - ~125 lines of pure presentation
+export function FolderItem({ folder }: FolderItemProps) {
+  const {
+    isOpen, isDeleteDialogOpen, handleDelete, handleDeleteConfirm, ...
+  } = useFolderItem(folder);
+
+  return (
+    <Collapsible.Root>
+      {/* Pure presentation - no business logic */}
+      <DeleteFolderDialog
+        open={isDeleteDialogOpen}
+        folderName={folder.name}
+        onConfirm={handleDeleteConfirm}
+        onCancel={closeDeleteDialog}
+      />
+    </Collapsible.Root>
+  );
+}
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `use-folder-item.ts` | Created | ~75 lines |
+| `use-folder-item.test.ts` | Created | ~200 lines (15 tests) |
+| `delete-folder-dialog.tsx` | Created | ~45 lines |
+| `folder-item.tsx` | Refactored | 108 → 128 lines (cleaner, no logic) |
+
+**Benefits:**
+| Metric | Before | After |
+|--------|--------|-------|
+| `window.confirm()` usage | Yes | No (proper AlertDialog) |
+| Inline business logic | 3 handlers | 0 |
+| Hook unit tests | 0 | 15 tests |
+| Pattern consistency | Inconsistent | Matches `useConversationItem` |
+| UX consistency | Native browser dialog | Themed AlertDialog |
+
+**Test Results:** 15 tests for hook, 56 total sidebar tests - all passing

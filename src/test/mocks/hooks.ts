@@ -138,8 +138,6 @@ export function createMockSmartAutoScrollHook(options: MockSmartAutoScrollHookOp
   };
 }
 
-type ItemStyle = "hover:bg-muted/50" | "bg-primary/10 border-primary text-primary font-medium" | "bg-muted/70";
-
 export interface MockConversationItemHookOptions {
   isEditing?: boolean;
   isMenuOpen?: boolean;
@@ -154,13 +152,14 @@ export interface MockConversationItemHookOptions {
   handleConversationClick?: () => void;
   handlePinToggle?: (e: React.MouseEvent) => Promise<void>;
   handleRename?: (e: React.MouseEvent) => void;
+  startEditing?: () => void;
   handleSaveRename?: (newTitle: string) => Promise<void>;
   handleCancelRename?: () => void;
   handleDelete?: (e: React.MouseEvent) => void;
   handleDeleteConfirm?: () => Promise<void>;
   handleMove?: (folderId: string | null) => Promise<void>;
   handleCreateFolderAndMove?: (folderName: string) => Promise<void>;
-  getItemStyles?: () => ItemStyle;
+  getItemStyles?: () => string;
 }
 
 export function createMockConversationItemHook(options: MockConversationItemHookOptions = {}) {
@@ -178,13 +177,14 @@ export function createMockConversationItemHook(options: MockConversationItemHook
     handleConversationClick: options.handleConversationClick ?? vi.fn<() => void>(),
     handlePinToggle: options.handlePinToggle ?? vi.fn<(e: React.MouseEvent) => Promise<void>>(),
     handleRename: options.handleRename ?? vi.fn<(e: React.MouseEvent) => void>(),
+    startEditing: options.startEditing ?? vi.fn<() => void>(),
     handleSaveRename: options.handleSaveRename ?? vi.fn<(newTitle: string) => Promise<void>>(),
     handleCancelRename: options.handleCancelRename ?? vi.fn<() => void>(),
     handleDelete: options.handleDelete ?? vi.fn<(e: React.MouseEvent) => void>(),
     handleDeleteConfirm: options.handleDeleteConfirm ?? vi.fn<() => Promise<void>>(),
     handleMove: options.handleMove ?? vi.fn<(folderId: string | null) => Promise<void>>(),
     handleCreateFolderAndMove: options.handleCreateFolderAndMove ?? vi.fn<(folderName: string) => Promise<void>>(),
-    getItemStyles: options.getItemStyles ?? vi.fn<() => ItemStyle>().mockReturnValue("hover:bg-muted/50"),
+    getItemStyles: options.getItemStyles ?? vi.fn<() => string>().mockReturnValue("hover:bg-muted/50"),
   };
 }
 
