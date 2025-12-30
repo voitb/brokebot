@@ -583,3 +583,103 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] Remaining hooks in `src/features/chat/hooks/` ✅ (All clean - no issues)
 - [x] `conversation-item.tsx` ✅ (Fixed with `useEffectEvent`)
 - [x] Complex components ✅ (All clean - 52 components reviewed)
+- [x] `chat-input.tsx` ✅ (Major refactor: extracted logic to `useChatInputForm` hook)
+
+---
+
+### 10. `chat-input.tsx` - Major Refactoring
+
+**File:** `src/features/chat/components/input/chat-input.tsx`
+**New Hook:** `src/features/chat/hooks/use-chat-input-form.ts`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Duplicate handlers | Medium | `handleMicClick` and `onMicToggle` did identical things |
+| Mixed concerns | High | STT toast orchestration was a side effect mixed in component |
+| Business logic in component | High | File content formatting was business logic in presentation |
+| No core hook | High | Unlike `useConversationItem` pattern, no hook extracted form logic |
+| Large component | Medium | 316 lines with too many responsibilities |
+
+**Pattern Applied:** Presentation/Logic Separation (following `useConversationItem` pattern)
+
+**Research Sources:**
+- [React Official Docs - Reusing Logic with Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
+- [React 19.2 Release - useEffectEvent](https://react.dev/blog/2025/10/01/react-19-2)
+- [Best Practices for Keeping Your React UI and Logic Separate](https://www.dhiwise.com/post/mastering-the-art-of-separating-ui-and-logic-in-react)
+
+**Before:**
+```tsx
+// 316 lines - mixed logic and presentation
+export function ChatInput({ ... }) {
+  const { currentModel, isModelLoading, modelStatus } = useModel();
+  const dragDrop = useDragDrop();
+  const stt = useSpeechToText(callback);
+  const files = useFileUpload({ ... });
+
+  // ❌ Duplicate handlers
+  const handleMicClick = () => { /* ... */ };
+  const onMicToggle = useEffectEvent(() => { /* same thing */ });
+
+  // ❌ Business logic in component
+  if (filesToSend.length > 0) {
+    const fileContents = filesToSend.map(f => { /* formatting */ });
+    fullMessage = `${messageToSend}\n\n${fileContents}`.trim();
+  }
+
+  // ❌ STT toast orchestration in component
+  useEffect(() => {
+    switch (transcriberStatus) { /* toast logic */ }
+  }, [transcriberStatus]);
+
+  // ...316 lines of mixed concerns
+}
+```
+
+**After:**
+```tsx
+// use-chat-input-form.ts - ~230 lines of pure logic
+export function useChatInputForm({ message, setMessage, onSend, isLoading }) {
+  // All hooks, derived state, effects, and handlers
+  return {
+    isModelReady, isModelError, isSubmitDisabled, placeholderText,
+    attachedFiles, handleFilesSelected, removeFile,
+    isDragOver, handleDrop, handleDragOver, handleDragLeave, handleDragEnter,
+    transcriberStatus, handleMicToggle,
+    handleSubmit, handleKeyDown, handleRetryModel,
+    textareaRef, modelDisplayInfo
+  };
+}
+
+// chat-input.tsx - ~180 lines of pure presentation
+export function ChatInput({ message, setMessage, isLoading, isGenerating, onSend, onStopGeneration }) {
+  const form = useChatInputForm({ message, setMessage, onSend, isLoading });
+
+  return (
+    <TooltipProvider>
+      {/* Pure JSX - no business logic */}
+    </TooltipProvider>
+  );
+}
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `use-chat-input-form.ts` | Created | ~230 lines |
+| `use-chat-input-form.test.ts` | Created | ~470 lines (24 tests) |
+| `chat-input.tsx` | Refactored | 316 → 180 lines |
+| `chat-input-utils.ts` | Modified | Added `formatAttachedFiles`, `buildMessageWithFiles` |
+
+**Benefits:**
+| Metric | Before | After |
+|--------|--------|-------|
+| Component lines | 316 | 180 (-43%) |
+| Hook lines | 0 | 230 |
+| Test coverage | Component-only | Hook unit tests + component integration |
+| Duplicate code | 2 identical handlers | 1 handler |
+| Pattern consistency | Inconsistent | Matches `useConversationItem` |
+| Separation of concerns | Mixed | Clean separation |
+
+**Test Results:** 24 tests for hook, 9 tests for component - all passing

@@ -1,5 +1,6 @@
 import type { OpenRouterMessage } from "@/features/chat/lib/openrouter";
 import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/features/chat/constants/prompts";
+import type { AttachedFile } from "./file-upload-utils";
 
 const TITLE_MAX_LENGTH = 50;
 
@@ -113,4 +114,28 @@ export function buildPrompt(
   ];
 
   return summarizeConversation(conversationMessages, 12);
+}
+
+/**
+ * Formats attached files as XML-like content for message submission.
+ * Sanitizes file names to prevent XSS.
+ */
+export function formatAttachedFiles(files: AttachedFile[]): string {
+  if (files.length === 0) return "";
+
+  return files
+    .map((f) => {
+      const safeName = f.file.name.replace(/[<>&"']/g, "");
+      return `<file name="${safeName}">\n${f.content}\n</file>`;
+    })
+    .join("\n\n");
+}
+
+/**
+ * Combines user message with formatted file contents.
+ */
+export function buildMessageWithFiles(message: string, files: AttachedFile[]): string {
+  const fileContents = formatAttachedFiles(files);
+  if (!fileContents) return message;
+  return `${message}\n\n${fileContents}`.trim();
 }
