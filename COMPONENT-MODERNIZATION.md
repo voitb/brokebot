@@ -587,6 +587,7 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `model-status.tsx` ✅ (Extracted ternaries to lookup maps)
 - [x] `speech-to-text-button.tsx` ✅ (Extracted switch statements to lookup maps)
 - [x] `folder-item.tsx` ✅ (Hook extraction: `useFolderItem` + `DeleteFolderDialog`)
+- [x] `model-utils.tsx` ✅ (Domain separation: `local-model-utils.tsx` + `online-model-utils.tsx`)
 
 ---
 
@@ -1005,3 +1006,93 @@ export function FolderItem({ folder }: FolderItemProps) {
 | UX consistency | Native browser dialog | Themed AlertDialog |
 
 **Test Results:** 15 tests for hook, 56 total sidebar tests - all passing
+
+---
+
+### 15. Model Icon Utilities - Domain Separation
+
+**Files:**
+- `src/features/chat/utils/local-model-utils.tsx` (new)
+- `src/features/chat/utils/online-model-utils.tsx` (new)
+- `src/features/chat/components/model-icons/model-utils.tsx` (deleted)
+
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Duplicate function name | High | `getCategoryIcon()` existed in two files with different behavior |
+| Misleading directory | Medium | `model-icons/` contained only utilities, not components |
+| Missing tests | Medium | No test coverage for icon utilities |
+| Inconsistent icon sizes | Low | `w-3 h-3` in one file, `w-4 h-4` in another |
+
+**Research Sources:**
+- [React Helper Functions Best Practices](https://www.dhiwise.com/post/a-guide-to-leveraging-react-helper-functions-for-development)
+- [React Custom Hooks vs Helper Functions](https://dev.to/andrewbaisden/react-custom-hooks-vs-helper-functions-when-to-use-both-2587)
+
+**Pattern Applied:** Domain-separated utility files with lookup maps
+
+**Before:**
+```tsx
+// model-icons/model-utils.tsx - for WebLLM local models
+export const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "light": return <Zap className="w-3 h-3" />;
+    // light/medium/large/heavy/extreme categories
+  }
+};
+
+// online-model-dialog/model-card.tsx - DUPLICATE function, different categories!
+function getCategoryIcon(category: string) {
+  switch (category) {
+    case "reasoning": return <Brain className="w-4 h-4" />;
+    // reasoning/multimodal/efficient/general/instruction categories
+  }
+}
+```
+
+**After:**
+```tsx
+// local-model-utils.tsx - WebLLM local models
+const CATEGORY_ICONS: Record<LocalModelCategory, React.ReactNode> = {
+  light: <Zap className="w-3 h-3" />,
+  medium: <Cpu className="w-3 h-3" />,
+  // ...
+};
+export function getCategoryIcon(category: string): React.ReactNode {
+  return CATEGORY_ICONS[category as LocalModelCategory] ?? <Cpu className="w-3 h-3" />;
+}
+
+// online-model-utils.tsx - OpenRouter online models
+const CATEGORY_ICONS: Record<OnlineModelCategory, React.ReactNode> = {
+  reasoning: <Brain className="w-3 h-3" />,
+  multimodal: <Eye className="w-3 h-3" />,
+  // ...
+};
+export function getCategoryIcon(category: string): React.ReactNode {
+  return CATEGORY_ICONS[category as OnlineModelCategory] ?? <Cloud className="w-3 h-3" />;
+}
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `local-model-utils.tsx` | Created | ~95 lines |
+| `online-model-utils.tsx` | Created | ~20 lines |
+| `local-model-utils.test.tsx` | Created | ~175 lines (36 tests) |
+| `online-model-utils.test.tsx` | Created | ~45 lines (6 tests) |
+| `model-category.tsx` | Updated imports | - |
+| `model-item.tsx` | Updated imports | - |
+| `model-card.tsx` | Removed inline function, updated imports | - |
+| `model-icons/` | Deleted | - |
+
+**Benefits:**
+| Metric | Before | After |
+|--------|--------|-------|
+| Duplicate functions | 2 with same name | 0 (domain-separated) |
+| Directory confusion | `model-icons/` (no icons) | `utils/` (clear purpose) |
+| Test coverage | 0 tests | 42 tests |
+| Icon size consistency | Mixed (w-3/w-4) | Standardized (w-3 h-3) |
+| Code pattern | Switch statements | Lookup maps |
+
+**Test Results:** 42 tests for both utility files - all passing

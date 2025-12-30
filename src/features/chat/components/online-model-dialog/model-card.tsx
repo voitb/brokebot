@@ -1,4 +1,4 @@
-import { Brain, Eye, Zap, Cloud, Code, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
+import { getCategoryIcon } from "@/features/chat/utils/online-model-utils";
 
 interface ModelCardProps {
   model: OpenRouterModel;
@@ -15,23 +16,6 @@ interface ModelCardProps {
   onSelect: (model: OpenRouterModel) => void;
   isFree: boolean;
   isEnabled: boolean;
-}
-
-function getCategoryIcon(category: string) {
-  switch (category) {
-    case "reasoning":
-      return <Brain className="w-4 h-4" />;
-    case "multimodal":
-      return <Eye className="w-4 h-4" />;
-    case "efficient":
-      return <Zap className="w-4 h-4" />;
-    case "general":
-      return <Cloud className="w-4 h-4" />;
-    case "instruction":
-      return <Code className="w-4 h-4" />;
-    default:
-      return <Cloud className="w-4 h-4" />;
-  }
 }
 
 export function ModelCard({
