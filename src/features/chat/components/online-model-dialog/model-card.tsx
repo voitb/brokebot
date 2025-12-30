@@ -34,7 +34,7 @@ export function ModelCard({
             <span className="flex-shrink-0 mt-0.5">
               {getCategoryIcon(model.category)}
             </span>
-            <TruncatedText lines={2} className="h-10">
+            <TruncatedText maxLines={2} classNames={{ base: "h-10" }}>
               {model.name}
             </TruncatedText>
           </div>
@@ -44,7 +44,7 @@ export function ModelCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-grow">
-        <TruncatedText lines={2} as="p" className="text-xs text-muted-foreground h-8">
+        <TruncatedText maxLines={2} as="p" classNames={{ base: "text-xs text-muted-foreground h-8" }}>
           {model.description}
         </TruncatedText>
       </CardContent>
