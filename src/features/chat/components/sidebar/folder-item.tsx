@@ -1,7 +1,15 @@
-import { useState, type MouseEvent } from "react";
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { ChevronRight, Folder as FolderIcon, MoreHorizontal, Edit, Trash2, MessageSquarePlus } from "lucide-react";
+import {
+  ChevronRight,
+  Folder as FolderIcon,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  MessageSquarePlus,
+} from "lucide-react";
 import { ConversationItem } from "./conversation-item";
+import { DeleteFolderDialog } from "./delete-folder-dialog";
+import { useFolderItem } from "@/features/chat/hooks/use-folder-item";
 import type { FolderWithConversations } from "@/features/chat/hooks/use-conversation-list";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useConversations } from "@/app/providers/conversations-provider";
-import { useConversationList } from "@/features/chat/hooks/use-conversation-list";
 import { InputDialog } from "@/shared/components/dialogs/input-dialog";
 
 interface FolderItemProps {
@@ -19,31 +25,26 @@ interface FolderItemProps {
 }
 
 export function FolderItem({ folder }: FolderItemProps) {
-  const [isOpen, setIsOpen] = useState(true);
-  const [isRenameDialogOpen, setRenameDialogOpen] = useState(false);
-  const { deleteFolder, updateFolderName } = useConversations();
-  const { handleNewChat } = useConversationList();
-
-  const handleDelete = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete the folder "${folder.name}"? This will not delete the conversations inside.`)) {
-      deleteFolder(folder.id);
-    }
-  };
-
-  const handleRename = (newName: string) => {
-    if (newName && newName.trim() !== "") {
-      updateFolderName(folder.id, newName);
-    }
-  };
-  
-  const handleNewChatInFolder = (e: MouseEvent) => {
-    e.stopPropagation();
-    handleNewChat(folder.id);
-  }
+  const {
+    isOpen,
+    isRenameDialogOpen,
+    isDeleteDialogOpen,
+    setIsOpen,
+    handleDelete,
+    handleDeleteConfirm,
+    handleRename,
+    handleNewChatInFolder,
+    openRenameDialog,
+    closeRenameDialog,
+    closeDeleteDialog,
+  } = useFolderItem(folder);
 
   return (
-    <Collapsible.Root open={isOpen} onOpenChange={setIsOpen} className="space-y-1">
+    <Collapsible.Root
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className="space-y-1"
+    >
       <Collapsible.Trigger asChild>
         <div className="flex items-center justify-between group/folder rounded-md px-2 py-1.5 text-sm hover:bg-muted cursor-pointer">
           <div className="flex items-center gap-2 truncate">
@@ -55,20 +56,29 @@ export function FolderItem({ folder }: FolderItemProps) {
             <FolderIcon className="w-4 h-4" />
             <span className="font-semibold truncate">{folder.name}</span>
           </div>
-          
+
           <div className="opacity-0 group-hover/folder:opacity-100 transition-opacity">
-             <DropdownMenu>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={e => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreHorizontal className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48" onClick={e => e.stopPropagation()}>
+              <DropdownMenuContent
+                align="end"
+                className="w-48"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <DropdownMenuItem onClick={handleNewChatInFolder}>
                   <MessageSquarePlus className="w-4 h-4 mr-2" />
                   New Chat in Folder
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
+                <DropdownMenuItem onClick={openRenameDialog}>
                   <Edit className="w-4 h-4 mr-2" />
                   Rename
                 </DropdownMenuItem>
@@ -90,12 +100,22 @@ export function FolderItem({ folder }: FolderItemProps) {
           <ConversationItem key={conversation.id} conversation={conversation} />
         ))}
         {isOpen && folder.conversations.length === 0 && (
-          <p className="text-xs text-muted-foreground px-2 py-1">No conversations in this folder.</p>
+          <p className="text-xs text-muted-foreground px-2 py-1">
+            No conversations in this folder.
+          </p>
         )}
       </Collapsible.Content>
-       <InputDialog
+
+      <DeleteFolderDialog
+        open={isDeleteDialogOpen}
+        folderName={folder.name}
+        onConfirm={handleDeleteConfirm}
+        onCancel={closeDeleteDialog}
+      />
+
+      <InputDialog
         open={isRenameDialogOpen}
-        onOpenChange={setRenameDialogOpen}
+        onOpenChange={(open) => !open && closeRenameDialog()}
         title="Rename folder"
         description={`Enter a new name for the folder "${folder.name}".`}
         inputLabel="New folder name"
@@ -105,4 +125,4 @@ export function FolderItem({ folder }: FolderItemProps) {
       />
     </Collapsible.Root>
   );
-}; 
+}
