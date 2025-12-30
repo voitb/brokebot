@@ -581,4 +581,5 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-textarea-auto-resize.ts` ✅ (Removed ineffective ref from deps)
 - [x] `editable-conversation-title.tsx` ✅ (Replaced setTimeout(100) with `useLayoutEffect`)
 - [x] Remaining hooks in `src/features/chat/hooks/` ✅ (All clean - no issues)
-- [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)
+- [x] `conversation-item.tsx` ✅ (Fixed with `useEffectEvent`)
+- [x] Complex components ✅ (All clean - 52 components reviewed)

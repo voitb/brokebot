@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from "react";
+import { useEffect, useEffectEvent, type MouseEvent } from "react";
 import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,18 +48,22 @@ export function ConversationItem({
     isActive,
   } = useConversationItem(conversation);
 
+  // Effect event for rename - always reads latest isActive and handleRename
+  const onRenameEvent = useEffectEvent(() => {
+    if (isActive) {
+      const dummyEvent = { stopPropagation: () => {}, preventDefault: () => {} } as MouseEvent;
+      handleRename(dummyEvent);
+    }
+  });
+
+  // Event listener registered once
   useEffect(() => {
     const renameListener = () => {
-      if (isActive) {
-        // This is a bit of a hacky way to prevent the click
-        // from propagating and navigating.
-        const dummyEvent = { stopPropagation: () => {}, preventDefault: () => {} } as MouseEvent;
-        handleRename(dummyEvent);
-      }
+      onRenameEvent();
     };
     document.addEventListener('conversation:rename', renameListener);
     return () => document.removeEventListener('conversation:rename', renameListener);
-  }, [isActive, handleRename]);
+  }, []);
 
   return (
     <>
