@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useDocuments } from "@/features/documents/hooks/use-documents";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Upload, Trash2, RefreshCw, Calendar } from "lucide-react";
+import { FileText, Upload, Trash2, Calendar } from "lucide-react";
 // Note: date-fns not available, using native Date
 // import { formatDistanceToNow } from "date-fns";
 
@@ -15,7 +15,7 @@ interface DocumentManagerProps {
  * Document manager component for uploading and managing text files
  */
 export function DocumentManager({ className }: DocumentManagerProps) {
-  const { documents, isLoading, uploadDocument, deleteDocument, refreshDocuments } = useDocuments();
+  const { documents, isLoading, uploadDocument, deleteDocument } = useDocuments();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,25 +68,15 @@ export function DocumentManager({ className }: DocumentManagerProps) {
             <FileText className="h-5 w-5" />
             Documents ({documents.length})
           </CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshDocuments}
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleUploadClick}
-              disabled={isLoading}
-            >
-              <Upload className="h-4 w-4" />
-              Upload
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleUploadClick}
+            disabled={isLoading}
+          >
+            <Upload className="h-4 w-4" />
+            Upload
+          </Button>
         </div>
       </CardHeader>
       

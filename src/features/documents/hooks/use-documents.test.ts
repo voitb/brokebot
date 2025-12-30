@@ -20,7 +20,6 @@ describe("useDocuments", () => {
       });
 
       expect(result.current.documents).toEqual([]);
-      expect(result.current.error).toBeNull();
     });
 
     it("loads existing documents from database", async () => {
@@ -154,7 +153,11 @@ describe("useDocuments", () => {
         await result.current.uploadDocument(file);
       });
 
-      expect(result.current.documents.length).toBe(1);
+      // useLiveQuery updates reactively after DB changes
+      await waitFor(() => {
+        expect(result.current.documents.length).toBe(1);
+      });
+
       expect(result.current.documents[0].filename).toBe("new.txt");
     });
   });
@@ -243,28 +246,4 @@ describe("useDocuments", () => {
     });
   });
 
-  describe("refreshDocuments", () => {
-    it("reloads documents from database", async () => {
-      const { result } = renderHook(() => useDocuments());
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.documents.length).toBe(0);
-
-      await db.documents.add({
-        filename: "added-later.txt",
-        content: "Added after init",
-        fileType: "txt",
-        createdAt: new Date(),
-      });
-
-      await act(async () => {
-        await result.current.refreshDocuments();
-      });
-
-      expect(result.current.documents.length).toBe(1);
-    });
-  });
 });
