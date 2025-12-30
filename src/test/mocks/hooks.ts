@@ -253,7 +253,7 @@ export function createMockFileUploadHook(options: MockFileUploadHookOptions = {}
 }
 
 export interface MockSpeechToTextHookOptions {
-  status?: "ready" | "recording" | "processing";
+  status?: "ready" | "recording" | "processing" | "loading" | "uninitialized" | "error";
   startRecording?: ReturnType<typeof vi.fn>;
   stopRecording?: ReturnType<typeof vi.fn>;
   isModelLoading?: boolean;
