@@ -570,7 +570,7 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `web-llm-provider.tsx` ✅ (Fixed with `useEffectEvent`)
 - [x] `chat-input.tsx` ✅ (Fixed with `useEffectEvent`)
 - [x] `use-documents.ts` ✅ (Fixed with React Compiler)
-- [x] `chat-messages.tsx` ✅ (Reviewed - Clean)
+- [x] `chat-messages.tsx` ✅ (Hook extraction: `useChatMessages`)
 - [x] `conversation-list.tsx` ✅ (Reviewed - Clean)
 - [x] `use-speech-to-text.ts` ✅ (Fixed with `useEffectEvent`)
 - [x] `use-message-stream.ts` ✅ (Reviewed - Clean)
@@ -584,6 +584,8 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `conversation-item.tsx` ✅ (Fixed with `useEffectEvent`)
 - [x] Complex components ✅ (All clean - 52 components reviewed)
 - [x] `chat-input.tsx` ✅ (Major refactor: extracted logic to `useChatInputForm` hook)
+- [x] `model-status.tsx` ✅ (Extracted ternaries to lookup maps)
+- [x] `speech-to-text-button.tsx` ✅ (Extracted switch statements to lookup maps)
 
 ---
 
@@ -683,3 +685,208 @@ export function ChatInput({ message, setMessage, isLoading, isGenerating, onSend
 | Separation of concerns | Mixed | Clean separation |
 
 **Test Results:** 24 tests for hook, 9 tests for component - all passing
+
+---
+
+### 11. `model-status.tsx` - Ternary to Lookup Maps
+
+**File:** `src/features/chat/components/input/model-status.tsx`
+**New Utils:** `src/features/chat/utils/model-status-utils.ts`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Nested ternary operators | Medium | 4-level nested ternaries for `statusColor` and `displayedStatus` |
+| Logic in presentation | Medium | State derivation mixed with JSX |
+
+**Research Sources:**
+- [React Official Docs - Conditional Rendering](https://react.dev/learn/conditional-rendering): "If your components get messy with too much nested conditional markup, consider extracting child components to clean things up"
+- [Why Nested Ternary Operators Are Bad Practice](https://dev.to/junihoj/why-nested-ternary-operators-are-bad-practice-a-guide-for-developers-ki1)
+
+**Before:**
+```tsx
+const statusColor = isModelError
+  ? "text-destructive"
+  : isEngineLoading
+  ? "text-amber-600 dark:text-amber-400"
+  : isModelReady
+  ? "text-green-600 dark:text-green-400"
+  : "text-muted-foreground";
+
+const displayedStatus = isModelError
+  ? "Error"
+  : isEngineLoading
+  ? "Loading Model..."
+  : isModelReady
+  ? "Ready"
+  : "Initializing...";
+```
+
+**After:**
+```tsx
+// model-status-utils.ts
+const STATUS_COLORS: Record<ModelStatusKey, string> = {
+  error: "text-destructive",
+  loading: "text-amber-600 dark:text-amber-400",
+  ready: "text-green-600 dark:text-green-400",
+  initializing: "text-muted-foreground",
+};
+
+export function getModelStatusKey(flags: ModelStatusFlags): ModelStatusKey { ... }
+export function getStatusColor(key: ModelStatusKey): string { ... }
+export function getDisplayedStatus(key: ModelStatusKey): string { ... }
+
+// model-status.tsx
+const statusKey = getModelStatusKey({ isModelError, isEngineLoading, isModelReady });
+const statusColor = getStatusColor(statusKey);
+const displayedStatus = getDisplayedStatus(statusKey);
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `model-status-utils.ts` | Created | ~40 lines |
+| `model-status-utils.test.ts` | Created | ~80 lines (14 tests) |
+| `model-status.tsx` | Refactored | 71 → 60 lines |
+
+---
+
+### 12. `speech-to-text-button.tsx` - Switch to Lookup Maps
+
+**File:** `src/features/chat/components/input/speech-to-text-button.tsx`
+**New Utils:** `src/features/chat/utils/speech-button-utils.ts`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Switch statements in component | Low | `getTooltipText()` and `getIcon()` recreated each render |
+| Imperative over declarative | Low | Switch statements vs. object maps |
+
+**Before:**
+```tsx
+const getTooltipText = () => {
+  switch (status) {
+    case "recording": return "Stop recording";
+    case "processing": return "Processing audio...";
+    case "loading": return "Loading model...";
+    default: return "Start voice input";
+  }
+};
+
+const getIcon = () => {
+  switch (status) {
+    case "recording": return <MicOff className="h-4 w-4 text-destructive" />;
+    case "processing":
+    case "loading": return <Loader2 className="h-4 w-4 animate-spin" />;
+    default: return <Mic className="h-4 w-4" />;
+  }
+};
+```
+
+**After:**
+```tsx
+// speech-button-utils.ts
+export const STATUS_TOOLTIP: Record<TranscriberStatus, string> = {
+  recording: "Stop recording",
+  processing: "Processing audio...",
+  loading: "Loading model...",
+  ready: "Start voice input",
+  uninitialized: "Start voice input",
+  error: "Start voice input",
+};
+
+export const STATUS_ICON: Record<TranscriberStatus, IconConfig> = { ... }
+
+// speech-to-text-button.tsx
+const iconConfig = getIconConfig(status);
+const IconComponent = ICON_COMPONENTS[iconConfig.type];
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `speech-button-utils.ts` | Created | ~45 lines |
+| `speech-button-utils.test.ts` | Created | ~130 lines (23 tests) |
+| `speech-to-text-button.tsx` | Refactored | 66 → 57 lines |
+
+---
+
+### 13. `chat-messages.tsx` - Hook Extraction
+
+**File:** `src/features/chat/components/messages/chat-messages.tsx`
+**New Hook:** `src/features/chat/hooks/use-chat-messages.ts`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Complex inline conditional props | Medium | `onRegenerate` and `onStopGeneration` computation inline in JSX |
+| No presentation/logic separation | Medium | Unlike `chat-input.tsx`, no hook extracted |
+| Repeated logic | Low | Same `isLastAssistantMessage` check repeated |
+
+**Research Sources:**
+- [React Docs - Reusing Logic with Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks): "Extract the shared logic into a custom Hook... leading to cleaner, more maintainable code"
+
+**Before:**
+```tsx
+{messages.map((message, index) => (
+  <MessageBubble
+    key={message.id}
+    message={message}
+    isGenerating={isGenerating}
+    isLastMessage={index === messages.length - 1}
+    onRegenerate={
+      message.role === "assistant" &&
+      index === messages.length - 1 &&
+      isModelReady
+        ? onRegenerate
+        : undefined
+    }
+    onStopGeneration={
+      message.role === "assistant" &&
+      index === messages.length - 1 &&
+      isGenerating
+        ? onStopGeneration
+        : undefined
+    }
+  />
+))}
+```
+
+**After:**
+```tsx
+// use-chat-messages.ts
+const getMessageBubbleProps = (message: Message, index: number): MessageBubbleProps => {
+  const isLastMessage = index === messages.length - 1;
+  const isLastAssistantMessage = message.role === "assistant" && isLastMessage;
+  return {
+    message,
+    isGenerating,
+    isLastMessage,
+    onRegenerate: isLastAssistantMessage && isModelReady ? onRegenerate : undefined,
+    onStopGeneration: isLastAssistantMessage && isGenerating ? onStopGeneration : undefined,
+  };
+};
+
+// chat-messages.tsx
+{messages.map((message, index) => (
+  <MessageBubble key={message.id} {...getMessageBubbleProps(message, index)} />
+))}
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `use-chat-messages.ts` | Created | ~70 lines |
+| `use-chat-messages.test.ts` | Created | ~210 lines (14 tests) |
+| `chat-messages.tsx` | Refactored | 76 → 49 lines (-36%) |
+
+**Benefits:**
+| Metric | Before | After |
+|--------|--------|-------|
+| Component lines | 76 | 49 (-36%) |
+| Inline conditionals | 2 complex | 0 |
+| Testability | Component-only | Hook unit tests |
+| Pattern consistency | Inconsistent | Matches `useChatInputForm` |

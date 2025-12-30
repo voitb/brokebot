@@ -1,5 +1,10 @@
 import { Loader2, AlertCircle } from "lucide-react";
 import { SimpleModelSelector } from "../simple-model-selector/simple-model-selector";
+import {
+  getModelStatusKey,
+  getStatusColor,
+  getDisplayedStatus,
+} from "@/features/chat/utils/model-status-utils";
 
 interface ModelStatusProps {
   selectedModel: {
@@ -15,9 +20,6 @@ interface ModelStatusProps {
   disabled?: boolean;
 }
 
-/**
- * Model status and selector component
- */
 export function ModelStatus({
   selectedModel,
   isEngineLoading,
@@ -26,21 +28,9 @@ export function ModelStatus({
   supportsImages,
   disabled = false,
 }: ModelStatusProps) {
-  const statusColor = isModelError
-    ? "text-destructive"
-    : isEngineLoading
-    ? "text-amber-600 dark:text-amber-400"
-    : isModelReady
-    ? "text-green-600 dark:text-green-400"
-    : "text-muted-foreground";
-
-  const displayedStatus = isModelError
-    ? "Error"
-    : isEngineLoading
-    ? "Loading Model..."
-    : isModelReady
-    ? "Ready"
-    : "Initializing...";
+  const statusKey = getModelStatusKey({ isModelError, isEngineLoading, isModelReady });
+  const statusColor = getStatusColor(statusKey);
+  const displayedStatus = getDisplayedStatus(statusKey);
 
   return (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -67,4 +57,4 @@ export function ModelStatus({
       </div>
     </div>
   );
-};
+}

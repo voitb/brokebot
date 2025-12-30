@@ -9,7 +9,7 @@ import { MessageTimestamp } from "./message-timestamp";
 import { GeneratingIndicator } from "./generating-indicator";
 import { AttachmentBadge } from "./attachment-badge";
 
-interface MessageBubbleProps {
+export interface MessageBubbleProps {
   message: Message;
   isGenerating?: boolean;
   isLastMessage?: boolean;
