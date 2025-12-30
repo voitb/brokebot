@@ -436,6 +436,63 @@ return { isChecking, ... };
 
 ---
 
+### 9. `use-header-actions.ts`
+
+**File:** `src/features/chat/hooks/use-header-actions.ts`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Event listener re-registration | High | `currentConversation` derived from `.find()` caused listener to re-register on every conversation update |
+| Unnecessary re-registration | Medium | Delete listener re-registered on route change (`conversationId` in deps) |
+
+**Pattern Applied:** `useEffectEvent` (React 19.2+)
+
+**Before:**
+```tsx
+// Derived state - NEW object reference every time conversations changes
+const currentConversation = conversations?.find(c => c.id === conversationId);
+
+// Event listener re-registers on every conversation update
+useEffect(() => {
+  const handleRename = () => {
+    if (conversationId && currentConversation) {
+      setIsEditingTitle(true);
+    }
+  };
+  document.addEventListener("conversation:rename", handleRename);
+  return () => document.removeEventListener("conversation:rename", handleRename);
+}, [conversationId, currentConversation]);  // ❌ Re-registers frequently
+```
+
+**After:**
+```tsx
+// Effect event - always reads latest values without causing re-registration
+const onRenameEvent = useEffectEvent(() => {
+  if (conversationId && currentConversation) {
+    setIsEditingTitle(true);
+  }
+});
+
+// Listener registered ONCE
+useEffect(() => {
+  const handleRename = () => {
+    onRenameEvent();
+  };
+  document.addEventListener("conversation:rename", handleRename);
+  return () => document.removeEventListener("conversation:rename", handleRename);
+}, []);  // ✅ Empty deps - registered once
+```
+
+**Why `useEffectEvent`:**
+- Listeners registered ONCE on mount, removed on unmount
+- `useEffectEvent` always reads latest `conversationId`, `currentConversation`
+- No stale closures - captures current state at call time, not registration time
+- Consistent with existing patterns in `chat-input.tsx`, `web-llm-provider.tsx`
+
+---
+
 ## Reviewed (No Issues)
 
 | Component | Status | Notes |
@@ -504,7 +561,7 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-message-stream.ts` ✅ (Reviewed - Clean)
 - [x] `use-drag-drop.ts` ✅ (Reviewed - Clean)
 - [x] `use-chat-guard.ts` ✅ (Fixed with ref + state pattern)
-- [ ] `use-header-actions.ts` (Event listener re-registration issue)
+- [x] `use-header-actions.ts` ✅ (Fixed with `useEffectEvent`)
 - [ ] `use-copy-to-clipboard.ts` (Magic number + ref pattern)
 - [ ] `use-textarea-auto-resize.ts` (Ref in dependencies)
 - [ ] Remaining hooks in `src/features/chat/hooks/`
