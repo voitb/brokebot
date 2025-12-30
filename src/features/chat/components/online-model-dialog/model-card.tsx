@@ -1,12 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TruncatedText } from "@/components/ui/truncated-text";
 import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { getCategoryIcon } from "@/features/chat/utils/online-model-utils";
 
@@ -28,8 +23,8 @@ export function ModelCard({
   return (
     <Card
       className={`transition-colors flex flex-col h-full ${isEnabled
-          ? "cursor-pointer hover:bg-accent"
-          : "opacity-50 cursor-not-allowed"
+        ? "cursor-pointer hover:bg-accent"
+        : "opacity-50 cursor-not-allowed"
         } ${isSelected ? "ring-2 ring-primary" : ""}`}
       onClick={() => isEnabled && onSelect(model)}
     >
@@ -39,16 +34,9 @@ export function ModelCard({
             <span className="flex-shrink-0 mt-0.5">
               {getCategoryIcon(model.category)}
             </span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="line-clamp-2 h-10">{model.name}</span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">{model.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <TruncatedText lines={2} className="h-10">
+              {model.name}
+            </TruncatedText>
           </div>
           <Badge variant={isFree ? "secondary" : "default"} className="text-xs flex-shrink-0">
             {isFree ? "FREE" : "PAID"}
@@ -56,18 +44,9 @@ export function ModelCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 flex-grow">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <p className="text-xs text-muted-foreground h-8 line-clamp-2">
-                {model.description}
-              </p>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs">{model.description}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <TruncatedText lines={2} as="p" className="text-xs text-muted-foreground h-8">
+          {model.description}
+        </TruncatedText>
       </CardContent>
       <CardFooter className="flex-col items-start space-y-2 pt-0">
         <div className="flex items-center justify-between w-full">

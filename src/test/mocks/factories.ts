@@ -79,12 +79,17 @@ export function createMockOpenRouterModel(overrides: {
   id: string;
   name: string;
   isFree: boolean;
+  description?: string;
+  provider?: string;
+  category?: string;
 }) {
   return {
-    ...overrides,
-    description: "A test model",
-    provider: "test-provider",
-    category: "general",
+    id: overrides.id,
+    name: overrides.name,
+    isFree: overrides.isFree,
+    description: overrides.description ?? "A test model",
+    provider: overrides.provider ?? "test-provider",
+    category: overrides.category ?? "general",
     contextLength: 4096,
     pricing: { prompt: "0.0001", completion: "0.0002" },
   };
