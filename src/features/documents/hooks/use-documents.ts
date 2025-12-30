@@ -35,9 +35,7 @@ export function useDocuments(): UseDocumentsReturn {
 
   useEffect(() => {
     loadDocuments();
-    // Only run on mount - loadDocuments is stable (no external deps)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadDocuments]);
 
   const uploadDocument = async (file: File): Promise<Document | null> => {
     try {
