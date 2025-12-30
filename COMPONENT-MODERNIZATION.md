@@ -364,6 +364,78 @@ onTranscript(newTranscript);
 
 ---
 
+### 8. `use-chat-guard.ts`
+
+**File:** `src/features/chat/hooks/use-chat-guard.ts`
+**Date:** 2025-12-29
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Dependency cycle | High | `hasChecked` state in deps while being set inside effect |
+| Wasteful re-runs | Medium | Effect re-ran unnecessarily when `hasChecked` changed |
+| Magic number | Low | `500` timeout extracted to `DEFAULT_TIMEOUT_MS` constant |
+
+**Pattern Applied:** Ref for internal tracking + State for external API
+
+**Before:**
+```tsx
+const [hasChecked, setHasChecked] = useState(false);
+
+useEffect(() => {
+  // ... sets hasChecked multiple places ...
+  setHasChecked(true);
+}, [conversationId, conversation, navigate, hasChecked, timeoutMs]);
+//                                          ^^^^^^^^^^
+//                                          State in deps that effect modifies = cycle
+
+return {
+  isChecking: conversationId ? !hasChecked : false,
+  // ...
+};
+```
+
+**After:**
+```tsx
+const [isChecking, setIsChecking] = useState(!!conversationId);
+const hasHandledRef = useRef(false);
+
+useEffect(() => {
+  hasHandledRef.current = false;
+  setIsChecking(!!conversationId);
+
+  if (!conversationId) return;
+
+  const timer = setTimeout(() => {
+    if (!hasHandledRef.current && conversation === undefined) {
+      hasHandledRef.current = true;
+      toast.error("Conversation not found", { ... });
+      navigate("/chat", { replace: true });
+      setIsChecking(false);
+    }
+  }, timeoutMs);
+
+  if (conversation !== undefined && !hasHandledRef.current) {
+    hasHandledRef.current = true;
+    setIsChecking(false);
+    clearTimeout(timer);
+  }
+
+  return () => clearTimeout(timer);
+}, [conversationId, conversation, navigate, timeoutMs]);
+// ✅ No isChecking/hasChecked in deps - no cycle!
+
+return { isChecking, ... };
+```
+
+**Why This Pattern:**
+- **Ref for internal tracking** - `hasHandledRef` doesn't trigger re-renders, avoiding dependency cycle
+- **State for external API** - `isChecking` provides the reactive value components need
+- **Separation of concerns** - Internal tracking logic is decoupled from render triggers
+- **No race conditions** - Ref prevents duplicate handling across effect runs
+
+---
+
 ## Reviewed (No Issues)
 
 | Component | Status | Notes |
@@ -431,5 +503,9 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-speech-to-text.ts` ✅ (Fixed with `useEffectEvent`)
 - [x] `use-message-stream.ts` ✅ (Reviewed - Clean)
 - [x] `use-drag-drop.ts` ✅ (Reviewed - Clean)
+- [x] `use-chat-guard.ts` ✅ (Fixed with ref + state pattern)
+- [ ] `use-header-actions.ts` (Event listener re-registration issue)
+- [ ] `use-copy-to-clipboard.ts` (Magic number + ref pattern)
+- [ ] `use-textarea-auto-resize.ts` (Ref in dependencies)
 - [ ] Remaining hooks in `src/features/chat/hooks/`
 - [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)
