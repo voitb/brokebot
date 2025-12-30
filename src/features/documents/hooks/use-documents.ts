@@ -1,67 +1,47 @@
-import { useState, useEffect } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Document } from "@/lib/db";
 import { toast } from "sonner";
 
 export interface UseDocumentsReturn {
   documents: Document[];
   isLoading: boolean;
-  error: string | null;
   uploadDocument: (file: File) => Promise<Document | null>;
   deleteDocument: (id: number) => Promise<void>;
   getDocumentContent: (id: number) => Promise<string | null>;
-  refreshDocuments: () => Promise<void>;
 }
 
 /**
  * Hook for managing documents in IndexedDB
+ * Uses useLiveQuery for reactive data - automatically updates when data changes
  */
 export function useDocuments(): UseDocumentsReturn {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const documents = useLiveQuery(
+    () => db.documents.orderBy("createdAt").reverse().toArray(),
+    [],
+    []
+  );
 
-  const loadDocuments = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const docs = await db.documents.orderBy("createdAt").reverse().toArray();
-      setDocuments(docs);
-    } catch {
-      setError("Failed to load documents");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadDocuments();
-  }, [loadDocuments]);
+  const isLoading = documents === undefined;
 
   const uploadDocument = async (file: File): Promise<Document | null> => {
     try {
-      setError(null);
-
-      // Validate file type
       const fileType = getFileType(file);
       if (!fileType) {
         toast.error("Unsupported file type. Only .txt and .md files are supported.");
         return null;
       }
 
-      // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         toast.error("File too large. Maximum size is 10MB.");
         return null;
       }
 
-      // Read file content
       const content = await readFileContent(file);
       if (!content.trim()) {
         toast.error("File appears to be empty.");
         return null;
       }
 
-      // Create document object
       const document: Omit<Document, "id"> = {
         filename: file.name,
         content,
@@ -69,18 +49,10 @@ export function useDocuments(): UseDocumentsReturn {
         createdAt: new Date(),
       };
 
-      // Save to IndexedDB
       const id = await db.documents.add(document);
-      const savedDocument = { ...document, id };
-
-      // Update local state
-      setDocuments(prev => [savedDocument, ...prev]);
-      
       toast.success(`Document "${file.name}" uploaded successfully!`);
-      return savedDocument;
-
+      return { ...document, id };
     } catch {
-      setError("Failed to upload document");
       toast.error("Failed to upload document");
       return null;
     }
@@ -88,12 +60,9 @@ export function useDocuments(): UseDocumentsReturn {
 
   const deleteDocument = async (id: number): Promise<void> => {
     try {
-      setError(null);
       await db.documents.delete(id);
-      setDocuments(prev => prev.filter(doc => doc.id !== id));
       toast.success("Document deleted successfully!");
     } catch {
-      setError("Failed to delete document");
       toast.error("Failed to delete document");
     }
   };
@@ -107,22 +76,15 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
 
-  const refreshDocuments = async (): Promise<void> => {
-    await loadDocuments();
-  };
-
   return {
-    documents,
+    documents: documents ?? [],
     isLoading,
-    error,
     uploadDocument,
     deleteDocument,
     getDocumentContent,
-    refreshDocuments,
   };
 }
 
-// Helper functions
 const getFileType = (file: File): "txt" | "md" | null => {
   if (file.type === "text/plain" || file.name.endsWith(".txt")) {
     return "txt";
@@ -144,4 +106,4 @@ const readFileContent = (file: File): Promise<string> => {
     };
     reader.readAsText(file);
   });
-}; 
+};
