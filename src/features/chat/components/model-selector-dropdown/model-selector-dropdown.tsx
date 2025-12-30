@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChevronDown, Cpu, Cloud, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,60 +9,32 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useWebLLM, type ModelInfo } from "@/app/providers/web-llm-provider";
-import {
-  useModel,
-  createLocalModel,
-  createOnlineModel,
-} from "@/app/providers/model-provider";
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
-import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
-import { toast } from "sonner";
-import { LocalModelList } from "./local-model-list";
-import { useUserConfig } from "@/shared/hooks/use-user-config";
+import { DropdownLocalModelList } from "./dropdown-local-model-list";
+import { useModelSelectorDropdown } from "@/features/chat/hooks/use-model-selector-dropdown";
 
-interface SimpleModelSelectorProps {
+interface ModelSelectorDropdownProps {
   disabled?: boolean;
 }
 
-export function SimpleModelSelector({
+export function ModelSelectorDropdown({
   disabled = false,
-}: SimpleModelSelectorProps) {
-  const { selectedModel: webllmModel, availableModels } = useWebLLM();
-  const { currentModel, setCurrentModel } = useModel();
-  const { config } = useUserConfig();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const isOnlineModel = currentModel?.type === "online";
-  const displayName = !currentModel
-    ? "Initializing..."
-    : isOnlineModel
-    ? currentModel.onlineModel?.name || "Online Model"
-    : webllmModel.name;
-
-  const isOpenRouterKeyAvailable = !!config?.openrouterApiKey;
-
-  const handleLocalModelSelect = (model: ModelInfo) => {
-    const localModel = createLocalModel(model);
-    setCurrentModel(localModel);
-    setIsDropdownOpen(false);
-  };
-
-  const handleOnlineModelSelect = (model: OpenRouterModel, apiKey: string) => {
-    if (!apiKey) {
-      toast.error("OpenRouter API key is required");
-      return;
-    }
-
-    const onlineModel = createOnlineModel(model, apiKey);
-    setCurrentModel(onlineModel);
-  };
-
-  const handleDialogTrigger = () => {
-    setIsDropdownOpen(false);
-    setIsDialogOpen(true);
-  };
+}: ModelSelectorDropdownProps) {
+  const {
+    isDropdownOpen,
+    setIsDropdownOpen,
+    isDialogOpen,
+    setIsDialogOpen,
+    isOnlineModel,
+    displayName,
+    isOpenRouterKeyAvailable,
+    currentModel,
+    availableModels,
+    activeLocalModel,
+    handleLocalModelSelect,
+    handleOnlineModelSelect,
+    handleDialogTrigger,
+  } = useModelSelectorDropdown();
 
   return (
     <div className="flex items-center gap-2">
@@ -71,7 +42,7 @@ export function SimpleModelSelector({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onModelSelect={handleOnlineModelSelect}
-        selectedModel={isOnlineModel ? currentModel.onlineModel : null}
+        selectedModel={isOnlineModel ? currentModel?.onlineModel : null}
       />
 
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
@@ -123,13 +94,13 @@ export function SimpleModelSelector({
             Local Models
           </DropdownMenuLabel>
 
-          <LocalModelList
-            availableModels={[...availableModels]}
-            webllmModel={webllmModel}
-            onSelect={handleLocalModelSelect}
+          <DropdownLocalModelList
+            availableModels={availableModels}
+            value={activeLocalModel}
+            onChange={handleLocalModelSelect}
           />
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
-};
+}

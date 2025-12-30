@@ -6,17 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { type ModelInfo } from "@/app/providers/web-llm-provider";
 
-interface LocalModelListProps {
+interface DropdownLocalModelListProps {
   availableModels: ModelInfo[];
-  webllmModel: ModelInfo;
-  onSelect: (model: ModelInfo) => void;
+  value: ModelInfo;
+  onChange: (model: ModelInfo) => void;
 }
 
-export function LocalModelList({
+export function DropdownLocalModelList({
   availableModels,
-  webllmModel,
-  onSelect,
-}: LocalModelListProps) {
+  value,
+  onChange,
+}: DropdownLocalModelListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredModels = searchQuery.trim()
@@ -49,7 +49,7 @@ export function LocalModelList({
           filteredModels.map((model: ModelInfo) => (
             <DropdownMenuItem
               key={model.id}
-              onClick={() => onSelect(model)}
+              onClick={() => onChange(model)}
               className="flex flex-col items-start gap-2 p-3 cursor-pointer"
             >
               <div className="flex items-center justify-between w-full">
@@ -60,7 +60,7 @@ export function LocalModelList({
                   <Badge variant="secondary" className="text-xs">
                     {model.performance}
                   </Badge>
-                  {webllmModel.id === model.id && (
+                  {value.id === model.id && (
                     <Badge variant="default" className="text-xs">
                       Active
                     </Badge>
@@ -88,4 +88,4 @@ export function LocalModelList({
       </ScrollArea>
     </>
   );
-};
+}
