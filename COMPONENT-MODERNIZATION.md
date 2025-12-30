@@ -101,12 +101,21 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
 ): UseSmartAutoScrollReturn<T> {
   const { messageCount, isGenerating, conversationId } = options;
   // ...
-  useEffect(() => {
+
+  // Initial scroll - useLayoutEffect prevents flash of content at wrong position
+  useLayoutEffect(() => {
     if (isInitialRender.current) {
-      requestAnimationFrame(() => scrollToBottom("auto"));
-      // ...
+      scrollToBottom("auto");
+      isInitialRender.current = false;
     }
-  }, [messageCount, isGenerating, conversationId]);
+  }, [conversationId]);
+
+  // Subsequent scrolls - useEffect for non-blocking smooth scroll
+  useEffect(() => {
+    if (!isInitialRender.current && !userHasScrolledUp.current) {
+      scrollToBottom("smooth");
+    }
+  }, [messageCount, isGenerating]);
 }
 
 // Caller:
@@ -118,7 +127,8 @@ useSmartAutoScroll({
 ```
 
 **Why These Changes:**
-- `requestAnimationFrame` waits for browser paint cycle (proper timing)
+- `useLayoutEffect` for initial scroll prevents content flash (runs before paint)
+- `useEffect` for subsequent smooth scrolls (non-blocking)
 - Typed options are type-safe and ESLint-friendly
 - `messageCount` (primitive) instead of `messages` (array) - stable comparison
 - No eslint-disable needed
@@ -510,10 +520,15 @@ useEffect(() => {
 - Third-party stores
 - Any external mutable data source
 
+### Use `useLayoutEffect` for:
+- Focus management (prevents flicker)
+- Initial scroll positioning (prevents content flash)
+- Any DOM mutation that affects visual appearance before paint
+
 ### Use `requestAnimationFrame` for:
-- Initial scroll positioning
-- Layout-dependent operations
-- Replacing arbitrary `setTimeout` timing hacks
+- Continuous animations (not one-time operations)
+- Non-blocking scroll event handlers
+- Operations where slight delay is acceptable
 
 ### Use `useEffectEvent` for (React 19.2+):
 - Reading latest props/state in Effects without causing re-runs
@@ -564,6 +579,6 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-header-actions.ts` ✅ (Fixed with `useEffectEvent`)
 - [x] `use-copy-to-clipboard.ts` ✅ (Extracted magic number to constant)
 - [x] `use-textarea-auto-resize.ts` ✅ (Removed ineffective ref from deps)
-- [x] `editable-conversation-title.tsx` ✅ (Replaced setTimeout(100) with requestAnimationFrame)
-- [ ] Remaining hooks in `src/features/chat/hooks/`
+- [x] `editable-conversation-title.tsx` ✅ (Replaced setTimeout(100) with `useLayoutEffect`)
+- [x] Remaining hooks in `src/features/chat/hooks/` ✅ (All clean - no issues)
 - [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)
