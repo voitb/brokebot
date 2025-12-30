@@ -564,5 +564,6 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `use-header-actions.ts` ✅ (Fixed with `useEffectEvent`)
 - [x] `use-copy-to-clipboard.ts` ✅ (Extracted magic number to constant)
 - [x] `use-textarea-auto-resize.ts` ✅ (Removed ineffective ref from deps)
+- [x] `editable-conversation-title.tsx` ✅ (Replaced setTimeout(100) with requestAnimationFrame)
 - [ ] Remaining hooks in `src/features/chat/hooks/`
 - [ ] Complex components (`chat-interface`, `code-block`, `model-selector`, etc.)
