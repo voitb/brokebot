@@ -27,20 +27,30 @@ export function ModelCard({
 }: ModelCardProps) {
   return (
     <Card
-      className={`transition-colors flex flex-col h-full ${
-        isEnabled
+      className={`transition-colors flex flex-col h-full ${isEnabled
           ? "cursor-pointer hover:bg-accent"
           : "opacity-50 cursor-not-allowed"
-      } ${isSelected ? "ring-2 ring-primary" : ""}`}
+        } ${isSelected ? "ring-2 ring-primary" : ""}`}
       onClick={() => isEnabled && onSelect(model)}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {getCategoryIcon(model.category)}
-            {model.name}
+        <CardTitle className="text-sm flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2 min-w-0">
+            <span className="flex-shrink-0 mt-0.5">
+              {getCategoryIcon(model.category)}
+            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="line-clamp-2 h-10">{model.name}</span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">{model.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <Badge variant={isFree ? "secondary" : "default"} className="text-xs">
+          <Badge variant={isFree ? "secondary" : "default"} className="text-xs flex-shrink-0">
             {isFree ? "FREE" : "PAID"}
           </Badge>
         </CardTitle>
