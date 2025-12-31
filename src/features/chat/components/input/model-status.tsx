@@ -1,5 +1,5 @@
 import { Loader2, AlertCircle } from "lucide-react";
-import { SimpleModelSelector } from "../simple-model-selector/simple-model-selector";
+import { ModelSelectorDropdown } from "../model-selector-dropdown/model-selector-dropdown";
 import {
   getModelStatusKey,
   getStatusColor,
@@ -35,7 +35,7 @@ export function ModelStatus({
   return (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
       <div className="flex items-center gap-2">
-        <SimpleModelSelector disabled={disabled} />
+        <ModelSelectorDropdown disabled={disabled} />
 
         {/* Model Status */}
         <div className="flex items-center gap-1">

@@ -588,6 +588,8 @@ import { useEffectEvent } from "react"; // ✅ Works with augmentation
 - [x] `speech-to-text-button.tsx` ✅ (Extracted switch statements to lookup maps)
 - [x] `folder-item.tsx` ✅ (Hook extraction: `useFolderItem` + `DeleteFolderDialog`)
 - [x] `model-utils.tsx` ✅ (Domain separation: `local-model-utils.tsx` + `online-model-utils.tsx`)
+- [x] `simple-model-selector.tsx` ✅ (Renamed to `ModelSelectorDropdown` + hook extraction)
+- [x] `editable-conversation-title.tsx` ✅ (Deduplicated handleSave/handleBlur + removed trailing semicolon)
 
 ---
 
@@ -1096,3 +1098,161 @@ export function getCategoryIcon(category: string): React.ReactNode {
 | Code pattern | Switch statements | Lookup maps |
 
 **Test Results:** 42 tests for both utility files - all passing
+
+---
+
+### 16. `simple-model-selector.tsx` → `model-selector-dropdown.tsx`
+
+**Files:**
+- `src/features/chat/components/model-selector-dropdown/model-selector-dropdown.tsx` (renamed from `simple-model-selector.tsx`)
+- `src/features/chat/components/model-selector-dropdown/dropdown-local-model-list.tsx` (renamed from `local-model-list.tsx`)
+- `src/features/chat/hooks/use-model-selector-dropdown.ts` (new)
+- `src/features/chat/utils/model-selector-utils.ts` (new)
+
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Nested ternary operator | Medium | 3-level nested ternary for `displayName` |
+| No presentation/logic separation | Medium | State, derived values, and handlers mixed with JSX |
+| Vague naming "Simple" | Low | Renamed to descriptive `ModelSelectorDropdown` |
+| Trailing semicolon | Low | Removed `};` after function component |
+
+**Research Sources:**
+- [React Conditional Rendering](https://react.dev/learn/conditional-rendering) - "If your components get messy with too much nested conditional markup, consider extracting child components"
+- [React Custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks) - "Extract the shared logic into a custom Hook... leading to cleaner, more maintainable code"
+
+**Pattern Applied:** Presentation/Logic Separation (following `useConversationItem`/`useFolderItem` pattern)
+
+**Before:**
+```tsx
+// simple-model-selector.tsx - 136 lines, mixed concerns
+export function SimpleModelSelector({ disabled = false }) {
+  const { selectedModel: webllmModel, availableModels } = useWebLLM();
+  const { currentModel, setCurrentModel } = useModel();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // ❌ Nested ternary
+  const displayName = !currentModel
+    ? "Initializing..."
+    : isOnlineModel
+    ? currentModel.onlineModel?.name || "Online Model"
+    : webllmModel.name;
+
+  // ❌ Handlers mixed with presentation
+  const handleLocalModelSelect = (model) => { ... };
+  const handleOnlineModelSelect = (model, apiKey) => { ... };
+
+  return (/* JSX with all logic inline */);
+}
+```
+
+**After:**
+```tsx
+// model-selector-utils.ts
+export function getDisplayName({ currentModel, webllmModel }): string {
+  if (!currentModel) return "Initializing...";
+  if (currentModel.type === "online") {
+    return currentModel.onlineModel?.name ?? "Online Model";
+  }
+  return webllmModel.name;
+}
+
+// use-model-selector-dropdown.ts - ~85 lines of pure logic
+export function useModelSelectorDropdown() {
+  // All state, derived values, and handlers
+  return {
+    isDropdownOpen, setIsDropdownOpen,
+    isDialogOpen, setIsDialogOpen,
+    displayName, isOnlineModel, isOpenRouterKeyAvailable,
+    handleLocalModelSelect, handleOnlineModelSelect, handleDialogTrigger,
+  };
+}
+
+// model-selector-dropdown.tsx - ~100 lines of pure presentation
+export function ModelSelectorDropdown({ disabled = false }) {
+  const { ... } = useModelSelectorDropdown();
+  return (/* Pure JSX */);
+}
+```
+
+**Files Created/Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `simple-model-selector/` → `model-selector-dropdown/` | Renamed directory | - |
+| `simple-model-selector.tsx` → `model-selector-dropdown.tsx` | Renamed + Refactored | 136 → 106 |
+| `local-model-list.tsx` → `dropdown-local-model-list.tsx` | Renamed + Fixed | 92 → 91 |
+| `use-model-selector-dropdown.ts` | Created | ~85 lines |
+| `model-selector-utils.ts` | Created | ~22 lines |
+| `model-selector-utils.test.ts` | Created | ~75 lines (4 tests) |
+| `model-status.tsx` | Updated import | - |
+
+**Benefits:**
+| Metric | Before | After |
+|--------|--------|-------|
+| Nested ternaries | 1 (3-level) | 0 (utility function) |
+| Component lines | 136 | 106 (-22%) |
+| Presentation/logic | Mixed | Separated |
+| Naming | Vague "Simple" | Descriptive "ModelSelectorDropdown" |
+| Pattern consistency | Inconsistent | Matches `useConversationItem` |
+
+---
+
+### 17. `editable-conversation-title.tsx` - Handler Deduplication
+
+**File:** `src/features/chat/components/sidebar/editable-conversation-title.tsx`
+**Date:** 2025-12-30
+
+**Issues Fixed:**
+| Issue | Severity | Description |
+|-------|----------|-------------|
+| Duplicate handlers | Low | `handleSave` and `handleBlur` had identical implementations |
+| Trailing semicolon | Low | Removed `};` after function component |
+
+**Before:**
+```tsx
+const handleSave = () => {
+  const trimmedTitle = title.trim();
+  if (trimmedTitle && trimmedTitle !== initialTitle) {
+    onSave(trimmedTitle);
+  } else {
+    onCancel();
+  }
+};
+
+const handleBlur = () => {
+  // Same exact code duplicated
+  const trimmedTitle = title.trim();
+  if (trimmedTitle && trimmedTitle !== initialTitle) {
+    onSave(trimmedTitle);
+  } else {
+    onCancel();
+  }
+};
+```
+
+**After:**
+```tsx
+const handleSave = () => {
+  const trimmedTitle = title.trim();
+  if (trimmedTitle && trimmedTitle !== initialTitle) {
+    onSave(trimmedTitle);
+  } else {
+    onCancel();
+  }
+};
+
+// Auto-save on blur - reuses handleSave logic
+const handleBlur = handleSave;
+```
+
+**Files Modified:**
+| File | Action | Lines |
+|------|--------|-------|
+| `editable-conversation-title.tsx` | Fixed | 73 → 66 (-10%) |
+
+**Benefits:**
+- Eliminated code duplication (DRY principle)
+- Clearer intent with descriptive comment
+- Easier maintenance - single source of truth for save logic
