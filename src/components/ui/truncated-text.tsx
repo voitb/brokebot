@@ -9,19 +9,20 @@ import { cn } from "@/lib/cn";
 
 interface TruncatedTextProps {
     children: ReactNode;
-    lines?: number;
-    className?: string;
+    maxLines?: number;
     tooltipContent?: ReactNode;
-    tooltipMaxWidth?: string;
+    classNames?: {
+        base?: string;
+        tooltip?: string;
+    };
     as?: "span" | "p" | "div";
 }
 
 export function TruncatedText({
     children,
-    lines = 1,
-    className,
+    maxLines = 1,
     tooltipContent,
-    tooltipMaxWidth = "max-w-xs",
+    classNames,
     as: Component = "span",
 }: TruncatedTextProps) {
     const textRef = useRef<HTMLElement>(null);
@@ -32,7 +33,7 @@ export function TruncatedText({
         if (!el) return;
 
         const check = () => {
-            const isOverflowing = lines === 1
+            const isOverflowing = maxLines === 1
                 ? el.scrollWidth > el.clientWidth
                 : el.scrollHeight > el.clientHeight;
             setIsTruncated(isOverflowing);
@@ -44,12 +45,12 @@ export function TruncatedText({
         observer.observe(el);
 
         return () => observer.disconnect();
-    }, [lines, children]);
+    }, [maxLines, children]);
 
     const textElement = (
         <Component
             ref={textRef as React.RefObject<HTMLSpanElement & HTMLParagraphElement & HTMLDivElement>}
-            className={cn(lines === 1 ? "truncate" : `line-clamp-${lines}`, "block", className)}
+            className={cn(maxLines === 1 ? "truncate" : `line-clamp-${maxLines}`, "block", classNames?.base)}
         >
             {children}
         </Component>
@@ -65,7 +66,7 @@ export function TruncatedText({
                 <TooltipTrigger asChild>
                     {textElement}
                 </TooltipTrigger>
-                <TooltipContent className={tooltipMaxWidth}>
+                <TooltipContent className={cn("max-w-xs", classNames?.tooltip)}>
                     <p>{tooltipContent ?? children}</p>
                 </TooltipContent>
             </Tooltip>
