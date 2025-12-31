@@ -36,7 +36,7 @@ export function OnlineModelDialog({
     handleModelSelect,
     handleOpenChange,
     freeModels,
-    // paidModels,
+    paidModels,
     isLoading,
     error,
   } = useOnlineModels(onModelSelect, onOpenChange);
@@ -66,7 +66,7 @@ export function OnlineModelDialog({
         </div>
       );
     }
-    
+
     return (
       <ScrollArea className="h-[calc(80vh-98px)]">
         <TabsContent value="api-keys">
@@ -88,29 +88,32 @@ export function OnlineModelDialog({
           />
         </TabsContent>
         <TabsContent value="paid" className="space-y-4 p-4">
-          {/* <Alert>
+          <Alert>
             <Key className="h-4 w-4" />
             <AlertDescription>
               Premium models with enhanced capabilities. Your data remains
               private.
             </AlertDescription>
           </Alert>
-          <ModelList
-            models={paidModels}
-            selectedModel={selectedModel}
-            onSelect={handleModelSelect}
-            isFree={false}
-            availableKeys={storedKeys}
-          /> */}
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <Key className="w-8 h-8 text-muted-foreground" />
+          {paidModels.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <Key className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No Paid Models Available</h3>
+              <p className="text-muted-foreground max-w-md">
+                No paid models are currently available. Please check back later.
+              </p>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-            <p className="text-muted-foreground max-w-md">
-              Premium model integration is currently in development. Soon you'll be able to access advanced AI models with enhanced capabilities while keeping your data private.
-            </p>
-          </div>
+          ) : (
+            <ModelList
+              models={paidModels}
+              selectedModel={selectedModel}
+              onSelect={handleModelSelect}
+              isFree={false}
+              availableKeys={storedKeys}
+            />
+          )}
         </TabsContent>
       </ScrollArea>
     )
