@@ -57,7 +57,7 @@ export function ModelSelector({
           >
             <Cpu className="w-3 h-3" />
             <span className="hidden sm:inline">
-              {selectedOnlineModel ? selectedOnlineModel.name : selectedModel.name}
+              {selectedOnlineModel ? selectedOnlineModel.name : (selectedModel?.name ?? "Select Model")}
             </span>
             <ChevronDown className="w-3 h-3" />
           </Button>
@@ -86,7 +86,7 @@ export function ModelSelector({
                   key={category}
                   category={category}
                   models={modelsByCategory[category] || []}
-                  activeModelId={selectedModel.id}
+                  activeModelId={selectedModel?.id ?? ""}
                   onSelectModel={handleModelSelect}
                 />
               ))

@@ -10,10 +10,6 @@ export interface UseDocumentsReturn {
   getDocumentContent: (id: number) => Promise<string | null>;
 }
 
-/**
- * Hook for managing documents in IndexedDB
- * Uses useLiveQuery for reactive data - automatically updates when data changes
- */
 export function useDocuments(): UseDocumentsReturn {
   const documents = useLiveQuery(
     () => db.documents.orderBy("createdAt").reverse().toArray(),

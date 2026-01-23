@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -7,17 +6,16 @@ interface SearchBarProps {
   onSearchChange: (value: string) => void;
   placeholder?: string;
   isSearching?: boolean;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-/**
- * Search bar for filtering conversations with loading indicator
- */
-export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(({
+export function SearchBar({
   searchTerm,
   onSearchChange,
   placeholder = "Search conversations...",
   isSearching = false,
-}, ref) => {
+  ref,
+}: SearchBarProps) {
   return (
     <div className="relative">
       {isSearching ? (
@@ -35,6 +33,4 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(({
       />
     </div>
   );
-});
-
-SearchBar.displayName = "SearchBar";
+}

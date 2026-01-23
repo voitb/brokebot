@@ -2,16 +2,10 @@ interface ThinkingSectionProps {
   thinking: string;
 }
 
-/**
- * Thinking indicator dot with animation
- */
 function ThinkingDot() {
   return <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />;
 }
 
-/**
- * Thinking header component
- */
 function ThinkingHeader() {
   return (
     <div className="flex items-center gap-2 mb-2">
@@ -20,9 +14,6 @@ function ThinkingHeader() {
   );
 }
 
-/**
- * Thinking section component for AI messages
- */
 export function ThinkingSection({ thinking }: ThinkingSectionProps) {
   if (!thinking.trim()) {
     return null;

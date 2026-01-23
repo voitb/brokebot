@@ -1,6 +1,3 @@
-/**
- * Animated dots component for loading state
- */
 function AnimatedDots() {
   return (
     <div className="flex space-x-1">
@@ -11,9 +8,6 @@ function AnimatedDots() {
   );
 }
 
-/**
- * Loading indicator showing animated dots while AI is generating response
- */
 export function LoadingIndicator() {
   return (
     <div className="flex justify-start mb-4">

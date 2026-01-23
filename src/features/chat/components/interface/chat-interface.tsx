@@ -1,14 +1,12 @@
 import { Loader2 } from "lucide-react";
 import { ChatHeader } from "../header/chat-header";
-import { ChatMessages } from "../messages/chat-messages";
-import { ChatInput } from "../input/chat-input";
-import { useConversation } from "@/shared/hooks/use-conversations";
-import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
+import { ChatMessages } from "../messages/chat-messages/chat-messages";
+import { ChatInput } from "../input/chat-input/";
+import { useConversation } from "@/hooks/use-conversations";
+import { useConversationId } from "@/hooks";
 import { useChatInput } from "@/features/chat/hooks/use-chat-input";
+import { ErrorBoundary } from "@/components/error-boundary";
 
-/**
- * Main chat interface component combining header, messages, and input
- */
 export function ChatInterface() {
   const conversationId = useConversationId();
   const { conversation } = useConversation(conversationId);
@@ -36,12 +34,14 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <ChatHeader />
-      <ChatMessages
-        isLoading={isLoading}
-        isGenerating={isGenerating}
-        onRegenerate={regenerateLastResponse}
-        onStopGeneration={stopGeneration}
-      />
+      <ErrorBoundary>
+        <ChatMessages
+          isLoading={isLoading}
+          isGenerating={isGenerating}
+          onRegenerate={regenerateLastResponse}
+          onStopGeneration={stopGeneration}
+        />
+      </ErrorBoundary>
       <ChatInput
         message={message}
         setMessage={setMessage}
@@ -52,4 +52,4 @@ export function ChatInterface() {
       />
     </div>
   );
-};
+}

@@ -29,5 +29,6 @@ export function useTextareaAutoResize({
         textarea.style.overflowY = "auto";
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- textareaRef is a stable ref object
   }, [message, minHeight, maxHeight]);
 } 

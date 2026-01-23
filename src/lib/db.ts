@@ -1,5 +1,7 @@
 import Dexie, { type EntityTable } from "dexie";
-import { AVAILABLE_MODELS } from "@/app/providers/web-llm-provider";
+
+// Default model ID for new users - used when WebLLM catalog is not yet loaded
+const DEFAULT_LOCAL_MODEL_ID = "Llama-3.2-3B-Instruct-q4f16_1-MLC";
 
 export interface Message {
   id: string;
@@ -54,7 +56,7 @@ export interface EncryptionKey {
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
   username: "User",
-  selectedModelId: AVAILABLE_MODELS[0]?.id ?? "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+  selectedModelId: DEFAULT_LOCAL_MODEL_ID,
   autoLoadModel: true,
   theme: "system",
   createdAt: new Date(),
@@ -72,17 +74,12 @@ type BrokebotDatabase = Dexie & {
 export function createDatabase(): BrokebotDatabase {
   const db = new Dexie("BrokenbotDB") as BrokebotDatabase;
 
-  // Version 2: Initial stable schema
   db.version(2).stores({
     conversations: "id, title, pinned, createdAt, updatedAt",
     documents: "++id, filename, fileType, createdAt",
     userConfig: "id, updatedAt",
   });
 
-  // LEGACY: Version 3-5 migrations for removed cloud/sharing features
-  // Kept for backward compatibility with existing user databases
-
-  // v3: Added storeConversationsInCloud (removed feature)
   db.version(3)
     .stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
@@ -98,14 +95,12 @@ export function createDatabase(): BrokebotDatabase {
       }
     });
 
-  // v4: Added shareId index (removed feature)
   db.version(4).stores({
     conversations: "id, title, pinned, shareId, createdAt, updatedAt",
     documents: "++id, filename, fileType, createdAt",
     userConfig: "id, updatedAt",
   });
 
-  // v5: Migrated to sharedLinks table (removed feature)
   db.version(5)
     .stores({
       conversations: "id, title, pinned, createdAt, updatedAt",
@@ -142,7 +137,6 @@ export function createDatabase(): BrokebotDatabase {
         });
     });
 
-  // v6: Added folders feature
   db.version(6).stores({
     conversations: "id, title, pinned, folderId, createdAt, updatedAt",
     documents: "++id, filename, fileType, createdAt",
@@ -151,7 +145,6 @@ export function createDatabase(): BrokebotDatabase {
     folders: "id, name, createdAt, updatedAt",
   });
 
-  // v7: Remove sharedLinks table - final local-only architecture
   db.version(7).stores({
     conversations: "id, title, pinned, folderId, createdAt, updatedAt",
     documents: "++id, filename, fileType, createdAt",
@@ -160,7 +153,6 @@ export function createDatabase(): BrokebotDatabase {
     folders: "id, name, createdAt, updatedAt",
   });
 
-  // v8: Add encryptionKey table for storing non-extractable CryptoKey
   db.version(8).stores({
     conversations: "id, title, pinned, folderId, createdAt, updatedAt",
     documents: "++id, filename, fileType, createdAt",
@@ -179,5 +171,4 @@ export function createDatabase(): BrokebotDatabase {
   return db;
 }
 
-// Default database instance for convenience
 export const db = createDatabase();

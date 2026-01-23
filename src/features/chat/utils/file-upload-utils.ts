@@ -12,9 +12,6 @@ export interface AttachedFile {
   content?: string;
 }
 
-/**
- * Reads file content as text
- */
 export function readFileContent(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,9 +21,6 @@ export function readFileContent(file: File): Promise<string> {
   });
 }
 
-/**
- * Processes a file for attachment to a message
- */
 export async function processFile(
   file: File,
   uploadDocument: (file: File) => Promise<Document | null>
@@ -76,9 +70,6 @@ export interface ValidationResult {
   error?: string;
 }
 
-/**
- * Validates a file for size and type constraints
- */
 export function validateFile(file: File, options: ValidateFileOptions): ValidationResult {
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return {

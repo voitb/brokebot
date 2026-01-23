@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { parseApiError, showErrorToast } from "./chat-error-utils";
-import { mockToast } from "@/test/mocks/modules";
+import { mockToast } from "@/testing/mocks/modules";
 
 describe("chatErrorUtils", () => {
   beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useDragDrop } from "./use-drag-drop";
-import { createMockFile, createMockFileList, createMockDragEvent } from "@/test/mocks/modules";
+import { createMockFile, createMockFileList, createMockDragEvent } from "@/testing/mocks/modules";
 
 describe("useDragDrop", () => {
   beforeEach(() => {

@@ -1,4 +1,3 @@
-// Re-export model types for convenience
 export type {
   OpenRouterMessage,
   StreamResponse,
@@ -8,7 +7,6 @@ export type {
 
 export type { ModelType, UnifiedModel } from '@/app/providers/model-provider';
 
-// UI-specific types
 export interface ConversationGroup {
   label: string;
   conversations: Array<{

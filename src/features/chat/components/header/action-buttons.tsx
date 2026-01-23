@@ -23,9 +23,6 @@ interface ActionButtonsProps {
   onImportConversation: () => void;
 }
 
-/**
- * Reusable action buttons for header - theme, settings, shortcuts, pin, export
- */
 export function ActionButtons({
   theme,
   conversationId,
@@ -40,7 +37,6 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <>
-      {/* Theme Toggle Button */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="sm" onClick={onToggleTheme}>
@@ -56,7 +52,6 @@ export function ActionButtons({
         </TooltipContent>
       </Tooltip>
 
-      {/* Export Button (conditional) */}
       {conversationId && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -70,7 +65,6 @@ export function ActionButtons({
         </Tooltip>
       )}
 
-      {/* Import Button (conditional) */}
       {conversationId && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -84,7 +78,6 @@ export function ActionButtons({
         </Tooltip>
       )}
 
-      {/* Settings Button */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="sm" onClick={onOpenSettings}>
@@ -96,7 +89,6 @@ export function ActionButtons({
         </TooltipContent>
       </Tooltip>
 
-      {/* Shortcuts Button (conditional) */}
       {showShortcuts && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -110,7 +102,6 @@ export function ActionButtons({
         </Tooltip>
       )}
 
-      {/* Star/Pin Button (conditional) */}
       {conversationId && (
         <Tooltip>
           <TooltipTrigger asChild>

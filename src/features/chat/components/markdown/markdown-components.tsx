@@ -1,10 +1,7 @@
 import type { Components } from "react-markdown";
-import { CodeBlock } from "@/features/chat/components/messages/code-block";
+import { CodeBlock } from "@/features/chat/components/messages/code-block/code-block";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-/**
- * Creates markdown components configuration for ReactMarkdown
- */
 export const createMarkdownComponents = (): Components => ({
   code: ({ className, children, ...props }) => (
     <CodeBlock className={className} {...props}>

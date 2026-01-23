@@ -1,4 +1,4 @@
-import { DocumentManager } from "@/features/documents/components/document-manager";
+import { DocumentManager } from "@/features/documents";
 
 export function DocumentsTab() {
   return (

@@ -6,9 +6,6 @@ interface ScrollToBottomButtonProps {
   show: boolean;
 }
 
-/**
- * Scroll to bottom button with conditional rendering and animation
- */
 export function ScrollToBottomButton({
   onClick,
   show,

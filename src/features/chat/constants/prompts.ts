@@ -1,10 +1,3 @@
-/**
- * AI Prompts and Instructions for Brokebot Application
- *
- * These prompts guide the behavior and responses of AI models,
- * ensuring consistency, clarity, and adaptability across user interactions.
- */
-
 export const AI_SYSTEM_RULES = `
 You are a helpful AI assistant integrated into the brokebot application. Follow these rules:
 

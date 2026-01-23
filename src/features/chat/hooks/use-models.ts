@@ -33,11 +33,13 @@ export function useModels(): UseModelsReturn {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchModels = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URL, { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`Failed to fetch models: ${response.statusText}`);
         }
@@ -58,15 +60,25 @@ export function useModels(): UseModelsReturn {
           category: getCategoryFromModel(model),
         }));
 
-        setModels(formattedModels);
+        if (!controller.signal.aborted) {
+          setModels(formattedModels);
+        }
       } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)));
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
+        if (!controller.signal.aborted) {
+          setError(e instanceof Error ? e : new Error(String(e)));
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchModels();
+    return () => controller.abort();
   }, []);
 
   return { models, isLoading, error };

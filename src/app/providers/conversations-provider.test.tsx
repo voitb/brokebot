@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { ConversationsProvider, useConversations } from "./conversations-provider";
 import { db } from "@/lib/db";
-import { clearTestDatabase, seedConversation, seedFolder } from "@/test/db-helpers";
-import { createMockMessage } from "@/test/mocks/factories";
+import { clearTestDatabase, seedConversation, seedFolder } from "@/testing/db-helpers";
+import { createMockMessage } from "@/testing/mocks/factories";
 
 // Type-safe helper to access context after it's been verified as defined
 function assertContext(context: ReturnType<typeof useConversations> | undefined): ReturnType<typeof useConversations> {

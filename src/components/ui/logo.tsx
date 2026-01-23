@@ -15,16 +15,10 @@ export function Logo({
 }: LogoProps) {
   const { theme } = useTheme();
 
-  // sprawdzamy preferencję systemu tylko raz – bez nasłuchiwania zmian
   const systemPrefersDark =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-  /**  
-   * showLightLogo = true  →  wybieramy jasne assety  
-   * showLightLogo = false →  wybieramy ciemne assety  
-   * (czyli odwrotność klasycznego podejścia)  
-   */
   const showLightLogo =
     theme === 'dark' ||
     (theme === 'system' && systemPrefersDark);
@@ -38,7 +32,6 @@ export function Logo({
         ? '/brokebot_light.png'
         : '/brokebot_dark.png';
 
-  // Tailwind-owe klasy rozmiarów
   const sizeClasses: Record<NonNullable<LogoProps['size']>, string> = {
     sm: 'w-6 h-6',
     md: 'w-8 h-8',

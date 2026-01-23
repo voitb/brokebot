@@ -1,5 +1,4 @@
-import { createContext, useContext } from "react";
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Conversation, type Message, type Folder } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
@@ -21,7 +20,7 @@ interface ConversationsContextType {
   updateFolderName: (id: string, newName: string) => Promise<void>;
 }
 
-const ConversationsContext = createContext<ConversationsContextType | undefined>(undefined);
+export const ConversationsContext = createContext<ConversationsContextType | undefined>(undefined);
 
 export function ConversationsProvider({ children }: { children: ReactNode }) {
   const rawConversations = useLiveQuery(
@@ -130,7 +129,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
         }
       });
     } catch {
-      // Silent fail for message updates
+      // Silently ignore - message update is non-critical
     }
   };
 
@@ -219,6 +218,8 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Context value: React Compiler handles memoization automatically.
+  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const value: ConversationsContextType = {
     conversations,
     folders: folders || [],

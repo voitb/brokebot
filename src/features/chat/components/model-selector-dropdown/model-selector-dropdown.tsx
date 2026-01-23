@@ -1,4 +1,5 @@
-import { ChevronDown, Cpu, Cloud, Key } from "lucide-react";
+import { useEffect } from "react";
+import { ChevronDown, Cpu, Cloud, Key, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { OnlineModelDialog } from "../online-model-dialog/online-model-dialog";
 import { DropdownLocalModelList } from "./dropdown-local-model-list";
-import { useModelSelectorDropdown } from "@/features/chat/hooks/use-model-selector-dropdown";
+import { useModelSelectorDropdown } from "./use-model-selector-dropdown";
 
 interface ModelSelectorDropdownProps {
   disabled?: boolean;
@@ -31,10 +32,19 @@ export function ModelSelectorDropdown({
     currentModel,
     availableModels,
     activeLocalModel,
+    isLoadingModels,
     handleLocalModelSelect,
     handleOnlineModelSelect,
     handleDialogTrigger,
+    loadLocalModels,
   } = useModelSelectorDropdown();
+
+  // Load local models when dropdown is opened and models not yet loaded
+  useEffect(() => {
+    if (isDropdownOpen && availableModels.length === 0 && !isLoadingModels) {
+      loadLocalModels();
+    }
+  }, [isDropdownOpen, availableModels.length, isLoadingModels, loadLocalModels]);
 
   return (
     <div className="flex items-center gap-2">
@@ -92,13 +102,20 @@ export function ModelSelectorDropdown({
           <DropdownMenuLabel className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <Cpu className="w-3 h-3" />
             Local Models
+            {isLoadingModels && <Loader2 className="w-3 h-3 animate-spin" />}
           </DropdownMenuLabel>
 
-          <DropdownLocalModelList
-            availableModels={availableModels}
-            value={activeLocalModel}
-            onChange={handleLocalModelSelect}
-          />
+          {isLoadingModels ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              Loading available models...
+            </div>
+          ) : (
+            <DropdownLocalModelList
+              availableModels={availableModels}
+              value={activeLocalModel}
+              onChange={handleLocalModelSelect}
+            />
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

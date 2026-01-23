@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { validateFile, processFile, readFileContent, type ValidateFileOptions } from "./file-upload-utils";
-import { createMockFile } from "@/test/mocks/modules";
+import { createMockFile } from "@/testing/mocks/modules";
 
 describe("fileUploadUtils", () => {
   beforeEach(() => {

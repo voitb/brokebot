@@ -6,9 +6,6 @@ interface LoadingDotsProps {
   color?: "default" | "primary" | "muted";
 }
 
-/**
- * Animated loading dots component
- */
 export function LoadingDots({
   className,
   size = "md",

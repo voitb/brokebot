@@ -18,7 +18,6 @@ export interface TranscribeResult {
   text?: string;
 }
 
-// Typed worker messages for type-safe communication
 export type WorkerMessage =
   | { type: "transcribe"; audioData: Float32Array; options: TranscribeOptions }
   | { type: "dispose" };

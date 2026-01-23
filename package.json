@@ -12,7 +12,10 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
+    "typecheck:all": "npm run typecheck && npm run typecheck:tests"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.0",

@@ -6,20 +6,16 @@ import { SearchBar } from "./search-bar";
 import { NewChatButton } from "./new-chat-button";
 import { UserProfile } from "./user-profile";
 import { FolderItem } from "./folder-item";
-import { useConversationList } from "@/features/chat/hooks/use-conversation-list";
+import { useConversationList } from "@/hooks";
 import { useConversations } from "@/app/providers/conversations-provider";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { InputDialog } from "@/shared/components/dialogs/input-dialog";
+import { InputDialog } from "@/components/ui/input-dialog";
 
-/**
- * Main conversation list component with search and grouping
- */
 export function ConversationList() {
   const {
     searchTerm,
@@ -54,11 +50,9 @@ export function ConversationList() {
   return (
     <>
     <div className="flex flex-col h-full">
-        {/* Header with New Chat and New Folder buttons */}
       <div className="p-4 pb-3">
           <div className="flex items-center space-x-2">
             <NewChatButton onNewChat={handleNewChat} className="flex-1" />
-            <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -74,11 +68,9 @@ export function ConversationList() {
                   <p>Create new folder</p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
           </div>
       </div>
 
-      {/* Search Bar */}
       <div className="px-4 pb-4">
         <SearchBar
           ref={searchInputRef}
@@ -89,11 +81,9 @@ export function ConversationList() {
         />
       </div>
 
-      {/* Conversation Groups */}
       <div className="flex-1 min-h-0 px-4">
         <ScrollArea className="h-full">
           <div className="space-y-4">
-            {/* Pinned Conversations */}
             {pinnedConversations.length > 0 && (
               <ConversationGroup
                 title="Favourites"
@@ -101,20 +91,17 @@ export function ConversationList() {
               />
             )}
 
-              {/* Folders */}
-              {foldersWithConversations.map((folder) => (
+            {foldersWithConversations.map((folder) => (
                 <FolderItem key={folder.id} folder={folder} />
-              ))}
+            ))}
 
-            {/* Recent Conversations */}
-              {unfoldedConversations.length > 0 && (
+            {unfoldedConversations.length > 0 && (
               <ConversationGroup
                 title="Recent"
                   conversations={unfoldedConversations}
               />
             )}
 
-            {/* Empty state */}
             {pinnedConversations.length === 0 &&
                 foldersWithConversations.length === 0 &&
                 unfoldedConversations.length === 0 && (
@@ -135,7 +122,6 @@ export function ConversationList() {
         </ScrollArea>
       </div>
 
-      {/* User Profile at bottom */}
       <div className="mt-auto">
         <UserProfile />
       </div>

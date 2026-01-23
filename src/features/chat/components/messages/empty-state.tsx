@@ -5,9 +5,6 @@ interface EmptyStateProps {
   conversation?: Conversation;
 }
 
-/**
- * Empty state when no messages are present
- */
 export function EmptyState({ conversation }: EmptyStateProps) {
   const title = conversation ? `Chat: ${conversation.title}` : "Welcome to brokebot!";
   const description = conversation

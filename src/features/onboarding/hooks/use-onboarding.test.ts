@@ -4,14 +4,29 @@ import { useOnboarding } from "./use-onboarding";
 
 describe("useOnboarding", () => {
   const STORAGE_KEY = "onboardingCompleted-v1";
+  let store: Record<string, string> = {};
 
   beforeEach(() => {
+    store = {};
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn((key: string) => store[key] ?? null),
+      setItem: vi.fn((key: string, value: string) => {
+        store[key] = value;
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete store[key];
+      }),
+      clear: vi.fn(() => {
+        Object.keys(store).forEach((k) => delete store[k]);
+      }),
+      length: 0,
+      key: vi.fn((i: number) => Object.keys(store)[i] ?? null),
+    });
     vi.clearAllMocks();
-    localStorage.clear();
   });
 
   afterEach(() => {
-    localStorage.clear();
+    vi.unstubAllGlobals();
   });
 
   describe("initial state", () => {

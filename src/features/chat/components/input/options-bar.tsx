@@ -18,9 +18,6 @@ interface OptionsBarProps {
   isEngineLoading: boolean;
 }
 
-/**
- * Options bar with model selector, quality settings, and action buttons
- */
 export function OptionsBar({
   quality,
   disabled,
@@ -32,10 +29,11 @@ export function OptionsBar({
   const actuallyLoading = isLoading || isEngineLoading;
 
   const handleReloadModel = async () => {
+    if (!selectedModel) return;
     try {
       await loadModel(selectedModel.id);
     } catch {
-      // Error handling is done in the WebLLM provider
+      // Error already handled by loadModel
     }
   };
 
@@ -79,10 +77,8 @@ export function OptionsBar({
   return (
     <div className="flex items-center justify-between mt-2">
       <div className="flex items-center gap-1">
-        {/* Model Selector */}
         <ModelSelector disabled={disabled || actuallyLoading} />
 
-        {/* Quality Selector */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -100,7 +96,6 @@ export function OptionsBar({
           </TooltipContent>
         </Tooltip>
 
-        {/* Search Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -117,7 +112,6 @@ export function OptionsBar({
           </TooltipContent>
         </Tooltip>
 
-        {/* Attach Button */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -134,7 +128,6 @@ export function OptionsBar({
           </TooltipContent>
         </Tooltip>
 
-        {/* Reload Model Button (only show on error) */}
         {isModelError && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -157,7 +150,6 @@ export function OptionsBar({
         )}
       </div>
 
-      {/* Status Badge */}
       {getStatusBadge()}
     </div>
   );

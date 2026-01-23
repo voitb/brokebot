@@ -1,9 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { MessageAvatar } from "./message-avatar";
 
-/**
- * Indicator shown when AI is generating but has no content yet
- */
 export function GeneratingIndicator() {
   return (
     <div className="flex justify-start group">

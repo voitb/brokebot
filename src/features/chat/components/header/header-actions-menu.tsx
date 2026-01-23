@@ -34,11 +34,11 @@ export function HeaderActionsMenu({
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-48">
       <DropdownMenuItem onClick={onOpenSettings}>
-        <Settings className="w-4 h-4 mr-2" />
+        <Settings />
         Settings
       </DropdownMenuItem>
       <DropdownMenuItem onClick={onOpenShortcuts}>
-        <Keyboard className="w-4 h-4 mr-2" />
+        <Keyboard />
         Shortcuts
       </DropdownMenuItem>
 
@@ -46,20 +46,17 @@ export function HeaderActionsMenu({
         <>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onOpenExport}>
-            <Download className="w-4 h-4 mr-2" />
+            <Download />
             Export conversation
           </DropdownMenuItem>
           <DropdownMenuItem onClick={onImportConversation}>
-            <Upload className="w-4 h-4 mr-2" />
+            <Upload />
             Import conversation
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            className="focus:bg-destructive/10"
-            onClick={onDeleteConversation}
-          >
-            <Trash2 className="w-4 h-4 mr-2 text-destructive" />
-            <span className="text-destructive">Delete conversation</span>
+          <DropdownMenuItem variant="destructive" onClick={onDeleteConversation}>
+            <Trash2 />
+            Delete conversation
           </DropdownMenuItem>
         </>
       )}

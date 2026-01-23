@@ -116,8 +116,6 @@ export function OnboardingDialog({
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement;
         const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-        // 20px tolerance - considered "at the bottom"
         const isAtBottom = distanceFromBottom <= 20;
 
         if (isAtBottom && !hasReadToBottom) {

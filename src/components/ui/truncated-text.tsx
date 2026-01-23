@@ -2,7 +2,6 @@ import { useRef, useState, useLayoutEffect, type ReactNode } from "react";
 import {
     Tooltip,
     TooltipContent,
-    TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/cn";
@@ -61,7 +60,6 @@ export function TruncatedText({
     }
 
     return (
-        <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
                     {textElement}
@@ -70,6 +68,5 @@ export function TruncatedText({
                     <p>{tooltipContent ?? children}</p>
                 </TooltipContent>
             </Tooltip>
-        </TooltipProvider>
     );
 }

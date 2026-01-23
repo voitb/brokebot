@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
-import { useUserConfig } from "@/shared/hooks/use-user-config";
+import { useUserConfig } from "@/hooks/use-user-config";
 
 function UserProfileMenu() {
   const { config } = useUserConfig();
@@ -82,39 +82,39 @@ function UserProfileMenu() {
           <DropdownMenuGroup>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <Settings className="w-4 h-4 mr-2" />
-                <span>Settings</span>
+                <Settings />
+                Settings
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent className="w-48">
                   <DropdownMenuItem onClick={() => openSettingsModal("general")}>
-                    <Settings className="w-4 h-4 mr-2" />
-                    <span>General</span>
+                    <Settings />
+                    General
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => openSettingsModal("documents")}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    <span>Documents</span>
+                    <FileText />
+                    Documents
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => openSettingsModal("privacy")}>
-                    <Shield className="w-4 h-4 mr-2" />
-                    <span>Privacy</span>
+                    <Shield />
+                    Privacy
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
             <DropdownMenuItem onClick={openShortcutsModal}>
-              <Keyboard className="w-4 h-4 mr-2" />
-              <span>Shortcuts</span>
+              <Keyboard />
+              Shortcuts
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/terms" target="_blank">
-                <FileText className="w-4 h-4 mr-2" />
-                <span>Terms of Service</span>
+                <FileText />
+                Terms of Service
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <LifeBuoy className="w-4 h-4 mr-2" />
-              <span>Support</span>
+              <LifeBuoy />
+              Support
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

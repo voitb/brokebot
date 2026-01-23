@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "@/test/utils";
+import { render } from "@/testing/utils";
 import { ModelList } from "./model-list";
-import { createMockOpenRouterModel } from "@/test/mocks/modules";
+import { createMockOpenRouterModel } from "@/testing/mocks/modules";
 
 const mockModels = [
   createMockOpenRouterModel({

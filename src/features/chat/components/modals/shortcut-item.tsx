@@ -3,9 +3,6 @@ interface ShortcutItemProps {
   keys: string;
 }
 
-/**
- * Individual keyboard shortcut item component
- */
 export function ShortcutItem({ label, keys }: ShortcutItemProps) {
   return (
     <div className="flex justify-between items-center">

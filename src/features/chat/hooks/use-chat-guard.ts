@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useConversation } from "@/shared/hooks/use-conversations";
+import { useConversation } from "@/hooks/use-conversations";
 
 const DEFAULT_TIMEOUT_MS = 500;
 
@@ -25,16 +25,13 @@ export function useChatGuard({
   const hasHandledRef = useRef(false);
 
   useEffect(() => {
-    // Reset on conversationId change
     hasHandledRef.current = false;
     setIsChecking(!!conversationId);
 
-    // Skip validation if no conversationId (for general /chat route)
     if (!conversationId) {
       return;
     }
 
-    // Create timeout to check if conversation exists
     const timer = setTimeout(() => {
       if (!hasHandledRef.current && conversation === undefined) {
         hasHandledRef.current = true;
@@ -47,7 +44,6 @@ export function useChatGuard({
       }
     }, timeoutMs);
 
-    // If conversation is found, mark as handled
     if (conversation !== undefined && !hasHandledRef.current) {
       hasHandledRef.current = true;
       setIsChecking(false);

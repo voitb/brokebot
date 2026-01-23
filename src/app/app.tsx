@@ -1,20 +1,23 @@
 import { Outlet } from "react-router-dom";
-import { ResponsiveChatLayout } from "@/features/layout/components/responsive-chat-layout";
+import { ResponsiveChatLayout } from "@/features/layout";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalRoot } from "@/app/modals/modal-root";
-import { Seo } from "@/shared/components/common/seo";
-import { PerformanceSEO } from "@/shared/components/common/performance-seo";
+import { Seo } from "@/components/seo/seo";
+import { PerformanceSEO } from "@/components/seo/performance-seo";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 function App() {
   return (
     <>
       <Seo />
       <PerformanceSEO enableWebVitals={true} />
-      <ResponsiveChatLayout>
-        <Outlet />
-        <Toaster position="top-right" />
-        <ModalRoot />
-      </ResponsiveChatLayout>
+      <ErrorBoundary>
+        <ResponsiveChatLayout>
+          <Outlet />
+          <Toaster position="top-right" />
+          <ModalRoot />
+        </ResponsiveChatLayout>
+      </ErrorBoundary>
     </>
   );
 }

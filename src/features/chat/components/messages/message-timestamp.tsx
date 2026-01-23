@@ -6,9 +6,6 @@ interface MessageTimestampProps {
   isUser: boolean;
 }
 
-/**
- * Message timestamp component with hover effect
- */
 export function MessageTimestamp({ timestamp, isUser }: MessageTimestampProps) {
   return (
     <div

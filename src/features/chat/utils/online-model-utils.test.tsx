@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import { getCategoryIcon, filterModelsByQuery } from "./online-model-utils";
-import { createMockOpenRouterModel } from "@/test/mocks/modules";
+import { createMockOpenRouterModel } from "@/testing/mocks/modules";
 
 describe("onlineModelUtils", () => {
   describe("getCategoryIcon", () => {
@@ -47,18 +47,21 @@ describe("onlineModelUtils", () => {
       createMockOpenRouterModel({
         id: "openai/gpt-4",
         name: "GPT-4",
+        isFree: false,
         description: "Advanced reasoning model",
         provider: "openai",
       }),
       createMockOpenRouterModel({
         id: "anthropic/claude-3",
         name: "Claude 3",
+        isFree: false,
         description: "Helpful AI assistant",
         provider: "anthropic",
       }),
       createMockOpenRouterModel({
         id: "google/gemini",
         name: "Gemini Pro",
+        isFree: true,
         description: "Multimodal capabilities",
         provider: "google",
       }),

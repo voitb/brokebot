@@ -8,9 +8,6 @@ interface StatusIndicatorProps {
   className?: string;
 }
 
-/**
- * Status indicator component with icons and animations
- */
 export function StatusIndicator({
   status,
   size = "md",
