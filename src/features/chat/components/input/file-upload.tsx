@@ -22,7 +22,6 @@ export function FileUpload({
     selectedModelName,
   });
 
-  // Notify parent of file changes
   useEffect(() => {
     onFilesChanged?.(attachedFiles);
   }, [attachedFiles, onFilesChanged]);
@@ -34,7 +33,6 @@ export function FileUpload({
     if (files) {
       await handleFilesSelected(files);
     }
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }

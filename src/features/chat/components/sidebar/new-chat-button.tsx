@@ -8,9 +8,6 @@ interface NewChatButtonProps {
   className?: string;
 }
 
-/**
- * New chat button for sidebar
- */
 export function NewChatButton({
   onNewChat,
   disabled = false,

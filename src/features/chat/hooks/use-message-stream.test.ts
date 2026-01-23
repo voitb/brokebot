@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useMessageStream, type StreamResult } from "./use-message-stream";
-import { createMockStream } from "@/test/mocks/factories";
+import { createMockStream } from "@/testing/mocks/factories";
 
 function assertStreamResult(result: StreamResult | null): StreamResult {
   if (!result) throw new Error("Stream result not initialized");

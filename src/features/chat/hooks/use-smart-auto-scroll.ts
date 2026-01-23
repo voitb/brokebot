@@ -83,19 +83,19 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     };
   }, []);
 
-  // Initial scroll - useLayoutEffect prevents flash of content at wrong position
   useLayoutEffect(() => {
     if (isInitialRender.current) {
       scrollToBottom("auto");
       isInitialRender.current = false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollToBottom is defined in this hook
   }, [conversationId]);
 
-  // Subsequent scrolls on new messages - useEffect for non-blocking smooth scroll
   useEffect(() => {
     if (!isInitialRender.current && !userHasScrolledUp.current) {
       scrollToBottom("smooth");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollToBottom is defined in this hook
   }, [messageCount, isGenerating]);
 
   const handleScrollToBottomClick = () => {

@@ -10,9 +10,6 @@ interface MessageFormProps {
   placeholder?: string;
 }
 
-/**
- * Message input form with auto-resize textarea and send button
- */
 export function MessageForm({
   onSubmit,
   disabled,

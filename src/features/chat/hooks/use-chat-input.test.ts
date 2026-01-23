@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useChatInput } from "./use-chat-input";
-import { mockNavigate } from "@/test/mocks/modules";
-import { createMockModel, createMockModelContext } from "@/test/mocks/factories";
+import { mockNavigate } from "@/testing/mocks/modules";
+import { createMockModel, createMockModelContext } from "@/testing/mocks/factories";
 import { useModel } from "@/app/providers/model-provider";
 import type { UnifiedModel } from "@/app/providers/model-provider";
 
@@ -20,9 +20,9 @@ let mockIsGenerating = false;
 
 // react-router-dom is globally mocked in setup.ts
 
-vi.mock("@/shared/hooks/use-conversations", async () => {
+vi.mock("@/hooks/use-conversations", async () => {
   const { createMockConversationsHook, createMockConversationHook } = await import(
-    "@/test/mocks/hooks"
+    "@/testing/mocks/hooks"
   );
   return {
     useConversations: () =>
@@ -39,12 +39,12 @@ vi.mock("@/shared/hooks/use-conversations", async () => {
   };
 });
 
-vi.mock("@/features/chat/hooks/use-conversation-id", () => ({
+vi.mock("@/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 
 vi.mock("@/app/providers/model-provider", async () => {
-  const { createMinimalModelProvider } = await import("@/test/mocks/providers");
+  const { createMinimalModelProvider } = await import("@/testing/mocks/providers");
   return createMinimalModelProvider();
 });
 

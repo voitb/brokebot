@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { createModelCatalog, type ModelInfo } from "./webllm";
+import { loadModelCatalog, createModelCatalog, type ModelInfo } from "./webllm";
 
 describe("webllm", () => {
-  describe("createModelCatalog", () => {
+  describe("loadModelCatalog (async)", () => {
     let catalog: ModelInfo[];
 
-    beforeAll(() => {
-      catalog = createModelCatalog();
+    beforeAll(async () => {
+      catalog = await loadModelCatalog();
     });
 
     it("returns an array of models", () => {
@@ -91,6 +91,14 @@ describe("webllm", () => {
       if (llama32Model) {
         expect(llama32Model.description).toBe("Meta's latest compact Llama model");
       }
+    });
+  });
+
+  describe("createModelCatalog (deprecated sync)", () => {
+    it("returns empty array (deprecated - use loadModelCatalog instead)", () => {
+      const catalog = createModelCatalog();
+      expect(Array.isArray(catalog)).toBe(true);
+      expect(catalog.length).toBe(0);
     });
   });
 });

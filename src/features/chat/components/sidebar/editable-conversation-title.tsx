@@ -17,7 +17,6 @@ export function EditableConversationTitle({
   const [title, setTitle] = useState(initialTitle);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto focus when component mounts - useLayoutEffect prevents focus flicker
   useLayoutEffect(() => {
     inputRef.current?.focus();
     const textLength = inputRef.current?.value.length;

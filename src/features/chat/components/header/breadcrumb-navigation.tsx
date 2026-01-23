@@ -20,10 +20,6 @@ interface BreadcrumbNavigationProps {
   onCancelTitleEdit: () => void;
 }
 
-/**
- * Breadcrumb navigation component for chat header
- * Shows app name -> conversation title with loading and editing states
- */
 export function BreadcrumbNavigation({
   conversationTitle,
   isLoadingConversation,

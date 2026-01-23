@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useConversationId } from "@/features/chat/hooks/use-conversation-id";
+import { useConversationId } from "@/hooks";
 import { useChatGuard } from "@/features/chat/hooks/use-chat-guard";
 
 interface ChatGuardProps {
@@ -7,10 +7,6 @@ interface ChatGuardProps {
   fallback?: ReactNode;
 }
 
-/**
- * ChatGuard component that validates conversation existence
- * Shows loading state while checking, redirects if conversation not found
- */
 export function ChatGuard({
   children,
   fallback = null,
@@ -18,7 +14,6 @@ export function ChatGuard({
   const conversationId = useConversationId();
   const { isChecking } = useChatGuard({ conversationId });
 
-  // Show fallback or nothing while checking
   if (isChecking) {
     return <>{fallback}</>;
   }

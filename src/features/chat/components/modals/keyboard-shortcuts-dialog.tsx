@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { KEYBOARD_SHORTCUTS } from "@/constants/keyboard-shortcuts";
+import { KEYBOARD_SHORTCUTS } from "@/config/keyboard-shortcuts";
 import { ShortcutGroup } from "./shortcut-group";
 
 interface KeyboardShortcutsDialogProps {
@@ -13,9 +13,6 @@ interface KeyboardShortcutsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Dialog showing keyboard shortcuts for the app
- */
 export function KeyboardShortcutsDialog({
   open,
   onOpenChange,

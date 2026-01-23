@@ -1,5 +1,5 @@
 import { Save, Trash2, Edit, X } from "lucide-react";
-import { useApiKeyManager } from "@/features/chat/hooks/use-api-key-manager";
+import { useApiKeyManager } from "./use-api-key-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/app/providers/theme-provider";
 import { WebLLMProvider } from "@/app/providers/web-llm-provider";
 import { ModelProvider } from "@/app/providers/model-provider";
 import { ConversationsProvider } from "@/app/providers/conversations-provider";
-import "../index.css";
+import "@/assets/styles/index.css";
 
 const rootElement = document.getElementById("root");
 

@@ -4,7 +4,6 @@ import type { AttachedFile } from "./file-upload-utils";
 
 const TITLE_MAX_LENGTH = 50;
 
-/** Prefix used to mark error messages that should be filtered from AI prompts */
 export const ERROR_MESSAGE_PREFIX = "[ERROR]: ";
 
 export type PromptMode = "online" | "local";
@@ -29,9 +28,6 @@ export function truncateTitle(message: string, maxLength: number = TITLE_MAX_LEN
   return message.slice(0, maxLength) + (message.length > maxLength ? "..." : "");
 }
 
-/**
- * Summarizes long conversations by keeping recent messages and adding earlier context as a summary
- */
 export function summarizeConversation(
   messages: OpenRouterMessage[],
   maxMessages: number = 10
@@ -73,9 +69,6 @@ export function summarizeConversation(
   return [...systemMessages, ...recentMessages];
 }
 
-/**
- * Builds the prompt for AI model consumption
- */
 export function buildPrompt(
   messages: OpenRouterMessage[],
   messageContent: string,
@@ -116,10 +109,6 @@ export function buildPrompt(
   return summarizeConversation(conversationMessages, 12);
 }
 
-/**
- * Formats attached files as XML-like content for message submission.
- * Sanitizes file names to prevent XSS.
- */
 export function formatAttachedFiles(files: AttachedFile[]): string {
   if (files.length === 0) return "";
 
@@ -131,9 +120,6 @@ export function formatAttachedFiles(files: AttachedFile[]): string {
     .join("\n\n");
 }
 
-/**
- * Combines user message with formatted file contents.
- */
 export function buildMessageWithFiles(message: string, files: AttachedFile[]): string {
   const fileContents = formatAttachedFiles(files);
   if (!fileContents) return message;

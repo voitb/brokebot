@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { screen } from "@testing-library/react";
-import { render } from "@/test/utils";
+import { render } from "@/testing/utils";
 import { MessageBubble } from "./message-bubble";
-import { createMockMessage } from "@/test/mocks/modules";
+import { createMockMessage } from "@/testing/mocks/modules";
 
 vi.mock("@/app/providers/web-llm-provider", async () => {
-  const { createMinimalWebLLMProvider } = await import("@/test/mocks/providers");
+  const { createMinimalWebLLMProvider } = await import("@/testing/mocks/providers");
   return createMinimalWebLLMProvider();
 });
 

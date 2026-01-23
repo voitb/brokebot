@@ -14,7 +14,7 @@ type ThemeProviderContextType = {
   setTheme: (theme: Theme) => void;
 };
 
-const ThemeProviderContext = createContext<
+export const ThemeProviderContext = createContext<
   ThemeProviderContextType | undefined
 >(undefined);
 
@@ -24,7 +24,6 @@ interface ThemeProviderProps {
   storageKey?: string;
 }
 
-// Module-level functions for useSyncExternalStore (stable references)
 function subscribeToSystemTheme(callback: () => void) {
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   mediaQuery.addEventListener("change", callback);
@@ -51,7 +50,6 @@ export function ThemeProvider({
     return stored || defaultTheme;
   });
 
-  // Subscribe to OS theme changes using React 18+ recommended pattern
   const systemTheme = useSyncExternalStore(
     subscribeToSystemTheme,
     getSystemThemeSnapshot,
@@ -64,6 +62,8 @@ export function ThemeProvider({
     root.classList.add(theme === "system" ? systemTheme : theme);
   }, [theme, systemTheme]);
 
+  // Context value: React Compiler handles memoization automatically.
+  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {

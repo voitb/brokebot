@@ -2,15 +2,14 @@ import ReactMarkdown from "react-markdown";
 import { Loader2 } from "lucide-react";
 import { createMarkdownComponents } from "@/features/chat/components/markdown/markdown-components";
 
+const MARKDOWN_COMPONENTS = createMarkdownComponents();
+
 interface MessageContentProps {
   content: string;
   isUser: boolean;
   isGenerating?: boolean;
 }
 
-/**
- * User message content component
- */
 function UserMessageContent({ content }: { content: string }) {
   return (
     <p className="text-sm whitespace-pre-wrap leading-relaxed">
@@ -19,9 +18,6 @@ function UserMessageContent({ content }: { content: string }) {
   );
 }
 
-/**
- * AI message content component with markdown support
- */
 interface AiMessageContentProps {
   content: string;
   isGenerating?: boolean;
@@ -31,15 +27,12 @@ function AiMessageContent({
   content,
   isGenerating = false
 }: AiMessageContentProps) {
-  const markdownComponents = createMarkdownComponents();
-
   return (
     <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
-      <ReactMarkdown components={markdownComponents}>
+      <ReactMarkdown components={MARKDOWN_COMPONENTS}>
         {content}
       </ReactMarkdown>
 
-      {/* Show typing indicator if generating */}
       {isGenerating && (
         <div className="flex items-center gap-1 mt-2 text-muted-foreground">
           <Loader2 className="w-3 h-3 animate-spin" />
@@ -50,9 +43,6 @@ function AiMessageContent({
   );
 }
 
-/**
- * Message content wrapper component
- */
 export function MessageContent({
   content,
   isUser,

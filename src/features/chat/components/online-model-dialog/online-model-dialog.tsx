@@ -11,7 +11,7 @@ import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
 import { ApiKeysTab } from "./api-keys-tab";
 import { ModelList } from "./model-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useOnlineModels } from "@/features/chat/hooks/use-online-models";
+import { useOnlineModels } from "./use-online-models";
 
 interface OnlineModelDialogProps {
   onModelSelect: (model: OpenRouterModel, apiKey: string) => void;
@@ -20,9 +20,6 @@ interface OnlineModelDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-/**
- * Dialog for selecting online AI models from OpenRouter
- */
 export function OnlineModelDialog({
   onModelSelect,
   selectedModel,

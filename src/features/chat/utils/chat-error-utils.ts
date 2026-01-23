@@ -2,7 +2,6 @@ import { toast } from "sonner";
 
 type NavigateFn = (options: { search: string }) => void;
 
-/** Action types that can be returned from error parsing - caller handles execution */
 export type ErrorActionType =
   | { type: "retry"; delay?: number }
   | { type: "navigate"; target: "settings" | "model-selector" }

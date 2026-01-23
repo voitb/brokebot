@@ -17,9 +17,6 @@ export interface MessageBubbleProps {
   onStopGeneration?: () => void;
 }
 
-/**
- * Individual message bubble with avatar and content
- */
 export function MessageBubble({
   message,
   isGenerating = false,
@@ -33,14 +30,12 @@ export function MessageBubble({
   const isModelReady = status === "Ready" && !isEngineLoading;
   const parsedMessage = parseMessage(message.content);
 
-  // If AI is generating but has no content yet, show loader without bubble
   if (isAiGenerating && !message.content.trim()) {
     return <GeneratingIndicator />;
   }
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} group`}>
-      {/* Avatar for AI */}
       {!isUser && (
         <MessageAvatar
           isUser={false}
@@ -50,19 +45,16 @@ export function MessageBubble({
       )}
 
       <div className={`max-w-xl ${isUser ? "ml-auto" : ""}`}>
-        {/* Thinking Section (only for AI) */}
         {!isUser && parsedMessage.thinking && (
           <ThinkingSection thinking={parsedMessage.thinking} />
         )}
 
-        {/* Main Message Content */}
         <MessageContent
           content={parsedMessage.content}
           isUser={isUser}
           isGenerating={isAiGenerating}
         />
 
-        {/* Attachments for user messages */}
         {isUser && parsedMessage.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
             {parsedMessage.attachments.map((att, index) => (
@@ -71,7 +63,6 @@ export function MessageBubble({
           </div>
         )}
 
-        {/* Message Actions (only for AI messages with content) */}
         {!isUser && (parsedMessage.content.trim() || isAiGenerating) && (
           <MessageActions
             content={parsedMessage.content}
@@ -83,11 +74,9 @@ export function MessageBubble({
           />
         )}
 
-        {/* Timestamp */}
         <MessageTimestamp timestamp={message.createdAt} isUser={isUser} />
       </div>
 
-      {/* Avatar for User */}
       {isUser && (
         <MessageAvatar isUser={true} isGenerating={false} position="right" />
       )}

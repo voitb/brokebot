@@ -5,8 +5,8 @@ import { ChatInterface } from "./chat-interface";
 import { ConversationsProvider } from "@/app/providers/conversations-provider";
 import { ThemeProvider } from "@/app/providers/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { clearTestDatabase } from "@/test/db-helpers";
-import { createMockModelContext, createMockWebLLMContext } from "@/test/mocks/factories";
+import { clearTestDatabase } from "@/testing/db-helpers";
+import { createMockModelContext, createMockWebLLMContext } from "@/testing/mocks/factories";
 
 const mockModelContext = createMockModelContext();
 const mockWebLLMContext = createMockWebLLMContext();
@@ -16,17 +16,13 @@ vi.mock("@/app/providers/model-provider", () => ({
   ModelProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-vi.mock("@/app/providers/web-llm-provider", async () => {
-  const { MOCK_AVAILABLE_MODELS } = await import("@/test/mocks/constants");
-  return {
-    useWebLLM: () => mockWebLLMContext,
-    WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
-    AVAILABLE_MODELS: MOCK_AVAILABLE_MODELS,
-  };
-});
+vi.mock("@/app/providers/web-llm-provider", () => ({
+  useWebLLM: () => mockWebLLMContext,
+  WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 vi.mock("@/features/chat/lib/transcriber", async () => {
-  const { createMockTranscriber } = await import("@/test/mocks/hooks");
+  const { createMockTranscriber } = await import("@/testing/mocks/hooks");
   return createMockTranscriber();
 });
 

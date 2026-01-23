@@ -6,16 +6,10 @@ interface MessageAvatarProps {
   position: "left" | "right";
 }
 
-/**
- * Avatar content based on user type
- */
 function AvatarContent({ isUser }: { isUser: boolean }) {
   return isUser ? <>💸</> : <>🤖</>;
 }
 
-/**
- * Avatar component for messages
- */
 export function MessageAvatar({
   isUser,
   position,

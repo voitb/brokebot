@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { OnlineModelDialog } from "./online-model-dialog";
-import { createMockOpenRouterModel } from "@/test/mocks/modules";
+import { createMockOpenRouterModel } from "@/testing/mocks/modules";
 
 const mockFreeModels = [
   createMockOpenRouterModel({ id: "free-1", name: "Free Model 1", isFree: true }),
@@ -25,7 +25,7 @@ let mockHookReturn = {
   error: null as Error | null,
 };
 
-vi.mock("@/features/chat/hooks/use-online-models", () => ({
+vi.mock("./use-online-models", () => ({
   useOnlineModels: () => mockHookReturn,
 }));
 

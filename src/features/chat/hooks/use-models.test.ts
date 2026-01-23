@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useModels } from "./use-models";
 
-import { setupFetchMock } from "@/test/mocks/modules";
+import { setupFetchMock } from "@/testing/mocks/modules";
 
 const { mockFetch } = setupFetchMock();
 
@@ -24,6 +24,79 @@ describe("useModels", () => {
       expect(result.current.isLoading).toBe(true);
       expect(result.current.models).toEqual([]);
       expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe("abort handling", () => {
+    it("passes AbortSignal to fetch", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: [
+            {
+              id: "test/model",
+              name: "Test",
+              description: "Test",
+              context_length: 8192,
+              pricing: { prompt: "0.01", completion: "0.01" },
+            },
+          ],
+        }),
+      });
+
+      const { result } = renderHook(() => useModels());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://openrouter.ai/api/v1/models",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it("ignores AbortError when unmounting", async () => {
+      const abortError = new DOMException("Aborted", "AbortError");
+      mockFetch.mockRejectedValueOnce(abortError);
+
+      const { result, unmount } = renderHook(() => useModels());
+
+      unmount();
+
+      expect(result.current.error).toBeNull();
+    });
+
+    it("does not update state after unmount", async () => {
+      let resolvePromise: (value: unknown) => void;
+      const fetchPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+      mockFetch.mockImplementation(() => fetchPromise);
+
+      const { result, unmount } = renderHook(() => useModels());
+
+      expect(result.current.isLoading).toBe(true);
+
+      unmount();
+
+      resolvePromise!({
+        ok: true,
+        json: async () => ({
+          data: [
+            {
+              id: "test/model",
+              name: "Test",
+              description: "Test",
+              context_length: 8192,
+              pricing: { prompt: "0.01", completion: "0.01" },
+            },
+          ],
+        }),
+      });
+
+      expect(result.current.models).toEqual([]);
+      expect(result.current.isLoading).toBe(true);
     });
   });
 
@@ -50,7 +123,10 @@ describe("useModels", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockFetch).toHaveBeenCalledWith("https://openrouter.ai/api/v1/models");
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://openrouter.ai/api/v1/models",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
       expect(result.current.models).toHaveLength(1);
       expect(result.current.error).toBeNull();
     });

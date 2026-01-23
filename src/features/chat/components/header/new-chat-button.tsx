@@ -7,10 +7,6 @@ interface NewChatButtonProps {
   onNewChat: () => void;
 }
 
-/**
- * New chat button with sidebar trigger for desktop view
- * Shows when sidebar is closed
- */
 export function NewChatButton({ onNewChat }: NewChatButtonProps) {
   return (
     <div className="flex items-center gap-2">

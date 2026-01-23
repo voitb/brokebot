@@ -1,22 +1,27 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useDocuments } from "@/features/documents/hooks/use-documents";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, Trash2, Calendar } from "lucide-react";
-// Note: date-fns not available, using native Date
-// import { formatDistanceToNow } from "date-fns";
-
 
 interface DocumentManagerProps {
   className?: string;
 }
 
-/**
- * Document manager component for uploading and managing text files
- */
 export function DocumentManager({ className }: DocumentManagerProps) {
   const { documents, isLoading, uploadDocument, deleteDocument } = useDocuments();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<{ id: number; filename: string } | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -26,7 +31,6 @@ export function DocumentManager({ className }: DocumentManagerProps) {
       await uploadDocument(files[i]);
     }
 
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -36,10 +40,14 @@ export function DocumentManager({ className }: DocumentManagerProps) {
     fileInputRef.current?.click();
   };
 
-  const handleDeleteDocument = async (id: number, filename: string) => {
-    if (window.confirm(`Are you sure you want to delete "${filename}"?`)) {
-      await deleteDocument(id);
-    }
+  const handleDeleteClick = (id: number, filename: string) => {
+    setDocumentToDelete({ id, filename });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!documentToDelete) return;
+    await deleteDocument(documentToDelete.id);
+    setDocumentToDelete(null);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -120,7 +128,7 @@ export function DocumentManager({ className }: DocumentManagerProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => doc.id && handleDeleteDocument(doc.id, doc.filename)}
+                  onClick={() => doc.id && handleDeleteClick(doc.id, doc.filename)}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -133,12 +141,32 @@ export function DocumentManager({ className }: DocumentManagerProps) {
         {documents.length > 0 && (
           <div className="mt-4 p-3 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground">
-              💡 <strong>Tip:</strong> When you attach files to chat messages, AI can read and 
+              💡 <strong>Tip:</strong> When you attach files to chat messages, AI can read and
               analyze their content. Your documents are stored locally and never sent to external servers.
             </p>
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Document</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{documentToDelete?.filename}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 } 

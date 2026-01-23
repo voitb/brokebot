@@ -9,9 +9,6 @@ interface ModelErrorProps {
   onRetry: () => Promise<void>;
 }
 
-/**
- * Model error alert component
- */
 export function ModelError({
   isModelError,
   status,

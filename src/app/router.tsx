@@ -1,9 +1,26 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import App from "@/app/app";
-import { WelcomeScreen } from "@/features/welcome/components/welcome-screen";
-import { ChatInterface } from "@/features/chat/components/interface/chat-interface";
 import { ChatGuard } from "@/features/chat/components/interface/chat-guard";
-import { TermsOfService } from "@/pages/terms-of-service";
+import { RouteLoadingFallback } from "@/components/ui/route-loading-fallback";
+
+const WelcomeScreen = lazy(() =>
+  import("@/app/pages/welcome").then((m) => ({
+    default: m.WelcomeScreen,
+  }))
+);
+
+const ChatInterface = lazy(() =>
+  import("@/features/chat/components/interface/chat-interface").then((m) => ({
+    default: m.ChatInterface,
+  }))
+);
+
+const TermsOfService = lazy(() =>
+  import("@/app/pages/terms-of-service").then((m) => ({
+    default: m.TermsOfService,
+  }))
+);
 
 export const router = createBrowserRouter([
   {
@@ -12,7 +29,11 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <WelcomeScreen />,
+        element: (
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <WelcomeScreen />
+          </Suspense>
+        ),
       },
       {
         path: "chat",
@@ -22,7 +43,9 @@ export const router = createBrowserRouter([
         path: "chat/:id",
         element: (
           <ChatGuard>
-            <ChatInterface />
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <ChatInterface />
+            </Suspense>
           </ChatGuard>
         ),
       },
@@ -34,6 +57,10 @@ export const router = createBrowserRouter([
   },
   {
     path: "/terms",
-    element: <TermsOfService />,
+    element: (
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <TermsOfService />
+      </Suspense>
+    ),
   },
 ]);

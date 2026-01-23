@@ -3,54 +3,38 @@ import {
   useContext,
   useState,
   useEffect,
-  useEffectEvent,
   type ReactNode,
 } from "react";
-import { CreateWebWorkerMLCEngine, WebWorkerMLCEngine } from "@mlc-ai/web-llm";
+import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
-import WebLLMWorker from "@/features/chat/lib/webllm/worker.ts?worker";
-import { createModelCatalog, type ModelInfo } from "@/features/chat/lib/webllm";
+import { loadModelCatalog, type ModelInfo } from "@/features/chat/lib/webllm";
 
 export { type ModelInfo };
-
-export const AVAILABLE_MODELS = createModelCatalog();
 
 interface EngineState {
   engine: WebWorkerMLCEngine | null;
   isLoading: boolean;
   progress: number;
   status: string;
-  selectedModel: ModelInfo;
-  availableModels: typeof AVAILABLE_MODELS;
+  selectedModel: ModelInfo | null;
+  availableModels: ModelInfo[];
+  isLoadingModels: boolean;
   setSelectedModel: (model: ModelInfo) => void;
   loadModel: (modelId: string) => Promise<void>;
+  loadAvailableModels: () => Promise<ModelInfo[]>;
 }
 
-const WebLLMContext = createContext<EngineState | undefined>(undefined);
+export const WebLLMContext = createContext<EngineState | undefined>(undefined);
 
 interface WebLLMProviderProps {
   children: ReactNode;
 }
 
 export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
-  const [selectedModel, setSelectedModelState] = useState<ModelInfo>(() => {
-    const stored = localStorage.getItem("unifiedModel");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed?.type === "local" && parsed.localModel?.id) {
-          const found = AVAILABLE_MODELS.find(
-            (m) => m.id === parsed.localModel.id
-          );
-          if (found) return found;
-        }
-      } catch {
-        // Ignore malformed JSON
-      }
-    }
-    return AVAILABLE_MODELS[0];
-  });
+  const [availableModels, setAvailableModels] = useState<ModelInfo[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [selectedModel, setSelectedModelState] = useState<ModelInfo | null>(null);
 
   const [engineState, setEngineState] = useState<{
     engine: WebWorkerMLCEngine | null;
@@ -59,14 +43,29 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     status: string;
   }>({
     engine: null,
-    isLoading: true,
+    isLoading: false,
     progress: 0,
-    status: "Initializing...",
+    status: "Ready",
   });
+
+  // Load available models lazily when needed
+  const ensureModelsLoaded = async (): Promise<ModelInfo[]> => {
+    if (availableModels.length > 0) {
+      return availableModels;
+    }
+
+    setIsLoadingModels(true);
+    try {
+      const models = await loadModelCatalog();
+      setAvailableModels(models);
+      return models;
+    } finally {
+      setIsLoadingModels(false);
+    }
+  };
 
   const loadModel = async (modelId: string) => {
     try {
-      // Cleanup old engine before creating new one to prevent memory leak
       if (engineState.engine) {
         await engineState.engine.unload();
       }
@@ -75,12 +74,23 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         ...prev,
         isLoading: true,
         progress: 0,
-        status: "Loading model...",
+        status: "Loading WebLLM...",
         engine: null,
       }));
 
+      // Dynamic import: WebLLM (5.5MB) only loads when user selects a local model
+      const { CreateWebWorkerMLCEngine } = await import("@mlc-ai/web-llm");
+
+      setEngineState((prev) => ({
+        ...prev,
+        status: "Loading model...",
+      }));
+
       const newEngine = await CreateWebWorkerMLCEngine(
-        new WebLLMWorker(),
+        new Worker(
+          new URL("@/features/chat/lib/webllm/worker.ts", import.meta.url),
+          { type: "module" }
+        ),
         modelId,
         {
           initProgressCallback: (report) => {
@@ -121,25 +131,45 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     }
   };
 
-  const setSelectedModel = (model: ModelInfo) => {
+  const setSelectedModel = async (model: ModelInfo) => {
     setSelectedModelState(model);
-    loadModel(model.id);
+    await loadModel(model.id);
   };
 
-  const onInitialize = useEffectEvent(() => {
-    loadModel(selectedModel.id);
-  });
-
+  // Check if user had a local model selected previously
   useEffect(() => {
-    onInitialize();
+    const initFromStorage = async () => {
+      const stored = localStorage.getItem("unifiedModel");
+      if (!stored) return;
+
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.type === "local" && parsed.localModel?.id) {
+          // User previously had a local model - load it
+          const models = await ensureModelsLoaded();
+          const found = models.find((m) => m.id === parsed.localModel.id);
+          if (found) {
+            setSelectedModelState(found);
+            await loadModel(found.id);
+          }
+        }
+      } catch {
+        // Invalid JSON in localStorage, ignore
+      }
+    };
+
+    initFromStorage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount; functions are stable
   }, []);
 
   const contextValue: EngineState = {
     ...engineState,
     selectedModel,
-    availableModels: AVAILABLE_MODELS,
+    availableModels,
+    isLoadingModels,
     setSelectedModel,
     loadModel,
+    loadAvailableModels: ensureModelsLoaded,
   };
 
   return (

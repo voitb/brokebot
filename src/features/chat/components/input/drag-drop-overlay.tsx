@@ -3,9 +3,6 @@ interface DragDropOverlayProps {
   supportsImages: boolean;
 }
 
-/**
- * Drag & drop overlay component
- */
 export function DragDropOverlay({
   isDragOver,
   supportsImages,

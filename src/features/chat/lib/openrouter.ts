@@ -155,7 +155,7 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
               yield { content: accumulatedContent, isComplete: false };
             }
           } catch {
-            // Malformed JSON chunks are expected in SSE streams
+            // Skip malformed SSE chunks
           }
         }
       }

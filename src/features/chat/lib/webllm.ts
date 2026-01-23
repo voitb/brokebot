@@ -1,5 +1,3 @@
-import { prebuiltAppConfig } from "@mlc-ai/web-llm";
-
 export interface ModelInfo {
   id: string;
   name: string;
@@ -103,30 +101,51 @@ const CUSTOM_DESCRIPTIONS: Record<string, string> = {
   "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC": "Tiny Llama model for basic chat",
 };
 
-export function createModelCatalog(): ModelInfo[] {
-  return prebuiltAppConfig.model_list.map((m) => {
-    const { name, size } = parseModelName(m.model_id);
-    const category = deriveCategory(m.vram_required_MB);
-    const modelType = deriveModelType(m.model_id, m.model_type);
-    const specialization = deriveSpecialization(m.model_id);
-    const supportsImages = deriveSupportsImages(m.model_id, m.model_type);
-    const supportsFunctions = deriveSupportsFunctions(m.model_id);
+// Singleton promise for lazy loading model catalog
+let modelCatalogPromise: Promise<ModelInfo[]> | null = null;
 
-    return {
-      id: m.model_id,
-      name,
-      size,
-      description: CUSTOM_DESCRIPTIONS[m.model_id] ?? `${name} model`,
-      ramRequirement: formatRamRequirement(m.vram_required_MB),
-      downloadSize: "See web-llm",
-      performance: derivePerformance(category),
-      category,
-      modelType,
-      vramRequired: m.vram_required_MB,
-      ...(supportsImages && { supportsImages }),
-      ...(supportsFunctions && { supportsFunctions }),
-      ...(specialization && { specialization }),
-      ...(category === "extreme" && { warning: "Requires high-end hardware" }),
-    };
-  });
+/**
+ * Lazily loads the WebLLM model catalog.
+ * Uses dynamic import to avoid loading the 5.5MB WebLLM bundle until needed.
+ */
+export async function loadModelCatalog(): Promise<ModelInfo[]> {
+  if (!modelCatalogPromise) {
+    modelCatalogPromise = import("@mlc-ai/web-llm").then(({ prebuiltAppConfig }) =>
+      prebuiltAppConfig.model_list.map((m) => {
+        const { name, size } = parseModelName(m.model_id);
+        const category = deriveCategory(m.vram_required_MB);
+        const modelType = deriveModelType(m.model_id, m.model_type);
+        const specialization = deriveSpecialization(m.model_id);
+        const supportsImages = deriveSupportsImages(m.model_id, m.model_type);
+        const supportsFunctions = deriveSupportsFunctions(m.model_id);
+
+        return {
+          id: m.model_id,
+          name,
+          size,
+          description: CUSTOM_DESCRIPTIONS[m.model_id] ?? `${name} model`,
+          ramRequirement: formatRamRequirement(m.vram_required_MB),
+          downloadSize: "See web-llm",
+          performance: derivePerformance(category),
+          category,
+          modelType,
+          vramRequired: m.vram_required_MB,
+          ...(supportsImages && { supportsImages }),
+          ...(supportsFunctions && { supportsFunctions }),
+          ...(specialization && { specialization }),
+          ...(category === "extreme" && { warning: "Requires high-end hardware" }),
+        };
+      })
+    );
+  }
+  return modelCatalogPromise;
+}
+
+/**
+ * @deprecated Use loadModelCatalog() instead for lazy loading.
+ * This synchronous version returns an empty array - model catalog is loaded async.
+ */
+export function createModelCatalog(): ModelInfo[] {
+  // Return empty array - actual catalog loaded async via loadModelCatalog()
+  return [];
 }

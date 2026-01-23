@@ -8,7 +8,7 @@ import { type ModelInfo } from "@/app/providers/web-llm-provider";
 
 interface DropdownLocalModelListProps {
   availableModels: ModelInfo[];
-  value: ModelInfo;
+  value: ModelInfo | null;
   onChange: (model: ModelInfo) => void;
 }
 
@@ -60,7 +60,7 @@ export function DropdownLocalModelList({
                   <Badge variant="secondary" className="text-xs">
                     {model.performance}
                   </Badge>
-                  {value.id === model.id && (
+                  {value?.id === model.id && (
                     <Badge variant="default" className="text-xs">
                       Active
                     </Badge>

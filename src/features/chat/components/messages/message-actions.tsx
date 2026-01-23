@@ -12,9 +12,6 @@ interface MessageActionsProps {
   onStopGeneration?: () => void;
 }
 
-/**
- * Stop generation button component
- */
 interface StopButtonProps {
   onStop?: () => void;
 }
@@ -38,9 +35,6 @@ function StopButton({ onStop }: StopButtonProps) {
   );
 }
 
-/**
- * Regenerate button component
- */
 interface RegenerateButtonProps {
   onRegenerate?: () => void;
   isModelReady: boolean;
@@ -68,9 +62,6 @@ function RegenerateButton({ onRegenerate, isModelReady }: RegenerateButtonProps)
   );
 }
 
-/**
- * Message actions component (copy, regenerate, stop)
- */
 export function MessageActions({
   content,
   isLastMessage,
@@ -81,7 +72,6 @@ export function MessageActions({
 }: MessageActionsProps) {
   return (
     <div className="flex items-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      {/* Copy button - always available for AI messages with content */}
       <CopyButton
         value={content}
         size="sm"
@@ -91,7 +81,6 @@ export function MessageActions({
         <span className="ml-1">Copy</span>
       </CopyButton>
 
-      {/* Regenerate/Stop button for last AI message */}
       {isLastMessage && (
         <>
           {isGenerating ? (

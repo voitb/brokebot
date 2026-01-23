@@ -5,13 +5,11 @@ import { Trash2 } from "lucide-react";
 
 interface DangerZoneSectionProps {
   onClearAllDataClick: () => void;
-  // onResetSettingsClick: () => void;
   hasConversations?: boolean;
 }
 
 export function DangerZoneSection({
   onClearAllDataClick,
-  // onResetSettingsClick,
   hasConversations = false,
 }: DangerZoneSectionProps) {
   return (
@@ -41,14 +39,6 @@ export function DangerZoneSection({
               <Trash2 className="mr-2 h-4 w-4" />
               Clear All Conversations & Documents
             </Button>
-            {/* <Button
-              variant="destructive"
-              onClick={onResetSettingsClick}
-              className="bg-red-700 hover:bg-red-800"
-            >
-              <Settings2 className="mr-2 h-4 w-4" />
-              Reset All Settings
-            </Button> */}
           </div>
         </CardContent>
       </Card>

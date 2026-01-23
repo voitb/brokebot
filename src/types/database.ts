@@ -1,4 +1,3 @@
-// Re-export database types for convenience
 export type {
   Message,
   Conversation,

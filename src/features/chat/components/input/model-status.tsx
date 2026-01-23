@@ -37,7 +37,6 @@ export function ModelStatus({
       <div className="flex items-center gap-2">
         <ModelSelectorDropdown disabled={disabled} />
 
-        {/* Model Status */}
         <div className="flex items-center gap-1">
           {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
           {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}

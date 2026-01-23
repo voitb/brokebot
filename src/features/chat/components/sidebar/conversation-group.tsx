@@ -6,9 +6,6 @@ interface ConversationGroupProps {
   conversations: Conversation[];
 }
 
-/**
- * Group of conversations with a title header
- */
 export function ConversationGroup({
   title,
   conversations,

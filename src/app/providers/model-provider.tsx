@@ -3,8 +3,8 @@ import {
   useContext,
   useState,
   useTransition,
-  type ReactNode,
   useEffect,
+  type ReactNode,
 } from "react";
 import { useWebLLM, type ModelInfo } from "./web-llm-provider";
 import {
@@ -14,8 +14,9 @@ import {
   type OpenRouterMessage,
   type StreamResponse,
 } from "@/features/chat/lib/openrouter";
-import { useUserConfig } from "@/shared/hooks/use-user-config";
+import { useUserConfig } from "@/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
+import { UnifiedModelSchema } from "@/lib/schemas/model-schema";
 
 export type ModelType = "local" | "online";
 
@@ -29,7 +30,7 @@ export interface UnifiedModel {
   client?: OpenRouterClient;
 }
 
-interface ModelProviderState {
+export interface ModelProviderState {
   currentModel: UnifiedModel | null;
   isOnlineMode: boolean;
   isModelLoading: boolean;
@@ -49,7 +50,7 @@ interface ModelProviderState {
   resetChat: () => Promise<void>;
 }
 
-const ModelContext = createContext<ModelProviderState | undefined>(undefined);
+export const ModelContext = createContext<ModelProviderState | undefined>(undefined);
 
 interface ModelProviderProps {
   children: ReactNode;
@@ -69,24 +70,29 @@ export function ModelProvider({ children }: ModelProviderProps) {
   const [isModelSwitching, startTransition] = useTransition();
 
   useEffect(() => {
-    // Initialize model from localStorage on mount
     const storedModel = localStorage.getItem("unifiedModel");
     if (storedModel) {
       try {
-        const parsed = JSON.parse(storedModel) as UnifiedModel;
-        if (parsed.type === "online" && parsed.onlineModel && config) {
-          // For online models, we need to recreate the client with OpenRouter key only
-          setCurrentModelState(
-            createOnlineModel(parsed.onlineModel, config.openrouterApiKey)
-          );
-          return;
+        const jsonData = JSON.parse(storedModel);
+        const parsed = UnifiedModelSchema.safeParse(jsonData);
+
+        if (parsed.success) {
+          if (parsed.data.type === "online" && parsed.data.onlineModel && config) {
+            setCurrentModelState(
+              createOnlineModel(parsed.data.onlineModel, config.openrouterApiKey)
+            );
+            return;
+          }
+        } else {
+          console.warn("Invalid stored model data, using default:", parsed.error.issues);
+          localStorage.removeItem("unifiedModel");
         }
       } catch {
-        // Fallback to local if JSON is malformed
+        console.warn("Malformed JSON in stored model, using default");
+        localStorage.removeItem("unifiedModel");
       }
     }
 
-    // Default to WebLLM model if nothing stored or if it's a local model
     if (webLLM.selectedModel) {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
@@ -221,6 +227,8 @@ export function ModelProvider({ children }: ModelProviderProps) {
       ? "Ready"
       : "Initializing...";
 
+  // Context value: React Compiler handles memoization automatically.
+  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const contextValue: ModelProviderState = {
     currentModel,
     isOnlineMode: currentModel?.type === "online",
@@ -252,7 +260,6 @@ export const useModel = (): ModelProviderState => {
   return context;
 };
 
-// Utility functions to create unified models
 export const createLocalModel = (localModel: ModelInfo): UnifiedModel => ({
   id: localModel.id,
   name: localModel.name,

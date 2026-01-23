@@ -1,13 +1,10 @@
 import { ShortcutItem } from "./shortcut-item";
-import type { KeyboardShortcutGroup } from "@/constants/keyboard-shortcuts";
+import type { KeyboardShortcutGroup } from "@/config/keyboard-shortcuts";
 
 interface ShortcutGroupProps {
   group: KeyboardShortcutGroup;
 }
 
-/**
- * Keyboard shortcuts group component
- */
 export function ShortcutGroup({ group }: ShortcutGroupProps) {
   return (
     <div>

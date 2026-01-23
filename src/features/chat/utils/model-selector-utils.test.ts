@@ -12,6 +12,8 @@ const mockActiveLocalModel: ModelInfo = {
   ramRequirement: "2GB",
   performance: "fast",
   category: "light",
+  modelType: "LLM",
+  specialization: "general",
 };
 
 const mockOnlineModel: UnifiedModel = {
@@ -23,9 +25,11 @@ const mockOnlineModel: UnifiedModel = {
     id: "gpt-4",
     name: "GPT-4 Turbo",
     description: "Latest GPT-4",
-    context_length: 128000,
+    contextLength: 128000,
     pricing: { prompt: "0.01", completion: "0.03" },
-    top_provider: { context_length: 128000, max_completion_tokens: 4096 },
+    isFree: false,
+    provider: "openai",
+    category: "general",
   },
 };
 
@@ -38,13 +42,13 @@ const mockLocalModel: UnifiedModel = {
 };
 
 describe("getDisplayName", () => {
-  it("returns 'Initializing...' when currentModel is null", () => {
+  it("returns 'Select Model' when currentModel is null", () => {
     const result = getDisplayName({
       currentModel: null,
       activeLocalModel: mockActiveLocalModel,
     });
 
-    expect(result).toBe("Initializing...");
+    expect(result).toBe("Select Model");
   });
 
   it("returns online model name when currentModel is online type", () => {
