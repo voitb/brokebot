@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const ONBOARDING_COMPLETED_KEY = "onboardingCompleted-v1";
 
@@ -8,14 +8,9 @@ export interface UseOnboardingReturn {
 }
 
 export function useOnboarding(): UseOnboardingReturn {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    const hasCompleted = localStorage.getItem(ONBOARDING_COMPLETED_KEY);
-    if (!hasCompleted) {
-      setShowOnboarding(true);
-    }
-  }, []);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem(ONBOARDING_COMPLETED_KEY);
+  });
 
   const completeOnboarding = () => {
     localStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");

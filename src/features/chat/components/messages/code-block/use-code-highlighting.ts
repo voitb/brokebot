@@ -13,7 +13,7 @@ interface UseCodeHighlightingReturn {
   language: string;
   code: string;
   isInline: boolean;
-  syntaxStyle: { [key: string]: React.CSSProperties };
+  syntaxStyle: Record<string, React.CSSProperties>;
 }
 
 export function useCodeHighlighting({

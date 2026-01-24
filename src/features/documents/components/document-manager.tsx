@@ -81,6 +81,7 @@ export function DocumentManager({ className }: DocumentManagerProps) {
             size="sm"
             onClick={handleUploadClick}
             disabled={isLoading}
+            aria-label="Upload documents"
           >
             <Upload className="h-4 w-4" />
             Upload
@@ -96,6 +97,7 @@ export function DocumentManager({ className }: DocumentManagerProps) {
           accept=".txt,.md"
           onChange={handleFileUpload}
           className="hidden"
+          aria-label="Upload text or markdown files"
         />
 
         {documents.length === 0 ? (
@@ -130,6 +132,7 @@ export function DocumentManager({ className }: DocumentManagerProps) {
                   size="sm"
                   onClick={() => doc.id && handleDeleteClick(doc.id, doc.filename)}
                   className="text-destructive hover:text-destructive"
+                  aria-label={`Delete ${doc.filename}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

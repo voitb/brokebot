@@ -5,6 +5,12 @@ import { type UserConfig } from "@/lib/db";
 
 export type SettingsTab = "general" | "documents" | "privacy";
 
+const VALID_SETTINGS_TABS: SettingsTab[] = ["general", "documents", "privacy"];
+
+export function isValidSettingsTab(value: string | null): value is SettingsTab {
+  return value !== null && VALID_SETTINGS_TABS.includes(value as SettingsTab);
+}
+
 export interface UseSettingsReturn {
   settings: Partial<UserConfig>;
   isSaving: boolean;

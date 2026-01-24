@@ -67,9 +67,19 @@ export function ConversationItem({
   return (
     <>
       <div
+        role="button"
+        tabIndex={0}
+        aria-current={isActive ? "page" : undefined}
+        aria-label={`${conversation.title}${isPinned ? ", pinned" : ""}${isActive ? ", currently selected" : ""}`}
         className={`group/item relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${getItemStyles()}`}
         onClick={handleConversationClick}
         onDoubleClick={handleRename}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleConversationClick();
+          }
+        }}
       >
         <div className="flex items-center justify-between min-w-0">
           {isEditing ? (
@@ -87,6 +97,9 @@ export function ConversationItem({
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label={`Actions for ${conversation.title}`}
+                aria-haspopup="menu"
+                aria-expanded={isMenuOpen}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 transition-opacity bg-muted/90 hover:bg-muted/100 backdrop-blur-sm shrink-0 z-10 ${isMenuOpen
                     ? "opacity-100"
                     : "opacity-0 group-hover/item:opacity-100"
@@ -179,4 +192,4 @@ export function ConversationItem({
       />
     </>
   );
-};
+}
