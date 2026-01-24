@@ -50,6 +50,11 @@ Check for maintainability:
 - Deeply nested JSX (> 5 levels)
 - Complex conditional rendering
 
+⚠️ EXCEPTIONS (Do NOT flag as issues):
+- `src/components/ui/` - shadcn/ui components should be kept as-is
+- Third-party component wrappers (Radix, etc.)
+- These components are intentionally large compound components
+
 ### 3. Props Design
 Check prop patterns:
 

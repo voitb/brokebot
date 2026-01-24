@@ -35,6 +35,7 @@ All available Claude Code commands for this project.
 
 | Command | Purpose | Agents Used |
 |---------|---------|-------------|
+| `/fix-all` | **Fix all validation issues** - TypeScript, React patterns, tests, accessibility to achieve 10/10 | 4 agents (parallel) |
 | `/fix-audit-issues` | **Fix all audit issues** - Structure, God hooks, cross-feature imports, performance, ESLint | 17 invocations across 8 phases |
 | `/fix-tests` | Systematically fix failing tests | `general-purpose`, `unit-testing:test-automator` |
 

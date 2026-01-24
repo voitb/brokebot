@@ -74,7 +74,7 @@ describe("ConversationItem", () => {
 
     render(<ConversationItem conversation={conversation} />);
 
-    const menuButton = screen.getByRole("button");
+    const menuButton = screen.getByRole("button", { name: /actions for/i });
     expect(menuButton).toBeInTheDocument();
   });
 

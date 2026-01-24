@@ -129,7 +129,7 @@ CHECK FOR:
 - Accessible components (aria-*, role)
 
 ❌ ANTI-PATTERNS TO FLAG:
-- God components (>300 lines)
+- God components (>300 lines) - EXCEPT src/components/ui/ (shadcn components)
 - Prop drilling >3 levels
 - Business logic in presentational components
 - Inline styles (should use Tailwind)
@@ -138,8 +138,11 @@ CHECK FOR:
 - Missing error boundaries
 - Missing loading states
 
+⚠️ EXCLUSIONS:
+- src/components/ui/*.tsx - shadcn/ui components are intentionally large compound components. Do NOT recommend splitting them.
+
 SCAN:
-- src/components/
+- src/components/ (exclude ui/ from size checks)
 - src/features/*/components/
 
 Return: Component health report with refactoring suggestions

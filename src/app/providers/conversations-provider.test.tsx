@@ -76,7 +76,9 @@ describe("ConversationsProvider", () => {
         conversationId = await assertContext(context).createConversation("New Chat", "Hello!");
       });
 
-      expect(conversationId).toBeTruthy();
+      await waitFor(() => {
+        expect(conversationId).toBeTruthy();
+      });
 
       const saved = await db.conversations.get(conversationId!);
       expect(saved?.title).toBe("New Chat");
@@ -128,6 +130,10 @@ describe("ConversationsProvider", () => {
         conversationId = await assertContext(context).createEmptyConversation("Empty Chat");
       });
 
+      await waitFor(() => {
+        expect(conversationId).toBeTruthy();
+      });
+
       const saved = await db.conversations.get(conversationId!);
       expect(saved?.title).toBe("Empty Chat");
       expect(saved?.messages).toHaveLength(0);
@@ -150,6 +156,10 @@ describe("ConversationsProvider", () => {
       let conversationId: string | null = null;
       await act(async () => {
         conversationId = await assertContext(context).createEmptyConversation("In Folder", folder.id);
+      });
+
+      await waitFor(() => {
+        expect(conversationId).toBeTruthy();
       });
 
       const saved = await db.conversations.get(conversationId!);
@@ -176,8 +186,12 @@ describe("ConversationsProvider", () => {
         await assertContext(context).addMessage(conversation.id, { role: "user", content: "New message" });
       });
 
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.messages).toHaveLength(1);
+      });
+
       const updated = await db.conversations.get(conversation.id);
-      expect(updated?.messages).toHaveLength(1);
       expect(updated?.messages[0].content).toBe("New message");
     });
 
@@ -200,8 +214,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).addMessage(conversation.id, { role: "user", content: "Test" });
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.updatedAt.getTime()).toBeGreaterThan(oldDate.getTime());
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.updatedAt.getTime()).toBeGreaterThan(oldDate.getTime());
+      });
     });
   });
 
@@ -225,8 +241,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).updateMessage(conversation.id, message.id, "Updated content");
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.messages[0].content).toBe("Updated content");
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.messages[0].content).toBe("Updated content");
+      });
     });
 
     it("does not update if content is same", async () => {
@@ -249,8 +267,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).updateMessage(conversation.id, message.id, "Same");
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.updatedAt.getTime()).toBe(oldDate.getTime());
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.updatedAt.getTime()).toBe(oldDate.getTime());
+      });
     });
   });
 
@@ -297,8 +317,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).togglePinConversation(conversation.id);
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.pinned).toBe(true);
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.pinned).toBe(true);
+      });
     });
 
     it("unpins pinned conversation", async () => {
@@ -319,8 +341,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).togglePinConversation(conversation.id);
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.pinned).toBe(false);
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.pinned).toBe(false);
+      });
     });
   });
 
@@ -365,8 +389,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).updateConversationTitle(conversation.id, "New Title");
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.title).toBe("New Title");
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.title).toBe("New Title");
+      });
     });
   });
 
@@ -389,7 +415,10 @@ describe("ConversationsProvider", () => {
         folderId = await assertContext(context).createFolder("New Folder");
       });
 
-      expect(folderId).toBeTruthy();
+      await waitFor(() => {
+        expect(folderId).toBeTruthy();
+      });
+
       const folder = await db.folders.get(folderId!);
       expect(folder?.name).toBe("New Folder");
     });
@@ -413,8 +442,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).deleteFolder(folder.id);
       });
 
-      const deletedFolder = await db.folders.get(folder.id);
-      expect(deletedFolder).toBeUndefined();
+      await waitFor(async () => {
+        const deletedFolder = await db.folders.get(folder.id);
+        expect(deletedFolder).toBeUndefined();
+      });
 
       const conversations = await db.conversations.toArray();
       expect(conversations[0].folderId).toBeUndefined();
@@ -438,8 +469,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).updateFolderName(folder.id, "New Name");
       });
 
-      const updated = await db.folders.get(folder.id);
-      expect(updated?.name).toBe("New Name");
+      await waitFor(async () => {
+        const updated = await db.folders.get(folder.id);
+        expect(updated?.name).toBe("New Name");
+      });
     });
 
     it("moves conversation to folder", async () => {
@@ -461,8 +494,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).moveConversationToFolder(conversation.id, folder.id);
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.folderId).toBe(folder.id);
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.folderId).toBe(folder.id);
+      });
     });
 
     it("removes conversation from folder", async () => {
@@ -484,8 +519,10 @@ describe("ConversationsProvider", () => {
         await assertContext(context).moveConversationToFolder(conversation.id, null);
       });
 
-      const updated = await db.conversations.get(conversation.id);
-      expect(updated?.folderId).toBeUndefined();
+      await waitFor(async () => {
+        const updated = await db.conversations.get(conversation.id);
+        expect(updated?.folderId).toBeUndefined();
+      });
     });
   });
 

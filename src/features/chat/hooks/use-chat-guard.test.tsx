@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { useChatGuard } from "./use-chat-guard";
 import { ConversationsProvider } from "@/app/providers/conversations-provider";
@@ -104,7 +104,9 @@ describe("useChatGuard timeout behavior", () => {
       { wrapper: simpleWrapper }
     );
 
-    await vi.advanceTimersByTimeAsync(100);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
 
     expect(mockToast.error).toHaveBeenCalledWith("Conversation not found", {
       description: "The requested conversation does not exist.",
@@ -127,10 +129,14 @@ describe("useChatGuard timeout behavior", () => {
       { wrapper: simpleWrapper }
     );
 
-    await vi.advanceTimersByTimeAsync(500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
     expect(mockToast.error).not.toHaveBeenCalled();
 
-    await vi.advanceTimersByTimeAsync(500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
     expect(mockToast.error).toHaveBeenCalled();
 
     vi.doUnmock("../use-conversations");

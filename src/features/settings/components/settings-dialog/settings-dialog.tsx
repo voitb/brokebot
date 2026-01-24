@@ -7,7 +7,7 @@ import { DocumentsTab } from "../documents-tab";
 import { PrivacyTab } from "../privacy-tab";
 import { SettingsMobileLayout } from "../settings-mobile-layout";
 import { SettingsDesktopLayout } from "../settings-desktop-layout";
-import { useSettings, type SettingsTab } from "./use-settings";
+import { useSettings, isValidSettingsTab, type SettingsTab } from "./use-settings";
 import { useConversations } from "@/hooks/use-conversations";
 import type { SettingsNavItem } from "../settings-layout-types";
 
@@ -24,7 +24,8 @@ const NAVIGATION_ITEMS: SettingsNavItem[] = [
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = (searchParams.get("tab") as SettingsTab) || "general";
+  const tabParam = searchParams.get("tab");
+  const activeTab: SettingsTab = isValidSettingsTab(tabParam) ? tabParam : "general";
 
   const { settings, handleFieldChange, handleSaveChanges } = useSettings();
   const { conversations } = useConversations();

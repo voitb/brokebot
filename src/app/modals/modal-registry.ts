@@ -14,3 +14,9 @@ export const MODAL_REGISTRY: Record<string, FC<ModalProps>> = {
 };
 
 export type ModalType = keyof typeof MODAL_REGISTRY;
+
+const VALID_MODAL_TYPES = Object.keys(MODAL_REGISTRY) as ModalType[];
+
+export function isValidModalType(value: string | null): value is ModalType {
+  return value !== null && VALID_MODAL_TYPES.includes(value as ModalType);
+}

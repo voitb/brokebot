@@ -53,6 +53,8 @@ export function ModelSelector({
             variant="ghost"
             size="sm"
             disabled={disabled}
+            aria-label={`Select AI model, currently ${selectedOnlineModel ? selectedOnlineModel.name : (selectedModel?.name ?? "none selected")}`}
+            aria-haspopup="listbox"
             className="text-xs h-6 px-2 text-muted-foreground hover:text-foreground gap-1"
           >
             <Cpu className="w-3 h-3" />
@@ -71,6 +73,7 @@ export function ModelSelector({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-7 h-8 text-xs"
+                aria-label="Search models"
               />
             </div>
           </div>
@@ -101,4 +104,4 @@ export function ModelSelector({
       />
     </div>
   );
-}; 
+}

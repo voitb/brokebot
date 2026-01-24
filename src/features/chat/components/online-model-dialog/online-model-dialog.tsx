@@ -2,6 +2,7 @@ import { Cloud, Key, AlertTriangle, TestTube, Settings, Loader } from "lucide-re
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -124,6 +125,9 @@ export function OnlineModelDialog({
             <Cloud className="w-5 h-5" />
             Select Online AI Model
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Configure API keys and browse available online AI models
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="api-keys" className="flex-1 flex flex-col h-full">
