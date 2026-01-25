@@ -81,7 +81,7 @@ export function useChatInputForm({
     handleDragEnter,
   } = useDragDrop();
 
-  const supportsImages = false;
+  const supportsImages = modelDisplayInfo.supportsImages;
 
   const {
     attachedFiles,

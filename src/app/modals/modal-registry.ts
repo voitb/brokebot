@@ -5,7 +5,6 @@ import { KeyboardShortcutsDialog } from "@/features/chat/components/modals/keybo
 export interface ModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  [key: string]: unknown;
 }
 
 export const MODAL_REGISTRY: Record<string, FC<ModalProps>> = {
