@@ -6,52 +6,23 @@ import { useConversationId } from "./use-conversation-id";
 function wrapper(initialPath: string) {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <MemoryRouter initialEntries={[initialPath]}>
-        {children}
-      </MemoryRouter>
+      <MemoryRouter initialEntries={[initialPath]}>{children}</MemoryRouter>
     );
   };
 }
 
 describe("useConversationId", () => {
-  it("returns conversation ID from /chat/:id route", () => {
+  it.each([
+    ["/chat/abc123", "abc123"],
+    ["/chat/550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a716-446655440000"],
+    ["/chat", undefined],
+    ["/chat/", undefined],
+    ["/settings", undefined],
+  ])("returns correct ID for path %s", (path, expected) => {
     const { result } = renderHook(() => useConversationId(), {
-      wrapper: wrapper("/chat/abc123"),
+      wrapper: wrapper(path),
     });
 
-    expect(result.current).toBe("abc123");
-  });
-
-  it("returns undefined for /chat route", () => {
-    const { result } = renderHook(() => useConversationId(), {
-      wrapper: wrapper("/chat"),
-    });
-
-    expect(result.current).toBeUndefined();
-  });
-
-  it("returns undefined for other routes", () => {
-    const { result } = renderHook(() => useConversationId(), {
-      wrapper: wrapper("/settings"),
-    });
-
-    expect(result.current).toBeUndefined();
-  });
-
-  it("handles UUIDs as conversation ID", () => {
-    const uuid = "550e8400-e29b-41d4-a716-446655440000";
-    const { result } = renderHook(() => useConversationId(), {
-      wrapper: wrapper(`/chat/${uuid}`),
-    });
-
-    expect(result.current).toBe(uuid);
-  });
-
-  it("returns undefined for /chat/ with trailing slash only", () => {
-    const { result } = renderHook(() => useConversationId(), {
-      wrapper: wrapper("/chat/"),
-    });
-
-    expect(result.current).toBeUndefined();
+    expect(result.current).toBe(expected);
   });
 });

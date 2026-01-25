@@ -119,6 +119,12 @@ Priority order:
 4. src/hooks/ - Hook return types
 5. src/features/*/hooks/ - Feature hook types
 
+## Shadcn Component Exclusions
+
+**Skip `src/components/ui/`** (shadcn) from type quality validation except custom components.
+
+Shadcn components follow their own type patterns. Only validate custom UI components.
+
 ## Output Format
 
 ### Critical Type Safety Issues

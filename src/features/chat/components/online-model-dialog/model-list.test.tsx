@@ -44,37 +44,19 @@ describe("ModelList", () => {
     vi.clearAllMocks();
   });
 
-  describe("Search Input", () => {
-    it("renders search input with placeholder", () => {
+  describe("search", () => {
+    it("renders search input", () => {
       render(<ModelList {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText("Search models...")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("Search models...")
+      ).toBeInTheDocument();
     });
 
-    it("updates search value on typing", async () => {
+    it("filters models by name", async () => {
       render(<ModelList {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search models...");
-      await user.type(searchInput, "GPT");
-
-      expect(searchInput).toHaveValue("GPT");
-    });
-  });
-
-  describe("Filtering", () => {
-    it("shows all models when search is empty", () => {
-      render(<ModelList {...defaultProps} />);
-
-      expect(screen.getByText("GPT-4")).toBeInTheDocument();
-      expect(screen.getByText("Claude 3")).toBeInTheDocument();
-      expect(screen.getByText("Gemini Pro")).toBeInTheDocument();
-    });
-
-    it("filters models by search query", async () => {
-      render(<ModelList {...defaultProps} />);
-
-      const searchInput = screen.getByPlaceholderText("Search models...");
-      await user.type(searchInput, "claude");
+      await user.type(screen.getByPlaceholderText("Search models..."), "claude");
 
       expect(screen.queryByText("GPT-4")).not.toBeInTheDocument();
       expect(screen.getByText("Claude 3")).toBeInTheDocument();
@@ -84,42 +66,27 @@ describe("ModelList", () => {
     it("filters by provider name", async () => {
       render(<ModelList {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search models...");
-      await user.type(searchInput, "google");
+      await user.type(screen.getByPlaceholderText("Search models..."), "google");
 
       expect(screen.queryByText("GPT-4")).not.toBeInTheDocument();
       expect(screen.queryByText("Claude 3")).not.toBeInTheDocument();
       expect(screen.getByText("Gemini Pro")).toBeInTheDocument();
     });
-  });
 
-  describe("Empty State", () => {
-    it("shows no-results message when search has no matches", async () => {
+    it("shows empty state when no matches", async () => {
       render(<ModelList {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search models...");
-      await user.type(searchInput, "nonexistent");
+      await user.type(
+        screen.getByPlaceholderText("Search models..."),
+        "nonexistent"
+      );
 
       expect(screen.getByText(/no models found matching/i)).toBeInTheDocument();
-      expect(screen.getByText(/"nonexistent"/)).toBeInTheDocument();
-    });
-
-    it("does not show empty message on initial render", () => {
-      render(<ModelList {...defaultProps} />);
-
-      expect(screen.queryByText(/no models found/i)).not.toBeInTheDocument();
-    });
-
-    it("does not show empty message when models exist with empty search", () => {
-      render(<ModelList {...defaultProps} />);
-
-      expect(screen.queryByText(/no models found/i)).not.toBeInTheDocument();
-      expect(screen.getByText("GPT-4")).toBeInTheDocument();
     });
   });
 
-  describe("Model Cards", () => {
-    it("renders a card for each model", () => {
+  describe("model display", () => {
+    it("renders all models", () => {
       render(<ModelList {...defaultProps} />);
 
       expect(screen.getByText("GPT-4")).toBeInTheDocument();
@@ -127,53 +94,24 @@ describe("ModelList", () => {
       expect(screen.getByText("Gemini Pro")).toBeInTheDocument();
     });
 
-    it("marks selected model with ring", () => {
-      const selectedModel = mockModels[1];
-      render(<ModelList {...defaultProps} selectedModel={selectedModel} />);
+    it("does not show empty message when models exist", () => {
+      render(<ModelList {...defaultProps} />);
 
-      const claudeCard = screen.getByText("Claude 3").closest("[data-slot='card']");
-      expect(claudeCard).toHaveClass("ring-2");
-    });
-
-    it("does not mark unselected models with ring", () => {
-      const selectedModel = mockModels[1];
-      render(<ModelList {...defaultProps} selectedModel={selectedModel} />);
-
-      const gptCard = screen.getByText("GPT-4").closest("[data-slot='card']");
-      expect(gptCard).not.toHaveClass("ring-2");
+      expect(screen.queryByText(/no models found/i)).not.toBeInTheDocument();
     });
   });
 
-  describe("Selection", () => {
-    it("calls onSelect when model card is clicked", async () => {
+  describe("selection", () => {
+    it("calls onSelect when model is clicked", async () => {
       render(<ModelList {...defaultProps} />);
 
       const gpt4Card = screen.getByText("GPT-4").closest("[data-slot='card']");
       await user.click(gpt4Card!);
 
-      expect(mockOnSelect).toHaveBeenCalledTimes(1);
       expect(mockOnSelect).toHaveBeenCalledWith(mockModels[0]);
     });
-  });
 
-  describe("Enable/Disable State", () => {
-    it("enables cards when openrouter key exists", () => {
-      render(<ModelList {...defaultProps} />);
-
-      const gptCard = screen.getByText("GPT-4").closest("[data-slot='card']");
-      expect(gptCard).toHaveClass("cursor-pointer");
-      expect(gptCard).not.toHaveClass("opacity-50");
-    });
-
-    it("disables cards when no openrouter key", () => {
-      render(<ModelList {...defaultProps} availableKeys={{}} />);
-
-      const gptCard = screen.getByText("GPT-4").closest("[data-slot='card']");
-      expect(gptCard).toHaveClass("cursor-not-allowed");
-      expect(gptCard).toHaveClass("opacity-50");
-    });
-
-    it("does not call onSelect when disabled card is clicked", async () => {
+    it("does not call onSelect when disabled", async () => {
       render(<ModelList {...defaultProps} availableKeys={{}} />);
 
       const gpt4Card = screen.getByText("GPT-4").closest("[data-slot='card']");

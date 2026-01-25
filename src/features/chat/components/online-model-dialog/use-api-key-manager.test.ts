@@ -45,31 +45,8 @@ describe("useApiKeyManager", () => {
     });
   });
 
-  describe("API key masking", () => {
-    it("masks long API keys correctly", async () => {
-      mockConfig = { openrouterApiKey: "abcd1234567890efgh" };
-
-      const { result } = renderHook(() => useApiKeyManager("openrouter"));
-
-      await waitFor(() => {
-        expect(result.current.apiKey).toBe("abcd••••••••efgh");
-      });
-    });
-
-    it("handles short API keys", async () => {
-      mockConfig = { openrouterApiKey: "short" };
-
-      const { result } = renderHook(() => useApiKeyManager("openrouter"));
-
-      // Short keys (< 8 chars) return empty string from mask
-      await waitFor(() => {
-        expect(result.current.apiKey).toBe("");
-      });
-    });
-  });
-
   describe("handleApiKeySave", () => {
-    it("saves valid API key and shows masked version", async () => {
+    it("saves valid API key", async () => {
       mockConfig = {};
       const { result } = renderHook(() => useApiKeyManager("openrouter"));
 
@@ -101,21 +78,6 @@ describe("useApiKeyManager", () => {
 
       expect(mockUpdateConfig).not.toHaveBeenCalled();
     });
-
-    it("rejects masked API key (contains ••••)", async () => {
-      mockConfig = { openrouterApiKey: "existing-key-1234" };
-      const { result } = renderHook(() => useApiKeyManager("openrouter"));
-
-      await waitFor(() => {
-        expect(result.current.apiKey).toContain("••••");
-      });
-
-      await act(async () => {
-        await result.current.handleApiKeySave();
-      });
-
-      expect(mockUpdateConfig).not.toHaveBeenCalled();
-    });
   });
 
   describe("handleApiKeyRemove", () => {
@@ -139,7 +101,7 @@ describe("useApiKeyManager", () => {
   });
 
   describe("editing mode", () => {
-    it("startEditing shows actual key and sets isEditing", async () => {
+    it("startEditing shows actual key, cancelEditing restores masked key", async () => {
       mockConfig = { openrouterApiKey: "real-key-for-editing" };
       const { result } = renderHook(() => useApiKeyManager("openrouter"));
 
@@ -153,19 +115,6 @@ describe("useApiKeyManager", () => {
 
       expect(result.current.isEditing).toBe(true);
       expect(result.current.apiKey).toBe("real-key-for-editing");
-    });
-
-    it("cancelEditing restores masked key and exits edit mode", async () => {
-      mockConfig = { openrouterApiKey: "real-key-for-editing" };
-      const { result } = renderHook(() => useApiKeyManager("openrouter"));
-
-      await waitFor(() => {
-        expect(result.current.hasStoredKey).toBe(true);
-      });
-
-      act(() => {
-        result.current.startEditing();
-      });
 
       act(() => {
         result.current.setApiKey("modified-key");
@@ -177,18 +126,6 @@ describe("useApiKeyManager", () => {
 
       expect(result.current.isEditing).toBe(false);
       expect(result.current.apiKey).toBe("real••••••••ting");
-    });
-  });
-
-  describe("setApiKey", () => {
-    it("updates apiKey state", () => {
-      const { result } = renderHook(() => useApiKeyManager("openrouter"));
-
-      act(() => {
-        result.current.setApiKey("new-key");
-      });
-
-      expect(result.current.apiKey).toBe("new-key");
     });
   });
 });

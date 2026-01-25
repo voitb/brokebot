@@ -8,25 +8,14 @@ vi.mock("@/app/providers/model-provider", async () => {
 });
 
 vi.mock("@/app/providers/web-llm-provider", async () => {
-  const { createMockWebLLMProvider } = await import("@/testing/mocks/providers");
-  return createMockWebLLMProvider();
-});
-
-vi.mock("@/features/chat/hooks/use-drag-drop", async () => {
-  const { createMockDragDropHook } = await import("@/testing/mocks/hooks");
-  return { useDragDrop: vi.fn(() => createMockDragDropHook()) };
-});
-
-vi.mock("@/features/chat/hooks/use-file-upload", async () => {
-  const { createMockFileUploadHook } = await import("@/testing/mocks/hooks");
-  return { useFileUpload: vi.fn(() => createMockFileUploadHook()) };
+  const { createMinimalWebLLMProvider } = await import("@/testing/mocks/providers");
+  return createMinimalWebLLMProvider();
 });
 
 vi.mock("@/features/chat/hooks/use-speech-to-text", async () => {
   const { createMockSpeechToTextHook } = await import("@/testing/mocks/hooks");
   return {
     useSpeechToText: vi.fn(() => createMockSpeechToTextHook()),
-    useTranscriberToasts: vi.fn(),
   };
 });
 
@@ -46,78 +35,45 @@ describe("ChatInput", () => {
     vi.clearAllMocks();
   });
 
-  it("renders textarea with placeholder showing model name when ready", () => {
+  it("renders with correct structure", () => {
     render(<ChatInput {...defaultProps} />);
 
-    const textarea = screen.getByRole("textbox");
-    expect(textarea).toBeInTheDocument();
-    expect(textarea).toHaveAttribute(
-      "placeholder",
-      expect.stringContaining("Test Model")
-    );
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /attach/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /send message/i })).toBeInTheDocument();
   });
 
-  it("renders textarea with model status when not ready", () => {
-    vi.mocked(useModel).mockReturnValue({
-      currentModel: null,
-      isModelLoading: true,
-      modelStatus: "Loading model...",
-    } as ReturnType<typeof useModel>);
+  it.each([
+    { message: "", isLoading: false, expectedDisabled: true, desc: "empty message" },
+    { message: "Hello", isLoading: false, expectedDisabled: false, desc: "has content" },
+    { message: "Hello", isLoading: true, expectedDisabled: true, desc: "loading" },
+  ])(
+    "submit button disabled=$expectedDisabled when $desc",
+    ({ message, isLoading, expectedDisabled }) => {
+      render(<ChatInput {...defaultProps} message={message} isLoading={isLoading} />);
 
-    render(<ChatInput {...defaultProps} />);
-
-    const textarea = screen.getByRole("textbox");
-    expect(textarea).toHaveAttribute("placeholder", "Loading model...");
-  });
-
-  it("disables submit button when message is empty", () => {
-    render(<ChatInput {...defaultProps} message="" />);
-
-    const allButtons = screen.getAllByRole("button");
-    const sendButton = allButtons.find(
-      (btn) => btn.getAttribute("type") === "submit"
-    );
-    expect(sendButton).toBeDisabled();
-  });
-
-  it("enables submit button when message has content", () => {
-    render(<ChatInput {...defaultProps} message="Hello" />);
-
-    const allButtons = screen.getAllByRole("button");
-    const sendButton = allButtons.find(
-      (btn) => btn.getAttribute("type") === "submit"
-    );
-    expect(sendButton).not.toBeDisabled();
-  });
-
-  it("disables submit button when loading", () => {
-    render(<ChatInput {...defaultProps} message="Hello" isLoading={true} />);
-
-    const allButtons = screen.getAllByRole("button");
-    const sendButton = allButtons.find(
-      (btn) => btn.getAttribute("type") === "submit"
-    );
-    expect(sendButton).toBeDisabled();
-  });
+      const sendButton = screen.getByRole("button", { name: /send message/i });
+      if (expectedDisabled) {
+        expect(sendButton).toBeDisabled();
+      } else {
+        expect(sendButton).not.toBeDisabled();
+      }
+    }
+  );
 
   it("disables textarea when loading", () => {
     render(<ChatInput {...defaultProps} isLoading={true} />);
 
-    const textarea = screen.getByRole("textbox");
-    expect(textarea).toBeDisabled();
+    expect(screen.getByRole("textbox")).toBeDisabled();
   });
 
   it("shows stop button when generating", () => {
     render(<ChatInput {...defaultProps} isGenerating={true} />);
 
-    const allButtons = screen.getAllByRole("button");
-    const stopButton = allButtons.find(
-      (btn) => btn.className.includes("destructive")
-    );
-    expect(stopButton).toBeDefined();
+    expect(screen.getByRole("button", { name: /stop generation/i })).toBeInTheDocument();
   });
 
-  it("does not submit when model has error", () => {
+  it("disables submit when model has error", () => {
     vi.mocked(useModel).mockReturnValue({
       currentModel: { name: "Test Model", type: "online" },
       isModelLoading: false,
@@ -126,20 +82,6 @@ describe("ChatInput", () => {
 
     render(<ChatInput {...defaultProps} message="Hello" />);
 
-    const allButtons = screen.getAllByRole("button");
-    const sendButton = allButtons.find(
-      (btn) => btn.getAttribute("type") === "submit"
-    );
-    expect(sendButton).toBeDisabled();
-  });
-
-  it("renders with correct structure", () => {
-    render(<ChatInput {...defaultProps} />);
-
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
-    expect(screen.getByTitle("Attach files")).toBeInTheDocument();
-
-    const allButtons = screen.getAllByRole("button");
-    expect(allButtons.length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /send message/i })).toBeDisabled();
   });
 });

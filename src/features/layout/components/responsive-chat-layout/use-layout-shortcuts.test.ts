@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useLayoutShortcuts } from "./use-layout-shortcuts";
 import { mockNavigate, mockSearchParams } from "@/testing/mocks/modules";
@@ -9,7 +9,6 @@ const mockTogglePinConversation = vi.fn();
 
 let mockOpen = false;
 let mockConversationId: string | undefined = undefined;
-let capturedShortcuts: Record<string, () => void> = {};
 
 vi.mock("@/components/ui/sidebar", async () => {
   const { createMockSidebarHook } = await import("@/testing/mocks/hooks");
@@ -38,163 +37,100 @@ vi.mock("@/app/providers/conversations-provider", async () => {
   };
 });
 
-// react-router-dom is globally mocked in setup.ts
+function pressKey(key: string): void {
+  document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+}
 
-vi.mock("@/features/layout/hooks/use-keyboard-shortcuts", () => ({
-  useKeyboardShortcuts: (shortcuts: Record<string, () => void>) => {
-    capturedShortcuts = shortcuts;
-  },
-}));
-
-// sonner is globally mocked in setup.ts
+function pressSequence(first: string, second: string): void {
+  pressKey(first);
+  pressKey(second);
+}
 
 describe("useLayoutShortcuts", () => {
+  let dispatchSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockOpen = false;
     mockConversationId = undefined;
-    capturedShortcuts = {};
+    dispatchSpy = vi.spyOn(document, "dispatchEvent");
   });
 
-  describe("onToggleSidebar", () => {
-    it("toggles sidebar from closed to open", () => {
-      mockOpen = false;
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onToggleSidebar?.();
-
-      expect(mockSetOpen).toHaveBeenCalledWith(true);
-    });
-
-    it("toggles sidebar from open to closed", () => {
-      mockOpen = true;
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onToggleSidebar?.();
-
-      expect(mockSetOpen).toHaveBeenCalledWith(false);
-    });
+  afterEach(() => {
+    pressKey("Escape");
+    dispatchSpy.mockRestore();
   });
 
-  describe("onNewChat", () => {
-    it("calls handleNewChat from useConversationList", () => {
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onNewChat?.();
-
-      expect(mockHandleNewChat).toHaveBeenCalled();
-    });
+  it("g+s toggles sidebar state", () => {
+    mockOpen = false;
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "s");
+    expect(mockSetOpen).toHaveBeenCalledWith(true);
   });
 
-  describe("onSearch", () => {
-    it("dispatches focus-search custom event", () => {
-      const dispatchEventSpy = vi.spyOn(document, "dispatchEvent");
-
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onSearch?.();
-
-      expect(dispatchEventSpy).toHaveBeenCalledWith(
-        expect.any(CustomEvent)
-      );
-      const event = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe("app:focus-search");
-
-      dispatchEventSpy.mockRestore();
-    });
+  it("g+n creates new chat", () => {
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "n");
+    expect(mockHandleNewChat).toHaveBeenCalled();
   });
 
-  describe("onPinChat", () => {
-    it("does nothing when no conversation is selected", () => {
-      mockConversationId = undefined;
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onPinChat?.();
-
-      expect(mockTogglePinConversation).not.toHaveBeenCalled();
-    });
-
-    it("toggles pin when conversation is selected", () => {
-      mockConversationId = "test-conv-id";
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onPinChat?.();
-
-      expect(mockTogglePinConversation).toHaveBeenCalledWith("test-conv-id");
-    });
+  it("g+f dispatches focus-search event", () => {
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "f");
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: "app:focus-search" }));
   });
 
-  describe("onDeleteChat", () => {
-    it("does nothing when no conversation is selected", () => {
-      mockConversationId = undefined;
-      const dispatchEventSpy = vi.spyOn(document, "dispatchEvent");
+  it("g+p and g+d require active conversation", () => {
+    mockConversationId = undefined;
+    renderHook(() => useLayoutShortcuts());
 
-      renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "p");
+    expect(mockTogglePinConversation).not.toHaveBeenCalled();
 
-      capturedShortcuts.onDeleteChat?.();
-
-      expect(dispatchEventSpy).not.toHaveBeenCalledWith(
-        expect.objectContaining({ type: "conversation:delete" })
-      );
-
-      dispatchEventSpy.mockRestore();
-    });
-
-    it("dispatches delete event when conversation is selected", () => {
-      mockConversationId = "test-conv-id";
-      const dispatchEventSpy = vi.spyOn(document, "dispatchEvent");
-
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onDeleteChat?.();
-
-      expect(dispatchEventSpy).toHaveBeenCalled();
-      const event = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe("conversation:delete");
-      expect(event.detail).toEqual({ conversationId: "test-conv-id" });
-
-      dispatchEventSpy.mockRestore();
-    });
+    pressKey("Escape");
+    pressSequence("g", "d");
+    const deleteEvent = dispatchSpy.mock.calls.find(
+      ([event]: [Event]) => event.type === "conversation:delete"
+    );
+    expect(deleteEvent).toBeUndefined();
   });
 
-  describe("onShowShortcuts", () => {
-    it("opens shortcuts modal when not open", () => {
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onShowShortcuts?.();
-
-      expect(mockNavigate).toHaveBeenCalledWith(
-        { search: "?modal=shortcuts" },
-        { replace: true }
-      );
-    });
-
-    it("closes shortcuts modal when already open", () => {
-      mockSearchParams.set("modal", "shortcuts");
-      renderHook(() => useLayoutShortcuts());
-
-      capturedShortcuts.onShowShortcuts?.();
-
-      expect(mockNavigate).toHaveBeenCalledWith(
-        { search: "" },
-        { replace: true }
-      );
-    });
+  it("g+p toggles pin with active conversation", () => {
+    mockConversationId = "conv-123";
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "p");
+    expect(mockTogglePinConversation).toHaveBeenCalledWith("conv-123");
   });
 
-  describe("onRenameChat", () => {
-    it("dispatches rename event", () => {
-      const dispatchEventSpy = vi.spyOn(document, "dispatchEvent");
+  it("g+d dispatches delete event with conversation id", () => {
+    mockConversationId = "conv-123";
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "d");
 
-      renderHook(() => useLayoutShortcuts());
+    const deleteCall = dispatchSpy.mock.calls.find(
+      ([event]: [Event]) => event.type === "conversation:delete"
+    );
+    expect(deleteCall).toBeDefined();
+    const deleteEvent = deleteCall?.[0] as CustomEvent | undefined;
+    expect(deleteEvent?.detail).toEqual({ conversationId: "conv-123" });
+  });
 
-      capturedShortcuts.onRenameChat?.();
+  it("? toggles shortcuts modal", () => {
+    renderHook(() => useLayoutShortcuts());
+    pressKey("?");
+    expect(mockNavigate).toHaveBeenCalledWith(
+      { search: "?modal=shortcuts" },
+      { replace: true }
+    );
+  });
 
-      expect(dispatchEventSpy).toHaveBeenCalled();
-      const event = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
-      expect(event.type).toBe("conversation:rename");
-
-      dispatchEventSpy.mockRestore();
-    });
+  it("? closes shortcuts modal when already open", () => {
+    mockSearchParams.set("modal", "shortcuts");
+    renderHook(() => useLayoutShortcuts());
+    pressKey("?");
+    expect(mockNavigate).toHaveBeenCalledWith(
+      { search: "" },
+      { replace: true }
+    );
   });
 });

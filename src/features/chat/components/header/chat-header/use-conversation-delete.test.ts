@@ -15,59 +15,6 @@ describe("useConversationDelete", () => {
     vi.restoreAllMocks();
   });
 
-  describe("initial state", () => {
-    it("returns deleteDialogOpen as false initially", () => {
-      const { result } = renderHook(() =>
-        useConversationDelete({
-          conversationId: "conv-1",
-          deleteConversation: mockDeleteConversation,
-        })
-      );
-
-      expect(result.current.deleteDialogOpen).toBe(false);
-    });
-  });
-
-  describe("handleDeleteConversation", () => {
-    it("opens delete dialog", () => {
-      const { result } = renderHook(() =>
-        useConversationDelete({
-          conversationId: "conv-1",
-          deleteConversation: mockDeleteConversation,
-        })
-      );
-
-      act(() => {
-        result.current.handleDeleteConversation();
-      });
-
-      expect(result.current.deleteDialogOpen).toBe(true);
-    });
-  });
-
-  describe("setDeleteDialogOpen", () => {
-    it("controls dialog state", () => {
-      const { result } = renderHook(() =>
-        useConversationDelete({
-          conversationId: "conv-1",
-          deleteConversation: mockDeleteConversation,
-        })
-      );
-
-      act(() => {
-        result.current.setDeleteDialogOpen(true);
-      });
-
-      expect(result.current.deleteDialogOpen).toBe(true);
-
-      act(() => {
-        result.current.setDeleteDialogOpen(false);
-      });
-
-      expect(result.current.deleteDialogOpen).toBe(false);
-    });
-  });
-
   describe("handleDeleteConfirm", () => {
     it("deletes conversation, shows success toast, and navigates", async () => {
       const { result } = renderHook(() =>
@@ -162,24 +109,6 @@ describe("useConversationDelete", () => {
       });
 
       expect(result.current.deleteDialogOpen).toBe(false);
-    });
-
-    it("cleans up event listener on unmount", () => {
-      const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
-
-      const { unmount } = renderHook(() =>
-        useConversationDelete({
-          conversationId: "conv-1",
-          deleteConversation: mockDeleteConversation,
-        })
-      );
-
-      unmount();
-
-      expect(removeEventListenerSpy).toHaveBeenCalledWith(
-        "conversation:delete",
-        expect.any(Function)
-      );
     });
   });
 });

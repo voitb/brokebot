@@ -118,6 +118,7 @@ export function ChatInput({
                         size="icon"
                         variant="destructive"
                         onClick={onStopGeneration}
+                        aria-label="Stop generation"
                       >
                         <Square className="h-4 w-4" />
                       </Button>
@@ -131,6 +132,7 @@ export function ChatInput({
                         type="submit"
                         size="icon"
                         disabled={isSubmitDisabled}
+                        aria-label="Send message"
                       >
                         <Send className="h-4 w-4" />
                       </Button>

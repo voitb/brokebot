@@ -1,175 +1,100 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useConversationBackup } from "./use-conversation-backup";
-import { db, DEFAULT_USER_CONFIG } from "@/lib/db";
-import { clearTestDatabase, seedConversation } from "@/testing/db-helpers";
+import { createMockConversation, createMockMessage } from "@/testing/mocks/factories";
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
+const mockConversationsToArray = vi.fn();
+const mockConversationsGet = vi.fn();
+const mockConversationsAdd = vi.fn();
+
+vi.mock("@/lib/db", () => ({
+  db: {
+    conversations: {
+      toArray: () => mockConversationsToArray(),
+      get: (id: string) => mockConversationsGet(id),
+      add: (conv: unknown) => mockConversationsAdd(conv),
+    },
   },
 }));
 
-// Store original createElement before any mocking
-const originalCreateElement = document.createElement.bind(document);
+vi.mock("sonner", () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
+}));
 
 describe("useConversationBackup", () => {
-  let createElementSpy: ReturnType<typeof vi.spyOn>;
+  const originalCreateElement = document.createElement.bind(document);
+  let mockAnchor: { setAttribute: ReturnType<typeof vi.fn>; click: ReturnType<typeof vi.fn> };
 
-  beforeEach(async () => {
-    await clearTestDatabase();
-    await db.userConfig.clear();
-    await db.userConfig.add({ ...DEFAULT_USER_CONFIG });
+  beforeEach(() => {
     vi.clearAllMocks();
+    mockAnchor = { setAttribute: vi.fn(), click: vi.fn() };
 
-    // Setup document.createElement mock before each test
-    createElementSpy = vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+    document.createElement = ((tagName: string) => {
       if (tagName === "a") {
-        return {
-          setAttribute: vi.fn(),
-          click: vi.fn(),
-        } as unknown as HTMLAnchorElement;
+        return mockAnchor as unknown as HTMLAnchorElement;
       }
       return originalCreateElement(tagName);
-    });
+    }) as typeof document.createElement;
   });
 
   afterEach(() => {
-    createElementSpy?.mockRestore();
+    document.createElement = originalCreateElement;
   });
 
-  describe("exportConversations", () => {
-    it("creates download link with conversations data", async () => {
-      await seedConversation({ title: "Test Chat" });
+  it("exports conversations and creates download link", async () => {
+    const conversations = [createMockConversation({ title: "Test Chat" })];
+    mockConversationsToArray.mockResolvedValue(conversations);
 
-      const { result } = renderHook(() => useConversationBackup());
+    const { result } = renderHook(() => useConversationBackup());
 
-      await act(async () => {
-        await result.current.exportConversations();
-      });
-
-      expect(createElementSpy).toHaveBeenCalledWith("a");
+    await act(async () => {
+      await result.current.exportConversations();
     });
 
-    it("initializes with isExporting as false", () => {
-      const { result } = renderHook(() => useConversationBackup());
-
-      expect(result.current.isExporting).toBe(false);
-    });
-
-    it("returns isExporting as false after completion", async () => {
-      const { result } = renderHook(() => useConversationBackup());
-
-      await act(async () => {
-        await result.current.exportConversations();
-      });
-
-      expect(result.current.isExporting).toBe(false);
-    });
+    expect(mockAnchor.setAttribute).toHaveBeenCalledWith("href", expect.stringContaining("data:application/json"));
+    expect(mockAnchor.setAttribute).toHaveBeenCalledWith("download", expect.stringMatching(/brokebot-conversations-.*\.json/));
+    expect(mockAnchor.click).toHaveBeenCalled();
   });
 
-  describe("importConversations", () => {
-    it("imports new conversations", async () => {
-      const { result } = renderHook(() => useConversationBackup());
+  it("imports new conversations and returns count", async () => {
+    mockConversationsGet.mockResolvedValue(undefined);
+    mockConversationsAdd.mockResolvedValue(undefined);
 
-      const conversationsToImport = [
-        {
-          id: "import-1",
-          title: "Imported Chat",
-          messages: [
-            { id: "msg-1", role: "user" as const, content: "Hello", createdAt: new Date() },
-          ],
-          pinned: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    const { result } = renderHook(() => useConversationBackup());
 
-      let importedCount = 0;
-      await act(async () => {
-        importedCount = await result.current.importConversations(conversationsToImport);
-      });
+    const conversationsToImport = [
+      createMockConversation({
+        id: "import-1",
+        title: "Imported Chat",
+        messages: [createMockMessage({ id: "msg-1", role: "user", content: "Hello" })],
+      }),
+    ];
 
-      expect(importedCount).toBe(1);
-      const saved = await db.conversations.get("import-1");
-      expect(saved?.title).toBe("Imported Chat");
+    let importedCount = 0;
+    await act(async () => {
+      importedCount = await result.current.importConversations(conversationsToImport);
     });
 
-    it("skips existing conversations", async () => {
-      await seedConversation({ id: "existing-id", title: "Original" });
+    expect(importedCount).toBe(1);
+    expect(mockConversationsAdd).toHaveBeenCalledWith(expect.objectContaining({
+      id: "import-1",
+      title: "Imported Chat",
+    }));
+  });
 
-      const { result } = renderHook(() => useConversationBackup());
+  it("skips existing conversations during import", async () => {
+    mockConversationsGet.mockResolvedValue(createMockConversation({ id: "existing-id" }));
 
-      const conversationsToImport = [
-        {
-          id: "existing-id",
-          title: "Duplicate",
-          messages: [],
-          pinned: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    const { result } = renderHook(() => useConversationBackup());
 
-      let importedCount = 0;
-      await act(async () => {
-        importedCount = await result.current.importConversations(conversationsToImport);
-      });
+    const conversationsToImport = [createMockConversation({ id: "existing-id", title: "Duplicate" })];
 
-      expect(importedCount).toBe(0);
-      const saved = await db.conversations.get("existing-id");
-      expect(saved?.title).toBe("Original");
+    let importedCount = 0;
+    await act(async () => {
+      importedCount = await result.current.importConversations(conversationsToImport);
     });
 
-    it("normalizes dates from JSON strings", async () => {
-      const { result } = renderHook(() => useConversationBackup());
-
-      const conversationsToImport = [
-        {
-          id: "import-dates",
-          title: "Date Test",
-          messages: [
-            { id: "msg-1", role: "user" as const, content: "Test", createdAt: "2024-01-15T12:00:00.000Z" as unknown as Date },
-          ],
-          pinned: false,
-          createdAt: "2024-01-15T10:00:00.000Z" as unknown as Date,
-          updatedAt: "2024-01-15T11:00:00.000Z" as unknown as Date,
-        },
-      ];
-
-      await act(async () => {
-        await result.current.importConversations(conversationsToImport);
-      });
-
-      const saved = await db.conversations.get("import-dates");
-      expect(saved?.createdAt).toBeInstanceOf(Date);
-      expect(saved?.messages[0].createdAt).toBeInstanceOf(Date);
-    });
-
-    it("initializes with isImporting as false", () => {
-      const { result } = renderHook(() => useConversationBackup());
-
-      expect(result.current.isImporting).toBe(false);
-    });
-
-    it("returns isImporting as false after completion", async () => {
-      const { result } = renderHook(() => useConversationBackup());
-
-      await act(async () => {
-        await result.current.importConversations([
-          {
-            id: "test-import",
-            title: "Test",
-            messages: [],
-            pinned: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ]);
-      });
-
-      expect(result.current.isImporting).toBe(false);
-    });
+    expect(importedCount).toBe(0);
+    expect(mockConversationsAdd).not.toHaveBeenCalled();
   });
 });

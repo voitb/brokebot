@@ -10,6 +10,40 @@ This project uses:
 - @testing-library/user-event for interactions
 - fake-indexeddb for Dexie mocking
 
+## Testing Pyramid (2026 Best Practices)
+
+### Target Ratios
+| Type | Ratio | What to Test | Speed |
+|------|-------|--------------|-------|
+| **Unit** | 70% | Business logic, utils, hooks | Fast (ms) |
+| **Integration** | 20% | Component interactions, API contracts | Medium (s) |
+| **E2E** | 10% | Critical user journeys (3-5 flows) | Slow (min) |
+
+### When to Write Unit Tests
+- Pure functions with business logic
+- Custom hooks with state management
+- Utility functions with multiple edge cases
+- Data transformations and validations
+
+### When to Write Integration Tests
+- Components that interact with APIs
+- Provider/consumer relationships
+- Multi-component workflows
+- Database operations (Dexie/IndexedDB)
+
+### When to Write E2E Tests (Playwright)
+- Critical user flows only (login, checkout, core features)
+- Multi-page journeys
+- Real browser behavior needed
+- **Limit to 3-5 critical flows** - expensive to maintain
+
+### What NOT to Test (Unit Level)
+- Implementation details (internal state, private methods)
+- Third-party library behavior
+- CSS/styling details
+- React framework behavior (re-renders, lifecycle)
+- Trivial one-liner functions
+
 ## Execution
 
 Launch the `unit-testing:test-automator` agent:
@@ -137,6 +171,24 @@ Check test data patterns:
 3. src/testing/mocks/ - Mock implementations
 4. src/testing/factories/ - Factory functions
 
+## Shadcn Component Exclusions
+
+**Coverage exclusions** - These are standard shadcn/ui components (no tests needed):
+- alert-dialog, avatar, badge, breadcrumb, button, card, checkbox
+- collapsible, command, dialog, drawer, dropdown-menu, form
+- input, label, navigation-menu, popover, scroll-area, select
+- separator, sheet, skeleton, switch, tabs, textarea, tooltip
+
+**DO require tests** for custom UI components:
+- auto-size-textarea.tsx, copy-button/, input-dialog.tsx
+- loading-dots.tsx, logo.tsx, provider-icons.tsx
+- route-loading-fallback.tsx, sidebar/ (custom parts), sonner.tsx
+- status-indicator.tsx, truncated-text.tsx
+
+When reporting coverage:
+- Expect low coverage for `src/components/ui/` overall
+- Focus on custom component coverage within that directory
+
 ## Output Format
 
 ### Coverage Report
@@ -258,3 +310,32 @@ describe('useMyHook', () => {
   });
 });
 ```
+
+## Over-Engineering Detection
+
+### Red Flags (Run `/validate-test-simplification` if found)
+- Test files >300 lines
+- More than 5 `vi.mock()` calls per file
+- Setup blocks >50 lines
+- Tests that test implementation details instead of behavior
+- Snapshot tests for large components
+
+### Quick Detection Commands
+```bash
+# Find large test files
+for f in src/**/*.test.ts*; do
+  [ -f "$f" ] && [ $(wc -l < "$f") -gt 300 ] && wc -l "$f"
+done | sort -rn
+
+# Find over-mocked files
+for f in src/**/*.test.ts*; do
+  [ -f "$f" ] && {
+    count=$(grep -c "vi.mock" "$f" 2>/dev/null || echo 0)
+    [ "$count" -gt 5 ] && echo "$count mocks: $f"
+  }
+done
+```
+
+### Related Commands
+- `/validate-test-simplification` - Deep analysis and simplification recommendations
+- `/fix-tests` - Fix failing tests with proper patterns

@@ -1,170 +1,83 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "@/testing/utils";
 import { ConversationList } from "./conversation-list";
-import {
-  createMockConversation,
-  createMockFolder,
-  createMockConversationListHook,
-} from "@/testing/mocks/modules";
+import { createMockConversation, createMockFolder } from "@/testing/mocks/modules";
+import { BrowserRouter } from "react-router-dom";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-const mockUseConversationList = createMockConversationListHook();
+const mockCreateFolder = vi.fn();
+const mockCreateEmptyConversation = vi.fn().mockResolvedValue("new-id");
 
-vi.mock("@/hooks", () => ({
-  useConversationList: vi.fn(() => mockUseConversationList),
-  useConversationId: vi.fn(() => undefined),
+const mockConversationsContext = {
+  conversations: [] as ReturnType<typeof createMockConversation>[],
+  folders: [] as ReturnType<typeof createMockFolder>[],
+  createFolder: mockCreateFolder,
+  createEmptyConversation: mockCreateEmptyConversation,
+};
+
+vi.mock("@/app/providers/conversations-provider", () => ({
+  useConversations: () => mockConversationsContext,
 }));
 
-vi.mock("@/app/providers/conversations-provider", async () => {
-  const { createMockConversationsHook } = await import("@/testing/mocks/hooks");
-  return {
-    useConversations: vi.fn(() => createMockConversationsHook({
-      createFolder: vi.fn(),
-    })),
-  };
-});
-
-vi.mock("@/app/providers/web-llm-provider", async () => {
-  const { createMinimalWebLLMProvider } = await import("@/testing/mocks/providers");
-  return createMinimalWebLLMProvider();
-});
-
-import { useConversationList } from "@/hooks";
-import { useConversations } from "@/app/providers/conversations-provider";
+function Wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <BrowserRouter>
+      <TooltipProvider>{children}</TooltipProvider>
+    </BrowserRouter>
+  );
+}
 
 describe("ConversationList", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useConversationList).mockReturnValue(mockUseConversationList);
-    vi.mocked(useConversations).mockReturnValue({
-      createFolder: vi.fn(),
-    } as unknown as ReturnType<typeof useConversations>);
+    mockConversationsContext.conversations = [];
+    mockConversationsContext.folders = [];
   });
 
-  it("renders search bar", () => {
-    render(<ConversationList />);
+  it("renders empty state when no conversations exist", () => {
+    render(<ConversationList />, { wrapper: Wrapper });
 
     expect(screen.getByPlaceholderText(/search conversations/i)).toBeInTheDocument();
-  });
-
-  it("renders new chat button", () => {
-    render(<ConversationList />);
-
     expect(screen.getByRole("button", { name: /new chat/i })).toBeInTheDocument();
-  });
-
-  it("renders new folder button", () => {
-    render(<ConversationList />);
-
     expect(screen.getByRole("button", { name: /create new folder/i })).toBeInTheDocument();
-  });
-
-  it("shows empty state when no conversations", () => {
-    render(<ConversationList />);
-
     expect(screen.getByText(/no conversations yet/i)).toBeInTheDocument();
   });
 
-  it("shows search empty state when searching with no results", () => {
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      searchTerm: "nonexistent",
-    });
-
-    render(<ConversationList />);
-
-    expect(screen.getByText(/no conversations found matching your search/i)).toBeInTheDocument();
-    expect(screen.getByText(/try searching with different keywords/i)).toBeInTheDocument();
-  });
-
-  it("renders favourites section when pinned conversations exist", () => {
-    const pinnedConversations = [
-      createMockConversation({ title: "Pinned Chat", pinned: true }),
-    ];
-
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      pinnedConversations,
-    });
-
-    render(<ConversationList />);
-
-    expect(screen.getByText("Favourites")).toBeInTheDocument();
-    expect(screen.getByText("Pinned Chat")).toBeInTheDocument();
-  });
-
-  it("renders recent section when unfolded conversations exist", () => {
-    const unfoldedConversations = [
-      createMockConversation({ title: "Recent Chat 1" }),
-      createMockConversation({ title: "Recent Chat 2" }),
-    ];
-
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      unfoldedConversations,
-    });
-
-    render(<ConversationList />);
-
-    expect(screen.getByText("Recent")).toBeInTheDocument();
-    expect(screen.getByText("Recent Chat 1")).toBeInTheDocument();
-    expect(screen.getByText("Recent Chat 2")).toBeInTheDocument();
-  });
-
-  it("calls handleNewChat when new chat button is clicked", async () => {
-    const handleNewChat = vi.fn();
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      handleNewChat,
-    });
-
-    render(<ConversationList />);
+  it("creates new chat when button is clicked", async () => {
+    render(<ConversationList />, { wrapper: Wrapper });
 
     await user.click(screen.getByRole("button", { name: /new chat/i }));
 
-    expect(handleNewChat).toHaveBeenCalled();
+    expect(mockCreateEmptyConversation).toHaveBeenCalledWith("New Conversation", undefined);
   });
 
-  it("calls setSearchTerm when typing in search bar", async () => {
-    const setSearchTerm = vi.fn();
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      setSearchTerm,
-    });
-
-    render(<ConversationList />);
-
-    const searchInput = screen.getByPlaceholderText(/search conversations/i);
-    await user.type(searchInput, "test");
-
-    expect(setSearchTerm).toHaveBeenCalled();
-  });
-
-  it("opens folder dialog when new folder button is clicked", async () => {
-    render(<ConversationList />);
+  it("opens folder dialog and creates folder on submit", async () => {
+    render(<ConversationList />, { wrapper: Wrapper });
 
     await user.click(screen.getByRole("button", { name: /create new folder/i }));
-
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
+
+    await user.type(screen.getByRole("textbox"), "Work Projects");
+    await user.click(screen.getByRole("button", { name: /create/i }));
+
+    expect(mockCreateFolder).toHaveBeenCalledWith("Work Projects");
   });
 
-  it("renders folders when foldersWithConversations exist", () => {
-    const folder = {
-      ...createMockFolder({ id: "folder-1", name: "Work Projects" }),
-      conversations: [createMockConversation({ title: "Work Chat" })],
-    };
+  it("renders conversations in correct sections", () => {
+    mockConversationsContext.conversations = [
+      createMockConversation({ id: "1", title: "Pinned Chat", pinned: true }),
+      createMockConversation({ id: "2", title: "Recent Chat", pinned: false }),
+    ];
+    mockConversationsContext.folders = [createMockFolder({ id: "folder-1", name: "Work" })];
 
-    vi.mocked(useConversationList).mockReturnValue({
-      ...mockUseConversationList,
-      foldersWithConversations: [folder],
-    });
+    render(<ConversationList />, { wrapper: Wrapper });
 
-    render(<ConversationList />);
-
-    expect(screen.getByText("Work Projects")).toBeInTheDocument();
+    expect(screen.getByText("Favourites")).toBeInTheDocument();
+    expect(screen.getByText("Pinned Chat")).toBeInTheDocument();
+    expect(screen.getByText("Recent")).toBeInTheDocument();
+    expect(screen.getByText("Recent Chat")).toBeInTheDocument();
   });
 });

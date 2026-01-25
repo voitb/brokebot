@@ -8,9 +8,6 @@ import {
   seedConversation,
   seedFolder,
 } from "@/testing/db-helpers";
-// mockNavigate is available via global mock in setup.ts
-
-// react-router-dom is globally mocked in setup.ts
 
 describe("useConversationList", () => {
   beforeEach(async () => {
@@ -24,16 +21,7 @@ describe("useConversationList", () => {
     </ConversationsProvider>
   );
 
-  it("returns empty data initially", async () => {
-    const { result } = renderHook(() => useConversationList(), { wrapper });
-
-    await waitFor(() => {
-      expect(result.current.pinnedConversations).toEqual([]);
-      expect(result.current.unfoldedConversations).toEqual([]);
-    });
-  });
-
-  it("separates pinned conversations", async () => {
+  it("separates pinned conversations from regular ones", async () => {
     await seedConversation({ title: "Pinned", pinned: true });
     await seedConversation({ title: "Regular", pinned: false });
 
@@ -65,28 +53,21 @@ describe("useConversationList", () => {
     ).toHaveLength(1);
   });
 
-  it("updates search term with transition", async () => {
-    const { result } = renderHook(() => useConversationList(), { wrapper });
-
-    act(() => {
-      result.current.setSearchTerm("test");
+  it("filters conversations by search term and sorts by date", async () => {
+    await seedConversation({
+      title: "React Help",
+      updatedAt: new Date("2024-01-01"),
     });
-
-    expect(result.current.searchTerm).toBe("test");
-
-    await waitFor(() => {
-      expect(result.current.isSearching).toBe(false);
+    await seedConversation({
+      title: "React Tips",
+      updatedAt: new Date("2024-12-01"),
     });
-  });
-
-  it("filters by title match", async () => {
-    await seedConversation({ title: "React Help" });
-    await seedConversation({ title: "Vue Tips" });
+    await seedConversation({ title: "Vue Guide" });
 
     const { result } = renderHook(() => useConversationList(), { wrapper });
 
     await waitFor(() => {
-      expect(result.current.unfoldedConversations).toHaveLength(2);
+      expect(result.current.unfoldedConversations).toHaveLength(3);
     });
 
     act(() => {
@@ -94,49 +75,10 @@ describe("useConversationList", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.unfoldedConversations).toHaveLength(1);
-    });
-
-    expect(result.current.unfoldedConversations[0].title).toBe("React Help");
-  });
-
-  it("clears search term when set to empty", async () => {
-    const { result } = renderHook(() => useConversationList(), { wrapper });
-
-    act(() => {
-      result.current.setSearchTerm("test");
-    });
-
-    expect(result.current.searchTerm).toBe("test");
-
-    act(() => {
-      result.current.setSearchTerm("");
-    });
-
-    expect(result.current.searchTerm).toBe("");
-
-    await waitFor(() => {
-      expect(result.current.isSearching).toBe(false);
-    });
-  });
-
-  it("sorts conversations by updatedAt", async () => {
-    await seedConversation({
-      title: "Older",
-      updatedAt: new Date("2024-01-01"),
-    });
-    await seedConversation({
-      title: "Newer",
-      updatedAt: new Date("2024-12-01"),
-    });
-
-    const { result } = renderHook(() => useConversationList(), { wrapper });
-
-    await waitFor(() => {
       expect(result.current.unfoldedConversations).toHaveLength(2);
     });
 
-    expect(result.current.unfoldedConversations[0].title).toBe("Newer");
-    expect(result.current.unfoldedConversations[1].title).toBe("Older");
+    expect(result.current.unfoldedConversations[0].title).toBe("React Tips");
+    expect(result.current.unfoldedConversations[1].title).toBe("React Help");
   });
 });

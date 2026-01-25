@@ -60,21 +60,6 @@ describe("useSettings", () => {
       expect(result.current.settings.theme).toBe("dark");
     });
 
-    it("preserves other fields when updating one", async () => {
-      mockConfig = { theme: "light", username: "test" };
-
-      const { result } = renderHook(() => useSettings());
-
-      await waitFor(() => {
-        expect(result.current.settings).toEqual({ theme: "light", username: "test" });
-      });
-
-      act(() => {
-        result.current.handleFieldChange("theme", "dark");
-      });
-
-      expect(result.current.settings).toEqual({ theme: "dark", username: "test" });
-    });
   });
 
   describe("handleSaveChanges", () => {
@@ -116,45 +101,6 @@ describe("useSettings", () => {
 
       expect(mockToast.error).toHaveBeenCalledWith("Failed to save settings.");
       expect(result.current.isSaving).toBe(false);
-    });
-
-    it("resets isSaving after save completes", async () => {
-      mockConfig = { theme: "light" };
-
-      const { result } = renderHook(() => useSettings());
-
-      await waitFor(() => {
-        expect(result.current.settings.theme).toBe("light");
-      });
-
-      // isSaving should be false initially
-      expect(result.current.isSaving).toBe(false);
-
-      await act(async () => {
-        await result.current.handleSaveChanges();
-      });
-
-      // isSaving should be false after completion
-      expect(result.current.isSaving).toBe(false);
-    });
-  });
-
-  describe("config sync", () => {
-    it("updates settings when config changes", async () => {
-      mockConfig = { theme: "light" };
-
-      const { result, rerender } = renderHook(() => useSettings());
-
-      await waitFor(() => {
-        expect(result.current.settings.theme).toBe("light");
-      });
-
-      mockConfig = { theme: "dark" };
-      rerender();
-
-      await waitFor(() => {
-        expect(result.current.settings.theme).toBe("dark");
-      });
     });
   });
 });

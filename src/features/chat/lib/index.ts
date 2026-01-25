@@ -7,10 +7,7 @@ export {
   type OpenRouterClient,
 } from "./openrouter";
 
-export {
-  createModelCatalog,
-  type ModelInfo,
-} from "./webllm";
+export { type ModelInfo } from "./webllm";
 
 export {
   transcribe,
@@ -20,7 +17,4 @@ export {
   type TranscribeResult,
 } from "./transcriber/transcribe";
 
-export type {
-  WorkerMessage,
-  WorkerResponse,
-} from "./transcriber/types";
+export type { WorkerMessage, WorkerResponse } from "./transcriber/types";

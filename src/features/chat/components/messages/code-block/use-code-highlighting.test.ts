@@ -21,57 +21,33 @@ describe("useCodeHighlighting", () => {
   });
 
   describe("language detection", () => {
-    it("extracts language from className", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-typescript",
-          children: "const x = 1;",
-        })
-      );
+    it.each(["typescript", "javascript", "python"])(
+      "extracts %s from className",
+      (lang) => {
+        const { result } = renderHook(() =>
+          useCodeHighlighting({
+            className: `language-${lang}`,
+            children: "code",
+          })
+        );
+        expect(result.current.language).toBe(lang);
+      }
+    );
 
-      expect(result.current.language).toBe("typescript");
-    });
-
-    it("handles javascript language", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-javascript",
-          children: "let x = 1;",
-        })
-      );
-
-      expect(result.current.language).toBe("javascript");
-    });
-
-    it("handles python language", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-python",
-          children: "x = 1",
-        })
-      );
-
-      expect(result.current.language).toBe("python");
-    });
-
-    it("returns empty string when no language specified", () => {
+    it("returns empty string when no language in className", () => {
       const { result } = renderHook(() =>
         useCodeHighlighting({
           className: "some-other-class",
           children: "code",
         })
       );
-
       expect(result.current.language).toBe("");
     });
 
     it("returns empty string when className is undefined", () => {
       const { result } = renderHook(() =>
-        useCodeHighlighting({
-          children: "code",
-        })
+        useCodeHighlighting({ children: "code" })
       );
-
       expect(result.current.language).toBe("");
     });
   });
@@ -84,29 +60,16 @@ describe("useCodeHighlighting", () => {
           children: "const x = 1;",
         })
       );
-
       expect(result.current.code).toBe("const x = 1;");
     });
 
-    it("removes trailing newline", () => {
+    it("removes trailing newline but preserves internal ones", () => {
       const { result } = renderHook(() =>
         useCodeHighlighting({
           className: "language-js",
-          children: "const x = 1;\n",
+          children: "const x = 1;\nconst y = 2;\n",
         })
       );
-
-      expect(result.current.code).toBe("const x = 1;");
-    });
-
-    it("preserves internal newlines", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-js",
-          children: "const x = 1;\nconst y = 2;",
-        })
-      );
-
       expect(result.current.code).toBe("const x = 1;\nconst y = 2;");
     });
   });
@@ -119,7 +82,6 @@ describe("useCodeHighlighting", () => {
           children: "code",
         })
       );
-
       expect(result.current.isInline).toBe(true);
     });
 
@@ -130,39 +92,24 @@ describe("useCodeHighlighting", () => {
           children: "const x = 1;",
         })
       );
-
       expect(result.current.isInline).toBe(false);
     });
   });
 
   describe("theme handling", () => {
-    it("returns oneDark style for dark theme", () => {
-      mockTheme = "dark";
-
+    it.each([
+      ["dark", "#282c34"],
+      ["light", "#fafafa"],
+    ])("returns correct style for %s theme", (theme, background) => {
+      mockTheme = theme;
       const { result } = renderHook(() =>
         useCodeHighlighting({
           className: "language-js",
           children: "code",
         })
       );
-
       expect(result.current.syntaxStyle).toEqual({
-        "pre[class*='language-']": { background: "#282c34" },
-      });
-    });
-
-    it("returns oneLight style for light theme", () => {
-      mockTheme = "light";
-
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-js",
-          children: "code",
-        })
-      );
-
-      expect(result.current.syntaxStyle).toEqual({
-        "pre[class*='language-']": { background: "#fafafa" },
+        "pre[class*='language-']": { background },
       });
     });
   });

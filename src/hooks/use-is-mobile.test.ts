@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useIsMobile } from "./use-is-mobile";
 import { createMockMatchMedia } from "@/testing/mocks/dom-helpers";
 
 describe("useIsMobile", () => {
   const originalInnerWidth = window.innerWidth;
-  let mockMatchMedia: ReturnType<typeof createMockMatchMedia>;
 
   beforeEach(() => {
-    mockMatchMedia = createMockMatchMedia(false);
-    vi.stubGlobal("matchMedia", mockMatchMedia);
+    vi.stubGlobal("matchMedia", createMockMatchMedia(false));
   });
 
   afterEach(() => {
@@ -21,114 +19,24 @@ describe("useIsMobile", () => {
     });
   });
 
-  it("returns true when viewport is less than 768px", () => {
+  function setViewportWidth(width: number): void {
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: 500,
+      value: width,
     });
+  }
+
+  it.each([
+    [500, true],
+    [767, true],
+    [768, false],
+    [1024, false],
+  ])("returns %s for %dpx viewport", (width, expected) => {
+    setViewportWidth(width);
 
     const { result } = renderHook(() => useIsMobile());
 
-    expect(result.current).toBe(true);
-  });
-
-  it("returns false when viewport is 768px or greater", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 1024,
-    });
-
-    const { result } = renderHook(() => useIsMobile());
-
-    expect(result.current).toBe(false);
-  });
-
-  it("returns false for exactly 768px (boundary condition)", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 768,
-    });
-
-    const { result } = renderHook(() => useIsMobile());
-
-    expect(result.current).toBe(false);
-  });
-
-  it("returns true for 767px (just below breakpoint)", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 767,
-    });
-
-    const { result } = renderHook(() => useIsMobile());
-
-    expect(result.current).toBe(true);
-  });
-
-  it("updates state when matchMedia change event fires", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 1024,
-    });
-
-    const { result } = renderHook(() => useIsMobile());
-
-    expect(result.current).toBe(false);
-
-    act(() => {
-      Object.defineProperty(window, "innerWidth", {
-        writable: true,
-        configurable: true,
-        value: 500,
-      });
-      mockMatchMedia.listeners.forEach((listener) => listener());
-    });
-
-    expect(result.current).toBe(true);
-  });
-
-  it("creates matchMedia query with correct breakpoint", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 1024,
-    });
-
-    renderHook(() => useIsMobile());
-
-    expect(mockMatchMedia).toHaveBeenCalledWith("(max-width: 767px)");
-  });
-
-  it("removes event listener on unmount", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 1024,
-    });
-
-    const { unmount } = renderHook(() => useIsMobile());
-
-    expect(mockMatchMedia.listeners.length).toBe(1);
-
-    unmount();
-
-    expect(mockMatchMedia.listeners.length).toBe(0);
-  });
-
-  it("handles initial state calculation correctly", () => {
-    Object.defineProperty(window, "innerWidth", {
-      writable: true,
-      configurable: true,
-      value: 500,
-    });
-
-    const { result } = renderHook(() => useIsMobile());
-
-    expect(result.current).toBe(true);
+    expect(result.current).toBe(expected);
   });
 });

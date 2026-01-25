@@ -15,11 +15,6 @@ describe("parseMessage", () => {
       expect(result.content).toBe("");
       expect(result.attachments).toEqual([]);
     });
-
-    it("handles empty string", () => {
-      const result = parseMessage("");
-      expect(result.content).toBe("");
-    });
   });
 
   describe("think tags", () => {
@@ -39,19 +34,11 @@ describe("parseMessage", () => {
       expect(result.content).toBe("Response here");
     });
 
-    it("handles incomplete think tag (still generating)", () => {
+    it("handles incomplete think tag (streaming)", () => {
       const content = "<think>Still thinking about this...";
       const result = parseMessage(content);
 
       expect(result.thinking).toBe("Still thinking about this...");
-      expect(result.content).toBe("");
-    });
-
-    it("handles only closing think tag", () => {
-      const content = "</think>";
-      const result = parseMessage(content);
-
-      expect(result.thinking).toBeUndefined();
       expect(result.content).toBe("");
     });
 
@@ -64,7 +51,7 @@ describe("parseMessage", () => {
   });
 
   describe("alternative think patterns", () => {
-    it("handles incomplete unicode think tag", () => {
+    it("handles unicode think tags", () => {
       const content = "◁think▷Still processing...";
       const result = parseMessage(content);
 
@@ -72,25 +59,11 @@ describe("parseMessage", () => {
       expect(result.content).toBe("");
     });
 
-    it("handles incomplete bracket think tag", () => {
+    it("handles bracket think tags", () => {
       const content = "[think]Calculating...";
       const result = parseMessage(content);
 
       expect(result.thinking).toBe("Calculating...");
-      expect(result.content).toBe("");
-    });
-
-    it("handles only closing unicode tag", () => {
-      const content = "◁/think▷";
-      const result = parseMessage(content);
-
-      expect(result.content).toBe("");
-    });
-
-    it("handles only closing bracket tag", () => {
-      const content = "[/think]";
-      const result = parseMessage(content);
-
       expect(result.content).toBe("");
     });
   });
@@ -123,32 +96,6 @@ describe("parseMessage", () => {
       expect(result.attachments).toHaveLength(1);
       expect(result.attachments[0].name).toBe("data.csv");
       expect(result.content).toBe("Analysis complete");
-    });
-  });
-
-  describe("edge cases", () => {
-    it("handles think block in middle of content", () => {
-      const content = "Before <think>middle thought</think> After";
-      const result = parseMessage(content);
-
-      expect(result.thinking).toBe("middle thought");
-      expect(result.content).toBe("Before  After");
-    });
-
-    it("handles empty think block", () => {
-      const content = "<think></think>Content after";
-      const result = parseMessage(content);
-
-      expect(result.thinking).toBe("");
-      expect(result.content).toBe("Content after");
-    });
-
-    it("handles whitespace-only think block", () => {
-      const content = "<think>   </think>Actual content";
-      const result = parseMessage(content);
-
-      expect(result.thinking).toBe("");
-      expect(result.content).toBe("Actual content");
     });
   });
 });

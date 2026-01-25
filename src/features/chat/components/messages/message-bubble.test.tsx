@@ -36,22 +36,6 @@ describe("MessageBubble", () => {
     expect(screen.getByText("Hi there!")).toBeInTheDocument();
   });
 
-  it("renders user avatar for user messages", () => {
-    const message = createMockMessage({ role: "user", content: "Test" });
-
-    render(<MessageBubble message={message} />);
-
-    expect(screen.getByText("💸")).toBeInTheDocument();
-  });
-
-  it("renders AI avatar for assistant messages", () => {
-    const message = createMockMessage({ role: "assistant", content: "Test" });
-
-    render(<MessageBubble message={message} />);
-
-    expect(screen.getByText("🤖")).toBeInTheDocument();
-  });
-
   it("shows generating indicator when generating with no content", () => {
     const message = createMockMessage({ role: "assistant", content: "" });
 

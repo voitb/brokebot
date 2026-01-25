@@ -1,123 +1,66 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { OnlineModelDialog } from "./online-model-dialog";
-import { createMockOpenRouterModel } from "@/testing/mocks/modules";
+import { useOnlineModels } from "./use-online-models";
 
-const mockFreeModels = [
-  createMockOpenRouterModel({ id: "free-1", name: "Free Model 1", isFree: true }),
-  createMockOpenRouterModel({ id: "free-2", name: "Free Model 2", isFree: true }),
-];
+vi.mock("./use-online-models");
 
-const mockPaidModels = [
-  createMockOpenRouterModel({ id: "paid-1", name: "Paid Model 1", isFree: false }),
-  createMockOpenRouterModel({ id: "paid-2", name: "Paid Model 2", isFree: false }),
-];
-
-let mockHookReturn = {
-  storedKeys: { openrouter: "test-key" },
-  hasOpenRouterKey: true,
-  hasPaidKey: true,
-  handleModelSelect: vi.fn(),
-  handleOpenChange: vi.fn(),
-  freeModels: mockFreeModels,
-  paidModels: mockPaidModels,
-  isLoading: false,
-  error: null as Error | null,
-};
-
-vi.mock("./use-online-models", () => ({
-  useOnlineModels: () => mockHookReturn,
-}));
+function createMockHookReturn(overrides = {}) {
+  return {
+    storedKeys: { openrouter: "test-key" },
+    freeModels: [],
+    paidModels: [],
+    hasOpenRouterKey: true,
+    hasPaidKey: true,
+    handleModelSelect: vi.fn(),
+    handleOpenChange: vi.fn(),
+    isLoading: false,
+    error: null,
+    ...overrides,
+  };
+}
 
 describe("OnlineModelDialog", () => {
   const mockOnModelSelect = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockHookReturn = {
-      storedKeys: { openrouter: "test-key" },
-      hasOpenRouterKey: true,
-      hasPaidKey: true,
-      handleModelSelect: vi.fn(),
-      handleOpenChange: vi.fn(),
-      freeModels: mockFreeModels,
-      paidModels: mockPaidModels,
-      isLoading: false,
-      error: null,
-    };
+    vi.mocked(useOnlineModels).mockReturnValue(createMockHookReturn());
   });
 
-  describe("Paid Models Tab", () => {
-    it("renders paid tab trigger", () => {
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
+  it("renders dialog with title and all tabs", () => {
+    render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
 
-      const paidTab = screen.getByRole("tab", { name: /paid models/i });
-      expect(paidTab).toBeInTheDocument();
-    });
-
-    it("disables paid tab when no API key", () => {
-      mockHookReturn = { ...mockHookReturn, hasPaidKey: false };
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
-
-      const paidTab = screen.getByRole("tab", { name: /paid models/i });
-      expect(paidTab).toHaveAttribute("data-disabled");
-    });
-
-    it("enables paid tab when API key exists", () => {
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
-
-      const paidTab = screen.getByRole("tab", { name: /paid models/i });
-      expect(paidTab).not.toHaveAttribute("data-disabled");
-    });
+    expect(screen.getByRole("heading", { name: "Select Online AI Model" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /api keys/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /free models/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /paid models/i })).toBeInTheDocument();
   });
 
-  describe("Free Models Tab", () => {
-    it("renders free tab trigger", () => {
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
+  it("disables model tabs when API keys missing", () => {
+    vi.mocked(useOnlineModels).mockReturnValue(
+      createMockHookReturn({ hasOpenRouterKey: false, hasPaidKey: false })
+    );
+    render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
 
-      const freeTab = screen.getByRole("tab", { name: /free models/i });
-      expect(freeTab).toBeInTheDocument();
-    });
-
-    it("disables free tab when no API key", () => {
-      mockHookReturn = { ...mockHookReturn, hasOpenRouterKey: false };
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
-
-      const freeTab = screen.getByRole("tab", { name: /free models/i });
-      expect(freeTab).toHaveAttribute("data-disabled");
-    });
+    expect(screen.getByRole("tab", { name: /free models/i })).toHaveAttribute("data-disabled");
+    expect(screen.getByRole("tab", { name: /paid models/i })).toHaveAttribute("data-disabled");
   });
 
-  describe("Loading and Error States", () => {
-    it("shows loading state", () => {
-      mockHookReturn = { ...mockHookReturn, isLoading: true };
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
+  it("shows loading state", () => {
+    vi.mocked(useOnlineModels).mockReturnValue(createMockHookReturn({ isLoading: true }));
+    render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
 
-      expect(screen.getByText("Loading models...")).toBeInTheDocument();
-    });
-
-    it("shows error state", () => {
-      mockHookReturn = { ...mockHookReturn, error: new Error("API Error") };
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
-
-      expect(screen.getByText(/failed to load models/i)).toBeInTheDocument();
-      expect(screen.getByText("API Error")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Loading models...")).toBeInTheDocument();
   });
 
-  describe("Dialog Structure", () => {
-    it("renders dialog with correct title", () => {
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
+  it("shows error state", () => {
+    vi.mocked(useOnlineModels).mockReturnValue(
+      createMockHookReturn({ error: new Error("API Error") })
+    );
+    render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
 
-      expect(screen.getByText("Select Online AI Model")).toBeInTheDocument();
-    });
-
-    it("renders all three tabs", () => {
-      render(<OnlineModelDialog onModelSelect={mockOnModelSelect} open={true} />);
-
-      expect(screen.getByRole("tab", { name: /api keys/i })).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /free models/i })).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /paid models/i })).toBeInTheDocument();
-    });
+    expect(screen.getByText(/failed to load models/i)).toBeInTheDocument();
+    expect(screen.getByText("API Error")).toBeInTheDocument();
   });
 });

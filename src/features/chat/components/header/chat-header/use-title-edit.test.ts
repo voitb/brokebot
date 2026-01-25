@@ -14,18 +14,16 @@ describe("useTitleEdit", () => {
     vi.restoreAllMocks();
   });
 
-  describe("initial state", () => {
-    it("returns isEditingTitle as false initially", () => {
-      const { result } = renderHook(() =>
-        useTitleEdit({
-          conversationId: "conv-1",
-          currentTitle: "Test Title",
-          onSaveTitle: mockOnSaveTitle,
-        })
-      );
+  it("starts with editing disabled", () => {
+    const { result } = renderHook(() =>
+      useTitleEdit({
+        conversationId: "conv-1",
+        currentTitle: "Test Title",
+        onSaveTitle: mockOnSaveTitle,
+      })
+    );
 
-      expect(result.current.isEditingTitle).toBe(false);
-    });
+    expect(result.current.isEditingTitle).toBe(false);
   });
 
   describe("handleTitleClick", () => {
@@ -45,41 +43,33 @@ describe("useTitleEdit", () => {
       expect(result.current.isEditingTitle).toBe(true);
     });
 
-    it("does not enable editing when conversationId is undefined", () => {
-      const { result } = renderHook(() =>
+    it("guards against missing conversationId or currentTitle", () => {
+      // Missing conversationId
+      const { result: noConvId } = renderHook(() =>
         useTitleEdit({
           conversationId: undefined,
           currentTitle: "Test Title",
           onSaveTitle: mockOnSaveTitle,
         })
       );
+      act(() => noConvId.current.handleTitleClick());
+      expect(noConvId.current.isEditingTitle).toBe(false);
 
-      act(() => {
-        result.current.handleTitleClick();
-      });
-
-      expect(result.current.isEditingTitle).toBe(false);
-    });
-
-    it("does not enable editing when currentTitle is undefined", () => {
-      const { result } = renderHook(() =>
+      // Missing currentTitle
+      const { result: noTitle } = renderHook(() =>
         useTitleEdit({
           conversationId: "conv-1",
           currentTitle: undefined,
           onSaveTitle: mockOnSaveTitle,
         })
       );
-
-      act(() => {
-        result.current.handleTitleClick();
-      });
-
-      expect(result.current.isEditingTitle).toBe(false);
+      act(() => noTitle.current.handleTitleClick());
+      expect(noTitle.current.isEditingTitle).toBe(false);
     });
   });
 
   describe("handleSaveTitle", () => {
-    it("calls onSaveTitle and exits edit mode", async () => {
+    it("saves trimmed title and exits edit mode", async () => {
       const { result } = renderHook(() =>
         useTitleEdit({
           conversationId: "conv-1",
@@ -91,32 +81,16 @@ describe("useTitleEdit", () => {
       act(() => {
         result.current.handleTitleClick();
       });
-
-      await act(async () => {
-        await result.current.handleSaveTitle("New Title");
-      });
-
-      expect(mockOnSaveTitle).toHaveBeenCalledWith("conv-1", "New Title");
-      expect(result.current.isEditingTitle).toBe(false);
-    });
-
-    it("trims whitespace from title", async () => {
-      const { result } = renderHook(() =>
-        useTitleEdit({
-          conversationId: "conv-1",
-          currentTitle: "Test Title",
-          onSaveTitle: mockOnSaveTitle,
-        })
-      );
 
       await act(async () => {
         await result.current.handleSaveTitle("  Trimmed Title  ");
       });
 
       expect(mockOnSaveTitle).toHaveBeenCalledWith("conv-1", "Trimmed Title");
+      expect(result.current.isEditingTitle).toBe(false);
     });
 
-    it("does not call onSaveTitle if title unchanged", async () => {
+    it("skips save when title is unchanged", async () => {
       const { result } = renderHook(() =>
         useTitleEdit({
           conversationId: "conv-1",
@@ -133,7 +107,7 @@ describe("useTitleEdit", () => {
       expect(result.current.isEditingTitle).toBe(false);
     });
 
-    it("does not call onSaveTitle without conversationId", async () => {
+    it("guards against missing conversationId", async () => {
       const { result } = renderHook(() =>
         useTitleEdit({
           conversationId: undefined,
@@ -163,13 +137,11 @@ describe("useTitleEdit", () => {
       act(() => {
         result.current.handleTitleClick();
       });
-
       expect(result.current.isEditingTitle).toBe(true);
 
       act(() => {
         result.current.handleCancelTitleEdit();
       });
-
       expect(result.current.isEditingTitle).toBe(false);
     });
   });
@@ -191,7 +163,7 @@ describe("useTitleEdit", () => {
       expect(result.current.isEditingTitle).toBe(true);
     });
 
-    it("does not enable editing for rename event without conversation", () => {
+    it("ignores rename event without conversation", () => {
       const { result } = renderHook(() =>
         useTitleEdit({
           conversationId: undefined,
