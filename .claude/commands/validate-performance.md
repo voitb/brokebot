@@ -146,6 +146,14 @@ Target metrics:
 3. src/features/*/components/ - Large components
 4. Heavy dependencies usage
 
+## Shadcn Component Exclusions
+
+**Skip `src/components/ui/`** from performance validation except custom components.
+
+Shadcn components have their own optimization patterns. Focus performance analysis on:
+- Feature components: `src/features/*/components/`
+- Custom UI: auto-size-textarea, copy-button, input-dialog, loading-dots, logo, provider-icons, route-loading-fallback, sidebar (custom), sonner, status-indicator, truncated-text
+
 ## Output Format
 
 ### Bundle Analysis

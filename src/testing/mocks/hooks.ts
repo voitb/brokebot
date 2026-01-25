@@ -348,17 +348,33 @@ export function createMockMessageStreamHook(options: MockMessageStreamHookOption
  * Options for creating a useSidebar mock
  */
 export interface MockSidebarHookOptions {
+  state?: "expanded" | "collapsed";
   open?: boolean;
   setOpen?: ReturnType<typeof vi.fn>;
+  openMobile?: boolean;
+  setOpenMobile?: ReturnType<typeof vi.fn>;
+  isMobile?: boolean;
+  toggleSidebar?: ReturnType<typeof vi.fn>;
 }
 
 /**
  * Creates a useSidebar hook mock return value
+ *
+ * @example
+ * vi.mock("@/components/ui/sidebar", () => ({
+ *   useSidebar: () => createMockSidebarHook({ open: true, isMobile: false }),
+ * }));
  */
 export function createMockSidebarHook(options: MockSidebarHookOptions = {}) {
+  const open = options.open ?? false;
   return {
-    open: options.open ?? false,
+    state: options.state ?? (open ? "expanded" : "collapsed"),
+    open,
     setOpen: options.setOpen ?? vi.fn(),
+    openMobile: options.openMobile ?? false,
+    setOpenMobile: options.setOpenMobile ?? vi.fn(),
+    isMobile: options.isMobile ?? false,
+    toggleSidebar: options.toggleSidebar ?? vi.fn(),
   };
 }
 

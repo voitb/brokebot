@@ -129,6 +129,16 @@ npm run typecheck && npm run typecheck:tests && npm run lint && npm test -- --ru
 - Comment out failing assertions
 - Disable ESLint rules without good reason
 
+## Shadcn Component Exclusions
+
+**Do NOT create tests** for standard shadcn/ui components:
+- `src/components/ui/` contains 26 shadcn components - library code, no tests needed
+
+**DO create tests** for custom UI components:
+- auto-size-textarea, copy-button, input-dialog, loading-dots, logo
+- provider-icons, route-loading-fallback, sidebar (custom parts)
+- sonner, status-indicator, truncated-text
+
 ## Test Data Factory Pattern
 
 Create factories in `src/testing/factories/` for reusable test data:

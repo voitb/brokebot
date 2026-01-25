@@ -1,89 +1,68 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ChatInterface } from "./chat-interface";
-import { ConversationsProvider } from "@/app/providers/conversations-provider";
-import { ThemeProvider } from "@/app/providers/theme-provider";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { clearTestDatabase } from "@/testing/db-helpers";
-import { createMockModelContext, createMockWebLLMContext } from "@/testing/mocks/factories";
+import type { UseConversationReturn } from "@/hooks";
+import type { Conversation, Message } from "@/lib/db";
+import { createMockConversation } from "@/testing/mocks/factories";
 
-const mockModelContext = createMockModelContext();
-const mockWebLLMContext = createMockWebLLMContext();
+vi.mock("../header/chat-header", () => ({ ChatHeader: () => <header>Header</header> }));
+vi.mock("../messages/chat-messages/chat-messages", () => ({ ChatMessages: () => <main>Messages</main> }));
+vi.mock("../input/chat-input/", () => ({ ChatInput: () => <div>Input</div> }));
 
-vi.mock("@/app/providers/model-provider", () => ({
-  useModel: () => mockModelContext,
-  ModelProvider: ({ children }: { children: React.ReactNode }) => children,
+const mockUseChatInput = vi.fn(() => ({
+  message: "",
+  setMessage: vi.fn(),
+  isLoading: false,
+  isGenerating: false,
+  handleMessageSubmit: vi.fn(),
+  regenerateLastResponse: vi.fn(),
+  stopGeneration: vi.fn(),
 }));
 
-vi.mock("@/app/providers/web-llm-provider", () => ({
-  useWebLLM: () => mockWebLLMContext,
-  WebLLMProvider: ({ children }: { children: React.ReactNode }) => children,
+let mockConversation: Conversation | undefined = undefined;
+let mockMessages: Message[] = [];
+
+vi.mock("@/features/chat/hooks/use-chat-input", () => ({ useChatInput: () => mockUseChatInput() }));
+vi.mock("@/hooks/use-conversations", () => ({
+  useConversation: (): UseConversationReturn => ({
+    conversation: mockConversation,
+    messages: mockMessages,
+  }),
 }));
 
-vi.mock("@/features/chat/lib/transcriber", async () => {
-  const { createMockTranscriber } = await import("@/testing/mocks/hooks");
-  return createMockTranscriber();
-});
-
-function renderChatInterface(conversationId?: string) {
-  const initialPath = conversationId ? `/conversation/${conversationId}` : "/conversation/new";
-
+function renderAt(path: string) {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <ThemeProvider defaultTheme="system" storageKey="test-theme">
-        <SidebarProvider>
-          <ConversationsProvider>
-            <Routes>
-              <Route path="/conversation/new" element={<ChatInterface />} />
-              <Route path="/conversation/:id" element={<ChatInterface />} />
-            </Routes>
-          </ConversationsProvider>
-        </SidebarProvider>
-      </ThemeProvider>
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/" element={<ChatInterface />} />
+        <Route path="/chat/:id" element={<ChatInterface />} />
+      </Routes>
     </MemoryRouter>
   );
 }
 
 describe("ChatInterface", () => {
-  beforeEach(async () => {
-    await clearTestDatabase();
-    vi.clearAllMocks();
-    Object.assign(mockModelContext, createMockModelContext());
-    Object.assign(mockWebLLMContext, createMockWebLLMContext());
+  beforeEach(() => {
+    mockConversation = undefined;
+    mockMessages = [];
   });
 
-  describe("rendering", () => {
-    it("renders chat input area", async () => {
-      renderChatInterface();
-
-      await waitFor(() => {
-        expect(screen.getByRole("textbox")).toBeInTheDocument();
-      });
-    });
+  it("renders layout when no conversation id", () => {
+    renderAt("/");
+    expect(screen.getByText("Header")).toBeInTheDocument();
+    expect(screen.getByText("Messages")).toBeInTheDocument();
+    expect(screen.getByText("Input")).toBeInTheDocument();
   });
 
-  describe("model status", () => {
-    it("shows model status indicator", async () => {
-      mockModelContext.modelStatus = "Ready";
+  it("shows loading when conversation id exists but not loaded", () => {
+    renderAt("/chat/123");
+    expect(screen.getByText(/loading conversation/i)).toBeInTheDocument();
+  });
 
-      renderChatInterface();
-
-      await waitFor(() => {
-        expect(screen.getByText(/ready/i)).toBeInTheDocument();
-      });
-    });
-
-    it("shows loading state when model is loading", async () => {
-      mockModelContext.isModelLoading = true;
-      mockModelContext.modelStatus = "Loading model...";
-
-      renderChatInterface();
-
-      await waitFor(() => {
-        expect(screen.getByText(/loading model/i)).toBeInTheDocument();
-      });
-    });
-
+  it("renders layout when conversation is loaded", () => {
+    mockConversation = createMockConversation({ id: "123" });
+    renderAt("/chat/123");
+    expect(screen.getByText("Header")).toBeInTheDocument();
   });
 });

@@ -41,7 +41,7 @@ grep -rn "@ts-ignore\|@ts-expect-error" src/ --include="*.ts" --include="*.tsx" 
 
 echo ""
 echo "=== Checking for forwardRef (deprecated in React 19) ==="
-grep -rn "forwardRef" src/ --include="*.tsx" | head -10
+grep -rn "forwardRef" src/ --include="*.tsx" | grep -v "components/ui/" | head -10
 
 echo ""
 echo "=== Checking for console.log ==="

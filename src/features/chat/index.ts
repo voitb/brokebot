@@ -103,7 +103,6 @@ export {
 export {
   createOpenRouterClient,
   getCategoryFromModel,
-  createModelCatalog,
   transcribe,
   disposeTranscriber,
   type OpenRouterMessage,

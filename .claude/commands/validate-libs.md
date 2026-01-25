@@ -211,6 +211,13 @@ Location: Component animations
 3. src/app/router.tsx - Router config
 4. src/components/ui/ - UI primitives
 
+## Shadcn Component Exclusions
+
+`src/components/ui/` contains shadcn/ui components. When validating Radix UI integration:
+- These ARE the reference implementation - check for correctness
+- Don't flag for size/complexity (compound components are intentional)
+- Custom UI components (auto-size-textarea, etc.) should follow project patterns
+
 ## Output Format
 
 ### Library-by-Library Analysis

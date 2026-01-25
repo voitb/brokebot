@@ -5,6 +5,18 @@ Comprehensive validation workflow that runs all validators to ensure your projec
 ## Overview
 
 This workflow orchestrates multiple specialized validators to check:
+
+## Global Exclusions
+
+### Shadcn/UI Components
+**Skip `src/components/ui/`** from validation except these custom components:
+- auto-size-textarea.tsx, copy-button/, input-dialog.tsx, loading-dots.tsx
+- logo.tsx, provider-icons.tsx, route-loading-fallback.tsx, sidebar/ (custom)
+- sonner.tsx, status-indicator.tsx, truncated-text.tsx
+
+Standard shadcn components (26 files) are library code - no tests, no pattern validation needed.
+
+## Validators
 - React 19 patterns and best practices
 - TypeScript implementation quality
 - Hook implementations

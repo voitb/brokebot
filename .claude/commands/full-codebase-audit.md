@@ -23,6 +23,21 @@ Based on 2026 best practices from:
 | **React Compiler** | Auto-memoization - Manual hooks only when measured |
 | **Bulletproof** | Feature-based, unidirectional code flow |
 
+## Global Exclusions
+
+### Shadcn/UI Components
+All audit agents should **skip `src/components/ui/`** except these custom components:
+- auto-size-textarea.tsx, copy-button/, input-dialog.tsx, loading-dots.tsx
+- logo.tsx, provider-icons.tsx, route-loading-fallback.tsx, sidebar/ (custom)
+- sonner.tsx, status-indicator.tsx, truncated-text.tsx
+
+Standard shadcn components are library code - excluded from:
+- Test coverage requirements
+- React pattern validation
+- TypeScript quality checks
+- Component architecture checks
+- Performance optimization suggestions
+
 ---
 
 ## Phase 1: Project Structure Analysis (Parallel)

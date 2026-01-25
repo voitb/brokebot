@@ -18,6 +18,7 @@ All available Claude Code commands for this project.
 | `/validate-hooks` | Custom hook implementations | `react-component-architect` |
 | `/validate-components` | Component architecture and a11y | `react-component-architect` |
 | `/validate-tests` | Test coverage and quality | `unit-testing:test-automator` |
+| `/validate-test-simplification` | **Simplify over-engineered tests** - Analysis + optional auto-fix | 4-6 agents (parallel) |
 | `/validate-libs` | Library integrations | `code-architect` |
 | `/validate-performance` | Performance patterns | `performance-engineer` |
 | `/quick-check` | Fast automated checks (no agents) | None (bash only) |
@@ -56,6 +57,14 @@ All available Claude Code commands for this project.
 | 6 | `code-simplifier:code-simplifier` | Remove nested TooltipProviders |
 | 7-8 | `Bash` | Update barrels, verification |
 
+## Global Commands (Project-Agnostic)
+
+Commands in `global/` folder work with any TypeScript/React/Next.js project:
+
+| Command | Purpose | Agents Used |
+|---------|---------|-------------|
+| `/global:validate-test-simplification` | **Simplify tests (any project)** - No project-specific config required | 4-6 agents (parallel) |
+
 ## Utility
 
 | Command | Purpose |
@@ -67,6 +76,7 @@ All available Claude Code commands for this project.
 ### Daily Development
 1. `/quick-check` - Before each commit
 2. `/fix-tests` - If tests fail
+3. `/validate-test-simplification` - Before adding 100+ line test files
 
 ### Weekly Review
 1. `/validate-all` - Comprehensive validation

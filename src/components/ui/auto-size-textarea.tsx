@@ -40,6 +40,7 @@ export const useAutosizeTextArea = ({
 
 export type AutosizeTextAreaRef = {
   textArea: HTMLTextAreaElement;
+  focus: () => void;
   maxHeight: number;
   minHeight: number;
 };

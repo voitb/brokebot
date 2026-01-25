@@ -89,6 +89,16 @@ Priority order:
 3. src/components/ - Shared components
 4. src/hooks/ - Check if hooks follow React rules
 
+## Shadcn Component Exclusions
+
+**Skip `src/components/ui/`** from React pattern validation except custom components.
+
+Shadcn components may legitimately use:
+- forwardRef (Radix UI requirement)
+- Different patterns than project conventions
+
+Only validate custom UI components: auto-size-textarea, copy-button, input-dialog, loading-dots, logo, provider-icons, route-loading-fallback, sidebar (custom), sonner, status-indicator, truncated-text
+
 ## Output Format
 
 Return findings as:
