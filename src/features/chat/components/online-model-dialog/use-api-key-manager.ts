@@ -27,9 +27,10 @@ export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn
 
   useEffect(() => {
     if (config && provider === "openrouter") {
-      const keyExists = !!config.openrouterApiKey;
+      const apiKeyValue = config.openrouterApiKey;
+      const keyExists = !!apiKeyValue;
       setHasStoredKey(keyExists);
-      setApiKey(keyExists ? maskApiKey(config.openrouterApiKey!) : "");
+      setApiKey(keyExists && apiKeyValue ? maskApiKey(apiKeyValue) : "");
     }
   }, [config, provider]);
 

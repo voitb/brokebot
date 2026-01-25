@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { db, type Conversation, type Message } from "@/lib/db";
 import { toast } from "sonner";
+import { useMounted } from "./use-mounted";
 
 export interface UseConversationBackupReturn {
   exportConversations: () => Promise<void>;
@@ -12,6 +13,7 @@ export interface UseConversationBackupReturn {
 export function useConversationBackup(): UseConversationBackupReturn {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const mountedRef = useMounted();
 
   const exportConversations = async () => {
     setIsExporting(true);
@@ -29,7 +31,9 @@ export function useConversationBackup(): UseConversationBackupReturn {
     } catch {
       toast.error("Failed to export conversations.");
     } finally {
-      setIsExporting(false);
+      if (mountedRef.current) {
+        setIsExporting(false);
+      }
     }
   };
 
@@ -55,8 +59,12 @@ export function useConversationBackup(): UseConversationBackupReturn {
           importedCount++;
         }
       }
+    } catch {
+      toast.error("Failed to import conversations.");
     } finally {
-      setIsImporting(false);
+      if (mountedRef.current) {
+        setIsImporting(false);
+      }
     }
 
     return importedCount;

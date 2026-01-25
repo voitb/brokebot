@@ -23,6 +23,9 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);
   const isInitialRender = useRef(true);
+  const scrollToBottomRef = useRef<(behavior?: "smooth" | "auto") => void>(
+    () => {}
+  );
 
   const getViewport = () => {
     const scrollArea = scrollAreaRef.current;
@@ -32,7 +35,7 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     ) as HTMLElement ?? scrollArea;
   };
 
-  const scrollToBottom = (behavior: "smooth" | "auto" = "smooth") => {
+  scrollToBottomRef.current = (behavior: "smooth" | "auto" = "smooth") => {
     const viewport = getViewport();
     if (viewport) {
       viewport.scrollTo({ top: viewport.scrollHeight, behavior });
@@ -85,22 +88,20 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
 
   useLayoutEffect(() => {
     if (isInitialRender.current) {
-      scrollToBottom("auto");
+      scrollToBottomRef.current("auto");
       isInitialRender.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollToBottom is defined in this hook
   }, [conversationId]);
 
   useEffect(() => {
     if (!isInitialRender.current && !userHasScrolledUp.current) {
-      scrollToBottom("smooth");
+      scrollToBottomRef.current("smooth");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollToBottom is defined in this hook
   }, [messageCount, isGenerating]);
 
   const handleScrollToBottomClick = () => {
     userHasScrolledUp.current = false;
-    scrollToBottom("smooth");
+    scrollToBottomRef.current("smooth");
   };
 
   return {
