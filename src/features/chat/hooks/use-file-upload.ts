@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useMounted } from "@/hooks/use-mounted";
 import { useDocuments } from "@/features/documents/hooks/use-documents";
 import {
   processFile as processFileUtil,
@@ -29,6 +30,7 @@ export function useFileUpload({
 }: UseFileUploadProps): UseFileUploadReturn {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const { uploadDocument } = useDocuments();
+  const mountedRef = useMounted();
 
   const handleFilesSelected = async (files: FileList) => {
     const validFiles: File[] = [];
@@ -45,7 +47,9 @@ export function useFileUpload({
     const processedFiles = await Promise.all(
       validFiles.map((file) => processFileUtil(file, uploadDocument))
     );
-    setAttachedFiles((prev) => [...prev, ...processedFiles]);
+    if (mountedRef.current) {
+      setAttachedFiles((prev) => [...prev, ...processedFiles]);
+    }
   };
 
   const removeFile = (fileId: string) => {
