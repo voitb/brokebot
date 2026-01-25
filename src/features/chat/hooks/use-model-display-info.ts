@@ -26,7 +26,7 @@ export function useModelDisplayInfo(): UseModelDisplayInfoReturn {
     ? {
         name: currentModel.name,
         modelType: currentModel.type === "online" ? "Online" : "Local",
-        supportsImages: false,
+        supportsImages: currentModel.localModel?.supportsImages ?? false,
         specialization:
           currentModel.localModel?.specialization ||
           currentModel.onlineModel?.category,

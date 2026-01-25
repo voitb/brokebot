@@ -89,8 +89,13 @@ export function useConversationList(): UseConversationListReturn {
     combinedFilteredConversations.forEach((convo) => {
       if (pinnedIds.has(convo.id)) return;
 
-      if (convo.folderId && folderMap.has(convo.folderId)) {
-        folderMap.get(convo.folderId)!.conversations.push(convo);
+      if (convo.folderId) {
+        const folder = folderMap.get(convo.folderId);
+        if (folder) {
+          folder.conversations.push(convo);
+        } else {
+          unfolded.push(convo);
+        }
       } else {
         unfolded.push(convo);
       }
