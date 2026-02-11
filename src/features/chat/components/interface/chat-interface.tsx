@@ -5,7 +5,7 @@ import { ChatInput } from "../input/chat-input/";
 import { useConversation } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks";
 import { useChatInput } from "@/features/chat/hooks/use-chat-input";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/errors/error-boundary";
 
 export function ChatInterface() {
   const conversationId = useConversationId();

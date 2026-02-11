@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useEffectEvent } from "react";
-import { transcribe } from "@/features/chat/lib/transcriber/transcribe";
-import type { TranscribeResult } from "@/features/chat/lib/transcriber/types";
+import { transcribe } from "@/features/chat/api/transcriber/transcribe";
+import type { TranscribeResult } from "@/features/chat/api/transcriber/types";
 
 const CHUNK_LENGTH_S = 30;
 const STRIDE_LENGTH_S = 5;

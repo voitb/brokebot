@@ -1,12 +1,10 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatHeader } from "@/features/chat";
-import {
-  GettingStarted,
-  WelcomeHeader,
-  FeatureGrid,
-  PrivacyNotice,
-} from "@/features/welcome";
 import { SEOMetadata } from "@/components/seo/seo-metadata";
+import { WelcomeHeader } from "./welcome-header";
+import { FeatureGrid } from "./feature-grid";
+import { GettingStarted } from "./getting-started";
+import { PrivacyNotice } from "./privacy-notice";
 
 export function WelcomeScreen() {
   return (

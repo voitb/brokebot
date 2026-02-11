@@ -1,5 +1,5 @@
 import { Brain, Eye, Zap, Cloud, Code } from "lucide-react";
-import type { OpenRouterModel } from "@/features/chat/lib/openrouter";
+import type { OpenRouterModel } from "@/features/chat/api/openrouter";
 
 export type OnlineModelCategory =
   | "reasoning"

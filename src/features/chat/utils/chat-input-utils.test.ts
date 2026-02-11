@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { summarizeConversation, truncateTitle } from "./chat-input-utils";
-import type { OpenRouterMessage } from "@/features/chat/lib/openrouter";
+import type { OpenRouterMessage } from "@/features/chat/api/openrouter";
 
 describe("summarizeConversation", () => {
   it("truncates and summarizes long conversations", () => {

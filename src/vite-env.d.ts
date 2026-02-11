@@ -15,7 +15,7 @@ declare module "*/worker?worker" {
   export default workerConstructor;
 }
 
-declare module "@/features/chat/lib/webllm/worker?worker" {
+declare module "@/features/chat/api/webllm/worker?worker" {
   const workerConstructor: new () => Worker;
   export default workerConstructor;
 }

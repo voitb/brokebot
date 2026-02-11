@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { TruncatedText } from "@/components/ui/truncated-text";
-import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/api/openrouter";
 import { getCategoryIcon } from "@/features/chat/utils/online-model-utils";
 
 interface ModelCardProps {
@@ -22,19 +22,19 @@ export function ModelCard({
 }: ModelCardProps) {
   return (
     <Card
-      className={`transition-colors flex flex-col h-full ${isEnabled
+      className={`gap-2 py-3 transition-colors flex flex-col h-full ${isEnabled
         ? "cursor-pointer hover:bg-accent"
         : "opacity-50 cursor-not-allowed"
         } ${isSelected ? "ring-2 ring-primary" : ""}`}
       onClick={() => isEnabled && onSelect(model)}
     >
-      <CardHeader className="pb-2">
+      <CardHeader>
         <CardTitle className="text-sm flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 min-w-0">
             <span className="flex-shrink-0 mt-0.5">
               {getCategoryIcon(model.category)}
             </span>
-            <TruncatedText maxLines={2} classNames={{ base: "h-10" }}>
+            <TruncatedText maxLines={2}>
               {model.name}
             </TruncatedText>
           </div>
@@ -43,8 +43,8 @@ export function ModelCard({
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0 flex-grow">
-        <TruncatedText maxLines={2} as="p" classNames={{ base: "text-xs text-muted-foreground h-8" }}>
+      <CardContent className="flex-grow">
+        <TruncatedText maxLines={3} as="p" classNames={{ base: "text-xs text-muted-foreground" }}>
           {model.description}
         </TruncatedText>
       </CardContent>
