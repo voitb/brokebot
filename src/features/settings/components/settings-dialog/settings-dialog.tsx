@@ -1,7 +1,7 @@
 import { Shield, Settings, FileText } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/errors/error-boundary";
 import { GeneralTab } from "../general-tab";
 import { DocumentsTab } from "../documents-tab";
 import { PrivacyTab } from "../privacy-tab";

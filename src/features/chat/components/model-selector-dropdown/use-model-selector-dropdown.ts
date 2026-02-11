@@ -6,7 +6,7 @@ import {
   createLocalModel,
   createOnlineModel,
 } from "@/app/providers/model-provider";
-import type { OpenRouterModel } from "@/features/chat/lib/openrouter";
+import type { OpenRouterModel } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { getDisplayName } from "@/features/chat/utils/model-selector-utils";
 

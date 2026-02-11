@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { type OpenRouterModel } from "@/features/chat/lib/openrouter";
+import { type OpenRouterModel } from "@/features/chat/api/openrouter";
 import { Input } from "@/components/ui/input";
 import { filterModelsByQuery } from "@/features/chat/utils/online-model-utils";
 import { ModelCard } from "./model-card";

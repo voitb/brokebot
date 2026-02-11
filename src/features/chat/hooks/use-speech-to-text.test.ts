@@ -5,7 +5,7 @@ import { setupMediaMocks } from "@/testing/mocks/modules";
 
 const mockTranscribe = vi.fn();
 
-vi.mock("@/features/chat/lib/transcriber/transcribe", () => ({
+vi.mock("@/features/chat/api/transcriber/transcribe", () => ({
   transcribe: (...args: unknown[]) => mockTranscribe(...args),
 }));
 

@@ -8,7 +8,7 @@ import {
 import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
-import { loadModelCatalog, type ModelInfo } from "@/features/chat/lib/webllm";
+import { loadModelCatalog, type ModelInfo } from "@/features/chat/api/webllm";
 
 export { type ModelInfo };
 
@@ -88,7 +88,7 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
 
       const newEngine = await CreateWebWorkerMLCEngine(
         new Worker(
-          new URL("@/features/chat/lib/webllm/worker.ts", import.meta.url),
+          new URL("@/features/chat/api/webllm/worker.ts", import.meta.url),
           { type: "module" }
         ),
         modelId,

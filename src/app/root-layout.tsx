@@ -1,12 +1,12 @@
 import { Outlet } from "react-router-dom";
-import { ResponsiveChatLayout } from "@/features/layout";
+import { ResponsiveChatLayout } from "@/components/layouts";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalRoot } from "@/app/modals/modal-root";
 import { Seo } from "@/components/seo/seo";
 import { PerformanceSEO } from "@/components/seo/performance-seo";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/errors/error-boundary";
 
-function App() {
+export function RootLayout() {
   return (
     <>
       <Seo />
@@ -21,5 +21,3 @@ function App() {
     </>
   );
 }
-
-export default App;

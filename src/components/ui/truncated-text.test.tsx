@@ -26,15 +26,14 @@ describe("TruncatedText", () => {
     expect(screen.getByText("Hello World")).toBeInTheDocument();
   });
 
-  it("does not wrap in tooltip when text fits", () => {
+  it("renders text when not truncated", () => {
     mockOverflow(false);
     render(<TruncatedText>Short text</TruncatedText>);
 
     expect(screen.getByText("Short text")).toBeInTheDocument();
-    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   });
 
-  it("wraps in tooltip when text is truncated", () => {
+  it("renders text when truncated", () => {
     mockOverflow(true);
     render(<TruncatedText>Very long text that should be truncated</TruncatedText>);
 

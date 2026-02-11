@@ -3,7 +3,7 @@ import { ApiKeySection } from "./api-key-section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { OpenRouterIcon } from "@/components/ui/provider-icons";
-import { createOpenRouterClient } from "@/features/chat/lib/openrouter";
+import { createOpenRouterClient } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { toast } from "sonner";
 import { TestTube, Loader2 } from "lucide-react";

@@ -1,11 +1,11 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import App from "@/app/app";
+import { RootLayout } from "@/app/root-layout";
 import { ChatGuard } from "@/features/chat/components/interface/chat-guard";
 import { RouteLoadingFallback } from "@/components/ui/route-loading-fallback";
 
 const WelcomeScreen = lazy(() =>
-  import("@/app/pages/welcome").then((m) => ({
+  import("@/app/routes/landing").then((m) => ({
     default: m.WelcomeScreen,
   }))
 );
@@ -17,7 +17,7 @@ const ChatInterface = lazy(() =>
 );
 
 const TermsOfService = lazy(() =>
-  import("@/app/pages/terms-of-service").then((m) => ({
+  import("@/app/routes/terms").then((m) => ({
     default: m.TermsOfService,
   }))
 );
@@ -25,7 +25,7 @@ const TermsOfService = lazy(() =>
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <RootLayout />,
     children: [
       {
         index: true,

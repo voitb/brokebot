@@ -1,4 +1,4 @@
-import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/features/layout/hooks/use-keyboard-shortcuts";
+import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useConversationList } from "@/hooks";
 import { useConversations } from "@/app/providers/conversations-provider";
