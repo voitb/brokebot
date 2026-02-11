@@ -1,10 +1,32 @@
 import { Loader2, AlertCircle } from "lucide-react";
 import { ModelSelectorDropdown } from "../model-selector-dropdown/model-selector-dropdown";
-import {
-  getModelStatusKey,
-  getStatusColor,
-  getDisplayedStatus,
-} from "@/features/chat/utils/model-status-utils";
+
+type ModelStatusKey = "error" | "loading" | "ready" | "initializing";
+
+const STATUS_COLORS: Record<ModelStatusKey, string> = {
+  error: "text-destructive",
+  loading: "text-amber-600 dark:text-amber-400",
+  ready: "text-green-600 dark:text-green-400",
+  initializing: "text-muted-foreground",
+};
+
+const STATUS_TEXT: Record<ModelStatusKey, string> = {
+  error: "Error",
+  loading: "Loading Model...",
+  ready: "Ready",
+  initializing: "Initializing...",
+};
+
+function getModelStatusKey(flags: {
+  isModelError: boolean;
+  isEngineLoading: boolean;
+  isModelReady: boolean;
+}): ModelStatusKey {
+  if (flags.isModelError) return "error";
+  if (flags.isEngineLoading) return "loading";
+  if (flags.isModelReady) return "ready";
+  return "initializing";
+}
 
 interface ModelStatusProps {
   selectedModel: {
@@ -29,8 +51,6 @@ export function ModelStatus({
   disabled = false,
 }: ModelStatusProps) {
   const statusKey = getModelStatusKey({ isModelError, isEngineLoading, isModelReady });
-  const statusColor = getStatusColor(statusKey);
-  const displayedStatus = getDisplayedStatus(statusKey);
 
   return (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -40,7 +60,7 @@ export function ModelStatus({
         <div className="flex items-center gap-1">
           {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
           {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}
-          <span className={statusColor}>{displayedStatus}</span>
+          <span className={STATUS_COLORS[statusKey]}>{STATUS_TEXT[statusKey]}</span>
         </div>
 
         {supportsImages && isModelReady && (

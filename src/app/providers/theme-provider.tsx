@@ -9,6 +9,11 @@ import {
 
 type Theme = "dark" | "light" | "system";
 
+const VALID_THEMES: readonly Theme[] = ["dark", "light", "system"];
+function isValidTheme(value: string | null): value is Theme {
+  return value !== null && (VALID_THEMES as readonly string[]).includes(value);
+}
+
 type ThemeProviderContextType = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
@@ -46,8 +51,8 @@ export function ThemeProvider({
   storageKey = "theme",
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem(storageKey) as Theme;
-    return stored || defaultTheme;
+    const stored = localStorage.getItem(storageKey);
+    return isValidTheme(stored) ? stored : defaultTheme;
   });
 
   const systemTheme = useSyncExternalStore(

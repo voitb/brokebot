@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import { formatMessageTime } from "@/features/chat/utils/format-message-time";
 
 interface MessageTimestampProps {
   timestamp: Date;
@@ -14,8 +13,8 @@ export function MessageTimestamp({ timestamp, isUser }: MessageTimestampProps) {
       }`}
     >
       <Badge variant="outline" className="text-xs">
-        {formatMessageTime(timestamp)}
+        {timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </Badge>
     </div>
   );
-} 
+}

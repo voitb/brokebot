@@ -19,7 +19,7 @@ interface UseFileUploadReturn {
   attachedFiles: AttachedFile[];
   clearFiles: () => void;
   replaceFiles: (files: AttachedFile[]) => void;
-  handleFilesSelected: (files: FileList) => Promise<void>;
+  handleFilesSelected: (files: FileList) => Promise<AttachedFile[]>;
   removeFile: (fileId: string) => void;
   processFile: (file: File) => Promise<AttachedFile>;
 }
@@ -32,7 +32,7 @@ export function useFileUpload({
   const { uploadDocument } = useDocuments();
   const mountedRef = useMounted();
 
-  const handleFilesSelected = async (files: FileList) => {
+  const handleFilesSelected = async (files: FileList): Promise<AttachedFile[]> => {
     const validFiles: File[] = [];
 
     for (const file of Array.from(files)) {
@@ -50,6 +50,7 @@ export function useFileUpload({
     if (mountedRef.current) {
       setAttachedFiles((prev) => [...prev, ...processedFiles]);
     }
+    return processedFiles;
   };
 
   const removeFile = (fileId: string) => {

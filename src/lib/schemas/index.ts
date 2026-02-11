@@ -1,2 +1,2 @@
-export { ConversationSchema, type ValidatedConversation } from "./conversation-schema";
-export { UnifiedModelSchema, type ValidatedUnifiedModel } from "./model-schema";
+export { ConversationSchema } from "./conversation-schema";
+export { UnifiedModelSchema } from "./model-schema";

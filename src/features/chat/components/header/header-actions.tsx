@@ -35,7 +35,7 @@ export function HeaderActions({
     <div className={cn("flex items-center gap-2", className)}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="sm" onClick={onToggleTheme}>
+          <Button variant="ghost" size="sm" onClick={onToggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
             {theme === "dark" ? (
               <Sun className="w-4 h-4" />
             ) : (
@@ -51,7 +51,7 @@ export function HeaderActions({
       {conversationId && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" onClick={onTogglePin}>
+            <Button variant="ghost" size="sm" onClick={onTogglePin} aria-label={isPinned ? "Unpin conversation" : "Pin conversation"}>
               <Star
                 className={cn(
                   "w-4 h-4",

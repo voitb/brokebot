@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useUserConfig } from "@/hooks/use-user-config";
 
@@ -21,18 +21,19 @@ export interface UseApiKeyManagerReturn {
 export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn {
   const { config, updateConfig } = useUserConfig();
 
-  const [apiKey, setApiKey] = useState("");
-  const [hasStoredKey, setHasStoredKey] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const hasStoredKey = !!(provider === "openrouter" && config?.openrouterApiKey);
+  const maskedKey = hasStoredKey ? maskApiKey(config!.openrouterApiKey!) : "";
 
-  useEffect(() => {
-    if (config && provider === "openrouter") {
-      const apiKeyValue = config.openrouterApiKey;
-      const keyExists = !!apiKeyValue;
-      setHasStoredKey(keyExists);
-      setApiKey(keyExists && apiKeyValue ? maskApiKey(apiKeyValue) : "");
+  const [apiKey, setApiKey] = useState(maskedKey);
+  const [isEditing, setIsEditing] = useState(false);
+  const prevMaskedKeyRef = useRef(maskedKey);
+
+  if (prevMaskedKeyRef.current !== maskedKey) {
+    prevMaskedKeyRef.current = maskedKey;
+    if (!isEditing) {
+      setApiKey(maskedKey);
     }
-  }, [config, provider]);
+  }
 
   const handleApiKeySave = async () => {
     if (!apiKey.trim() || apiKey.includes("••••")) {
@@ -41,7 +42,6 @@ export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn
     }
 
     await updateConfig({ openrouterApiKey: apiKey });
-    setHasStoredKey(true);
     setApiKey(maskApiKey(apiKey));
     setIsEditing(false);
     toast.success("API key saved successfully");
@@ -49,7 +49,6 @@ export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn
 
   const handleApiKeyRemove = async () => {
     await updateConfig({ openrouterApiKey: "" });
-    setHasStoredKey(false);
     setApiKey("");
     setIsEditing(false);
     toast.success("API key removed");

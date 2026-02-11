@@ -1,12 +1,7 @@
 import { Brain, Eye, Zap, Cloud, Code } from "lucide-react";
-import type { OpenRouterModel } from "@/features/chat/api/openrouter";
+import type { OpenRouterModel, OnlineModelCategory } from "@/features/chat/api/openrouter";
 
-export type OnlineModelCategory =
-  | "reasoning"
-  | "multimodal"
-  | "efficient"
-  | "general"
-  | "instruction";
+export type { OnlineModelCategory };
 
 const CATEGORY_ICONS: Record<OnlineModelCategory, React.ReactNode> = {
   reasoning: <Brain className="w-3 h-3" />,
@@ -16,8 +11,8 @@ const CATEGORY_ICONS: Record<OnlineModelCategory, React.ReactNode> = {
   instruction: <Code className="w-3 h-3" />,
 };
 
-export function getCategoryIcon(category: string): React.ReactNode {
-  return CATEGORY_ICONS[category as OnlineModelCategory] ?? <Cloud className="w-3 h-3" />;
+export function getCategoryIcon(category: OnlineModelCategory): React.ReactNode {
+  return CATEGORY_ICONS[category];
 }
 
 export function filterModelsByQuery(

@@ -9,6 +9,7 @@ import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
 import { toast } from "sonner";
 
 import { loadModelCatalog, type ModelInfo } from "@/features/chat/api/webllm";
+import { UnifiedModelSchema } from "@/lib/schemas/model-schema";
 
 export { type ModelInfo };
 
@@ -142,19 +143,19 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
       const stored = localStorage.getItem("unifiedModel");
       if (!stored) return;
 
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed?.type === "local" && parsed.localModel?.id) {
-          // User previously had a local model - load it
-          const models = await ensureModelsLoaded();
-          const found = models.find((m) => m.id === parsed.localModel.id);
-          if (found) {
-            setSelectedModelState(found);
-            await loadModel(found.id);
-          }
+      const result = UnifiedModelSchema.safeParse((() => {
+        try { return JSON.parse(stored); } catch { return null; }
+      })());
+      if (!result.success) return;
+
+      const parsed = result.data;
+      if (parsed.type === "local" && parsed.localModel?.id) {
+        const models = await ensureModelsLoaded();
+        const found = models.find((m) => m.id === parsed.localModel?.id);
+        if (found) {
+          setSelectedModelState(found);
+          await loadModel(found.id);
         }
-      } catch {
-        // Invalid JSON in localStorage, ignore
       }
     };
 

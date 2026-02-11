@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
@@ -20,14 +20,12 @@ export interface UseSettingsReturn {
 
 export function useSettings(): UseSettingsReturn {
   const { config, updateConfig } = useUserConfig();
-  const [settings, setSettings] = useState<Partial<UserConfig>>({});
+  const [settings, setSettings] = useState<Partial<UserConfig>>(() => config ?? {});
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (config) {
-      setSettings(config);
-    }
-  }, [config]);
+  if (config && Object.keys(settings).length === 0) {
+    setSettings(config);
+  }
 
   const handleFieldChange = <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
       setSettings((prev) => ({ ...prev, [field]: value }));

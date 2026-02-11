@@ -8,7 +8,6 @@ import {
 } from "@/app/providers/model-provider";
 import type { OpenRouterModel } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
-import { getDisplayName } from "@/features/chat/utils/model-selector-utils";
 
 export interface UseModelSelectorDropdownReturn {
   isDropdownOpen: boolean;
@@ -37,7 +36,11 @@ export function useModelSelectorDropdown(): UseModelSelectorDropdownReturn {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const isOnlineModel = currentModel?.type === "online";
-  const displayName = getDisplayName({ currentModel, activeLocalModel: selectedModel });
+  const displayName = !currentModel
+    ? "Select Model"
+    : currentModel.type === "online"
+      ? currentModel.onlineModel?.name ?? "Online Model"
+      : selectedModel?.name ?? currentModel.name;
   const isOpenRouterKeyAvailable = !!config?.openrouterApiKey;
 
   const loadLocalModels = async () => {

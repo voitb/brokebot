@@ -10,7 +10,7 @@ export function RootLayout() {
   return (
     <>
       <Seo />
-      <PerformanceSEO enableWebVitals={true} />
+      <PerformanceSEO />
       <ErrorBoundary>
         <ResponsiveChatLayout>
           <Outlet />

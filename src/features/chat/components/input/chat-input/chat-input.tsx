@@ -49,7 +49,6 @@ export function ChatInput({
     handleMicToggle,
     handleSubmit,
     handleKeyDown,
-    handleRetryModel,
     isSubmitDisabled,
     isInputDisabled,
     placeholderText,
@@ -67,8 +66,6 @@ export function ChatInput({
         <ModelError
           isModelError={isModelError}
           status={modelStatus}
-          isEngineLoading={isModelLoading}
-          onRetry={handleRetryModel}
         />
 
         <DragDropOverlay isDragOver={isDragOver} supportsImages={supportsImages} />
