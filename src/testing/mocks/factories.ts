@@ -75,23 +75,18 @@ export function createMockModel(type: "local" | "online" = "online") {
   };
 }
 
-export function createMockOpenRouterModel(overrides: {
+export function createMockOpenRouterModel(overrides: Partial<OpenRouterModel> & {
   id: string;
   name: string;
   isFree: boolean;
-  description?: string;
-  provider?: string;
-  category?: string;
-}) {
+}): OpenRouterModel {
   return {
-    id: overrides.id,
-    name: overrides.name,
-    isFree: overrides.isFree,
-    description: overrides.description ?? "A test model",
-    provider: overrides.provider ?? "test-provider",
-    category: overrides.category ?? "general",
+    description: "A test model",
+    provider: "test-provider",
+    category: "general",
     contextLength: 4096,
     pricing: { prompt: "0.0001", completion: "0.0002" },
+    ...overrides,
   };
 }
 

@@ -1,8 +1,10 @@
 import { useState, useRef, type ChangeEvent, type RefObject } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { useDataManagement } from "@/hooks/use-data-management";
 import { useConversationBackup } from "@/hooks/use-conversation-backup";
+import { ConversationSchema } from "@/lib/schemas/conversation-schema";
 import { toast } from "sonner";
 import type { UserConfig } from "@/lib/db";
 
@@ -67,17 +69,14 @@ export function usePrivacySettings(hasConversations = false): UsePrivacySettings
 
     try {
       const text = await file.text();
-      const data = JSON.parse(text);
+      const result = z.array(ConversationSchema).safeParse(JSON.parse(text));
 
-      if (
-        !Array.isArray(data) ||
-        !data.every((conv) => conv.id && conv.messages)
-      ) {
+      if (!result.success) {
         toast.error("Invalid conversation file format");
         return;
       }
 
-      const count = await importConversations(data);
+      const count = await importConversations(result.data);
       toast.success(`Successfully imported ${count} conversation(s)`);
     } catch {
       toast.error(

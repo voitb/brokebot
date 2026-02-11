@@ -65,6 +65,7 @@ export function FolderItem({ folder }: FolderItemProps) {
                   size="sm"
                   className="h-6 w-6 p-0"
                   onClick={(e) => e.stopPropagation()}
+                  aria-label={`Actions for folder ${folder.name}`}
                 >
                   <MoreHorizontal className="w-3 h-3" />
                 </Button>

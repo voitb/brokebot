@@ -1,4 +1,4 @@
-import { useRef, useEffect, type ChangeEvent } from "react";
+import { useRef, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, FileText } from "lucide-react";
 import { useFileUpload, type AttachedFile } from "@/features/chat/hooks/use-file-upload";
@@ -17,21 +17,18 @@ export function FileUpload({
   onFilesChanged,
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { attachedFiles, handleFilesSelected } = useFileUpload({
+  const { handleFilesSelected } = useFileUpload({
     supportsImages,
     selectedModelName,
   });
-
-  useEffect(() => {
-    onFilesChanged?.(attachedFiles);
-  }, [attachedFiles, onFilesChanged]);
 
   const handleFileInputChange = async (
     e: ChangeEvent<HTMLInputElement>
   ) => {
     const files = e.target.files;
     if (files) {
-      await handleFilesSelected(files);
+      const processed = await handleFilesSelected(files);
+      onFilesChanged?.(processed);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -54,14 +51,14 @@ export function FileUpload({
         size="sm"
         className="h-8 w-8 p-0"
         onClick={() => fileInputRef.current?.click()}
-        title="Attach files"
+        aria-label="Attach files"
         disabled={disabled}
       >
         <Paperclip className="h-4 w-4" />
       </Button>
     </>
   );
-};
+}
 
 interface FilePreviewItemProps {
   file: AttachedFile;
@@ -98,6 +95,7 @@ function FilePreviewItem({
       size="sm"
       className="h-6 w-6 p-0"
       onClick={() => onRemove(file.id)}
+      aria-label={`Remove ${file.file.name}`}
     >
       <X className="h-3 w-3" />
     </Button>

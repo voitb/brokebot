@@ -24,7 +24,6 @@ export interface UseChatInputFormProps {
 }
 
 export interface UseChatInputFormReturn {
-  currentModelName: string | undefined;
   isModelReady: boolean;
   isModelError: boolean;
   isModelLoading: boolean;
@@ -32,7 +31,6 @@ export interface UseChatInputFormReturn {
   supportsImages: boolean;
 
   attachedFiles: AttachedFile[];
-  handleFilesSelected: (files: FileList) => Promise<void>;
   removeFile: (fileId: string) => void;
   replaceFiles: (files: AttachedFile[]) => void;
 
@@ -47,7 +45,6 @@ export interface UseChatInputFormReturn {
 
   handleSubmit: (e: FormEvent) => Promise<void>;
   handleKeyDown: (e: ReactKeyboardEvent) => void;
-  handleRetryModel: () => Promise<void>;
 
   isSubmitDisabled: boolean;
   isInputDisabled: boolean;
@@ -133,14 +130,6 @@ export function useChatInputForm({
 
   useInputKeyboardShortcuts(onMicToggle);
 
-  const handleMicToggle = () => {
-    onMicToggle();
-  };
-
-  const handleRetryModel = async () => {
-    toast.info("Model retry is not yet implemented for unified models");
-  };
-
   const submitMessage = async () => {
     if (!message.trim() && attachedFiles.length === 0) return;
     if (!isModelReady) {
@@ -182,14 +171,12 @@ export function useChatInputForm({
   };
 
   return {
-    currentModelName,
     isModelReady,
     isModelError,
     isModelLoading,
     modelStatus,
     supportsImages,
     attachedFiles,
-    handleFilesSelected,
     removeFile,
     replaceFiles,
     isDragOver,
@@ -198,10 +185,9 @@ export function useChatInputForm({
     handleDragLeave,
     handleDragEnter,
     transcriberStatus,
-    handleMicToggle,
+    handleMicToggle: onMicToggle,
     handleSubmit,
     handleKeyDown,
-    handleRetryModel,
     isSubmitDisabled,
     isInputDisabled,
     placeholderText,

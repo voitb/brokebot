@@ -21,7 +21,9 @@ describe("useApiKeyManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockConfig = null;
-    mockUpdateConfig.mockResolvedValue(undefined);
+    mockUpdateConfig.mockImplementation(async (update: Partial<UserConfig>) => {
+      mockConfig = { ...mockConfig, ...update };
+    });
   });
 
   describe("initial state", () => {

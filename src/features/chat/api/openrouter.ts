@@ -9,12 +9,19 @@ export interface StreamResponse {
   error?: string;
 }
 
+export type OnlineModelCategory =
+  | "reasoning"
+  | "multimodal"
+  | "efficient"
+  | "general"
+  | "instruction";
+
 export interface OpenRouterModel {
   id: string;
   name: string;
   description: string;
   provider: string;
-  category: string;
+  category: OnlineModelCategory;
   isFree: boolean;
   contextLength: number;
   pricing: {
@@ -40,7 +47,7 @@ export function getCategoryFromModel(model: {
   id: string;
   name: string;
   description: string;
-}): string {
+}): OnlineModelCategory {
   const modelName = model.name.toLowerCase();
   const modelId = model.id.toLowerCase();
   const modelDesc = model.description.toLowerCase();

@@ -2,12 +2,20 @@ import { z } from "zod";
 
 const ModelTypeSchema = z.enum(["local", "online"]);
 
+const OnlineModelCategorySchema = z.enum([
+  "reasoning",
+  "multimodal",
+  "efficient",
+  "general",
+  "instruction",
+]);
+
 const OpenRouterModelSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
   provider: z.string(),
-  category: z.string(),
+  category: OnlineModelCategorySchema,
   isFree: z.boolean(),
   contextLength: z.number(),
   pricing: z.object({

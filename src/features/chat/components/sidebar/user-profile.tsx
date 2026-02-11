@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUserConfig } from "@/hooks/use-user-config";
 
-function UserProfileMenu() {
+export function UserProfile() {
   const { config } = useUserConfig();
   const navigate = useNavigate();
 
@@ -121,8 +121,4 @@ function UserProfileMenu() {
       </DropdownMenu>
     </div>
   );
-};
-
-export function UserProfile() {
-  return <UserProfileMenu />;
 }
