@@ -12,7 +12,7 @@ interface WrapperProps {
 function AllTheProviders({ children }: WrapperProps) {
   return (
     <BrowserRouter>
-      <ThemeProvider defaultTheme="system" storageKey="brokebot-theme">
+      <ThemeProvider>
         <TooltipProvider>
           {children}
         </TooltipProvider>
@@ -24,7 +24,7 @@ function AllTheProviders({ children }: WrapperProps) {
 function WithConversations({ children }: WrapperProps) {
   return (
     <BrowserRouter>
-      <ThemeProvider defaultTheme="system" storageKey="brokebot-theme">
+      <ThemeProvider>
         <TooltipProvider>
           <ConversationsProvider>
             {children}

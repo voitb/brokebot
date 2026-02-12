@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OpenRouterIcon } from "@/components/ui/provider-icons";
 import { type UserConfig } from "@/lib/db";
 import { useTheme } from "@/app/providers/theme-provider";
-import { ApiKeySection } from "@/features/chat";
+import { ApiKeySection } from "@/features/chat/components/online-model-dialog/api-key-section";
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;

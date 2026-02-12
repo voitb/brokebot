@@ -14,7 +14,7 @@ vi.mock("@/app/providers/conversations-provider", () => ({
   })),
 }));
 
-vi.mock("@/hooks", () => ({
+vi.mock("@/hooks/use-conversation-list", () => ({
   useConversationList: vi.fn(() => ({
     handleNewChat: mockHandleNewChat,
   })),

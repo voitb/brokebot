@@ -50,8 +50,6 @@ export function createMockUserConfig(overrides: Partial<UserConfig> = {}): UserC
   return {
     id: "user_config",
     username: "TestUser",
-    selectedModelId: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
-    autoLoadModel: false,
     theme: "system",
     createdAt: new Date(),
     updatedAt: new Date(),

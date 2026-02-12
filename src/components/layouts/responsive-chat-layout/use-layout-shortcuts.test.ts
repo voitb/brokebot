@@ -20,10 +20,13 @@ vi.mock("@/components/ui/sidebar", async () => {
   };
 });
 
-vi.mock("@/hooks", () => ({
+vi.mock("@/hooks/use-conversation-list", () => ({
   useConversationList: () => ({
     handleNewChat: mockHandleNewChat,
   }),
+}));
+
+vi.mock("@/hooks/use-conversation-id", () => ({
   useConversationId: () => mockConversationId,
 }));
 

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ChatInterface } from "./chat-interface";
-import type { UseConversationReturn } from "@/hooks";
+import type { UseConversationReturn } from "@/hooks/use-conversations";
 import type { Conversation, Message } from "@/lib/db";
 import { createMockConversation } from "@/testing/mocks/factories";
 

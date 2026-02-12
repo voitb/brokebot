@@ -118,9 +118,9 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
       });
 
       if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as ChatCompletionResponse;
+        const errorData: unknown = await response.json().catch(() => ({}));
         const errorMessage =
-          errorData.error?.message ||
+          (errorData as Record<string, Record<string, string>>)?.error?.message ||
           `API request failed with status ${response.status}`;
         yield { content: "", isComplete: true, error: errorMessage };
         return;
@@ -138,14 +138,16 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
 
       const decoder = new TextDecoder();
       let accumulatedContent = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
 
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
+        const chunk = buffer + decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
+        buffer = lines.pop() ?? "";
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
@@ -154,8 +156,8 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
           if (data === "[DONE]") continue;
 
           try {
-            const parsed = JSON.parse(data) as ChatCompletionResponse;
-            const delta = parsed.choices?.[0]?.delta?.content;
+            const parsed: unknown = JSON.parse(data);
+            const delta = (parsed as ChatCompletionResponse)?.choices?.[0]?.delta?.content;
 
             if (delta) {
               accumulatedContent += delta;

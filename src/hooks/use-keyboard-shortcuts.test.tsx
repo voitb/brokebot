@@ -7,13 +7,9 @@ import { mockNavigate } from "@/testing/mocks/modules";
 
 let mockConversationId: string | null = null;
 
-vi.mock("@/hooks", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/hooks")>();
-  return {
-    ...actual,
-    useConversationId: () => mockConversationId,
-  };
-});
+vi.mock("@/hooks/use-conversation-id", () => ({
+  useConversationId: () => mockConversationId,
+}));
 
 function wrapper({ children }: { children: ReactNode }) {
   return <BrowserRouter>{children}</BrowserRouter>;

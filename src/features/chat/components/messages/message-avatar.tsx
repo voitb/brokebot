@@ -1,13 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface MessageAvatarProps {
   isUser: boolean;
-  isGenerating?: boolean;
   position: "left" | "right";
-}
-
-function AvatarContent({ isUser }: { isUser: boolean }) {
-  return isUser ? <>💸</> : <>🤖</>;
 }
 
 export function MessageAvatar({
@@ -21,9 +16,8 @@ export function MessageAvatar({
 
   return (
     <Avatar className={className}>
-      <AvatarImage src="" />
       <AvatarFallback className={fallbackClassName}>
-        <AvatarContent isUser={isUser} />
+        {isUser ? <>💸</> : <>🤖</>}
       </AvatarFallback>
     </Avatar>
   );

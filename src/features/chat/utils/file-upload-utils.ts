@@ -65,25 +65,14 @@ export interface ValidateFileOptions {
   modelName: string;
 }
 
-export interface ValidationResult {
-  valid: boolean;
-  error?: string;
-}
-
-export function validateFile(file: File, options: ValidateFileOptions): ValidationResult {
+export function validateFile(file: File, options: ValidateFileOptions): string | null {
   if (file.size > MAX_FILE_SIZE_BYTES) {
-    return {
-      valid: false,
-      error: `File ${file.name} is too large. Maximum size is 10MB.`,
-    };
+    return `File ${file.name} is too large. Maximum size is 10MB.`;
   }
 
   if (file.type.startsWith("image/") && !options.supportsImages) {
-    return {
-      valid: false,
-      error: `Images are only supported by vision models. Current model: ${options.modelName}`,
-    };
+    return `Images are only supported by vision models. Current model: ${options.modelName}`;
   }
 
-  return { valid: true };
+  return null;
 }

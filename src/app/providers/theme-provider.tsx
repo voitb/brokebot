@@ -9,6 +9,9 @@ import {
 
 type Theme = "dark" | "light" | "system";
 
+const STORAGE_KEY = "vite-ui-theme";
+const DEFAULT_THEME: Theme = "dark";
+
 const VALID_THEMES: readonly Theme[] = ["dark", "light", "system"];
 function isValidTheme(value: string | null): value is Theme {
   return value !== null && (VALID_THEMES as readonly string[]).includes(value);
@@ -22,12 +25,6 @@ type ThemeProviderContextType = {
 export const ThemeProviderContext = createContext<
   ThemeProviderContextType | undefined
 >(undefined);
-
-interface ThemeProviderProps {
-  children: ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
-}
 
 function subscribeToSystemTheme(callback: () => void) {
   const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -45,14 +42,10 @@ function getServerSnapshot(): "dark" | "light" {
   return "light";
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "system",
-  storageKey = "theme",
-}: ThemeProviderProps) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem(storageKey);
-    return isValidTheme(stored) ? stored : defaultTheme;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return isValidTheme(stored) ? stored : DEFAULT_THEME;
   });
 
   const systemTheme = useSyncExternalStore(
@@ -70,7 +63,7 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      localStorage.setItem(storageKey, newTheme);
+      localStorage.setItem(STORAGE_KEY, newTheme);
       setTheme(newTheme);
     },
   };

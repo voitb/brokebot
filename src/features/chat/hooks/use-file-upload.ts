@@ -34,9 +34,9 @@ export function useFileUpload({
     const validFiles: File[] = [];
 
     for (const file of Array.from(files)) {
-      const validation = validateFile(file, { supportsImages, modelName: selectedModelName });
-      if (!validation.valid && validation.error) {
-        toast.error(validation.error);
+      const error = validateFile(file, { supportsImages, modelName: selectedModelName });
+      if (error) {
+        toast.error(error);
         continue;
       }
       validFiles.push(file);

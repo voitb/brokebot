@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { useConversation } from "@/hooks/use-conversations";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import { useSmartAutoScroll } from "@/features/chat/hooks/use-smart-auto-scroll";
 import { useWebLLM } from "@/app/providers/web-llm-provider";
 import type { Message, Conversation } from "@/lib/db";

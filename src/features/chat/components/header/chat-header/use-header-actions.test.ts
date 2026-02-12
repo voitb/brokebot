@@ -91,13 +91,11 @@ describe("useHeaderActions", () => {
   });
 
   it("toggles pin state for conversation", async () => {
-    mockConversations = [
-      createMockConversation({
-        id: "conv-1",
-        title: "Pinned Conv",
-        pinned: true,
-      }),
-    ];
+    mockConversation = createMockConversation({
+      id: "conv-1",
+      title: "Pinned Conv",
+      pinned: true,
+    });
 
     const { result } = renderHook(() =>
       useHeaderActions({ conversationId: "conv-1" })

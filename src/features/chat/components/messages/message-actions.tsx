@@ -12,56 +12,6 @@ interface MessageActionsProps {
   onStopGeneration?: () => void;
 }
 
-interface StopButtonProps {
-  onStop?: () => void;
-}
-
-function StopButton({ onStop }: StopButtonProps) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs text-destructive hover:text-destructive"
-          onClick={onStop}
-        >
-          <Square className="w-3 h-3 mr-1" />
-          Stop
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Stop generation</TooltipContent>
-    </Tooltip>
-  );
-}
-
-interface RegenerateButtonProps {
-  onRegenerate?: () => void;
-  isModelReady: boolean;
-}
-
-function RegenerateButton({ onRegenerate, isModelReady }: RegenerateButtonProps) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs"
-          onClick={onRegenerate}
-          disabled={!onRegenerate || !isModelReady}
-        >
-          <RefreshCw className="w-3 h-3 mr-1" />
-          Regenerate
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        {!isModelReady ? "Model is not ready" : "Regenerate response"}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
 export function MessageActions({
   content,
   isLastMessage,
@@ -84,12 +34,38 @@ export function MessageActions({
       {isLastMessage && (
         <>
           {isGenerating ? (
-            <StopButton onStop={onStopGeneration} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                  onClick={onStopGeneration}
+                >
+                  <Square className="w-3 h-3 mr-1" />
+                  Stop
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Stop generation</TooltipContent>
+            </Tooltip>
           ) : (
-            <RegenerateButton
-              onRegenerate={onRegenerate}
-              isModelReady={isModelReady}
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={onRegenerate}
+                  disabled={!onRegenerate || !isModelReady}
+                >
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  Regenerate
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {!isModelReady ? "Model is not ready" : "Regenerate response"}
+              </TooltipContent>
+            </Tooltip>
           )}
         </>
       )}

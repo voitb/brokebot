@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { ResponsiveChatLayout } from "@/components/layouts";
+import { ResponsiveChatLayout } from "@/components/layouts/responsive-chat-layout";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalRoot } from "@/app/modals/modal-root";
 import { Seo } from "@/components/seo/seo";

@@ -8,7 +8,7 @@ vi.mock("./db", () => {
     db: {
       encryptionKey: {
         get: vi.fn(async (id: string) => storage.get(id)),
-        add: vi.fn(async (record: { id: string; key: CryptoKey }) => {
+        put: vi.fn(async (record: { id: string; key: CryptoKey }) => {
           storage.set(record.id, record);
         }),
       },

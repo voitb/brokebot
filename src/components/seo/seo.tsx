@@ -1,10 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 
-const TITLE = 'brokebot - Your Private AI Assistant';
-const DESCRIPTION = 'Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline.';
-const URL = 'https://brokebot.voitz.dev/';
-const IMAGE = `${URL}brokebot_dark.png`;
 const SITE_NAME = 'brokebot';
+const SITE_URL = 'https://brokebot.voitz.dev/';
+const DEFAULT_TITLE = 'brokebot - Your Private AI Assistant';
+const DEFAULT_DESCRIPTION = 'Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline.';
+const DEFAULT_IMAGE = `${SITE_URL}brokebot_dark.png`;
 const KEYWORDS = 'AI Assistant, ChatGPT Clone, WebLLM, Local AI, Offline AI, Private AI, IndexedDB, React, Vite, brokebot';
 
 const structuredData = {
@@ -13,9 +13,9 @@ const structuredData = {
   "name": SITE_NAME,
   "applicationCategory": "Productivity",
   "operatingSystem": "Web Browser",
-  "description": DESCRIPTION,
-  "url": URL,
-  "image": IMAGE,
+  "description": DEFAULT_DESCRIPTION,
+  "url": SITE_URL,
+  "image": DEFAULT_IMAGE,
   "author": {
     "@type": "Organization",
     "name": "voitz"
@@ -25,27 +25,27 @@ const structuredData = {
     "name": "voitz",
     "logo": {
       "@type": "ImageObject",
-      "url": `${URL}brokebot_light_square.png`
+      "url": `${SITE_URL}brokebot_light_square.png`
     }
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": URL
+    "@id": SITE_URL
   },
   "potentialAction": {
     "@type": "UseAction",
-    "target": URL
+    "target": SITE_URL
   }
 };
 
 export function Seo() {
   return (
     <Helmet>
-      <title>{TITLE}</title>
-      <meta name="description" content={DESCRIPTION} />
+      <title>{DEFAULT_TITLE}</title>
+      <meta name="description" content={DEFAULT_DESCRIPTION} />
       <meta name="keywords" content={KEYWORDS} />
       <meta name="author" content="voitz" />
-      <link rel="canonical" href={URL} />
+      <link rel="canonical" href={SITE_URL} />
 
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="mobile-web-app-capable" content="yes" />
@@ -54,22 +54,22 @@ export function Seo() {
       <meta name="theme-color" content="#000000" />
 
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={URL} />
-      <meta property="og:title" content={TITLE} />
-      <meta property="og:description" content={DESCRIPTION} />
-      <meta property="og:image" content={IMAGE} />
+      <meta property="og:url" content={SITE_URL} />
+      <meta property="og:title" content={DEFAULT_TITLE} />
+      <meta property="og:description" content={DEFAULT_DESCRIPTION} />
+      <meta property="og:image" content={DEFAULT_IMAGE} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={TITLE} />
+      <meta property="og:image:alt" content={DEFAULT_TITLE} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={URL} />
-      <meta name="twitter:title" content={TITLE} />
-      <meta name="twitter:description" content={DESCRIPTION} />
-      <meta name="twitter:image" content={IMAGE} />
-      <meta name="twitter:image:alt" content={TITLE} />
+      <meta name="twitter:url" content={SITE_URL} />
+      <meta name="twitter:title" content={DEFAULT_TITLE} />
+      <meta name="twitter:description" content={DEFAULT_DESCRIPTION} />
+      <meta name="twitter:image" content={DEFAULT_IMAGE} />
+      <meta name="twitter:image:alt" content={DEFAULT_TITLE} />
       <meta name="twitter:creator" content="@voitz__" />
       <meta name="twitter:site" content="@voitz__" />
 
@@ -90,6 +90,39 @@ export function Seo() {
       <script type="application/ld+json">
         {JSON.stringify(structuredData, null, 2)}
       </script>
+    </Helmet>
+  );
+}
+
+interface PageSeoProps {
+  title: string;
+  description: string;
+}
+
+export function PageSeo({ title, description }: PageSeoProps) {
+  const fullTitle = `${title} | ${SITE_NAME}`;
+
+  return (
+    <Helmet>
+      <title>{fullTitle}</title>
+      <meta name="description" content={description} />
+
+      <meta property="og:title" content={fullTitle} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={DEFAULT_IMAGE} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={title} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_US" />
+
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={fullTitle} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={DEFAULT_IMAGE} />
+      <meta name="twitter:image:alt" content={title} />
+      <meta name="twitter:creator" content="@voitz__" />
+      <meta name="twitter:site" content="@voitz__" />
     </Helmet>
   );
 }

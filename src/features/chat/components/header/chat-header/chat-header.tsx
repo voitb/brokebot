@@ -1,7 +1,7 @@
 import { useNavigate, createSearchParams } from "react-router-dom";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { useTheme } from "@/app/providers/theme-provider";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import { BreadcrumbNavigation } from "../breadcrumb-navigation";
 import { HeaderActions } from "../header-actions";
 import { NewChatButton } from "../new-chat-button";

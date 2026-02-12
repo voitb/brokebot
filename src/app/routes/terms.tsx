@@ -1,9 +1,9 @@
-import { SEOMetadata } from "@/components/seo/seo-metadata";
+import { PageSeo } from "@/components/seo/seo";
 
 export function TermsOfService() {
   return (
     <>
-      <SEOMetadata
+      <PageSeo
         title="Terms of Service"
         description="Read the terms of service for brokebot - your privacy-first AI assistant."
       />

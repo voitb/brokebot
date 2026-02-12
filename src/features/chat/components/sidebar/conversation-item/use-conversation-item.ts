@@ -1,7 +1,7 @@
 import { useState, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations } from "@/app/providers/conversations-provider";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import type { Conversation, Folder } from "@/lib/db";
 
 export interface UseConversationItemReturn {
