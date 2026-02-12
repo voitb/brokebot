@@ -19,6 +19,7 @@ export function ChatHeader() {
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
+    hasMessages,
     deleteDialogOpen,
     setDeleteDialogOpen,
     handleNewChat,
@@ -26,6 +27,7 @@ export function ChatHeader() {
     handleSaveTitle,
     handleCancelTitleEdit,
     handleTogglePinConversation,
+    handleExportConversation,
     handleImportConversation,
     handleFileImport,
     fileInputRef,
@@ -45,25 +47,16 @@ export function ChatHeader() {
     navigate({ search: createSearchParams({ modal: "shortcuts" }).toString() });
   };
 
-  const handleOpenExport = () => {
-    if (!conversationId) return;
-    navigate({
-      search: createSearchParams({
-        modal: "export",
-        conversationId,
-      }).toString(),
-    });
-  };
-
   const actionProps = {
     conversationId,
     isPinned: isConversationPinned,
+    hasMessages,
     theme,
     onToggleTheme: handleToggleTheme,
     onTogglePin: handleTogglePinConversation,
     onOpenSettings: handleOpenSettings,
     onOpenShortcuts: handleOpenShortcuts,
-    onOpenExport: handleOpenExport,
+    onOpenExport: handleExportConversation,
     onImportConversation: handleImportConversation,
     onDeleteConversation: handleDeleteConversation,
   };
