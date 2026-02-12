@@ -99,7 +99,6 @@ export function useChatInputForm({
     status: transcriberStatus,
     startRecording,
     stopRecording,
-    isModelLoading: isWhisperModelLoading,
     error: transcriberError,
   } = useSpeechToText(handleTranscriptReceived);
 
@@ -108,10 +107,9 @@ export function useChatInputForm({
   const isSubmitDisabled =
     (!message.trim() && attachedFiles.length === 0) ||
     isLoading ||
-    isModelError ||
-    isWhisperModelLoading;
+    isModelError;
   const isInputDisabled =
-    isLoading || isModelLoading || isModelError || isWhisperModelLoading;
+    isLoading || isModelLoading || isModelError;
 
   const placeholderText =
     isModelReady && currentModelName

@@ -12,6 +12,10 @@ interface OpenRouterApiModel {
   };
 }
 
+interface OpenRouterModelsResponse {
+  data: OpenRouterApiModel[];
+}
+
 interface UseModelsReturn {
   models: OpenRouterModel[];
   isLoading: boolean;
@@ -43,7 +47,7 @@ export function useModels(): UseModelsReturn {
         if (!response.ok) {
           throw new Error(`Failed to fetch models: ${response.statusText}`);
         }
-        const { data } = await response.json();
+        const { data } = (await response.json()) as OpenRouterModelsResponse;
         if (!Array.isArray(data)) {
           throw new Error('Unexpected response format from OpenRouter API.');
         }

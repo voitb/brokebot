@@ -139,6 +139,8 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
 
   // Check if user had a local model selected previously
   useEffect(() => {
+    let cancelled = false;
+
     const initFromStorage = async () => {
       const stored = localStorage.getItem("unifiedModel");
       if (!stored) return;
@@ -151,15 +153,18 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
       const parsed = result.data;
       if (parsed.type === "local" && parsed.localModel?.id) {
         const models = await ensureModelsLoaded();
+        if (cancelled) return;
         const found = models.find((m) => m.id === parsed.localModel?.id);
         if (found) {
           setSelectedModelState(found);
+          if (cancelled) return;
           await loadModel(found.id);
         }
       }
     };
 
     initFromStorage();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount; functions are stable
   }, []);
 

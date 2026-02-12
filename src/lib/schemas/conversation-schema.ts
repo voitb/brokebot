@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Conversation } from "@/lib/db";
 
 const MessageSchema = z.object({
   id: z.string(),
@@ -18,4 +19,11 @@ export const ConversationSchema = z.object({
   folderId: z.string().optional(),
 });
 
-export type ValidatedConversation = z.infer<typeof ConversationSchema>;
+// Compile-time assertion: schema and interface stay in sync
+type _SchemaMatchesInterface = z.infer<typeof ConversationSchema> extends Conversation
+  ? Conversation extends z.infer<typeof ConversationSchema>
+    ? true
+    : never
+  : never;
+const _typeCheck: _SchemaMatchesInterface = true;
+void _typeCheck;

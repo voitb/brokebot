@@ -22,7 +22,7 @@ export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn
   const { config, updateConfig } = useUserConfig();
 
   const hasStoredKey = !!(provider === "openrouter" && config?.openrouterApiKey);
-  const maskedKey = hasStoredKey ? maskApiKey(config!.openrouterApiKey!) : "";
+  const maskedKey = config?.openrouterApiKey ? maskApiKey(config.openrouterApiKey) : "";
 
   const [apiKey, setApiKey] = useState(maskedKey);
   const [isEditing, setIsEditing] = useState(false);

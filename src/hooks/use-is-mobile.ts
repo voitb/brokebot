@@ -1,21 +1,21 @@
-import React from "react"
+import { useSyncExternalStore } from "react";
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 768;
 
-export function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = React.useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth < MOBILE_BREAKPOINT;
-  });
+function subscribe(callback: () => void) {
+  const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+function getSnapshot() {
+  return window.innerWidth < MOBILE_BREAKPOINT;
+}
 
-  return isMobile;
+function getServerSnapshot() {
+  return false;
+}
+
+export function useIsMobile() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

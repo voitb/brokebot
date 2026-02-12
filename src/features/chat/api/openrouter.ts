@@ -71,6 +71,16 @@ export function getCategoryFromModel(model: {
   return "general";
 }
 
+interface ChatCompletionChoice {
+  message?: { content: string };
+  delta?: { content?: string };
+}
+
+interface ChatCompletionResponse {
+  choices: ChatCompletionChoice[];
+  error?: { message: string };
+}
+
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 function validateApiKey(key: string): boolean {
@@ -117,7 +127,7 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = (await response.json().catch(() => ({}))) as ChatCompletionResponse;
         const errorMessage =
           errorData.error?.message ||
           `API request failed with status ${response.status}`;
@@ -153,7 +163,7 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
           if (data === "[DONE]") continue;
 
           try {
-            const parsed = JSON.parse(data);
+            const parsed = JSON.parse(data) as ChatCompletionResponse;
             const delta = parsed.choices?.[0]?.delta?.content;
 
             if (delta) {
@@ -197,14 +207,14 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = (await response.json().catch(() => ({}))) as ChatCompletionResponse;
       throw new Error(
         errorData.error?.message ||
           `API request failed with status ${response.status}`
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     return data.choices?.[0]?.message?.content || "";
   }
 

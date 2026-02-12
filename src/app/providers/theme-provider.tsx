@@ -1,7 +1,7 @@
 import {
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useState,
   useSyncExternalStore,
   type ReactNode,
@@ -61,7 +61,7 @@ export function ThemeProvider({
     getServerSnapshot
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme === "system" ? systemTheme : theme);

@@ -16,17 +16,15 @@ import {
 } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
+import { type z } from "zod";
 import { UnifiedModelSchema } from "@/lib/schemas/model-schema";
 
 export type ModelType = "local" | "online";
 
-export interface UnifiedModel {
-  id: string;
-  name: string;
-  type: ModelType;
-  description: string;
-  localModel?: ModelInfo;
-  onlineModel?: OpenRouterModel;
+// Extends the Zod-validated shape with the non-serializable `client` field
+// that cannot be represented in the schema.
+type ValidatedUnifiedModel = z.infer<typeof UnifiedModelSchema>;
+export interface UnifiedModel extends ValidatedUnifiedModel {
   client?: OpenRouterClient;
 }
 
@@ -69,6 +67,8 @@ export function ModelProvider({ children }: ModelProviderProps) {
   );
   const [isModelSwitching, startTransition] = useTransition();
 
+  const apiKey = config?.openrouterApiKey;
+
   useEffect(() => {
     const storedModel = localStorage.getItem("unifiedModel");
     if (storedModel) {
@@ -77,18 +77,16 @@ export function ModelProvider({ children }: ModelProviderProps) {
         const parsed = UnifiedModelSchema.safeParse(jsonData);
 
         if (parsed.success) {
-          if (parsed.data.type === "online" && parsed.data.onlineModel && config) {
+          if (parsed.data.type === "online" && parsed.data.onlineModel && apiKey) {
             setCurrentModelState(
-              createOnlineModel(parsed.data.onlineModel, config.openrouterApiKey)
+              createOnlineModel(parsed.data.onlineModel, apiKey)
             );
             return;
           }
         } else {
-          console.warn("Invalid stored model data, using default:", parsed.error.issues);
           localStorage.removeItem("unifiedModel");
         }
       } catch {
-        console.warn("Malformed JSON in stored model, using default");
         localStorage.removeItem("unifiedModel");
       }
     }
@@ -96,7 +94,7 @@ export function ModelProvider({ children }: ModelProviderProps) {
     if (webLLM.selectedModel) {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
-  }, [webLLM.selectedModel, config]);
+  }, [webLLM.selectedModel, apiKey]);
 
   const interruptGeneration = () => {
     if (currentModel?.type === "local" && webLLM.engine) {

@@ -60,4 +60,3 @@ export const UnifiedModelSchema = z.object({
   onlineModel: OpenRouterModelSchema.optional(),
 });
 
-export type ValidatedUnifiedModel = z.infer<typeof UnifiedModelSchema>;
