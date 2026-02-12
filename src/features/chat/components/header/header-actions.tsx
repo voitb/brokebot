@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 interface HeaderActionsProps {
   conversationId: string | undefined;
   isPinned: boolean;
+  hasMessages: boolean;
   theme: string;
   onToggleTheme: () => void;
   onTogglePin: () => void;
@@ -21,6 +22,7 @@ interface HeaderActionsProps {
 export function HeaderActions({
   conversationId,
   isPinned,
+  hasMessages,
   theme,
   onToggleTheme,
   onTogglePin,
@@ -68,6 +70,7 @@ export function HeaderActions({
 
       <HeaderActionsMenu
         conversationId={conversationId}
+        hasMessages={hasMessages}
         onOpenSettings={onOpenSettings}
         onOpenShortcuts={onOpenShortcuts}
         onOpenExport={onOpenExport}

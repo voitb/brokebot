@@ -10,6 +10,7 @@ import {
 
 interface HeaderActionsMenuProps {
   conversationId?: string;
+  hasMessages?: boolean;
   onOpenSettings: () => void;
   onOpenShortcuts: () => void;
   onOpenExport: () => void;
@@ -19,6 +20,7 @@ interface HeaderActionsMenuProps {
 
 export function HeaderActionsMenu({
   conversationId,
+  hasMessages,
   onOpenSettings,
   onOpenShortcuts,
   onOpenExport,
@@ -45,7 +47,7 @@ export function HeaderActionsMenu({
       {conversationId && (
         <>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onOpenExport}>
+          <DropdownMenuItem onClick={onOpenExport} disabled={!hasMessages}>
             <Download />
             Export conversation
           </DropdownMenuItem>

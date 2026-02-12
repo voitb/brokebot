@@ -15,6 +15,7 @@ interface UseHeaderActionsReturn {
   conversationTitle?: string;
   isLoadingConversation: boolean;
   isConversationPinned: boolean;
+  hasMessages: boolean;
   deleteDialogOpen: boolean;
   setDeleteDialogOpen: (open: boolean) => void;
   handleNewChat: () => Promise<void>;
@@ -218,6 +219,7 @@ export function useHeaderActions({
     conversationTitle,
     isLoadingConversation,
     isConversationPinned,
+    hasMessages: (conversation?.messages?.length ?? 0) > 0,
     deleteDialogOpen,
     setDeleteDialogOpen,
     handleNewChat,
