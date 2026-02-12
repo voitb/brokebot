@@ -33,7 +33,12 @@ export function useDocuments(): UseDocumentsReturn {
         return null;
       }
 
-      const content = await readFileContent(file);
+      const content = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsText(file);
+      });
       if (!content.trim()) {
         toast.error("File appears to be empty.");
         return null;
@@ -92,15 +97,3 @@ const getFileType = (file: File): "txt" | "md" | null => {
   return null;
 };
 
-const readFileContent = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      resolve(e.target?.result as string);
-    };
-    reader.onerror = () => {
-      reject(new Error("Failed to read file"));
-    };
-    reader.readAsText(file);
-  });
-};

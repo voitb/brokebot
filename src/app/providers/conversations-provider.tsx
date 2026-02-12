@@ -1,13 +1,12 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Conversation, type Message, type Folder } from "@/lib/db";
-import { v4 as uuidv4 } from "uuid";
+
 import { toast } from "sonner";
 
 interface ConversationsContextType {
   conversations: Conversation[];
   folders: Folder[];
-  createConversation: (title: string, firstMessageContent: string) => Promise<string | null>;
   createEmptyConversation: (title?: string, folderId?: string) => Promise<string | null>;
   addMessage: (conversationId: string, message: Omit<Message, "id" | "createdAt">) => Promise<string>;
   updateMessage: (conversationId: string, messageId: string, newContent: string) => Promise<void>;
@@ -41,41 +40,12 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
       })
     : [];
 
-  const createConversation = async (
-    title: string,
-    firstMessageContent: string
-  ): Promise<string | null> => {
-    const newConversation: Conversation = {
-      id: uuidv4(),
-      title,
-      messages: [
-        {
-          id: uuidv4(),
-          role: "user",
-          content: firstMessageContent,
-          createdAt: new Date(),
-        },
-      ],
-      pinned: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    try {
-      await db.conversations.add(newConversation);
-      return newConversation.id;
-    } catch {
-      toast.error("Failed to create conversation.");
-      return null;
-    }
-  };
-
   const createEmptyConversation = async (
     title: string = "New Conversation",
     folderId?: string
   ): Promise<string | null> => {
     const newConversation: Conversation = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       title,
       messages: [],
       pinned: false,
@@ -99,7 +69,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
   ): Promise<string> => {
     const newMessage: Message = {
       ...message,
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       createdAt: new Date(),
     };
 
@@ -179,7 +149,7 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
 
   const createFolder = async (name: string): Promise<string | null> => {
     const newFolder: Folder = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       name,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -221,7 +191,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
   const value: ConversationsContextType = {
     conversations,
     folders: folders || [],
-    createConversation,
     createEmptyConversation,
     addMessage,
     updateMessage,

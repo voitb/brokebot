@@ -79,6 +79,9 @@ describe("ChatInput", () => {
       currentModel: createMockModel("online"),
       isModelLoading: false,
       modelStatus: "Error: Something went wrong",
+      availableOnlineModels: [],
+      isLoadingAvailableModels: false,
+      availableModelsError: null,
     } as ReturnType<typeof useModel>);
 
     render(<ChatInput {...defaultProps} message="Hello" />);

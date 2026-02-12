@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { type OpenRouterModel } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
-import { useModels } from "@/features/chat/hooks/use-models";
+import { useModel } from "@/app/providers/model-provider";
 
 export interface UseOnlineModelsReturn {
   storedKeys: { openrouter: string | undefined };
@@ -20,10 +20,14 @@ export function useOnlineModels(
   onOpenChange?: (open: boolean) => void
 ): UseOnlineModelsReturn {
   const { config } = useUserConfig();
-  const { models, isLoading, error } = useModels();
+  const {
+    availableOnlineModels,
+    isLoadingAvailableModels: isLoading,
+    availableModelsError: error,
+  } = useModel();
 
-  const freeModels = models.filter((m) => m.isFree);
-  const paidModels = models.filter((m) => !m.isFree);
+  const freeModels = availableOnlineModels.filter((m) => m.isFree);
+  const paidModels = availableOnlineModels.filter((m) => !m.isFree);
 
   const hasOpenRouterKey = !!config?.openrouterApiKey;
   const hasPaidKey = hasOpenRouterKey;

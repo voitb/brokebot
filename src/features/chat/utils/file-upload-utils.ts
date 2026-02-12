@@ -12,7 +12,7 @@ export interface AttachedFile {
   content?: string;
 }
 
-export function readFileContent(file: File): Promise<string> {
+function readFileAsText(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target?.result as string);
@@ -47,7 +47,7 @@ export async function processFile(
     type = "text";
 
     try {
-      content = await readFileContent(file);
+      content = await readFileAsText(file);
       const savedDocument = await uploadDocument(file);
       if (savedDocument) {
         document = savedDocument;

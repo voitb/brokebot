@@ -90,6 +90,7 @@ export function ChatInput({
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholderText}
+                aria-label="Type a message"
                 className="w-full resize-none border-none bg-transparent pr-2 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isInputDisabled}
               />

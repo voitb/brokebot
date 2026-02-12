@@ -1,4 +1,8 @@
-import * as Collapsible from "@radix-ui/react-collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   ChevronRight,
   Folder as FolderIcon,
@@ -40,12 +44,12 @@ export function FolderItem({ folder }: FolderItemProps) {
   } = useFolderItem(folder);
 
   return (
-    <Collapsible.Root
+    <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
       className="space-y-1"
     >
-      <Collapsible.Trigger asChild>
+      <CollapsibleTrigger asChild>
         <div className="flex items-center justify-between group/folder rounded-md px-2 py-1.5 text-sm hover:bg-muted cursor-pointer">
           <div className="flex items-center gap-2 truncate">
             <ChevronRight
@@ -91,9 +95,9 @@ export function FolderItem({ folder }: FolderItemProps) {
             </DropdownMenu>
           </div>
         </div>
-      </Collapsible.Trigger>
+      </CollapsibleTrigger>
 
-      <Collapsible.Content className="pl-4 space-y-1">
+      <CollapsibleContent className="pl-4 space-y-1">
         {folder.conversations.map((conversation) => (
           <ConversationItem key={conversation.id} conversation={conversation} />
         ))}
@@ -102,7 +106,7 @@ export function FolderItem({ folder }: FolderItemProps) {
             No conversations in this folder.
           </p>
         )}
-      </Collapsible.Content>
+      </CollapsibleContent>
 
       <DeleteFolderDialog
         open={isDeleteDialogOpen}
@@ -121,6 +125,6 @@ export function FolderItem({ folder }: FolderItemProps) {
         onConfirm={handleRename}
         confirmText="Rename"
       />
-    </Collapsible.Root>
+    </Collapsible>
   );
 }

@@ -81,6 +81,12 @@ export function Seo() {
       <link rel="icon" type="image/png" sizes="32x32" href="/brokebot_light_square.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/brokebot_light_square.png" />
 
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://brokebot.voitz.dev" />
+      <link rel="preload" href="/brokebot_light_square.png" as="image" />
+      <link rel="preload" href="/brokebot_dark.png" as="image" />
+
       <script type="application/ld+json">
         {JSON.stringify(structuredData, null, 2)}
       </script>

@@ -1,12 +1,12 @@
 import { vi } from "vitest";
-import { v4 as uuidv4 } from "uuid";
+
 import type { Conversation, Message, Folder, Document, UserConfig } from "@/lib/db";
 import type { OpenRouterModel } from "@/features/chat/api/openrouter";
 import type { UnifiedModel } from "@/app/providers/model-provider";
 
 export function createMockMessage(overrides: Partial<Message> = {}): Message {
   return {
-    id: uuidv4(),
+    id: crypto.randomUUID(),
     role: "user",
     content: "Test message",
     createdAt: new Date(),
@@ -16,7 +16,7 @@ export function createMockMessage(overrides: Partial<Message> = {}): Message {
 
 export function createMockConversation(overrides: Partial<Conversation> = {}): Conversation {
   return {
-    id: uuidv4(),
+    id: crypto.randomUUID(),
     title: "Test Conversation",
     messages: [],
     pinned: false,
@@ -28,7 +28,7 @@ export function createMockConversation(overrides: Partial<Conversation> = {}): C
 
 export function createMockFolder(overrides: Partial<Folder> = {}): Folder {
   return {
-    id: uuidv4(),
+    id: crypto.randomUUID(),
     name: "Test Folder",
     createdAt: new Date(),
     updatedAt: new Date(),
