@@ -1,3 +1,7 @@
+import type { OnlineModelCategory } from "@/lib/schemas/model-schema";
+
+export type { OnlineModelCategory };
+
 export interface OpenRouterMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -8,13 +12,6 @@ export interface StreamResponse {
   isComplete: boolean;
   error?: string;
 }
-
-export type OnlineModelCategory =
-  | "reasoning"
-  | "multimodal"
-  | "efficient"
-  | "general"
-  | "instruction";
 
 export interface OpenRouterModel {
   id: string;

@@ -1,18 +1,13 @@
 import type { OpenRouterMessage } from "@/features/chat/api/openrouter";
 import { COMPLETE_AI_RULES, CONTEXTUAL_PROMPT_TEMPLATE } from "@/features/chat/constants/prompts";
 import type { AttachedFile } from "./file-upload-utils";
+import type { Message } from "@/lib/db";
 
 const TITLE_MAX_LENGTH = 50;
 
 export const ERROR_MESSAGE_PREFIX = "[ERROR]: ";
 
 export type PromptMode = "online" | "local";
-
-interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-}
 
 export function findLastMessageByRole(
   messages: Message[],

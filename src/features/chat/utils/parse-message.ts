@@ -52,7 +52,7 @@ function extractThinking(text: string, attachments: { name: string }[]): ParsedM
 }
 
 export function parseMessage(content: string | undefined): ParsedMessage {
-  if (!content || typeof content !== 'string') {
+  if (!content) {
     return { content: '', attachments: [] };
   }
 

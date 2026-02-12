@@ -137,13 +137,27 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     await loadModel(model.id);
   };
 
-  // Check if user had a local model selected previously
+  // Restore saved local model, or auto-load default on first visit
   useEffect(() => {
     let cancelled = false;
 
     const initFromStorage = async () => {
       const stored = localStorage.getItem("unifiedModel");
-      if (!stored) return;
+
+      if (!stored) {
+        // No saved model — auto-load default local model
+        const models = await ensureModelsLoaded();
+        if (cancelled) return;
+        const defaultModel =
+          models.find((m) => m.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC") ??
+          models.find((m) => m.category === "light" && m.modelType === "LLM");
+        if (defaultModel) {
+          setSelectedModelState(defaultModel);
+          if (cancelled) return;
+          await loadModel(defaultModel.id);
+        }
+        return;
+      }
 
       const result = UnifiedModelSchema.safeParse((() => {
         try { return JSON.parse(stored); } catch { return null; }
@@ -151,10 +165,10 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
       if (!result.success) return;
 
       const parsed = result.data;
-      if (parsed.type === "local" && parsed.localModel?.id) {
+      if (parsed.type === "local") {
         const models = await ensureModelsLoaded();
         if (cancelled) return;
-        const found = models.find((m) => m.id === parsed.localModel?.id);
+        const found = models.find((m) => m.id === parsed.localModel.id);
         if (found) {
           setSelectedModelState(found);
           if (cancelled) return;

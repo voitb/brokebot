@@ -1,8 +1,13 @@
-import type { CSSProperties, ReactNode } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { type CSSProperties, type ReactNode, lazy, Suspense } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useCodeHighlighting } from "./use-code-highlighting";
+
+const SyntaxHighlighter = lazy(() =>
+  import("react-syntax-highlighter").then((m) => ({
+    default: m.Prism,
+  }))
+);
 
 const CODE_BLOCK_STYLE: CSSProperties = {
   margin: 0,
@@ -64,16 +69,18 @@ export function CodeBlock({ className, children }: CodeBlockProps) {
         <ScrollArea
           className="w-1 flex-1 rounded-b-lg border"
         >
-          <SyntaxHighlighter
-            style={syntaxStyle}
-            language={language}
-            PreTag="div"
-            wrapLines={false}
-            className="!m-0 !rounded-none !border-0"
-            customStyle={CODE_BLOCK_STYLE}
-          >
-            {code}
-          </SyntaxHighlighter>
+          <Suspense fallback={<pre><code>{code}</code></pre>}>
+            <SyntaxHighlighter
+              style={syntaxStyle}
+              language={language}
+              PreTag="div"
+              wrapLines={false}
+              className="!m-0 !rounded-none !border-0"
+              customStyle={CODE_BLOCK_STYLE}
+            >
+              {code}
+            </SyntaxHighlighter>
+          </Suspense>
           <ScrollBar orientation="horizontal" className="w-full" />
         </ScrollArea>
       </div>

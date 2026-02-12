@@ -1,20 +1,24 @@
 import {
   useRef,
+  useEffect,
   useEffectEvent,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
 } from "react";
 import { toast } from "sonner";
+import { useModel } from "@/app/providers/model-provider";
 import { useDragDrop } from "@/features/chat/hooks/use-drag-drop";
 import { useFileUpload, type AttachedFile } from "@/features/chat/hooks/use-file-upload";
 import { useSpeechToText, type TranscriberStatus } from "@/features/chat/hooks/use-speech-to-text";
-import { useModelDisplayInfo, type ModelDisplayInfo } from "@/features/chat/hooks/use-model-display-info";
-import { useSpeechNotifications } from "@/features/chat/hooks/use-speech-notifications";
-import { useInputKeyboardShortcuts } from "./use-input-keyboard-shortcuts";
 import { buildMessageWithFiles } from "@/features/chat/utils/chat-input-utils";
 
-export type { ModelDisplayInfo };
+export interface ModelDisplayInfo {
+  name: string;
+  modelType: "Online" | "Local" | "None";
+  supportsImages: boolean;
+  specialization?: string;
+}
 
 export interface UseChatInputFormProps {
   message: string;
@@ -61,14 +65,32 @@ export function useChatInputForm({
   onSend,
   isLoading,
 }: UseChatInputFormProps): UseChatInputFormReturn {
-  const {
-    currentModelName,
-    isModelReady,
-    isModelError,
-    isModelLoading,
-    modelStatus,
-    modelDisplayInfo,
-  } = useModelDisplayInfo();
+  const { currentModel, isModelLoading, modelStatus } = useModel();
+
+  const isModelError = modelStatus.toLowerCase().includes("error");
+  const isModelReady = !!currentModel && !isModelLoading;
+
+  const modelDisplayInfo: ModelDisplayInfo = currentModel
+    ? currentModel.type === "local"
+      ? {
+          name: currentModel.localModel.name,
+          modelType: "Local",
+          supportsImages: currentModel.localModel.supportsImages ?? false,
+          specialization: currentModel.localModel.specialization,
+        }
+      : {
+          name: currentModel.onlineModel.name,
+          modelType: "Online",
+          supportsImages: false,
+          specialization: currentModel.onlineModel.category,
+        }
+    : {
+        name: "Initializing...",
+        modelType: "None",
+        supportsImages: false,
+      };
+
+  const currentModelName = modelDisplayInfo.name;
 
   const {
     isDragOver,
@@ -99,7 +121,6 @@ export function useChatInputForm({
     status: transcriberStatus,
     startRecording,
     stopRecording,
-    error: transcriberError,
   } = useSpeechToText(handleTranscriptReceived);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -116,8 +137,6 @@ export function useChatInputForm({
       ? `Message ${currentModelName}... or click the mic to talk`
       : modelStatus;
 
-  useSpeechNotifications(transcriberStatus, transcriberError);
-
   const onMicToggle = useEffectEvent(() => {
     if (transcriberStatus === "recording") {
       stopRecording();
@@ -126,7 +145,17 @@ export function useChatInputForm({
     }
   });
 
-  useInputKeyboardShortcuts(onMicToggle);
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.key === "m") {
+        event.preventDefault();
+        onMicToggle();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onMicToggle]);
 
   const submitMessage = async () => {
     if (!message.trim() && attachedFiles.length === 0) return;

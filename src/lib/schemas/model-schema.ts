@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-const ModelTypeSchema = z.enum(["local", "online"]);
-
-const OnlineModelCategorySchema = z.enum([
+export const OnlineModelCategorySchema = z.enum([
   "reasoning",
   "multimodal",
   "efficient",
   "general",
   "instruction",
 ]);
+
+export type OnlineModelCategory = z.infer<typeof OnlineModelCategorySchema>;
 
 const OpenRouterModelSchema = z.object({
   id: z.string(),
@@ -51,12 +51,18 @@ const LocalModelInfoSchema = z.object({
   vramRequired: z.number().optional(),
 });
 
-export const UnifiedModelSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: ModelTypeSchema,
-  description: z.string(),
-  localModel: LocalModelInfoSchema.optional(),
-  onlineModel: OpenRouterModelSchema.optional(),
+const LocalUnifiedModelSchema = z.object({
+  type: z.literal("local"),
+  localModel: LocalModelInfoSchema,
 });
+
+const OnlineUnifiedModelSchema = z.object({
+  type: z.literal("online"),
+  onlineModel: OpenRouterModelSchema,
+});
+
+export const UnifiedModelSchema = z.discriminatedUnion("type", [
+  LocalUnifiedModelSchema,
+  OnlineUnifiedModelSchema,
+]);
 

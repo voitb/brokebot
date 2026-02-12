@@ -1,7 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type Document } from "@/lib/db";
 import { toast } from "sonner";
-import { useMounted } from "@/hooks/use-mounted";
 
 export interface UseDocumentsReturn {
   documents: Document[];
@@ -12,7 +11,6 @@ export interface UseDocumentsReturn {
 }
 
 export function useDocuments(): UseDocumentsReturn {
-  const mountedRef = useMounted();
 
   const documents = useLiveQuery(
     () => db.documents.orderBy("createdAt").reverse().toArray(),
@@ -49,14 +47,10 @@ export function useDocuments(): UseDocumentsReturn {
       };
 
       const id = await db.documents.add(document);
-      if (mountedRef.current) {
-        toast.success(`Document "${file.name}" uploaded successfully!`);
-      }
+      toast.success(`Document "${file.name}" uploaded successfully!`);
       return { ...document, id };
     } catch {
-      if (mountedRef.current) {
-        toast.error("Failed to upload document");
-      }
+      toast.error("Failed to upload document");
       return null;
     }
   };
@@ -64,13 +58,9 @@ export function useDocuments(): UseDocumentsReturn {
   const deleteDocument = async (id: number): Promise<void> => {
     try {
       await db.documents.delete(id);
-      if (mountedRef.current) {
-        toast.success("Document deleted successfully!");
-      }
+      toast.success("Document deleted successfully!");
     } catch {
-      if (mountedRef.current) {
-        toast.error("Failed to delete document");
-      }
+      toast.error("Failed to delete document");
     }
   };
 

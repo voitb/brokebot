@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks";
 import { useModel } from "@/app/providers/model-provider";
-import { useMounted } from "@/hooks/use-mounted";
 import {
   findLastMessageByRole,
   buildPrompt,
@@ -29,7 +28,6 @@ interface UseChatInputReturn {
 export function useChatInput(): UseChatInputReturn {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const mountedRef = useMounted();
   const conversationId = useConversationId();
   const navigate = useNavigate();
 
@@ -70,22 +68,16 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       if (error) {
-        if (mountedRef.current) {
-          showErrorToast(error, { onRetry: () => handleMessageSubmit(content), navigate });
-        }
+        showErrorToast(error, { onRetry: () => handleMessageSubmit(content), navigate });
         updateMessage(activeConversationId, responseId, ERROR_GENERATING);
         return;
       }
 
       await updateMessage(activeConversationId, responseId, response);
     } catch (error) {
-      if (mountedRef.current) {
-        showErrorToast(error, { navigate });
-      }
+      showErrorToast(error, { navigate });
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
   };
 
@@ -110,15 +102,11 @@ export function useChatInput(): UseChatInputReturn {
       });
 
       if (error) {
-        if (mountedRef.current) {
-          showErrorToast(error, { onRetry: () => regenerateLastResponse(), navigate });
-        }
+        showErrorToast(error, { onRetry: () => regenerateLastResponse(), navigate });
         updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
       }
     } catch (error) {
-      if (mountedRef.current) {
-        showErrorToast(error, { navigate });
-      }
+      showErrorToast(error, { navigate });
       updateMessage(conversationId, lastAssistant.id, ERROR_REGENERATING);
     }
   };

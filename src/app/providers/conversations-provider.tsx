@@ -218,8 +218,6 @@ export function ConversationsProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Context value: React Compiler handles memoization automatically.
-  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const value: ConversationsContextType = {
     conversations,
     folders: folders || [],

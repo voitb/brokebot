@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useEffectEvent } from "react";
+import { toast } from "sonner";
 import { transcribe } from "@/features/chat/api/transcriber/transcribe";
+
+const STT_TOAST_ID = "stt-toast";
 
 const CHUNK_LENGTH_S = 30;
 const STRIDE_LENGTH_S = 5;
@@ -48,6 +51,7 @@ export function useSpeechToText(
     }
 
     setStatus("processing");
+    toast.loading("Transcribing audio...", { id: STT_TOAST_ID });
     const audioBlob = new Blob(audioChunksRef.current, {
       type: mediaRecorderRef.current?.mimeType,
     });
@@ -77,8 +81,10 @@ export function useSpeechToText(
       }
     } catch {
       setError("An error occurred during transcription.");
+      toast.error("An error occurred during transcription.", { id: STT_TOAST_ID });
     } finally {
       setStatus("ready");
+      toast.dismiss(STT_TOAST_ID);
     }
   };
 
@@ -109,6 +115,10 @@ export function useSpeechToText(
 
       recorder.start();
       setStatus("recording");
+      toast.message("Recording...", {
+        description: "Click the mic icon to stop.",
+        id: STT_TOAST_ID,
+      });
     } catch (error) {
       const message =
         error instanceof Error && error.message.includes("not supported")
@@ -116,6 +126,7 @@ export function useSpeechToText(
           : "Could not access microphone. Please check permissions.";
       setError(message);
       setStatus("error");
+      toast.error(message, { id: STT_TOAST_ID });
     }
   };
 

@@ -15,17 +15,17 @@ export const useAutosizeTextArea = ({
   maxHeight = Number.MAX_SAFE_INTEGER,
   minHeight = 0,
 }: UseAutosizeTextAreaProps) => {
-  const [init, setInit] = React.useState(true);
-  React.useEffect(() => {
+  const initRef = React.useRef(true);
+  React.useLayoutEffect(() => {
     const offsetBorder = 6;
     const textAreaElement = textAreaRef.current;
     if (textAreaElement) {
-      if (init) {
+      if (initRef.current) {
         textAreaElement.style.minHeight = `${minHeight + offsetBorder}px`;
         if (maxHeight > minHeight) {
           textAreaElement.style.maxHeight = `${maxHeight}px`;
         }
-        setInit(false);
+        initRef.current = false;
       }
       textAreaElement.style.height = `${minHeight + offsetBorder}px`;
       const scrollHeight = textAreaElement.scrollHeight;
@@ -35,7 +35,7 @@ export const useAutosizeTextArea = ({
         textAreaElement.style.height = `${scrollHeight + offsetBorder}px`;
       }
     }
-  }, [init, maxHeight, minHeight, textAreaRef, triggerAutoSize]);
+  }, [maxHeight, minHeight, textAreaRef, triggerAutoSize]);
 };
 
 export type AutosizeTextAreaRef = {

@@ -57,8 +57,8 @@ export function MessageBubble({
 
         {isUser && parsedMessage.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {parsedMessage.attachments.map((att, index) => (
-              <AttachmentBadge key={index} fileName={att.name} />
+            {parsedMessage.attachments.map((att) => (
+              <AttachmentBadge key={att.name} fileName={att.name} />
             ))}
           </div>
         )}

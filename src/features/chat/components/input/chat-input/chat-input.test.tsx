@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@/testing/utils";
 import { ChatInput } from "./chat-input";
+import { createMockModel } from "@/testing/mocks/factories";
 
 vi.mock("@/app/providers/model-provider", async () => {
   const { createMinimalModelProvider } = await import("@/testing/mocks/providers");
@@ -75,7 +76,7 @@ describe("ChatInput", () => {
 
   it("disables submit when model has error", () => {
     vi.mocked(useModel).mockReturnValue({
-      currentModel: { name: "Test Model", type: "online" },
+      currentModel: createMockModel("online"),
       isModelLoading: false,
       modelStatus: "Error: Something went wrong",
     } as ReturnType<typeof useModel>);
