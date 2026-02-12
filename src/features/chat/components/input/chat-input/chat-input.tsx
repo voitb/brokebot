@@ -77,13 +77,13 @@ export function ChatInput({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div
-            className="flex items-end gap-1 rounded-md border p-1.5"
+            className="flex items-end gap-1 rounded-md border p-1.5 overflow-hidden"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
           >
-            <ScrollArea className="min-h-[60px] max-h-[200px] flex-grow [&>div]:max-h-[200px]">
+            <ScrollArea className="min-h-[60px] max-h-[200px] min-w-0 flex-grow [&>div]:max-h-[200px]">
               <Textarea
                 ref={textareaRef}
                 value={message}

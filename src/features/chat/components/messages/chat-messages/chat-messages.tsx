@@ -29,7 +29,7 @@ export function ChatMessages({
   return (
     <div className="flex-1 overflow-hidden relative">
       <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
-        <div role="log" aria-live="polite" aria-label="Chat messages" className="p-6 space-y-6">
+        <div role="log" aria-live="polite" aria-label="Chat messages" className="p-6 space-y-6 min-w-0">
           {messages.length === 0 && !isLoading && !isGenerating && (
             <EmptyState conversation={conversation} />
           )}
