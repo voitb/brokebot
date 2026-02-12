@@ -87,7 +87,6 @@ export function createMockConversationBackupHook(options: MockConversationBackup
 export interface MockConversationsHookOptions {
   conversations?: Conversation[];
   folders?: unknown[];
-  createConversation?: ReturnType<typeof vi.fn>;
   createEmptyConversation?: ReturnType<typeof vi.fn>;
   addMessage?: ReturnType<typeof vi.fn>;
   updateMessage?: ReturnType<typeof vi.fn>;
@@ -115,7 +114,6 @@ export function createMockConversationsHook(options: MockConversationsHookOption
   return {
     conversations: options.conversations ?? [],
     folders: options.folders ?? [],
-    createConversation: options.createConversation ?? vi.fn().mockResolvedValue("new-id"),
     createEmptyConversation: options.createEmptyConversation ?? vi.fn().mockResolvedValue("new-id"),
     addMessage: options.addMessage ?? vi.fn().mockResolvedValue("message-id"),
     updateMessage: options.updateMessage ?? vi.fn().mockResolvedValue(undefined),

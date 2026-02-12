@@ -1,7 +1,5 @@
 import type { OnlineModelCategory } from "@/lib/schemas/model-schema";
 
-export type { OnlineModelCategory };
-
 export interface OpenRouterMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -33,10 +31,6 @@ export interface OpenRouterClient {
     messages: OpenRouterMessage[],
     options?: { onProgress?: (content: string) => void; signal?: AbortSignal }
   ) => AsyncGenerator<StreamResponse, void, unknown>;
-  sendMessage: (
-    model: string,
-    messages: OpenRouterMessage[]
-  ) => Promise<string>;
   testConnection: () => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -188,33 +182,6 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
     }
   }
 
-  async function sendMessage(
-    model: string,
-    messages: OpenRouterMessage[]
-  ): Promise<string> {
-    const validation = getValidatedKey();
-    if ("error" in validation) {
-      throw new Error(validation.error);
-    }
-
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: "POST",
-      headers: buildHeaders(),
-      body: JSON.stringify({ model, messages, stream: false }),
-    });
-
-    if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as ChatCompletionResponse;
-      throw new Error(
-        errorData.error?.message ||
-          `API request failed with status ${response.status}`
-      );
-    }
-
-    const data = (await response.json()) as ChatCompletionResponse;
-    return data.choices?.[0]?.message?.content || "";
-  }
-
   async function testConnection(): Promise<{
     success: boolean;
     error?: string;
@@ -244,5 +211,5 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
     }
   }
 
-  return { streamCompletion, sendMessage, testConnection };
+  return { streamCompletion, testConnection };
 }

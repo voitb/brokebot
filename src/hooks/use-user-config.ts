@@ -30,7 +30,7 @@ export function useUserConfig(): UseUserConfigReturn {
           try {
             decryptedConfig.openrouterApiKey = await decryptValue(rawConfig.openrouterApiKey);
           } catch {
-            decryptedConfig.openrouterApiKey = rawConfig.openrouterApiKey;
+            decryptedConfig.openrouterApiKey = "";
           }
         }
 

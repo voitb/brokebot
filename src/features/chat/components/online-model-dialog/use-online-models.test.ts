@@ -14,10 +14,10 @@ const mockModels = [
   createMockOpenRouterModel({ id: "paid-model-2", name: "Paid Model 2", isFree: false }),
 ];
 
-let mockUseModelsReturn = {
-  models: mockModels,
-  isLoading: false,
-  error: null as Error | null,
+let mockUseModelReturn = {
+  availableOnlineModels: mockModels,
+  isLoadingAvailableModels: false,
+  availableModelsError: null as Error | null,
 };
 
 vi.mock("@/hooks/use-user-config", async () => {
@@ -27,8 +27,8 @@ vi.mock("@/hooks/use-user-config", async () => {
   };
 });
 
-vi.mock("@/features/chat/hooks/use-models", () => ({
-  useModels: () => mockUseModelsReturn,
+vi.mock("@/app/providers/model-provider", () => ({
+  useModel: () => mockUseModelReturn,
 }));
 
 describe("useOnlineModels", () => {
@@ -37,25 +37,25 @@ describe("useOnlineModels", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseModelsReturn = {
-      models: mockModels,
-      isLoading: false,
-      error: null,
+    mockUseModelReturn = {
+      availableOnlineModels: mockModels,
+      isLoadingAvailableModels: false,
+      availableModelsError: null,
     };
   });
 
   describe("initial state", () => {
-    it("returns loading state from useModels", () => {
-      mockUseModelsReturn = { ...mockUseModelsReturn, isLoading: true };
+    it("returns loading state from useModel", () => {
+      mockUseModelReturn = { ...mockUseModelReturn, isLoadingAvailableModels: true };
       const { result } = renderHook(() =>
         useOnlineModels(mockOnModelSelect, mockOnOpenChange)
       );
       expect(result.current.isLoading).toBe(true);
     });
 
-    it("returns error state from useModels", () => {
+    it("returns error state from useModel", () => {
       const error = new Error("Failed to fetch");
-      mockUseModelsReturn = { ...mockUseModelsReturn, error };
+      mockUseModelReturn = { ...mockUseModelReturn, availableModelsError: error };
       const { result } = renderHook(() =>
         useOnlineModels(mockOnModelSelect, mockOnOpenChange)
       );

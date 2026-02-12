@@ -1,7 +1,6 @@
 import { Brain, Eye, Zap, Cloud, Code } from "lucide-react";
-import type { OpenRouterModel, OnlineModelCategory } from "@/features/chat/api/openrouter";
-
-export type { OnlineModelCategory };
+import type { OpenRouterModel } from "@/features/chat/api/openrouter";
+import type { OnlineModelCategory } from "@/lib/schemas/model-schema";
 
 const CATEGORY_ICONS: Record<OnlineModelCategory, React.ReactNode> = {
   reasoning: <Brain className="w-3 h-3" />,

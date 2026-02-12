@@ -1,11 +1,11 @@
 import { useSearchParams } from "react-router-dom";
-import { MODAL_REGISTRY, isValidModalType } from "./modal-registry";
+import { MODAL_REGISTRY } from "./modal-registry";
 
 export function ModalRoot() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const modalParam = searchParams.get("modal");
-  const modalType = isValidModalType(modalParam) ? modalParam : null;
+  const modalType = modalParam && modalParam in MODAL_REGISTRY ? modalParam : null;
   const props = Object.fromEntries(searchParams.entries());
 
   if (!modalType) {

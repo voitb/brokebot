@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { ChevronDown, Cpu, Cloud, Key, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,12 +38,12 @@ export function ModelSelectorDropdown({
     loadLocalModels,
   } = useModelSelectorDropdown();
 
-  // Load local models when dropdown is opened and models not yet loaded
-  useEffect(() => {
-    if (isDropdownOpen && availableModels.length === 0 && !isLoadingModels) {
+  const handleDropdownOpenChange = (open: boolean) => {
+    setIsDropdownOpen(open);
+    if (open && availableModels.length === 0 && !isLoadingModels) {
       loadLocalModels();
     }
-  }, [isDropdownOpen, availableModels.length, isLoadingModels, loadLocalModels]);
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -55,7 +54,7 @@ export function ModelSelectorDropdown({
         selectedModel={currentModel?.type === "online" ? currentModel.onlineModel : null}
       />
 
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"

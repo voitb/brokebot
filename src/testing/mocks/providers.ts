@@ -85,6 +85,9 @@ export function createMinimalModelProvider(
       currentModel: overrides.currentModel ?? createMockModel("online"),
       isModelLoading: overrides.isModelLoading ?? false,
       modelStatus: overrides.modelStatus ?? "Ready",
+      availableOnlineModels: [],
+      isLoadingAvailableModels: false,
+      availableModelsError: null,
     })),
   };
 }

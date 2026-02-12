@@ -57,47 +57,6 @@ describe("createOpenRouterClient", () => {
     });
   });
 
-  describe("sendMessage", () => {
-    it("throws for invalid API key format", async () => {
-      const client = createOpenRouterClient("bad-key");
-
-      await expect(
-        client.sendMessage("gpt-4", [{ role: "user", content: "Hi" }])
-      ).rejects.toThrow("Invalid OpenRouter API key format");
-    });
-
-    it("returns response content on success", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            choices: [{ message: { content: "Hello there!" } }],
-          }),
-      });
-
-      const client = createOpenRouterClient(validApiKey);
-      const result = await client.sendMessage("gpt-4", [
-        { role: "user", content: "Hi" },
-      ]);
-
-      expect(result).toBe("Hello there!");
-    });
-
-    it("throws on API error", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: () => Promise.resolve({ error: { message: "Server error" } }),
-      });
-
-      const client = createOpenRouterClient(validApiKey);
-
-      await expect(
-        client.sendMessage("gpt-4", [{ role: "user", content: "Hi" }])
-      ).rejects.toThrow("Server error");
-    });
-  });
-
   describe("streamCompletion", () => {
     it("yields error for invalid API key format", async () => {
       const client = createOpenRouterClient("bad-key");
