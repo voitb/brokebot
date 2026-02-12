@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useEffectEvent } from "react";
 import { transcribe } from "@/features/chat/api/transcriber/transcribe";
-import type { TranscribeResult } from "@/features/chat/api/transcriber/types";
 
 const CHUNK_LENGTH_S = 30;
 const STRIDE_LENGTH_S = 5;
@@ -17,7 +16,6 @@ export interface UseSpeechToTextResult {
   status: TranscriberStatus;
   startRecording: () => void;
   stopRecording: () => void;
-  isModelLoading: boolean;
   error: string | null;
 }
 
@@ -33,8 +31,6 @@ export function useSpeechToText(
   const onTranscript = useEffectEvent((transcript: string) => {
     onTranscriptReceived(transcript);
   });
-
-  const isModelLoading = false;
 
   useEffect(() => {
     return () => {
@@ -74,13 +70,12 @@ export function useSpeechToText(
         }
       );
 
-      const newTranscript = (result as TranscribeResult)?.text?.trim() ?? "";
+      const newTranscript = result?.text?.trim() ?? "";
 
       if (newTranscript) {
         onTranscript(newTranscript);
       }
-    } catch (err) {
-      console.error("[STT] Transcription error:", err);
+    } catch {
       setError("An error occurred during transcription.");
     } finally {
       setStatus("ready");
@@ -132,5 +127,5 @@ export function useSpeechToText(
     }
   };
 
-  return { status, startRecording, stopRecording, isModelLoading, error };
+  return { status, startRecording, stopRecording, error };
 }

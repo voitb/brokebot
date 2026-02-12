@@ -94,20 +94,6 @@ When assisting with errors:
 Remember: Your goal is effective assistance, clear reasoning, and adherence to best practices only when contextually appropriate.
 `;
 
-export const CODE_FORMATTING_SYSTEM_MESSAGE = `
-When providing code, always use proper markdown syntax with clearly specified languages:
-
-\`\`\`javascript
-console.log("Hello World");
-\`\`\`
-
-\`\`\`python
-print("Hello World")
-\`\`\`
-
-Always clearly specify the language after opening backticks.
-`;
-
 export const CONVERSATION_RULES = `
 Additional guidelines for engaging and helpful interactions:
 

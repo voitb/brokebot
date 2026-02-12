@@ -25,7 +25,6 @@ export interface UseConversationItemReturn {
   handleDeleteConfirm: () => Promise<void>;
   handleMove: (folderId: string | null) => Promise<void>;
   handleCreateFolderAndMove: (folderName: string) => Promise<void>;
-  getItemStyles: () => string;
 }
 
 export function useConversationItem(conversation: Conversation): UseConversationItemReturn {
@@ -115,16 +114,6 @@ export function useConversationItem(conversation: Conversation): UseConversation
     }
   };
 
-  const getItemStyles = () => {
-    if (isEditing || isActive) {
-      return "bg-primary/10 border-primary text-primary font-medium";
-    } else if (isMenuOpen) {
-      return "bg-muted/70";
-    } else {
-      return "hover:bg-muted/50";
-    }
-  };
-
   return {
     isEditing,
     isMenuOpen,
@@ -146,6 +135,5 @@ export function useConversationItem(conversation: Conversation): UseConversation
     handleDeleteConfirm,
     handleMove,
     handleCreateFolderAndMove,
-    getItemStyles,
   };
 }

@@ -61,11 +61,10 @@ export function AutosizeTextarea({
   ...props
 }: AutosizeTextAreaProps) {
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
-  const [triggerAutoSize, setTriggerAutoSize] = React.useState("");
 
   useAutosizeTextArea({
     textAreaRef,
-    triggerAutoSize: triggerAutoSize,
+    triggerAutoSize: (value as string) ?? "",
     maxHeight,
     minHeight,
   });
@@ -77,10 +76,6 @@ export function AutosizeTextarea({
     minHeight,
   }));
 
-  React.useEffect(() => {
-    setTriggerAutoSize(value as string);
-  }, [props?.defaultValue, value]);
-
   return (
     <textarea
       {...props}
@@ -90,10 +85,7 @@ export function AutosizeTextarea({
         "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
-      onChange={(e) => {
-        setTriggerAutoSize(e.target.value);
-        onChange?.(e);
-      }}
+      onChange={onChange}
     />
   );
 }

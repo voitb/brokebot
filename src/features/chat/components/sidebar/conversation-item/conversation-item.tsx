@@ -1,4 +1,3 @@
-import { useEffect, useEffectEvent } from "react";
 import { MoreHorizontal, Star, Edit, Trash2, FolderPlus, Folder, FolderSymlink, FolderMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,31 +37,20 @@ export function ConversationItem({
     handleConversationClick,
     handlePinToggle,
     handleRename,
-    startEditing,
     handleSaveRename,
     handleCancelRename,
     handleDelete,
     handleDeleteConfirm,
     handleMove,
     handleCreateFolderAndMove,
-    getItemStyles,
     isActive,
   } = useConversationItem(conversation);
 
-  const onRenameEvent = useEffectEvent(() => {
-    if (isActive) {
-      startEditing();
-    }
-  });
-
-  useEffect(() => {
-    const renameListener = () => {
-      onRenameEvent();
-    };
-    document.addEventListener('conversation:rename', renameListener);
-    return () => document.removeEventListener('conversation:rename', renameListener);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- onRenameEvent is from useEffectEvent (stable)
-  }, []);
+  const itemStyles = isEditing || isActive
+    ? "bg-primary/10 border-primary text-primary font-medium"
+    : isMenuOpen
+      ? "bg-muted/70"
+      : "hover:bg-muted/50";
 
   return (
     <>
@@ -71,7 +59,7 @@ export function ConversationItem({
         tabIndex={0}
         aria-current={isActive ? "page" : undefined}
         aria-label={`${conversation.title}${isPinned ? ", pinned" : ""}${isActive ? ", currently selected" : ""}`}
-        className={`group/item relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${getItemStyles()}`}
+        className={`group/item relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${itemStyles}`}
         onClick={handleConversationClick}
         onDoubleClick={handleRename}
         onKeyDown={(e) => {

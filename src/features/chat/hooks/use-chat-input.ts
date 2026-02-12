@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks";
 import { useModel } from "@/app/providers/model-provider";
+import { useMounted } from "@/hooks/use-mounted";
 import {
   findLastMessageByRole,
   buildPrompt,
@@ -28,15 +29,9 @@ interface UseChatInputReturn {
 export function useChatInput(): UseChatInputReturn {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const mountedRef = useRef(true);
+  const mountedRef = useMounted();
   const conversationId = useConversationId();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
 
   const {
     createEmptyConversation,
