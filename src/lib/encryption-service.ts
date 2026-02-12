@@ -66,6 +66,7 @@ export async function decryptValue(encryptedText: string): Promise<string> {
   return new TextDecoder().decode(decrypted);
 }
 
+/** @internal Test-only: resets the cached encryption key */
 export function clearEncryptionCache(): void {
   keyPromise = null;
 }

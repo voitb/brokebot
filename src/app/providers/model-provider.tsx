@@ -16,17 +16,20 @@ import {
 } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { useModels } from "@/features/chat/hooks/use-models";
-import { type z } from "zod";
 import { UnifiedModelSchema } from "@/lib/schemas/model-schema";
 
-export type ModelType = "local" | "online";
+export type LocalModel = {
+  type: "local";
+  localModel: ModelInfo;
+};
 
-// Extends the Zod-validated shape with the non-serializable `client` field
-// that cannot be represented in the schema.
-type ValidatedUnifiedModel = z.infer<typeof UnifiedModelSchema>;
-export interface UnifiedModel extends ValidatedUnifiedModel {
+export type OnlineModel = {
+  type: "online";
+  onlineModel: OpenRouterModel;
   client?: OpenRouterClient;
-}
+};
+
+export type UnifiedModel = LocalModel | OnlineModel;
 
 export interface ModelProviderState {
   currentModel: UnifiedModel | null;
@@ -38,7 +41,6 @@ export interface ModelProviderState {
   isLoadingAvailableModels: boolean;
   availableModelsError: Error | null;
   setCurrentModel: (model: UnifiedModel) => void;
-  sendMessage: (messages: OpenRouterMessage[]) => Promise<string>;
   streamMessage: (
     messages: OpenRouterMessage[],
     onProgress?: (content: string) => void,
@@ -69,32 +71,34 @@ export function ModelProvider({ children }: ModelProviderProps) {
 
   const apiKey = config?.openrouterApiKey;
 
+  // Mount-only: hydrate from localStorage
   useEffect(() => {
     const storedModel = localStorage.getItem("unifiedModel");
-    if (storedModel) {
-      try {
-        const jsonData = JSON.parse(storedModel);
-        const parsed = UnifiedModelSchema.safeParse(jsonData);
+    if (!storedModel) return;
 
-        if (parsed.success) {
-          if (parsed.data.type === "online" && parsed.data.onlineModel && apiKey) {
-            setCurrentModelState(
-              createOnlineModel(parsed.data.onlineModel, apiKey)
-            );
-            return;
-          }
-        } else {
-          localStorage.removeItem("unifiedModel");
-        }
-      } catch {
+    try {
+      const jsonData = JSON.parse(storedModel);
+      const parsed = UnifiedModelSchema.safeParse(jsonData);
+
+      if (parsed.success && parsed.data.type === "online" && apiKey) {
+        setCurrentModelState(
+          createOnlineModel(parsed.data.onlineModel, apiKey)
+        );
+      } else if (!parsed.success) {
         localStorage.removeItem("unifiedModel");
       }
+    } catch {
+      localStorage.removeItem("unifiedModel");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount with initial apiKey
+  }, []);
 
-    if (webLLM.selectedModel) {
+  // Sync local model selection from WebLLM
+  useEffect(() => {
+    if (webLLM.selectedModel && currentModel?.type !== "online") {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
-  }, [webLLM.selectedModel, apiKey]);
+  }, [webLLM.selectedModel]); // eslint-disable-line react-hooks/exhaustive-deps -- Only react to selectedModel changes
 
   const interruptGeneration = () => {
     if (currentModel?.type === "local" && webLLM.engine) {
@@ -103,8 +107,8 @@ export function ModelProvider({ children }: ModelProviderProps) {
   };
 
   const resetChat = async () => {
-    if (currentModel?.type === "local" && webLLM.engine && currentModel.id) {
-      await webLLM.engine.reload(currentModel.id);
+    if (currentModel?.type === "local" && webLLM.engine) {
+      await webLLM.engine.reload(currentModel.localModel.id);
     }
   };
 
@@ -113,38 +117,10 @@ export function ModelProvider({ children }: ModelProviderProps) {
       setCurrentModelState(model);
       localStorage.setItem("unifiedModel", JSON.stringify(model));
 
-      if (model.type === "local" && model.localModel) {
+      if (model.type === "local") {
         webLLM.setSelectedModel(model.localModel);
       }
     });
-  };
-
-  const sendMessage = async (messages: OpenRouterMessage[]): Promise<string> => {
-    if (!currentModel) {
-      throw new Error("No model selected");
-    }
-
-    if (currentModel.type === "local") {
-      if (!webLLM.engine) {
-        throw new Error("WebLLM engine not ready");
-      }
-
-      const response = await webLLM.engine.chat.completions.create({
-        messages: messages.map((msg) => ({
-          role: msg.role,
-          content: msg.content,
-        })),
-        stream: false,
-      });
-
-      return response.choices[0]?.message?.content || "";
-    } else {
-      if (!currentModel.client) {
-        throw new Error("OpenRouter client not configured");
-      }
-
-      return await currentModel.client.sendMessage(currentModel.id, messages);
-    }
   };
 
   async function* streamMessage(
@@ -210,7 +186,7 @@ export function ModelProvider({ children }: ModelProviderProps) {
       }
 
       yield* currentModel.client.streamCompletion(
-        currentModel.id,
+        currentModel.onlineModel.id,
         messages,
         { onProgress, signal }
       );
@@ -225,8 +201,6 @@ export function ModelProvider({ children }: ModelProviderProps) {
       ? "Ready"
       : "Initializing...";
 
-  // Context value: React Compiler handles memoization automatically.
-  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const contextValue: ModelProviderState = {
     currentModel,
     isOnlineMode: currentModel?.type === "online",
@@ -237,7 +211,6 @@ export function ModelProvider({ children }: ModelProviderProps) {
     isLoadingAvailableModels,
     availableModelsError,
     setCurrentModel,
-    sendMessage,
     streamMessage,
     interruptGeneration,
     resetChat,
@@ -258,22 +231,16 @@ export const useModel = (): ModelProviderState => {
   return context;
 };
 
-export const createLocalModel = (localModel: ModelInfo): UnifiedModel => ({
-  id: localModel.id,
-  name: localModel.name,
+export const createLocalModel = (localModel: ModelInfo): LocalModel => ({
   type: "local",
-  description: localModel.description,
   localModel,
 });
 
 export const createOnlineModel = (
   onlineModel: OpenRouterModel,
   apiKey?: string
-): UnifiedModel => ({
-  id: onlineModel.id,
-  name: onlineModel.name,
+): OnlineModel => ({
   type: "online",
-  description: onlineModel.description,
   onlineModel,
   client: apiKey ? createOpenRouterClient(apiKey) : undefined,
 });

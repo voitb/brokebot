@@ -39,8 +39,8 @@ export function useModelSelectorDropdown(): UseModelSelectorDropdownReturn {
   const displayName = !currentModel
     ? "Select Model"
     : currentModel.type === "online"
-      ? currentModel.onlineModel?.name ?? "Online Model"
-      : selectedModel?.name ?? currentModel.name;
+      ? currentModel.onlineModel.name
+      : selectedModel?.name ?? currentModel.localModel.name;
   const isOpenRouterKeyAvailable = !!config?.openrouterApiKey;
 
   const loadLocalModels = async () => {

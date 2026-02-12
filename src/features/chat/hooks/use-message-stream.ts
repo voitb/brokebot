@@ -41,6 +41,7 @@ export function useMessageStream(): UseMessageStreamReturn {
     messages: OpenRouterMessage[],
     onChunk: (content: string) => void
   ): Promise<StreamResult> => {
+    abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
     setIsGenerating(true);
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
@@ -23,7 +23,9 @@ export function useSettings(): UseSettingsReturn {
   const [settings, setSettings] = useState<Partial<UserConfig>>(() => config ?? {});
   const [isSaving, setIsSaving] = useState(false);
 
-  if (config && Object.keys(settings).length === 0) {
+  const prevConfigRef = useRef(config);
+  if (config && prevConfigRef.current !== config) {
+    prevConfigRef.current = config;
     setSettings(config);
   }
 

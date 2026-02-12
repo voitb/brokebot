@@ -67,8 +67,6 @@ export function ThemeProvider({
     root.classList.add(theme === "system" ? systemTheme : theme);
   }, [theme, systemTheme]);
 
-  // Context value: React Compiler handles memoization automatically.
-  // Manual useMemo is not required. See: https://react.dev/learn/react-compiler
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {

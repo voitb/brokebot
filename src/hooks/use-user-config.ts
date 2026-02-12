@@ -79,7 +79,7 @@ export function useUserConfig(): UseUserConfigReturn {
   };
 
   return {
-    config: config || DEFAULT_USER_CONFIG,
+    config,
     updateConfig,
     resetConfig,
   };

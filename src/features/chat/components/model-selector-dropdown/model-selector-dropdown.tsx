@@ -52,7 +52,7 @@ export function ModelSelectorDropdown({
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onModelSelect={handleOnlineModelSelect}
-        selectedModel={isOnlineModel ? currentModel?.onlineModel : null}
+        selectedModel={currentModel?.type === "online" ? currentModel.onlineModel : null}
       />
 
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>

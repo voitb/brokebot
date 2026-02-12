@@ -24,13 +24,6 @@ interface UseModelsReturn {
 
 const API_URL = 'https://openrouter.ai/api/v1/models';
 
-function formatContextLength(length: number | undefined): number {
-    if (typeof length !== 'number' || length <= 0) {
-      return 0;
-    }
-    return length;
-}
-
 export function useModels(): UseModelsReturn {
   const [models, setModels] = useState<OpenRouterModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -57,7 +50,7 @@ export function useModels(): UseModelsReturn {
           id: model.id,
           name: model.name,
           description: model.description,
-          contextLength: formatContextLength(model.context_length),
+          contextLength: model.context_length > 0 ? model.context_length : 0,
           pricing: model.pricing,
           provider: model.id.split('/')[0],
           isFree: parseFloat(model.pricing.prompt) === 0 && parseFloat(model.pricing.completion) === 0,

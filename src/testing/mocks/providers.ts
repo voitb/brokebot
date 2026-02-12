@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import {
   createMockLocalModel,
+  createMockModel,
   createMockWebLLMContext,
   createMockModelContext,
   type MockWebLLMContextOverrides,
@@ -81,7 +82,7 @@ export function createMinimalModelProvider(
 ) {
   return {
     useModel: vi.fn(() => ({
-      currentModel: overrides.currentModel ?? { name: "Test Model", type: "online" as const },
+      currentModel: overrides.currentModel ?? createMockModel("online"),
       isModelLoading: overrides.isModelLoading ?? false,
       modelStatus: overrides.modelStatus ?? "Ready",
     })),

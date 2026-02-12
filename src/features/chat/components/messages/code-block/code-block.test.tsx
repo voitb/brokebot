@@ -30,22 +30,22 @@ describe("CodeBlock", () => {
   });
 
   describe("code block rendering", () => {
-    it("renders syntax-highlighted block for code with language class", () => {
+    it("renders syntax-highlighted block for code with language class", async () => {
       render(
         <CodeBlock className="language-typescript">
           const x = 1;{"\n"}const y = 2;
         </CodeBlock>
       );
 
-      const highlighter = screen.getByTestId("syntax-highlighter");
+      const highlighter = await screen.findByTestId("syntax-highlighter");
       expect(highlighter).toBeInTheDocument();
       expect(highlighter.textContent).toContain("const x = 1;");
     });
 
-    it("uses correct language for syntax highlighting", () => {
+    it("uses correct language for syntax highlighting", async () => {
       render(<CodeBlock className="language-python">x = 1</CodeBlock>);
 
-      const highlighter = screen.getByTestId("syntax-highlighter");
+      const highlighter = await screen.findByTestId("syntax-highlighter");
       expect(highlighter).toHaveAttribute("data-language", "python");
     });
   });

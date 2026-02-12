@@ -2,6 +2,7 @@ import { vi } from "vitest";
 import { v4 as uuidv4 } from "uuid";
 import type { Conversation, Message, Folder, Document, UserConfig } from "@/lib/db";
 import type { OpenRouterModel } from "@/features/chat/api/openrouter";
+import type { UnifiedModel } from "@/app/providers/model-provider";
 
 export function createMockMessage(overrides: Partial<Message> = {}): Message {
   return {
@@ -58,20 +59,20 @@ export function createMockUserConfig(overrides: Partial<UserConfig> = {}): UserC
   };
 }
 
-export function createMockModel(type: "local" | "online" = "online") {
+export function createMockModel(type: "local" | "online" = "online"): UnifiedModel {
   if (type === "local") {
     return {
-      id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
-      name: "Llama 3.2 1B",
       type: "local" as const,
-      description: "Fast and efficient local model",
+      localModel: createMockLocalModel(),
     };
   }
   return {
-    id: "openai/gpt-4",
-    name: "GPT-4",
     type: "online" as const,
-    description: "OpenAI GPT-4 model",
+    onlineModel: createMockOpenRouterModel({
+      id: "openai/gpt-4",
+      name: "GPT-4",
+      isFree: false,
+    }),
   };
 }
 
@@ -135,7 +136,7 @@ export function createMockWebLLMContext(overrides: MockWebLLMContextOverrides = 
 }
 
 export interface MockModelContextOverrides {
-  currentModel?: { id: string; name: string; type: "local" | "online"; description: string } | null;
+  currentModel?: UnifiedModel | null;
   isOnlineMode?: boolean;
   isModelLoading?: boolean;
   isModelSwitching?: boolean;
@@ -144,7 +145,6 @@ export interface MockModelContextOverrides {
   isLoadingAvailableModels?: boolean;
   availableModelsError?: Error | null;
   setCurrentModel?: ReturnType<typeof vi.fn>;
-  sendMessage?: ReturnType<typeof vi.fn>;
   streamMessage?: () => AsyncGenerator<{ content: string; isComplete: boolean }, void, unknown>;
   interruptGeneration?: ReturnType<typeof vi.fn>;
   resetChat?: ReturnType<typeof vi.fn>;
@@ -152,12 +152,7 @@ export interface MockModelContextOverrides {
 
 export function createMockModelContext(overrides: MockModelContextOverrides = {}) {
   return {
-    currentModel: overrides.currentModel !== undefined ? overrides.currentModel : {
-      id: "test-model",
-      name: "Test Model",
-      type: "online" as const,
-      description: "A test model for unit tests",
-    },
+    currentModel: overrides.currentModel !== undefined ? overrides.currentModel : createMockModel("online"),
     isOnlineMode: overrides.isOnlineMode ?? true,
     isModelLoading: overrides.isModelLoading ?? false,
     isModelSwitching: overrides.isModelSwitching ?? false,
@@ -166,7 +161,6 @@ export function createMockModelContext(overrides: MockModelContextOverrides = {}
     isLoadingAvailableModels: overrides.isLoadingAvailableModels ?? false,
     availableModelsError: overrides.availableModelsError ?? null,
     setCurrentModel: overrides.setCurrentModel ?? vi.fn(),
-    sendMessage: overrides.sendMessage ?? vi.fn().mockResolvedValue("Test response"),
     streamMessage: overrides.streamMessage ?? async function* () {
       yield { content: "Test", isComplete: true };
     },
