@@ -17,7 +17,7 @@ async function getOrCreateKey(): Promise<CryptoKey> {
     ["encrypt", "decrypt"]
   );
 
-  await db.encryptionKey.add({ id: ENCRYPTION_KEY_ID, key });
+  await db.encryptionKey.put({ id: ENCRYPTION_KEY_ID, key });
   return key;
 }
 

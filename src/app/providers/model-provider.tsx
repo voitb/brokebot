@@ -59,19 +59,18 @@ interface ModelProviderProps {
 export function ModelProvider({ children }: ModelProviderProps) {
   const webLLM = useWebLLM();
   const { config } = useUserConfig();
+  const apiKey = config?.openrouterApiKey;
   const {
     models: availableOnlineModels,
     isLoading: isLoadingAvailableModels,
     error: availableModelsError
-  } = useModels();
+  } = useModels({ apiKey });
   const [currentModel, setCurrentModelState] = useState<UnifiedModel | null>(
     null
   );
   const [isModelSwitching, startTransition] = useTransition();
 
-  const apiKey = config?.openrouterApiKey;
-
-  // Mount-only: hydrate from localStorage
+  // Hydrate online model from localStorage when apiKey is available
   useEffect(() => {
     const storedModel = localStorage.getItem("unifiedModel");
     if (!storedModel) return;
@@ -90,15 +89,14 @@ export function ModelProvider({ children }: ModelProviderProps) {
     } catch {
       localStorage.removeItem("unifiedModel");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount with initial apiKey
-  }, []);
+  }, [apiKey]);
 
   // Sync local model selection from WebLLM
   useEffect(() => {
     if (webLLM.selectedModel && currentModel?.type !== "online") {
       setCurrentModelState(createLocalModel(webLLM.selectedModel));
     }
-  }, [webLLM.selectedModel]); // eslint-disable-line react-hooks/exhaustive-deps -- Only react to selectedModel changes
+  }, [webLLM.selectedModel, currentModel?.type]);
 
   const interruptGeneration = () => {
     if (currentModel?.type === "local" && webLLM.engine) {

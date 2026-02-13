@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import { useChatGuard } from "@/features/chat/hooks/use-chat-guard";
 
 interface ChatGuardProps {

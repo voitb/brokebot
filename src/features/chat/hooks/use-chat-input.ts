@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConversations, useConversation } from "@/hooks/use-conversations";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import { useModel } from "@/app/providers/model-provider";
 import {
   findLastMessageByRole,

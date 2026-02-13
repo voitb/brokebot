@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Button } from "../button";
 import { Copy, Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
-import { useCopyToClipboard } from "@/hooks";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/cn";
 
 interface CopyButtonProps {

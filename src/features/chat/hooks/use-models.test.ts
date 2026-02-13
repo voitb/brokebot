@@ -25,9 +25,7 @@ describe("useModels", () => {
       }),
     });
 
-    const { result } = renderHook(() => useModels());
-
-    expect(result.current.isLoading).toBe(true);
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -53,7 +51,7 @@ describe("useModels", () => {
       }),
     });
 
-    const { result } = renderHook(() => useModels());
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.models[0].contextLength).toBe(0);
@@ -63,7 +61,7 @@ describe("useModels", () => {
   it("handles API error response", async () => {
     mockFetch.mockResolvedValueOnce({ ok: false, statusText: "Server Error" });
 
-    const { result } = renderHook(() => useModels());
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.error?.message).toContain("Failed to fetch models");
@@ -73,7 +71,7 @@ describe("useModels", () => {
   it("handles invalid response format", async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ data: null }) });
 
-    const { result } = renderHook(() => useModels());
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.error?.message).toContain("Unexpected response format");
@@ -82,10 +80,19 @@ describe("useModels", () => {
   it("handles network error", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network failure"));
 
-    const { result } = renderHook(() => useModels());
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.error?.message).toBe("Network failure");
     expect(result.current.models).toEqual([]);
+  });
+
+  it("does not fetch when no apiKey is provided", () => {
+    const { result } = renderHook(() => useModels());
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.models).toEqual([]);
+    expect(result.current.error).toBeNull();
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

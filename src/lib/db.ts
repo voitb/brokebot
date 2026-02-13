@@ -1,8 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
 
-// Default model ID for new users - used when WebLLM catalog is not yet loaded
-const DEFAULT_LOCAL_MODEL_ID = "Llama-3.2-3B-Instruct-q4f16_1-MLC";
-
 export interface Message {
   id: string;
   role: "user" | "assistant";
@@ -32,8 +29,6 @@ export interface UserConfig {
   id: "user_config";
   username: string;
   avatarUrl?: string;
-  selectedModelId: string;
-  autoLoadModel: boolean;
   openrouterApiKey?: string;
   theme: "light" | "dark" | "system";
   createdAt: Date;
@@ -56,8 +51,6 @@ export interface EncryptionKey {
 export const DEFAULT_USER_CONFIG: UserConfig = {
   id: "user_config",
   username: "User",
-  selectedModelId: DEFAULT_LOCAL_MODEL_ID,
-  autoLoadModel: true,
   theme: "system",
   createdAt: new Date(),
   updatedAt: new Date(),

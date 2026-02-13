@@ -36,7 +36,6 @@ export function useHeaderActions({
 }: UseHeaderActionsOptions): UseHeaderActionsReturn {
   const navigate = useNavigate();
   const {
-    conversations,
     togglePinConversation,
     updateConversationTitle,
     createEmptyConversation,
@@ -45,11 +44,8 @@ export function useHeaderActions({
   const { conversation } = useConversation(conversationId);
   const { importConversations } = useConversationBackup();
 
-  const currentConversation = conversations?.find(
-    (c) => c.id === conversationId
-  );
-  const conversationTitle = currentConversation?.title;
-  const isConversationPinned = currentConversation?.pinned || false;
+  const conversationTitle = conversation?.title;
+  const isConversationPinned = conversation?.pinned || false;
   const isLoadingConversation = conversationId
     ? conversation === undefined
     : false;

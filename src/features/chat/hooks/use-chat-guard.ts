@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useConversation } from "@/hooks/use-conversations";
@@ -21,34 +21,19 @@ export function useChatGuard({
 }: UseChatGuardOptions): UseChatGuardReturn {
   const navigate = useNavigate();
   const { conversation } = useConversation(conversationId);
-  const [isChecking, setIsChecking] = useState(!!conversationId);
-  const hasHandledRef = useRef(false);
+
+  const isChecking = !!conversationId && conversation === undefined;
 
   useEffect(() => {
-    hasHandledRef.current = false;
-    setIsChecking(!!conversationId);
-
-    if (!conversationId) {
-      return;
-    }
+    if (!conversationId || conversation !== undefined) return;
 
     const timer = setTimeout(() => {
-      if (!hasHandledRef.current && conversation === undefined) {
-        hasHandledRef.current = true;
-        toast.error("Conversation not found", {
-          description: "The requested conversation does not exist.",
-          duration: 4000,
-        });
-        navigate("/chat", { replace: true });
-        setIsChecking(false);
-      }
+      toast.error("Conversation not found", {
+        description: "The requested conversation does not exist.",
+        duration: 4000,
+      });
+      navigate("/chat", { replace: true });
     }, timeoutMs);
-
-    if (conversation !== undefined && !hasHandledRef.current) {
-      hasHandledRef.current = true;
-      setIsChecking(false);
-      clearTimeout(timer);
-    }
 
     return () => clearTimeout(timer);
   }, [conversationId, conversation, navigate, timeoutMs]);
@@ -57,4 +42,4 @@ export function useChatGuard({
     isChecking,
     conversationExists: conversationId ? conversation !== undefined : true,
   };
-} 
+}

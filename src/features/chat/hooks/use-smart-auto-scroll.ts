@@ -84,7 +84,7 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
       viewport.removeEventListener("scroll", handleScroll);
       observer.disconnect();
     };
-  }, []);
+  }, [conversationId]);
 
   useLayoutEffect(() => {
     if (isInitialRender.current) {

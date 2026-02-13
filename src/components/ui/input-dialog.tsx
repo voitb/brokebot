@@ -34,12 +34,11 @@ export function InputDialog({
 }: InputDialogProps) {
   const [value, setValue] = useState(initialValue);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset when dialog opens, not when initialValue ref changes
   useEffect(() => {
     if (open) {
       setValue(initialValue);
     }
-  }, [open]);
+  }, [open, initialValue]);
 
   const handleConfirm = () => {
     if (value.trim()) {

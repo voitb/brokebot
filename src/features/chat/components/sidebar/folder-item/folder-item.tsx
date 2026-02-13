@@ -14,7 +14,7 @@ import {
 import { ConversationItem } from "../conversation-item";
 import { DeleteFolderDialog } from "../delete-folder-dialog";
 import { useFolderItem } from "./use-folder-item";
-import type { FolderWithConversations } from "@/hooks";
+import type { FolderWithConversations } from "@/hooks/use-conversation-list";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

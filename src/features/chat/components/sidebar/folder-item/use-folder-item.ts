@@ -1,6 +1,6 @@
 import { useState, type MouseEvent } from "react";
 import { useConversations } from "@/app/providers/conversations-provider";
-import { useConversationList } from "@/hooks";
+import { useConversationList } from "@/hooks/use-conversation-list";
 import type { Folder } from "@/lib/db";
 
 export interface UseFolderItemReturn {

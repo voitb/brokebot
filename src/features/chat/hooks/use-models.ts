@@ -16,6 +16,10 @@ interface OpenRouterModelsResponse {
   data: OpenRouterApiModel[];
 }
 
+interface UseModelsOptions {
+  apiKey?: string;
+}
+
 interface UseModelsReturn {
   models: OpenRouterModel[];
   isLoading: boolean;
@@ -24,12 +28,18 @@ interface UseModelsReturn {
 
 const API_URL = 'https://openrouter.ai/api/v1/models';
 
-export function useModels(): UseModelsReturn {
+export function useModels({ apiKey }: UseModelsOptions = {}): UseModelsReturn {
   const [models, setModels] = useState<OpenRouterModel[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    if (!apiKey) {
+      setModels([]);
+      setIsLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
 
     const fetchModels = async () => {
@@ -76,7 +86,7 @@ export function useModels(): UseModelsReturn {
 
     fetchModels();
     return () => controller.abort();
-  }, []);
+  }, [apiKey]);
 
   return { models, isLoading, error };
 } 

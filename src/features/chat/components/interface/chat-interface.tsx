@@ -3,7 +3,7 @@ import { ChatHeader } from "../header/chat-header";
 import { ChatMessages } from "../messages/chat-messages/chat-messages";
 import { ChatInput } from "../input/chat-input/";
 import { useConversation } from "@/hooks/use-conversations";
-import { useConversationId } from "@/hooks";
+import { useConversationId } from "@/hooks/use-conversation-id";
 import { useChatInput } from "@/features/chat/hooks/use-chat-input";
 import { ErrorBoundary } from "@/components/errors/error-boundary";
 

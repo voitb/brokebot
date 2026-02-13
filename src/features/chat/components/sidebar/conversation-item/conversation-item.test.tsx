@@ -21,7 +21,7 @@ vi.mock("@/app/providers/conversations-provider", () => ({
   }),
 }));
 
-vi.mock("@/hooks", () => ({
+vi.mock("@/hooks/use-conversation-id", () => ({
   useConversationId: () => undefined,
 }));
 

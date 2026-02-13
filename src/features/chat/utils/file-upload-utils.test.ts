@@ -11,7 +11,7 @@ describe("validateFile", () => {
   it("accepts valid files under size limit", () => {
     const file = createMockFile("test.txt", "Hello world");
 
-    expect(validateFile(file, defaultOptions)).toEqual({ valid: true });
+    expect(validateFile(file, defaultOptions)).toBeNull();
   });
 
   it("rejects files larger than 10MB", () => {
@@ -19,8 +19,8 @@ describe("validateFile", () => {
 
     const result = validateFile(file, defaultOptions);
 
-    expect(result.valid).toBe(false);
-    expect(result.error).toContain("too large");
+    expect(result).not.toBeNull();
+    expect(result).toContain("too large");
   });
 
   it("rejects images when model does not support them", () => {
@@ -28,8 +28,8 @@ describe("validateFile", () => {
 
     const result = validateFile(file, { supportsImages: false, modelName: "GPT-3.5" });
 
-    expect(result.valid).toBe(false);
-    expect(result.error).toContain("vision models");
+    expect(result).not.toBeNull();
+    expect(result).toContain("vision models");
   });
 });
 

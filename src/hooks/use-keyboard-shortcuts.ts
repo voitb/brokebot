@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useConversationId } from '@/hooks';
+import { useConversationId } from '@/hooks/use-conversation-id';
 
 interface UseKeyboardShortcutsProps {
   onToggleSidebar?: () => void;

@@ -37,11 +37,7 @@ export function MessageBubble({
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} group`}>
       {!isUser && (
-        <MessageAvatar
-          isUser={false}
-          isGenerating={isAiGenerating}
-          position="left"
-        />
+        <MessageAvatar isUser={false} position="left" />
       )}
 
       <div className={`max-w-xl overflow-hidden ${isUser ? "ml-auto" : ""}`}>
@@ -78,7 +74,7 @@ export function MessageBubble({
       </div>
 
       {isUser && (
-        <MessageAvatar isUser={true} isGenerating={false} position="right" />
+        <MessageAvatar isUser={true} position="right" />
       )}
     </div>
   );

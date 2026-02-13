@@ -11,7 +11,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <HelmetProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider>
           <TooltipProvider>
             <WebLLMProvider>
               <ModelProvider>
