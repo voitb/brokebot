@@ -12,7 +12,7 @@ interface MessageContentProps {
 
 function UserMessageContent({ content }: { content: string }) {
   return (
-    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
       {content}
     </p>
   );
@@ -28,7 +28,7 @@ function AiMessageContent({
   isGenerating = false
 }: AiMessageContentProps) {
   return (
-    <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert">
+    <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert break-words">
       <ReactMarkdown components={MARKDOWN_COMPONENTS}>
         {content}
       </ReactMarkdown>

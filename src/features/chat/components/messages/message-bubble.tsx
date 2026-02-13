@@ -44,7 +44,7 @@ export function MessageBubble({
         />
       )}
 
-      <div className={`max-w-xl ${isUser ? "ml-auto" : ""}`}>
+      <div className={`max-w-xl overflow-hidden ${isUser ? "ml-auto" : ""}`}>
         {!isUser && parsedMessage.thinking && (
           <ThinkingSection thinking={parsedMessage.thinking} />
         )}
