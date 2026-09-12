@@ -48,7 +48,7 @@
     "react-dom": "^19.2.3",
     "react-helmet-async": "^2.0.5",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.6.2",
+    "react-router-dom": "^7.18.3",
     "react-syntax-highlighter": "^15.6.1",
     "rehype-sanitize": "^6.0.0",
     "sonner": "^2.0.5",
