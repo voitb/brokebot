@@ -1,4 +1,5 @@
-import { Save, Trash2, Edit, X } from "lucide-react";
+import { Save, Trash2, Edit, X, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { useApiKeyManager } from "./use-api-key-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ export function ApiKeySection({ provider }: ApiKeySectionProps) {
     cancelEditing,
   } = useApiKeyManager(provider);
 
+  const [isRevealed, setIsRevealed] = useState(false);
+
   const details = providerDetails[provider];
 
   return (
@@ -37,7 +40,8 @@ export function ApiKeySection({ provider }: ApiKeySectionProps) {
       <div className="flex gap-2">
         <Input
           id={`api-key-${provider}`}
-          type={isEditing || !hasStoredKey ? "text" : "password"}
+          type={isRevealed ? "text" : "password"}
+          autoComplete="off"
           placeholder={
             hasStoredKey
               ? "API key configured"
@@ -48,9 +52,19 @@ export function ApiKeySection({ provider }: ApiKeySectionProps) {
           className="flex-1"
           disabled={!isEditing && hasStoredKey}
         />
-        {hasStoredKey ? (
-          isEditing ? (
-            <>
+        {(isEditing || !hasStoredKey) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsRevealed((prev) => !prev)}
+            aria-label={isRevealed ? "Hide API key" : "Show API key"}
+            className="flex items-center gap-1"
+          >
+            {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </Button>
+        )}
+        {hasStoredKey && isEditing && (
+          <>
               <Button
                 variant="default"
                 size="sm"
@@ -69,13 +83,17 @@ export function ApiKeySection({ provider }: ApiKeySectionProps) {
                 <X className="w-4 h-4" />
                 Cancel
               </Button>
-            </>
-          ) : (
-            <>
+          </>
+        )}
+        {hasStoredKey && !isEditing && (
+          <>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={startEditing}
+                onClick={() => {
+                  setIsRevealed(false);
+                  startEditing();
+                }}
                 className="flex items-center gap-1"
               >
                 <Edit className="w-4 h-4" />
@@ -90,9 +108,9 @@ export function ApiKeySection({ provider }: ApiKeySectionProps) {
                 <Trash2 className="w-4 h-4" />
                 Remove
               </Button>
-            </>
-          )
-        ) : (
+          </>
+        )}
+        {!hasStoredKey && (
           <Button
             variant="default"
             size="sm"

@@ -1,22 +1,24 @@
 import type { ReactNode } from "react";
 import { useConversationId } from "@/hooks/use-conversation-id";
 import { useChatGuard } from "@/features/chat/hooks/use-chat-guard";
+import { ActiveConversationContext } from "@/features/chat/hooks/use-active-conversation";
+import { RouteLoadingFallback } from "@/components/ui/route-loading-fallback";
 
 interface ChatGuardProps {
   children: ReactNode;
-  fallback?: ReactNode;
 }
 
-export function ChatGuard({
-  children,
-  fallback = null,
-}: ChatGuardProps) {
+export function ChatGuard({ children }: ChatGuardProps) {
   const conversationId = useConversationId();
-  const { isChecking } = useChatGuard({ conversationId });
+  const { isChecking, conversation, messages } = useChatGuard({ conversationId });
 
   if (isChecking) {
-    return <>{fallback}</>;
+    return <RouteLoadingFallback />;
   }
 
-  return <>{children}</>;
-};
+  return (
+    <ActiveConversationContext.Provider value={{ conversation, messages }}>
+      {children}
+    </ActiveConversationContext.Provider>
+  );
+}

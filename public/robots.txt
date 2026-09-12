@@ -1,10 +1,8 @@
 # Allow all user agents
 User-agent: *
 
-# Allow access to the main pages and shared content
+# Allow access to the main pages
 Allow: /$
-Allow: /c/
-Allow: /share/
 Allow: /terms
 
 # Disallow access to authentication and settings pages

@@ -20,13 +20,28 @@ export function ModelCard({
   isFree,
   isEnabled,
 }: ModelCardProps) {
+  const handleSelect = () => {
+    if (isEnabled) onSelect(model);
+  };
+
   return (
     <Card
+      role="button"
+      tabIndex={isEnabled ? 0 : -1}
+      aria-label={model.name}
+      aria-pressed={isSelected}
+      aria-disabled={!isEnabled}
       className={`gap-2 py-3 transition-colors flex flex-col h-full ${isEnabled
         ? "cursor-pointer hover:bg-accent"
         : "opacity-50 cursor-not-allowed"
         } ${isSelected ? "ring-2 ring-primary" : ""}`}
-      onClick={() => isEnabled && onSelect(model)}
+      onClick={handleSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleSelect();
+        }
+      }}
     >
       <CardHeader>
         <CardTitle className="text-sm flex items-start justify-between gap-2">

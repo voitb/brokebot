@@ -26,8 +26,8 @@ const features: Feature[] = [
   },
   {
     icon: Shield,
-    title: "Free & 100% Private",
-    description: "Completely free with local models. All data stays on your device.",
+    title: "Free & Private by Default",
+    description: "Completely free with local models. Local models keep your data on your device.",
   },
   {
     icon: Cpu,

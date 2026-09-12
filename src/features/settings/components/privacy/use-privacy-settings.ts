@@ -1,54 +1,61 @@
 import { useState, useRef, type ChangeEvent, type RefObject } from "react";
 import { useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { useDataManagement } from "@/hooks/use-data-management";
 import { useConversationBackup } from "@/hooks/use-conversation-backup";
-import { ConversationSchema } from "@/lib/schemas/conversation-schema";
+import {
+  parseConversationBackup,
+  type ConversationBackup,
+} from "@/lib/schemas/conversation-backup-schema";
 import { toast } from "sonner";
-import type { UserConfig } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export interface UsePrivacySettingsReturn {
-  config: UserConfig;
+  hasApiKey: boolean;
   hasConversations: boolean;
+  hasDocuments: boolean;
+  hasFolders: boolean;
   showClearDataDialog: boolean;
-  showResetSettingsDialog: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
   handleClearAllDataConfirm: () => Promise<void>;
-  handleResetSettingsConfirm: () => Promise<void>;
   handleExportConversations: () => Promise<void>;
   handleImportClick: () => void;
   handleFileImport: (event: ChangeEvent<HTMLInputElement>) => Promise<void>;
   setShowClearDataDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowResetSettingsDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function usePrivacySettings(hasConversations = false): UsePrivacySettingsReturn {
-  const { config, resetConfig } = useUserConfig();
+export function usePrivacySettings(): UsePrivacySettingsReturn {
+  const { config } = useUserConfig();
   const { clearAllData } = useDataManagement();
   const { exportConversations, importConversations } = useConversationBackup();
+
+  const conversationCount = useLiveQuery(() => db.conversations.count(), []);
+  const documentCount = useLiveQuery(() => db.documents.count(), []);
+  const folderCount = useLiveQuery(() => db.folders.count(), []);
 
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
-  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false);
 
   const handleClearAllDataConfirm = async () => {
-    await clearAllData();
+    try {
+      await clearAllData();
+    } catch {
+      return;
+    }
     toast.success("All data cleared successfully");
     setShowClearDataDialog(false);
     navigate("/");
   };
 
-  const handleResetSettingsConfirm = async () => {
-    await resetConfig();
-    toast.success("Settings reset to defaults");
-    setShowResetSettingsDialog(false);
-  };
-
   const handleExportConversations = async () => {
-    await exportConversations();
+    try {
+      await exportConversations();
+    } catch {
+      return;
+    }
     toast.success("Conversations exported successfully");
   };
 
@@ -62,45 +69,62 @@ export function usePrivacySettings(hasConversations = false): UsePrivacySettings
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== "application/json") {
+    if (file.type !== "application/json" && !file.name.endsWith(".json")) {
       toast.error("Please select a valid JSON file");
       return;
     }
 
     try {
-      const text = await file.text();
-      const result = z.array(ConversationSchema).safeParse(JSON.parse(text));
+      let backup: ConversationBackup;
 
-      if (!result.success) {
-        toast.error("Invalid conversation file format");
+      try {
+        const text = await file.text();
+        const parsed = parseConversationBackup(JSON.parse(text));
+
+        if (!parsed.success) {
+          toast.error("Invalid conversation file format");
+          return;
+        }
+
+        backup = parsed.backup;
+      } catch {
+        toast.error(
+          "Failed to import conversations. Please check the file format."
+        );
         return;
       }
 
-      const count = await importConversations(result.data);
-      toast.success(`Successfully imported ${count} conversation(s)`);
-    } catch {
-      toast.error(
-        "Failed to import conversations. Please check the file format."
-      );
-    }
+      let count: number;
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      try {
+        count = (await importConversations(backup)).conversations.length;
+      } catch {
+        return;
+      }
+
+      if (count > 0) {
+        toast.success(`Successfully imported ${count} conversation(s)`);
+      } else {
+        toast.info("No new conversations to import.");
+      }
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   return {
-    config,
-    hasConversations,
+    hasApiKey: !!config.openrouterApiKey,
+    hasConversations: (conversationCount ?? 0) > 0,
+    hasDocuments: (documentCount ?? 0) > 0,
+    hasFolders: (folderCount ?? 0) > 0,
     showClearDataDialog,
-    showResetSettingsDialog,
     fileInputRef,
     handleClearAllDataConfirm,
-    handleResetSettingsConfirm,
     handleExportConversations,
     handleImportClick,
     handleFileImport,
     setShowClearDataDialog,
-    setShowResetSettingsDialog,
   };
 }

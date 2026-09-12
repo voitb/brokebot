@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 
 interface TruncatedTextProps {
     children: ReactNode;
-    maxLines?: number;
+    maxLines?: 1 | 2 | 3 | 4 | 5 | 6;
     tooltipContent?: ReactNode;
     classNames?: {
         base?: string;
@@ -17,7 +17,7 @@ interface TruncatedTextProps {
     as?: "span" | "p" | "div";
 }
 
-const LINE_CLAMP_CLASS: Record<number, string> = {
+const LINE_CLAMP_CLASS: Record<NonNullable<TruncatedTextProps["maxLines"]>, string> = {
     1: "line-clamp-1",
     2: "line-clamp-2",
     3: "line-clamp-3",
@@ -33,8 +33,7 @@ export function TruncatedText({
     classNames,
     as: Component = "span",
 }: TruncatedTextProps) {
-    const textRef = useRef<HTMLElement>(null);
-    const isCheckingRef = useRef(false);
+    const textRef = useRef<HTMLElement | null>(null);
     const [isTruncated, setIsTruncated] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
 
@@ -43,9 +42,6 @@ export function TruncatedText({
         if (!el) return;
 
         const check = () => {
-            if (isCheckingRef.current) return;
-            isCheckingRef.current = true;
-
             if (maxLines === 1) {
                 setIsTruncated(el.scrollWidth > el.clientWidth);
             } else {
@@ -57,8 +53,6 @@ export function TruncatedText({
                 el.style.webkitLineClamp = "";
                 setIsTruncated(fullHeight > clampedHeight);
             }
-
-            isCheckingRef.current = false;
         };
 
         check();
@@ -70,7 +64,9 @@ export function TruncatedText({
 
     const textElement = (
         <Component
-            ref={textRef as React.RefObject<HTMLSpanElement & HTMLParagraphElement & HTMLDivElement>}
+            ref={(node: HTMLElement | null) => {
+                textRef.current = node;
+            }}
             className={cn(
                 maxLines === 1 ? "truncate block" : LINE_CLAMP_CLASS[maxLines],
                 classNames?.base,

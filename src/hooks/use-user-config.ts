@@ -6,18 +6,16 @@ import { toast } from "sonner";
 
 export interface UseUserConfigReturn {
   config: UserConfig;
+  isLoading: boolean;
   updateConfig: (updates: Partial<Omit<UserConfig, "id" | "createdAt" | "updatedAt">>) => Promise<void>;
   resetConfig: () => Promise<void>;
 }
 
 export function useUserConfig(): UseUserConfigReturn {
-  const rawConfig = useLiveQuery(
-    () => db.userConfig.get("user_config"),
-    [],
-    DEFAULT_USER_CONFIG
-  );
+  const rawConfig = useLiveQuery(() => db.userConfig.get("user_config"), []);
 
   const [config, setConfig] = useState<UserConfig>(DEFAULT_USER_CONFIG);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +34,7 @@ export function useUserConfig(): UseUserConfigReturn {
 
         if (!cancelled) {
           setConfig(decryptedConfig);
+          setIsLoading(false);
         }
       }
     };
@@ -60,8 +59,9 @@ export function useUserConfig(): UseUserConfigReturn {
         ...encryptedUpdates,
         updatedAt: new Date(),
       });
-    } catch {
+    } catch (error) {
       toast.error("Failed to save settings.");
+      throw error;
     }
   };
 
@@ -73,13 +73,15 @@ export function useUserConfig(): UseUserConfigReturn {
         updatedAt: new Date(),
       };
       await db.userConfig.put(newConfig);
-    } catch {
-      // Reset failure is non-critical
+    } catch (error) {
+      toast.error("Failed to reset settings.");
+      throw error;
     }
   };
 
   return {
     config,
+    isLoading,
     updateConfig,
     resetConfig,
   };

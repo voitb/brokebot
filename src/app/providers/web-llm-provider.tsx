@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import type { WebWorkerMLCEngine } from "@mlc-ai/web-llm";
@@ -21,9 +22,11 @@ interface EngineState {
   selectedModel: ModelInfo | null;
   availableModels: ModelInfo[];
   isLoadingModels: boolean;
-  setSelectedModel: (model: ModelInfo) => void;
+  setSelectedModel: (model: ModelInfo) => Promise<void>;
   loadModel: (modelId: string) => Promise<void>;
   loadAvailableModels: () => Promise<ModelInfo[]>;
+  loadDefaultModel: () => Promise<void>;
+  unloadEngine: () => Promise<void>;
 }
 
 export const WebLLMContext = createContext<EngineState | undefined>(undefined);
@@ -49,6 +52,9 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     status: "Ready",
   });
 
+  const loadControllerRef = useRef<AbortController | null>(null);
+  const initControllerRef = useRef<AbortController | null>(null);
+
   // Load available models lazily when needed
   const ensureModelsLoaded = async (): Promise<ModelInfo[]> => {
     if (availableModels.length > 0) {
@@ -66,10 +72,15 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
   };
 
   const loadModel = async (modelId: string) => {
+    loadControllerRef.current?.abort();
+    const controller = new AbortController();
+    loadControllerRef.current = controller;
+
     try {
       if (engineState.engine) {
         await engineState.engine.unload();
       }
+      if (controller.signal.aborted) return;
 
       setEngineState((prev) => ({
         ...prev,
@@ -81,20 +92,23 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
 
       // Dynamic import: WebLLM (5.5MB) only loads when user selects a local model
       const { CreateWebWorkerMLCEngine } = await import("@mlc-ai/web-llm");
+      if (controller.signal.aborted) return;
 
       setEngineState((prev) => ({
         ...prev,
         status: "Loading model...",
       }));
 
+      const worker = new Worker(
+        new URL("@/features/chat/api/webllm/worker.ts", import.meta.url),
+        { type: "module" }
+      );
       const newEngine = await CreateWebWorkerMLCEngine(
-        new Worker(
-          new URL("@/features/chat/api/webllm/worker.ts", import.meta.url),
-          { type: "module" }
-        ),
+        worker,
         modelId,
         {
           initProgressCallback: (report) => {
+            if (controller.signal.aborted) return;
             setEngineState((prev) => ({
               ...prev,
               progress: report.progress,
@@ -103,6 +117,11 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
           },
         }
       );
+      if (controller.signal.aborted) {
+        await newEngine.unload();
+        worker.terminate();
+        return;
+      }
 
       setEngineState({
         engine: newEngine,
@@ -111,6 +130,8 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
         status: "Ready",
       });
     } catch (error) {
+      if (controller.signal.aborted) return;
+
       if (error instanceof Error && (error.message.includes("WebGPU") || error.message.includes("Web-GPU"))) {
         toast.error(
           "WebGPU is required for local models to run in this browser.",
@@ -123,7 +144,12 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
             duration: 10000,
           }
         );
+      } else {
+        toast.error("Failed to load the local model.", {
+          description: error instanceof Error ? error.message : String(error),
+        });
       }
+
       setEngineState((prev) => ({
         ...prev,
         isLoading: false,
@@ -132,53 +158,91 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     }
   };
 
+  const unloadEngine = async () => {
+    loadControllerRef.current?.abort();
+    initControllerRef.current?.abort();
+    const { engine } = engineState;
+    setSelectedModelState(null);
+    setEngineState({
+      engine: null,
+      isLoading: false,
+      progress: 0,
+      status: "Ready",
+    });
+    await engine?.unload();
+  };
+
   const setSelectedModel = async (model: ModelInfo) => {
     setSelectedModelState(model);
     await loadModel(model.id);
   };
 
+  const loadDefaultModel = async () => {
+    const controller = new AbortController();
+    initControllerRef.current = controller;
+
+    const models = await ensureModelsLoaded();
+    if (controller.signal.aborted) return;
+
+    const defaultModel =
+      models.find((m) => m.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC") ??
+      models.find((m) => m.category === "light" && m.modelType === "LLM");
+    if (!defaultModel) return;
+
+    setSelectedModelState(defaultModel);
+    if (controller.signal.aborted) return;
+    await loadModel(defaultModel.id);
+  };
+
   // Restore saved local model, or auto-load default on first visit
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    initControllerRef.current = controller;
 
     const initFromStorage = async () => {
-      const stored = localStorage.getItem("unifiedModel");
+      try {
+        const stored = localStorage.getItem("unifiedModel");
 
-      if (!stored) {
-        // No saved model — auto-load default local model
-        const models = await ensureModelsLoaded();
-        if (cancelled) return;
-        const defaultModel =
-          models.find((m) => m.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC") ??
-          models.find((m) => m.category === "light" && m.modelType === "LLM");
-        if (defaultModel) {
-          setSelectedModelState(defaultModel);
-          if (cancelled) return;
-          await loadModel(defaultModel.id);
+        if (!stored) {
+          // No saved model — auto-load default local model
+          await loadDefaultModel();
+          return;
         }
-        return;
-      }
 
-      const result = UnifiedModelSchema.safeParse((() => {
-        try { return JSON.parse(stored); } catch { return null; }
-      })());
-      if (!result.success) return;
-
-      const parsed = result.data;
-      if (parsed.type === "local") {
-        const models = await ensureModelsLoaded();
-        if (cancelled) return;
-        const found = models.find((m) => m.id === parsed.localModel.id);
-        if (found) {
-          setSelectedModelState(found);
-          if (cancelled) return;
-          await loadModel(found.id);
+        let storedModel: unknown;
+        try {
+          storedModel = JSON.parse(stored);
+        } catch {
+          return;
         }
+
+        const result = UnifiedModelSchema.safeParse(storedModel);
+        if (!result.success) return;
+
+        const parsed = result.data;
+        if (parsed.type === "local") {
+          const models = await ensureModelsLoaded();
+          if (controller.signal.aborted) return;
+          const found = models.find((m) => m.id === parsed.localModel.id);
+          if (found) {
+            setSelectedModelState(found);
+            if (controller.signal.aborted) return;
+            await loadModel(found.id);
+          }
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        toast.error("Failed to initialize local models.", {
+          description: error instanceof Error ? error.message : String(error),
+        });
       }
     };
 
     initFromStorage();
-    return () => { cancelled = true; };
+    return () => {
+      initControllerRef.current?.abort();
+      loadControllerRef.current?.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Run once on mount; functions are stable
   }, []);
 
@@ -190,6 +254,8 @@ export const WebLLMProvider = ({ children }: WebLLMProviderProps) => {
     setSelectedModel,
     loadModel,
     loadAvailableModels: ensureModelsLoaded,
+    loadDefaultModel,
+    unloadEngine,
   };
 
   return (

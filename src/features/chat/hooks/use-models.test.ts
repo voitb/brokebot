@@ -5,6 +5,26 @@ import { setupFetchMock } from "@/testing/mocks/modules";
 
 const { mockFetch } = setupFetchMock();
 
+function createApiModel(
+  overrides: Partial<{
+    id: string;
+    name: string;
+    description: string;
+    context_length: number;
+    pricing: { prompt: string; completion: string };
+  }> = {}
+) {
+  return {
+    id: "openai/gpt-4o-mini",
+    name: "GPT-4o Mini",
+    description: "A small model",
+    context_length: 128000,
+    pricing: { prompt: "0.00015", completion: "0.0006" },
+    architecture: { modality: "text->text" },
+    ...overrides,
+  };
+}
+
 describe("useModels", () => {
   beforeEach(() => {
     mockFetch.mockClear();
@@ -56,6 +76,76 @@ describe("useModels", () => {
 
     expect(result.current.models[0].contextLength).toBe(0);
     expect(result.current.models[1].contextLength).toBe(0);
+  });
+
+  it("maps a valid catalog payload and ignores unknown wire fields", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: [createApiModel()], extra: "ignored" }),
+    });
+
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.models).toEqual([
+      {
+        id: "openai/gpt-4o-mini",
+        name: "GPT-4o Mini",
+        description: "A small model",
+        contextLength: 128000,
+        pricing: { prompt: "0.00015", completion: "0.0006" },
+        provider: "openai",
+        isFree: false,
+        category: "reasoning",
+      },
+    ]);
+  });
+
+  it("skips a model entry that violates the schema and maps the rest", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [
+          createApiModel(),
+          { ...createApiModel({ id: "broken/model" }), pricing: { prompt: 0.5, completion: "0.001" } },
+        ],
+      }),
+    });
+
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.models.map((model) => model.id)).toEqual(["openai/gpt-4o-mini"]);
+  });
+
+  it("reports an error when every model entry violates the schema", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: [
+          { ...createApiModel(), pricing: { prompt: 0.5, completion: "0.001" } },
+          { ...createApiModel({ id: "other/model" }), pricing: { prompt: "0.1", completion: 2 } },
+        ],
+      }),
+    });
+
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error?.message).toContain("Unexpected response format");
+    expect(result.current.models).toEqual([]);
+  });
+
+  it("reports no error for an empty catalog", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ data: [] }) });
+
+    const { result } = renderHook(() => useModels({ apiKey: "test-key" }));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.models).toEqual([]);
   });
 
   it("handles API error response", async () => {

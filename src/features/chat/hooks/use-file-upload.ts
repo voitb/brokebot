@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useDocuments } from "@/features/documents/hooks/use-documents";
+import type { Document } from "@/lib/db";
 import {
   processFile as processFileUtil,
   validateFile,
@@ -10,31 +10,28 @@ import {
 export type { AttachedFile };
 
 interface UseFileUploadProps {
-  supportsImages: boolean;
   selectedModelName: string;
+  persistToLibrary?: (file: File) => Promise<Document | null>;
 }
 
 interface UseFileUploadReturn {
   attachedFiles: AttachedFile[];
   clearFiles: () => void;
-  replaceFiles: (files: AttachedFile[]) => void;
   handleFilesSelected: (files: FileList) => Promise<AttachedFile[]>;
   removeFile: (fileId: string) => void;
-  processFile: (file: File) => Promise<AttachedFile>;
 }
 
 export function useFileUpload({
-  supportsImages,
   selectedModelName,
+  persistToLibrary,
 }: UseFileUploadProps): UseFileUploadReturn {
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
-  const { uploadDocument } = useDocuments();
 
   const handleFilesSelected = async (files: FileList): Promise<AttachedFile[]> => {
     const validFiles: File[] = [];
 
     for (const file of Array.from(files)) {
-      const error = validateFile(file, { supportsImages, modelName: selectedModelName });
+      const error = validateFile(file, { modelName: selectedModelName });
       if (error) {
         toast.error(error);
         continue;
@@ -42,9 +39,19 @@ export function useFileUpload({
       validFiles.push(file);
     }
 
-    const processedFiles = await Promise.all(
-      validFiles.map((file) => processFileUtil(file, uploadDocument))
+    const results = await Promise.allSettled(
+      validFiles.map((file) => processFileUtil(file, persistToLibrary))
     );
+
+    const processedFiles: AttachedFile[] = [];
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        toast.error(`Failed to read ${validFiles[index].name}`);
+        return;
+      }
+      processedFiles.push(result.value);
+    });
+
     setAttachedFiles((prev) => [...prev, ...processedFiles]);
     return processedFiles;
   };
@@ -55,14 +62,10 @@ export function useFileUpload({
 
   const clearFiles = () => setAttachedFiles([]);
 
-  const replaceFiles = (files: AttachedFile[]) => setAttachedFiles(files);
-
   return {
     attachedFiles,
     clearFiles,
-    replaceFiles,
     handleFilesSelected,
     removeFile,
-    processFile: (file: File) => processFileUtil(file, uploadDocument),
   };
 } 

@@ -14,18 +14,6 @@ function AllTheProviders({ children }: WrapperProps) {
     <BrowserRouter>
       <ThemeProvider>
         <TooltipProvider>
-          {children}
-        </TooltipProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  );
-}
-
-function WithConversations({ children }: WrapperProps) {
-  return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <TooltipProvider>
           <ConversationsProvider>
             {children}
           </ConversationsProvider>
@@ -40,10 +28,5 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
-const renderWithConversations = (
-  ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: WithConversations, ...options });
-
 export * from '@testing-library/react';
-export { customRender as render, renderWithConversations, WithConversations };
+export { customRender as render };

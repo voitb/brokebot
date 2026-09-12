@@ -1,5 +1,7 @@
+import { createElement } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useFolderItem } from "./use-folder-item";
 import type { Folder } from "@/lib/db";
 
@@ -27,6 +29,27 @@ const baseFolder: Folder = {
   updatedAt: new Date("2024-01-01"),
 };
 
+function FolderHarness({ folder }: { folder: Folder }) {
+  const api = useFolderItem(folder);
+
+  return createElement(
+    "div",
+    null,
+    createElement("button", { type: "button", onClick: api.handleDelete }, "Delete folder"),
+    createElement("button", { type: "button", onClick: api.handleNewChatInFolder }, "New chat in folder"),
+    api.isDeleteDialogOpen
+      ? createElement(
+          "div",
+          null,
+          createElement("button", { type: "button", onClick: api.handleDeleteConfirm }, "Confirm delete"),
+          createElement("button", { type: "button", onClick: api.closeDeleteDialog }, "Cancel delete"),
+        )
+      : null,
+    createElement("span", null, api.isRenameDialogOpen ? "rename-open" : "rename-closed"),
+    createElement("span", null, api.isDeleteDialogOpen ? "delete-open" : "delete-closed"),
+  );
+}
+
 describe("useFolderItem", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -36,50 +59,55 @@ describe("useFolderItem", () => {
     const { result } = renderHook(() => useFolderItem(baseFolder));
 
     expect(result.current.isOpen).toBe(true);
-    expect(result.current.isMenuOpen).toBe(false);
     expect(result.current.isRenameDialogOpen).toBe(false);
     expect(result.current.isDeleteDialogOpen).toBe(false);
   });
 
   describe("delete flow", () => {
-    it("opens delete dialog, confirms deletion, and closes", () => {
+    it("opens delete dialog, confirms deletion, and closes", async () => {
+      const user = userEvent.setup();
       const folder = { ...baseFolder, id: "folder-123" };
-      const { result } = renderHook(() => useFolderItem(folder));
+      render(createElement(FolderHarness, { folder }));
 
-      const mockEvent = { stopPropagation: vi.fn() } as unknown as React.MouseEvent;
-      act(() => {
-        result.current.handleDelete(mockEvent);
-      });
+      await user.click(screen.getByRole("button", { name: "Delete folder" }));
 
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
-      expect(result.current.isDeleteDialogOpen).toBe(true);
-      expect(result.current.isMenuOpen).toBe(false);
+      expect(screen.getByText("delete-open")).toBeInTheDocument();
 
-      act(() => {
-        result.current.handleDeleteConfirm();
-      });
+      await user.click(screen.getByRole("button", { name: "Confirm delete" }));
 
       expect(mockDeleteFolder).toHaveBeenCalledWith("folder-123");
-      expect(result.current.isDeleteDialogOpen).toBe(false);
+      expect(screen.getByText("delete-closed")).toBeInTheDocument();
     });
 
-    it("closes delete dialog without deleting", () => {
-      const { result } = renderHook(() => useFolderItem(baseFolder));
+    it("keeps the delete dialog open when deletion fails", async () => {
+      mockDeleteFolder.mockRejectedValueOnce(new Error("db down"));
+      const user = userEvent.setup();
+      render(createElement(FolderHarness, { folder: baseFolder }));
 
-      act(() => {
-        result.current.handleDelete({ stopPropagation: vi.fn() } as unknown as React.MouseEvent);
-      });
-      act(() => {
-        result.current.closeDeleteDialog();
-      });
+      await user.click(screen.getByRole("button", { name: "Delete folder" }));
+      await user.click(screen.getByRole("button", { name: "Confirm delete" }));
 
-      expect(result.current.isDeleteDialogOpen).toBe(false);
+      expect(screen.getByText("delete-open")).toBeInTheDocument();
+    });
+
+    it("closes delete dialog without deleting", async () => {
+      const user = userEvent.setup();
+      render(createElement(FolderHarness, { folder: baseFolder }));
+
+      await user.click(screen.getByRole("button", { name: "Delete folder" }));
+
+      expect(screen.getByText("delete-open")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Cancel delete" }));
+
+      expect(screen.getByText("delete-closed")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Confirm delete" })).not.toBeInTheDocument();
       expect(mockDeleteFolder).not.toHaveBeenCalled();
     });
   });
 
   describe("rename flow", () => {
-    it("opens rename dialog and saves trimmed name", () => {
+    it("opens rename dialog and saves trimmed name", async () => {
       const folder = { ...baseFolder, id: "folder-456" };
       const { result } = renderHook(() => useFolderItem(folder));
 
@@ -87,24 +115,38 @@ describe("useFolderItem", () => {
         result.current.openRenameDialog();
       });
       expect(result.current.isRenameDialogOpen).toBe(true);
-      expect(result.current.isMenuOpen).toBe(false);
 
-      act(() => {
-        result.current.handleRename("  New Folder Name  ");
+      await act(async () => {
+        await result.current.handleRename("  New Folder Name  ");
       });
 
       expect(mockUpdateFolderName).toHaveBeenCalledWith("folder-456", "New Folder Name");
       expect(result.current.isRenameDialogOpen).toBe(false);
     });
 
-    it("does not save empty or whitespace-only names", () => {
+    it("keeps the rename dialog open when saving fails", async () => {
+      mockUpdateFolderName.mockRejectedValueOnce(new Error("db down"));
       const { result } = renderHook(() => useFolderItem(baseFolder));
 
       act(() => {
-        result.current.handleRename("");
+        result.current.openRenameDialog();
       });
-      act(() => {
-        result.current.handleRename("   ");
+
+      await act(async () => {
+        await result.current.handleRename("New Folder Name");
+      });
+
+      expect(result.current.isRenameDialogOpen).toBe(true);
+    });
+
+    it("does not save empty or whitespace-only names", async () => {
+      const { result } = renderHook(() => useFolderItem(baseFolder));
+
+      await act(async () => {
+        await result.current.handleRename("");
+      });
+      await act(async () => {
+        await result.current.handleRename("   ");
       });
 
       expect(mockUpdateFolderName).not.toHaveBeenCalled();
@@ -112,16 +154,13 @@ describe("useFolderItem", () => {
   });
 
   describe("new chat in folder", () => {
-    it("calls handleNewChat with folder id", () => {
+    it("calls handleNewChat with folder id", async () => {
+      const user = userEvent.setup();
       const folder = { ...baseFolder, id: "folder-new-chat" };
-      const { result } = renderHook(() => useFolderItem(folder));
+      render(createElement(FolderHarness, { folder }));
 
-      const mockEvent = { stopPropagation: vi.fn() } as unknown as React.MouseEvent;
-      act(() => {
-        result.current.handleNewChatInFolder(mockEvent);
-      });
+      await user.click(screen.getByRole("button", { name: "New chat in folder" }));
 
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
       expect(mockHandleNewChat).toHaveBeenCalledWith("folder-new-chat");
     });
   });

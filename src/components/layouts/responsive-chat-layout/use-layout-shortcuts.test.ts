@@ -1,13 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { useLayoutShortcuts } from "./use-layout-shortcuts";
-import { mockNavigate, mockSearchParams } from "@/testing/mocks/modules";
+import { mockNavigate, mockSearchParams, mockToast } from "@/testing/mocks/modules";
 
 const mockSetOpen = vi.fn();
+const mockSetOpenMobile = vi.fn();
 const mockHandleNewChat = vi.fn();
 const mockTogglePinConversation = vi.fn();
 
 let mockOpen = false;
+let mockOpenMobile = false;
+let mockIsMobile = false;
 let mockConversationId: string | undefined = undefined;
 
 vi.mock("@/components/ui/sidebar", async () => {
@@ -16,6 +19,9 @@ vi.mock("@/components/ui/sidebar", async () => {
     useSidebar: () => createMockSidebarHook({
       open: mockOpen,
       setOpen: mockSetOpen,
+      openMobile: mockOpenMobile,
+      setOpenMobile: mockSetOpenMobile,
+      isMobile: mockIsMobile,
     }),
   };
 });
@@ -40,8 +46,10 @@ vi.mock("@/app/providers/conversations-provider", async () => {
   };
 });
 
-function pressKey(key: string): void {
-  document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+function pressKey(key: string, options: KeyboardEventInit = {}): void {
+  document.dispatchEvent(
+    new KeyboardEvent("keydown", { key, bubbles: true, ...options })
+  );
 }
 
 function pressSequence(first: string, second: string): void {
@@ -55,7 +63,10 @@ describe("useLayoutShortcuts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockOpen = false;
+    mockOpenMobile = false;
+    mockIsMobile = false;
     mockConversationId = undefined;
+    mockTogglePinConversation.mockResolvedValue(undefined);
     dispatchSpy = vi.spyOn(document, "dispatchEvent");
   });
 
@@ -64,11 +75,21 @@ describe("useLayoutShortcuts", () => {
     dispatchSpy.mockRestore();
   });
 
-  it("g+s toggles sidebar state", () => {
+  it("g+s toggles the desktop sidebar above the mobile breakpoint", () => {
     mockOpen = false;
     renderHook(() => useLayoutShortcuts());
     pressSequence("g", "s");
     expect(mockSetOpen).toHaveBeenCalledWith(true);
+    expect(mockSetOpenMobile).not.toHaveBeenCalled();
+  });
+
+  it("g+s toggles the mobile sidebar below the breakpoint", () => {
+    mockIsMobile = true;
+    mockOpenMobile = false;
+    renderHook(() => useLayoutShortcuts());
+    pressSequence("g", "s");
+    expect(mockSetOpenMobile).toHaveBeenCalledWith(true);
+    expect(mockSetOpen).not.toHaveBeenCalled();
   });
 
   it("g+n creates new chat", () => {
@@ -98,11 +119,15 @@ describe("useLayoutShortcuts", () => {
     expect(deleteEvent).toBeUndefined();
   });
 
-  it("g+p toggles pin with active conversation", () => {
+  it("g+p toggles pin with active conversation", async () => {
     mockConversationId = "conv-123";
     renderHook(() => useLayoutShortcuts());
     pressSequence("g", "p");
     expect(mockTogglePinConversation).toHaveBeenCalledWith("conv-123");
+    expect(mockToast.success).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockToast.success).toHaveBeenCalledWith("Conversation pin status updated.");
+    });
   });
 
   it("g+d dispatches delete event with conversation id", () => {
@@ -120,7 +145,7 @@ describe("useLayoutShortcuts", () => {
 
   it("? toggles shortcuts modal", () => {
     renderHook(() => useLayoutShortcuts());
-    pressKey("?");
+    pressKey("?", { shiftKey: true });
     expect(mockNavigate).toHaveBeenCalledWith(
       { search: "?modal=shortcuts" },
       { replace: true }
@@ -130,7 +155,7 @@ describe("useLayoutShortcuts", () => {
   it("? closes shortcuts modal when already open", () => {
     mockSearchParams.set("modal", "shortcuts");
     renderHook(() => useLayoutShortcuts());
-    pressKey("?");
+    pressKey("?", { shiftKey: true });
     expect(mockNavigate).toHaveBeenCalledWith(
       { search: "" },
       { replace: true }

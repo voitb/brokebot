@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { type ModelInfo } from "@/app/providers/web-llm-provider";
+import type { ModelInfo } from "@/features/chat/api/webllm";
 
 interface DropdownLocalModelListProps {
   availableModels: ModelInfo[];
@@ -73,7 +73,6 @@ export function DropdownLocalModelList({
                 </div>
                 <div className="flex justify-between">
                   <span>Size: {model.size}</span>
-                  <span>Download: {model.downloadSize}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Requirements: {model.ramRequirement}</span>

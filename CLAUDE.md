@@ -156,3 +156,7 @@ vi.stubGlobal('localStorage', {
 4. **Implement** - Apply senior-level code quality
 5. **Review** - Check for AI slop patterns
 6. **Test** - Ensure coverage and passing tests
+
+# Scale
+`src/` contains 253 files — 252 `.ts`/`.tsx` plus one `.css` — of which 59 are colocated
+`*.test.ts(x)` files and 36 are non-test `use-*.ts` hooks. Measured 2026-09-12 with the `find` commands listed in README § Scale.

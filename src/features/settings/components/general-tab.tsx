@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,13 +12,14 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OpenRouterIcon } from "@/components/ui/provider-icons";
 import { type UserConfig } from "@/lib/db";
-import { useTheme } from "@/app/providers/theme-provider";
+import { useTheme } from "@/hooks/use-theme";
 import { ApiKeySection } from "@/features/chat/components/online-model-dialog/api-key-section";
 
 interface GeneralTabProps {
   settings: Partial<UserConfig>;
   onFieldChange: <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => void;
   onSaveChanges: () => Promise<void>;
+  isSaving: boolean;
 }
 
 const apiKeyProviders = [
@@ -32,12 +34,18 @@ const apiKeyProviders = [
 export function GeneralTab({
   settings,
   onFieldChange,
+  onSaveChanges,
+  isSaving,
 }: GeneralTabProps) {
   const { setTheme } = useTheme();
 
-  const handleThemeChange = (theme: "light" | "dark" | "system") => {
+  const handleThemeChange = async (theme: "light" | "dark" | "system") => {
     onFieldChange("theme", theme);
-    setTheme(theme);
+    try {
+      await setTheme(theme);
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -51,7 +59,7 @@ export function GeneralTab({
               id="username"
               value={settings.username || ""}
               onChange={(e) => onFieldChange("username", e.target.value)}
-              placeholder="How should the AI address you?"
+              placeholder="Your name"
             />
           </div>
         </div>
@@ -76,6 +84,11 @@ export function GeneralTab({
               </SelectContent>
             </Select>
           </div>
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={onSaveChanges} disabled={isSaving}>
+            Save changes
+          </Button>
         </div>
       </section>
 

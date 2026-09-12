@@ -6,9 +6,8 @@ import type { TranscriberStatus } from "@/features/chat/hooks/use-speech-to-text
 const STATUS_TOOLTIP: Record<TranscriberStatus, string> = {
   recording: "Stop recording",
   processing: "Processing audio...",
-  loading: "Loading model...",
+  pending: "Starting microphone...",
   ready: "Start voice input",
-  uninitialized: "Start voice input",
   error: "Start voice input",
 };
 
@@ -22,9 +21,8 @@ interface IconConfig {
 const STATUS_ICON: Record<TranscriberStatus, IconConfig> = {
   recording: { type: "mic-off", className: "h-4 w-4 text-destructive" },
   processing: { type: "loader", className: "h-4 w-4 animate-spin" },
-  loading: { type: "loader", className: "h-4 w-4 animate-spin" },
+  pending: { type: "loader", className: "h-4 w-4 animate-spin" },
   ready: { type: "mic", className: "h-4 w-4" },
-  uninitialized: { type: "mic", className: "h-4 w-4" },
   error: { type: "mic", className: "h-4 w-4" },
 };
 
@@ -47,7 +45,7 @@ export function SpeechToTextButton({
 }: SpeechToTextButtonProps) {
   const iconConfig = STATUS_ICON[status];
   const IconComponent = ICON_COMPONENTS[iconConfig.type];
-  const isDisabled = disabled || status === "processing" || status === "loading";
+  const isDisabled = disabled || status === "processing" || status === "pending";
 
   return (
     <Tooltip>
@@ -59,6 +57,7 @@ export function SpeechToTextButton({
             variant="ghost"
             onClick={onClick}
             disabled={isDisabled}
+            aria-label="Voice input"
             className="h-8 w-8 p-0"
           >
             <IconComponent className={iconConfig.className} />

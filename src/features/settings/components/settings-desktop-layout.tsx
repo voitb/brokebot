@@ -36,7 +36,7 @@ export function SettingsDesktopLayout({
   const activeTabLabel = tabs.find((tab) => tab.id === activeTab)?.label ?? activeTab;
 
   return (
-    <SidebarProvider className="items-start h-full min-h-0 hidden md:flex">
+    <SidebarProvider className="items-start h-full min-h-0 flex">
       <Sidebar collapsible="none" className="flex">
         <SidebarContent>
           <SidebarGroup>

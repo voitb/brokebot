@@ -10,6 +10,7 @@ export interface FolderWithConversations extends Folder {
 interface UseConversationListReturn {
   searchTerm: string;
   isSearching: boolean;
+  isLoading: boolean;
   pinnedConversations: Conversation[];
   foldersWithConversations: FolderWithConversations[];
   unfoldedConversations: Conversation[];
@@ -18,18 +19,10 @@ interface UseConversationListReturn {
 }
 
 function processConversationData(
-  conversations: Conversation[] | undefined,
-  folders: Folder[] | undefined,
+  conversations: Conversation[],
+  folders: Folder[],
   searchTerm: string
 ) {
-  if (!conversations || !folders) {
-    return {
-      pinned: [] as Conversation[],
-      foldersWithConversations: [] as FolderWithConversations[],
-      unfolded: [] as Conversation[],
-    };
-  }
-
   const term = searchTerm.toLowerCase().trim();
 
   const filteredConversations = term
@@ -115,7 +108,8 @@ function processConversationData(
 
 export function useConversationList(): UseConversationListReturn {
   const navigate = useNavigate();
-  const { conversations, folders, createEmptyConversation } = useConversations();
+  const { conversations, folders, isLoading, createEmptyConversation } =
+    useConversations();
   const [searchTerm, setSearchTerm] = useState("");
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -126,18 +120,23 @@ export function useConversationList(): UseConversationListReturn {
   );
 
   const handleNewChat = async (folderId?: string) => {
-    const conversationId = await createEmptyConversation(
-      "New Conversation",
-      folderId
-    );
-    if (conversationId) {
-      navigate(`/chat/${conversationId}`);
+    let conversationId: string;
+    try {
+      conversationId = await createEmptyConversation(
+        "New Conversation",
+        folderId
+      );
+    } catch {
+      return;
     }
+
+    navigate(`/chat/${conversationId}`);
   };
 
   return {
     searchTerm,
     isSearching: searchTerm !== deferredSearchTerm,
+    isLoading,
     setSearchTerm,
     handleNewChat,
     pinnedConversations: processedData.pinned,

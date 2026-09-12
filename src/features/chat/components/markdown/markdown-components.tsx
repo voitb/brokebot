@@ -1,14 +1,13 @@
 import type { Components } from "react-markdown";
 import { CodeBlock } from "@/features/chat/components/messages/code-block/code-block";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const createMarkdownComponents = (): Components => ({
+export const MARKDOWN_COMPONENTS: Components = {
   code: ({ className, children, ...props }) => (
     <CodeBlock className={className} {...props}>
       {children}
     </CodeBlock>
   ),
-  pre: ({ children }) => <ScrollArea className="w-full">{children}</ScrollArea>,
+  pre: ({ children }) => <>{children}</>,
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="mb-2 last:mb-0 pl-4">{children}</ul>,
   ol: ({ children }) => <ol className="mb-2 last:mb-0 pl-4">{children}</ol>,
@@ -17,4 +16,4 @@ export const createMarkdownComponents = (): Components => ({
       {children}
     </blockquote>
   ),
-});
+};

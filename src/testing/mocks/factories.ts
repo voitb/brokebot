@@ -96,7 +96,6 @@ export function createMockLocalModel() {
     size: "1B",
     description: "Fast and efficient model for quick responses",
     ramRequirement: "2GB",
-    downloadSize: "~750MB",
     performance: "Fast",
     category: "light" as const,
     modelType: "LLM" as const,
@@ -139,13 +138,9 @@ export interface MockModelContextOverrides {
   isModelLoading?: boolean;
   isModelSwitching?: boolean;
   modelStatus?: string;
-  availableOnlineModels?: OpenRouterModel[];
-  isLoadingAvailableModels?: boolean;
-  availableModelsError?: Error | null;
   setCurrentModel?: ReturnType<typeof vi.fn>;
   streamMessage?: () => AsyncGenerator<{ content: string; isComplete: boolean }, void, unknown>;
   interruptGeneration?: ReturnType<typeof vi.fn>;
-  resetChat?: ReturnType<typeof vi.fn>;
 }
 
 export function createMockModelContext(overrides: MockModelContextOverrides = {}) {
@@ -155,15 +150,11 @@ export function createMockModelContext(overrides: MockModelContextOverrides = {}
     isModelLoading: overrides.isModelLoading ?? false,
     isModelSwitching: overrides.isModelSwitching ?? false,
     modelStatus: overrides.modelStatus ?? "Ready",
-    availableOnlineModels: overrides.availableOnlineModels ?? ([] as OpenRouterModel[]),
-    isLoadingAvailableModels: overrides.isLoadingAvailableModels ?? false,
-    availableModelsError: overrides.availableModelsError ?? null,
     setCurrentModel: overrides.setCurrentModel ?? vi.fn(),
     streamMessage: overrides.streamMessage ?? async function* () {
       yield { content: "Test", isComplete: true };
     },
     interruptGeneration: overrides.interruptGeneration ?? vi.fn(),
-    resetChat: overrides.resetChat ?? vi.fn().mockResolvedValue(undefined),
   };
 }
 

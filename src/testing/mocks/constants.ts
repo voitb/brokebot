@@ -12,7 +12,6 @@ export const MOCK_LOCAL_MODEL = {
   size: "1B",
   description: "Test model for unit tests",
   ramRequirement: "1GB",
-  downloadSize: "~500MB",
   performance: "Fast",
   category: "light" as const,
   modelType: "LLM" as const,

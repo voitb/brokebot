@@ -1,28 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useFileUpload, type AttachedFile } from "./use-file-upload";
-import { mockToast, createMockFile, createMockFileList } from "@/testing/mocks/modules";
+import { useFileUpload } from "./use-file-upload";
+import type { Document } from "@/lib/db";
+import {
+  mockToast,
+  createMockFile,
+  createMockFileList,
+  createMockDocument,
+} from "@/testing/mocks/modules";
 
-const mockUploadDocument = vi.fn();
-
-vi.mock("@/features/documents/hooks/use-documents", async () => {
-  const { createMockDocumentsHook } = await import("@/testing/mocks/hooks");
-  return {
-    useDocuments: () => createMockDocumentsHook({ uploadDocument: mockUploadDocument }),
-  };
-});
-
-function renderFileUpload(supportsImages = true) {
-  return renderHook(() => useFileUpload({ supportsImages, selectedModelName: "GPT-4" }));
+function renderFileUpload(persistToLibrary?: (file: File) => Promise<Document | null>) {
+  return renderHook(() =>
+    useFileUpload({ selectedModelName: "GPT-4", persistToLibrary })
+  );
 }
 
 describe("useFileUpload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUploadDocument.mockResolvedValue({ id: 1, filename: "test.txt" });
   });
 
-  it("adds files to state and uploads text files", async () => {
+  it("attaches text files without writing to the document library", async () => {
     const { result } = renderFileUpload();
 
     await act(async () => {
@@ -32,11 +30,69 @@ describe("useFileUpload", () => {
     });
 
     expect(result.current.attachedFiles).toHaveLength(1);
-    expect(mockUploadDocument).toHaveBeenCalledTimes(1);
+    expect(result.current.attachedFiles[0].content).toBe("content");
   });
 
-  it("rejects images when not supported", async () => {
-    const { result } = renderFileUpload(false);
+  it("persists to the library only when a callback is passed", async () => {
+    const persistToLibrary = vi.fn(async () => createMockDocument());
+    const { result } = renderFileUpload(persistToLibrary);
+    const file = createMockFile("test.txt", "content");
+
+    await act(async () => {
+      await result.current.handleFilesSelected(createMockFileList([file]));
+    });
+
+    expect(persistToLibrary).toHaveBeenCalledTimes(1);
+    expect(persistToLibrary).toHaveBeenCalledWith(file);
+
+    const { result: librarylessUpload } = renderFileUpload();
+
+    await act(async () => {
+      await librarylessUpload.current.handleFilesSelected(
+        createMockFileList([createMockFile("test.txt", "content")])
+      );
+    });
+
+    expect(persistToLibrary).toHaveBeenCalledTimes(1);
+  });
+
+  it("appends on a second selection instead of replacing", async () => {
+    const { result } = renderFileUpload();
+
+    await act(async () => {
+      await result.current.handleFilesSelected(
+        createMockFileList([createMockFile("first.txt", "one")])
+      );
+    });
+
+    await act(async () => {
+      await result.current.handleFilesSelected(
+        createMockFileList([createMockFile("second.txt", "two")])
+      );
+    });
+
+    expect(result.current.attachedFiles).toHaveLength(2);
+    expect(result.current.attachedFiles.map((attached) => attached.file.name)).toEqual([
+      "first.txt",
+      "second.txt",
+    ]);
+  });
+
+  it("rejects unsupported file types", async () => {
+    const { result } = renderFileUpload();
+
+    await act(async () => {
+      await result.current.handleFilesSelected(
+        createMockFileList([createMockFile("paper.pdf", "%PDF", "application/pdf")])
+      );
+    });
+
+    expect(result.current.attachedFiles).toHaveLength(0);
+    expect(mockToast.error).toHaveBeenCalled();
+  });
+
+  it("rejects images", async () => {
+    const { result } = renderFileUpload();
 
     await act(async () => {
       await result.current.handleFilesSelected(
@@ -45,7 +101,7 @@ describe("useFileUpload", () => {
     });
 
     expect(result.current.attachedFiles).toHaveLength(0);
-    expect(mockToast.error).toHaveBeenCalled();
+    expect(mockToast.error).toHaveBeenCalledWith(expect.stringContaining("not supported"));
   });
 
   it("enforces file size limit", async () => {
@@ -61,7 +117,20 @@ describe("useFileUpload", () => {
     expect(mockToast.error).toHaveBeenCalled();
   });
 
-  it("removes, clears, and replaces files", async () => {
+  it("does not attach a file whose read fails", async () => {
+    const { result } = renderFileUpload();
+    const file = createMockFile("broken.txt", "content");
+    vi.spyOn(file, "text").mockRejectedValue(new Error("read failed"));
+
+    await act(async () => {
+      await result.current.handleFilesSelected(createMockFileList([file]));
+    });
+
+    expect(result.current.attachedFiles).toHaveLength(0);
+    expect(mockToast.error).toHaveBeenCalledWith("Failed to read broken.txt");
+  });
+
+  it("removes and clears files", async () => {
     const { result } = renderFileUpload();
 
     await act(async () => {
@@ -77,16 +146,6 @@ describe("useFileUpload", () => {
     const fileId = result.current.attachedFiles[0].id;
     act(() => result.current.removeFile(fileId));
     expect(result.current.attachedFiles).toHaveLength(1);
-
-    const newFile: AttachedFile = {
-      id: "new-id",
-      file: createMockFile("new.txt", "content"),
-      type: "text",
-      content: "content",
-    };
-    act(() => result.current.replaceFiles([newFile]));
-    expect(result.current.attachedFiles).toHaveLength(1);
-    expect(result.current.attachedFiles[0].id).toBe("new-id");
 
     act(() => result.current.clearFiles());
     expect(result.current.attachedFiles).toHaveLength(0);

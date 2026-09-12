@@ -30,6 +30,18 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
+function getStoredSidebarState(defaultOpen: boolean): boolean {
+  const entry = document.cookie.split("; ").find((part) =>
+    part.startsWith(`${SIDEBAR_COOKIE_NAME}=`),
+  );
+
+  if (!entry) {
+    return defaultOpen;
+  }
+
+  return entry.slice(SIDEBAR_COOKIE_NAME.length + 1) === "true";
+}
+
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
   open: boolean;
@@ -67,10 +79,12 @@ function SidebarProvider({
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [_open, _setOpen] = React.useState(() => getStoredSidebarState(defaultOpen));
   const open = openProp ?? _open;
+  const openRef = React.useRef(open);
+  openRef.current = open;
   const setOpen = (value: boolean | ((value: boolean) => boolean)) => {
-    const openState = typeof value === "function" ? value(open) : value;
+    const openState = typeof value === "function" ? value(openRef.current) : value;
     if (setOpenProp) {
       setOpenProp(openState);
     } else {

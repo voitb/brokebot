@@ -3,65 +3,62 @@ import type { Document } from "@/lib/db";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
+const TEXT_FILE_EXTENSIONS = [".txt", ".md"];
+
+// one attachment must not be able to fill the whole request body
+const ATTACHMENT_CHAR_BUDGET = 200_000;
+
 export interface AttachedFile {
   id: string;
   file: File;
-  preview?: string;
-  type: "image" | "text" | "other";
+  type: "text" | "other";
   document?: Document;
-  content?: string;
+  content: string;
 }
 
-function readFileAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target?.result as string);
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsText(file);
-  });
+function isTextFile(file: File): boolean {
+  return (
+    file.type === "text/plain" ||
+    TEXT_FILE_EXTENSIONS.some((extension) => file.name.toLowerCase().endsWith(extension))
+  );
 }
 
 export async function processFile(
   file: File,
-  uploadDocument: (file: File) => Promise<Document | null>
+  persistToLibrary?: (file: File) => Promise<Document | null>
 ): Promise<AttachedFile> {
   const id = crypto.randomUUID();
   let type: AttachedFile["type"] = "other";
-  let preview: string | undefined;
-  let content: string | undefined;
+  let content = "";
   let document: Document | undefined;
 
-  if (file.type.startsWith("image/")) {
-    type = "image";
-    preview = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = () => resolve(undefined);
-      reader.readAsDataURL(file);
-    });
-  } else if (
-    file.type === "text/plain" ||
-    file.name.endsWith(".txt") ||
-    file.name.endsWith(".md")
-  ) {
+  if (isTextFile(file)) {
     type = "text";
+    const text = await file.text();
 
-    try {
-      content = await readFileAsText(file);
-      const savedDocument = await uploadDocument(file);
-      if (savedDocument) {
-        document = savedDocument;
+    if (text.length > ATTACHMENT_CHAR_BUDGET) {
+      toast.info(`${file.name} was truncated to the first ${ATTACHMENT_CHAR_BUDGET} characters.`);
+      content = `${text.slice(0, ATTACHMENT_CHAR_BUDGET)}\n[truncated: only the first ${ATTACHMENT_CHAR_BUDGET} characters of ${file.name} were sent]`;
+    } else {
+      content = text;
+    }
+
+    if (persistToLibrary) {
+      try {
+        const savedDocument = await persistToLibrary(file);
+        if (savedDocument) {
+          document = savedDocument;
+        }
+      } catch {
+        toast.error("Failed to process text file");
       }
-    } catch {
-      toast.error("Failed to process text file");
     }
   }
 
-  return { id, file, preview, type, content, document };
+  return { id, file, type, content, document };
 }
 
 export interface ValidateFileOptions {
-  supportsImages: boolean;
   modelName: string;
 }
 
@@ -70,8 +67,12 @@ export function validateFile(file: File, options: ValidateFileOptions): string |
     return `File ${file.name} is too large. Maximum size is 10MB.`;
   }
 
-  if (file.type.startsWith("image/") && !options.supportsImages) {
-    return `Images are only supported by vision models. Current model: ${options.modelName}`;
+  if (file.type.startsWith("image/")) {
+    return `Image attachments are not supported yet. ${options.modelName} receives text only.`;
+  }
+
+  if (!isTextFile(file)) {
+    return `File ${file.name} is not a supported type. Attach a text file (.txt, .md).`;
   }
 
   return null;

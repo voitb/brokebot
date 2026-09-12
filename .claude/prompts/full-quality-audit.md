@@ -14,7 +14,7 @@ Brokebot is a privacy-first ChatGPT alternative built with:
 
 Architecture: Feature-based (`src/features/{chat,settings,documents,onboarding}`), Context API for state, no Redux/Zustand, Dexie for persistence, encryption for API keys.
 
-Scale: ~259 files, 64 custom hooks, 48 test files, 45+ components.
+Scale: 239 files under `src/` (238 `.ts`/`.tsx` + 1 `.css`), 52 colocated `*.test.ts(x)` files, 32 `use-*.ts` hooks, 110 non-test `.tsx` files. Measured 2026-09-10.
 
 ## Audit Instructions
 

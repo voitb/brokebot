@@ -15,8 +15,12 @@ export function MessageAvatar({
     : "bg-muted text-muted-foreground text-xs";
 
   return (
-    <Avatar className={className}>
-      <AvatarFallback className={fallbackClassName}>
+    <Avatar
+      className={className}
+      role="img"
+      aria-label={isUser ? "User" : "Assistant"}
+    >
+      <AvatarFallback className={fallbackClassName} aria-hidden="true">
         {isUser ? <>💸</> : <>🤖</>}
       </AvatarFallback>
     </Avatar>

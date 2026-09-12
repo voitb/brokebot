@@ -4,15 +4,10 @@ import { vi } from "vitest";
 export { MOCK_LOCAL_MODEL, MOCK_AVAILABLE_MODELS, MOCK_ONLINE_MODEL } from "./constants";
 
 // Re-export file helpers for DRY test utilities
-export { createMockFile, createMockFileList, createMockDataTransfer, createMockDragEvent } from "./file-helpers";
+export { createMockFile, createMockFileList, createMockDragEvent } from "./file-helpers";
 
 // Re-export DOM helpers for element mocking
-export {
-  createMockTextarea,
-  createMockViewport,
-  createMockMutationObserver,
-  createMockMatchMedia,
-} from "./dom-helpers";
+export { createMockMatchMedia } from "./dom-helpers";
 
 // Re-export media mocks for audio/video testing
 export { MockMediaRecorder, MockMediaStream, setupMediaMocks } from "./media";
@@ -25,7 +20,7 @@ export {
   createMinimalModelProvider,
 } from "./providers";
 
-// Re-export hook mocks for hook testing
+// Re-export hook factories as renderHook seeds only
 export {
   createMockUserConfigHook,
   createMockConversationsHook,
@@ -84,6 +79,14 @@ export const mockNavigate = vi.fn();
 export const mockSearchParams = new URLSearchParams();
 
 /**
+ * Centralized mock for the react-router-dom useSearchParams setter
+ * Automatically mocked globally in setup.ts - use this to assert URL updates
+ */
+export const mockSetSearchParams = vi.fn<
+  (next: URLSearchParams | ((prev: URLSearchParams) => URLSearchParams)) => void
+>();
+
+/**
  * Setup a mock fetch for API tests
  * Returns the mock function and a restore helper
  */
@@ -106,6 +109,7 @@ export function resetMocks() {
   mockToast.dismiss.mockClear();
   mockToast.info.mockClear();
   mockNavigate.mockClear();
+  mockSetSearchParams.mockClear();
   // Clear URLSearchParams by deleting all keys
   for (const key of [...mockSearchParams.keys()]) {
     mockSearchParams.delete(key);

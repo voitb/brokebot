@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { db, type Conversation, type Message } from "@/lib/db";
+import { db, type Conversation, type Document, type Message } from "@/lib/db";
 import { toast } from "sonner";
+import type { ConversationBackup } from "@/lib/schemas/conversation-backup-schema";
+
+export interface ImportedBackupIds {
+  conversations: string[];
+  folders: string[];
+  documents: Document["id"][];
+}
 
 export interface UseConversationBackupReturn {
   exportConversations: () => Promise<void>;
-  importConversations: (conversations: Conversation[]) => Promise<number>;
+  importConversations: (backup: ConversationBackup) => Promise<ImportedBackupIds>;
   isExporting: boolean;
   isImporting: boolean;
 }
@@ -16,8 +23,13 @@ export function useConversationBackup(): UseConversationBackupReturn {
   const exportConversations = async () => {
     setIsExporting(true);
     try {
-      const conversations = await db.conversations.toArray();
-      const dataStr = JSON.stringify(conversations, null, 2);
+      const [conversations, folders, documents] = await Promise.all([
+        db.conversations.toArray(),
+        db.folders.toArray(),
+        db.documents.toArray(),
+      ]);
+      const backup: ConversationBackup = { conversations, folders, documents };
+      const dataStr = JSON.stringify(backup, null, 2);
       const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
       const exportFileDefaultName = `brokebot-conversations-${new Date().toISOString().split("T")[0]}.json`;
@@ -26,21 +38,38 @@ export function useConversationBackup(): UseConversationBackupReturn {
       linkElement.setAttribute("href", dataUri);
       linkElement.setAttribute("download", exportFileDefaultName);
       linkElement.click();
-    } catch {
+    } catch (error) {
       toast.error("Failed to export conversations.");
+      throw error;
     } finally {
       setIsExporting(false);
     }
   };
 
-  const importConversations = async (conversations: Conversation[]): Promise<number> => {
+  const importConversations = async (
+    backup: ConversationBackup
+  ): Promise<ImportedBackupIds> => {
     setIsImporting(true);
-    let importedCount = 0;
+    const imported: ImportedBackupIds = { conversations: [], folders: [], documents: [] };
 
     try {
-      for (const conversation of conversations) {
-        const existing = await db.conversations.get(conversation.id);
-        if (!existing) {
+      await db.transaction("rw", db.conversations, db.folders, db.documents, async () => {
+        for (const folder of backup.folders) {
+          const existing = await db.folders.get(folder.id);
+          if (existing) continue;
+
+          await db.folders.add({
+            ...folder,
+            createdAt: new Date(folder.createdAt),
+            updatedAt: new Date(folder.updatedAt),
+          });
+          imported.folders.push(folder.id);
+        }
+
+        for (const conversation of backup.conversations) {
+          const existing = await db.conversations.get(conversation.id);
+          if (existing) continue;
+
           const normalizedConversation: Conversation = {
             ...conversation,
             createdAt: new Date(conversation.createdAt),
@@ -52,16 +81,39 @@ export function useConversationBackup(): UseConversationBackupReturn {
           };
 
           await db.conversations.add(normalizedConversation);
-          importedCount++;
+          imported.conversations.push(normalizedConversation.id);
         }
-      }
-    } catch {
+
+        for (const document of backup.documents) {
+          const normalizedDocument = {
+            filename: document.filename,
+            content: document.content,
+            fileType: document.fileType,
+            createdAt: new Date(document.createdAt),
+          };
+
+          const existing = await db.documents
+            .where("filename")
+            .equals(normalizedDocument.filename)
+            .filter(
+              (stored) =>
+                stored.createdAt.getTime() === normalizedDocument.createdAt.getTime() &&
+                stored.content === normalizedDocument.content
+            )
+            .first();
+          if (existing) continue;
+
+          imported.documents.push(await db.documents.add(normalizedDocument));
+        }
+      });
+    } catch (error) {
       toast.error("Failed to import conversations.");
+      throw error;
     } finally {
       setIsImporting(false);
     }
 
-    return importedCount;
+    return imported;
   };
 
   return {

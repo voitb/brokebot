@@ -80,6 +80,39 @@ describe("useApiKeyManager", () => {
 
       expect(mockUpdateConfig).not.toHaveBeenCalled();
     });
+
+    it("leaves field state unchanged when the write fails", async () => {
+      mockConfig = {};
+      const { result } = renderHook(() => useApiKeyManager("openrouter"));
+
+      act(() => {
+        result.current.setApiKey("new-api-key-1234567890");
+      });
+
+      mockUpdateConfig.mockRejectedValueOnce(new Error("db write failed"));
+
+      await act(async () => {
+        await expect(result.current.handleApiKeySave()).rejects.toThrow();
+      });
+
+      expect(result.current.apiKey).toBe("new-api-key-1234567890");
+      expect(result.current.isEditing).toBe(false);
+    });
+
+    it("rejects a masked placeholder", async () => {
+      mockConfig = { openrouterApiKey: "sk-or-v1-abcdefgh12345678" };
+      const { result } = renderHook(() => useApiKeyManager("openrouter"));
+
+      await waitFor(() => {
+        expect(result.current.apiKey).toBe("sk-o••••••••5678");
+      });
+
+      await act(async () => {
+        await result.current.handleApiKeySave();
+      });
+
+      expect(mockUpdateConfig).not.toHaveBeenCalled();
+    });
   });
 
   describe("handleApiKeyRemove", () => {
@@ -98,6 +131,24 @@ describe("useApiKeyManager", () => {
       expect(mockUpdateConfig).toHaveBeenCalledWith({ openrouterApiKey: "" });
       expect(result.current.hasStoredKey).toBe(false);
       expect(result.current.apiKey).toBe("");
+      expect(result.current.isEditing).toBe(false);
+    });
+
+    it("keeps the stored key when the removal write fails", async () => {
+      mockConfig = { openrouterApiKey: "existing-key-1234" };
+      const { result } = renderHook(() => useApiKeyManager("openrouter"));
+
+      await waitFor(() => {
+        expect(result.current.hasStoredKey).toBe(true);
+      });
+
+      mockUpdateConfig.mockRejectedValueOnce(new Error("db write failed"));
+
+      await act(async () => {
+        await expect(result.current.handleApiKeyRemove()).rejects.toThrow();
+      });
+
+      expect(result.current.apiKey).toBe("exis••••••••1234");
       expect(result.current.isEditing).toBe(false);
     });
   });

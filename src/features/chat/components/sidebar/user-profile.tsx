@@ -1,7 +1,6 @@
 import { Link, useNavigate, createSearchParams } from "react-router-dom";
 import {
   ChevronsUpDown,
-  LifeBuoy,
   FileText,
   Keyboard,
   Settings,
@@ -111,10 +110,6 @@ export function UserProfile() {
                 <FileText />
                 Terms of Service
               </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <LifeBuoy />
-              Support
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

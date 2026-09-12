@@ -60,6 +60,25 @@ describe("useSettings", () => {
       expect(result.current.settings.theme).toBe("dark");
     });
 
+    it("keeps an unsaved edit when the stored config changes", async () => {
+      mockConfig = { theme: "light", username: "test" };
+
+      const { result, rerender } = renderHook(() => useSettings());
+
+      await waitFor(() => {
+        expect(result.current.settings.username).toBe("test");
+      });
+
+      act(() => {
+        result.current.handleFieldChange("username", "typed but unsaved");
+      });
+
+      mockConfig = { theme: "dark", username: "test" };
+      rerender();
+
+      expect(result.current.settings.username).toBe("typed but unsaved");
+      expect(result.current.settings.theme).toBe("dark");
+    });
   });
 
   describe("handleSaveChanges", () => {
@@ -85,7 +104,7 @@ describe("useSettings", () => {
       expect(result.current.isSaving).toBe(false);
     });
 
-    it("shows error toast on save failure", async () => {
+    it("does not toast success when save fails", async () => {
       mockConfig = { theme: "light" };
       mockUpdateConfig.mockRejectedValue(new Error("Save failed"));
 
@@ -99,7 +118,8 @@ describe("useSettings", () => {
         await result.current.handleSaveChanges();
       });
 
-      expect(mockToast.error).toHaveBeenCalledWith("Failed to save settings.");
+      expect(mockToast.success).not.toHaveBeenCalled();
+      expect(mockToast.error).not.toHaveBeenCalled();
       expect(result.current.isSaving).toBe(false);
     });
   });

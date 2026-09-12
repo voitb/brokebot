@@ -30,16 +30,14 @@ export function OnlineModelDialog({
   const {
     storedKeys,
     hasOpenRouterKey,
-    hasPaidKey,
     handleModelSelect,
-    handleOpenChange,
     freeModels,
     paidModels,
     isLoading,
     error,
   } = useOnlineModels(onModelSelect, onOpenChange);
 
-  const renderContent = () => {
+  const renderModels = (models: OpenRouterModel[], isFree: boolean) => {
     if (isLoading) {
       return (
         <div className="flex items-center justify-center h-full p-8">
@@ -65,60 +63,57 @@ export function OnlineModelDialog({
       );
     }
 
+    if (!isFree && models.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+            <Key className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No Paid Models Available</h3>
+          <p className="text-muted-foreground max-w-md">
+            No paid models are currently available. Please check back later.
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <ScrollArea className="h-[calc(80vh-98px)]">
-        <TabsContent value="api-keys">
-          <ApiKeysTab />
-        </TabsContent>
-        <TabsContent value="free" className="space-y-4 p-4">
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              These models are free but may learn from conversations.
-            </AlertDescription>
-          </Alert>
-          <ModelList
-            models={freeModels}
-            selectedModel={selectedModel}
-            onSelect={handleModelSelect}
-            isFree
-            availableKeys={storedKeys}
-          />
-        </TabsContent>
-        <TabsContent value="paid" className="space-y-4 p-4">
-          <Alert>
-            <Key className="h-4 w-4" />
-            <AlertDescription>
-              Premium models with enhanced capabilities. Your data remains
-              private.
-            </AlertDescription>
-          </Alert>
-          {paidModels.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                <Key className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No Paid Models Available</h3>
-              <p className="text-muted-foreground max-w-md">
-                No paid models are currently available. Please check back later.
-              </p>
-            </div>
-          ) : (
-            <ModelList
-              models={paidModels}
-              selectedModel={selectedModel}
-              onSelect={handleModelSelect}
-              isFree={false}
-              availableKeys={storedKeys}
-            />
-          )}
-        </TabsContent>
-      </ScrollArea>
-    )
-  }
+      <ModelList
+        models={models}
+        selectedModel={selectedModel}
+        onSelect={handleModelSelect}
+        isFree={isFree}
+        availableKeys={storedKeys}
+      />
+    );
+  };
+
+  const renderContent = () => (
+    <ScrollArea className="h-[calc(80vh-98px)]">
+      <TabsContent value="api-keys">
+        <ApiKeysTab />
+      </TabsContent>
+      <TabsContent value="free" className="space-y-4 p-4">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            These models are free but may learn from conversations.
+          </AlertDescription>
+        </Alert>
+        {renderModels(freeModels, true)}
+      </TabsContent>
+      <TabsContent value="paid" className="space-y-4 p-4">
+        <Alert>
+          <Key className="h-4 w-4" />
+          <AlertDescription>Your data remains private.</AlertDescription>
+        </Alert>
+        {renderModels(paidModels, false)}
+      </TabsContent>
+    </ScrollArea>
+  );
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="block max-w-4xl h-[80vh] overflow-hidden p-0">
         <DialogHeader className="px-4 pt-4 pb-0">
           <DialogTitle className="flex items-center gap-2">
@@ -147,7 +142,7 @@ export function OnlineModelDialog({
             <TabsTrigger
               value="paid"
               className="flex items-center gap-2"
-              disabled={!hasPaidKey}
+              disabled={!hasOpenRouterKey}
             >
               <Key className="w-4 h-4" />
               Paid Models

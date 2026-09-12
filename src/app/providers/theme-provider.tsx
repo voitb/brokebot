@@ -2,24 +2,19 @@ import {
   createContext,
   useContext,
   useLayoutEffect,
-  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { DEFAULT_USER_CONFIG } from "@/lib/db";
+import { useUserConfig } from "@/hooks/use-user-config";
 
-type Theme = "dark" | "light" | "system";
+type Theme = typeof DEFAULT_USER_CONFIG.theme;
 
-const STORAGE_KEY = "vite-ui-theme";
-const DEFAULT_THEME: Theme = "dark";
-
-const VALID_THEMES: readonly Theme[] = ["dark", "light", "system"];
-function isValidTheme(value: string | null): value is Theme {
-  return value !== null && (VALID_THEMES as readonly string[]).includes(value);
-}
+const THEME_KEY = "theme-class";
 
 type ThemeProviderContextType = {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme) => Promise<void>;
 };
 
 export const ThemeProviderContext = createContext<
@@ -43,10 +38,8 @@ function getServerSnapshot(): "dark" | "light" {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return isValidTheme(stored) ? stored : DEFAULT_THEME;
-  });
+  const { config, isLoading, updateConfig } = useUserConfig();
+  const theme: Theme = config.theme;
 
   const systemTheme = useSyncExternalStore(
     subscribeToSystemTheme,
@@ -55,17 +48,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   useLayoutEffect(() => {
+    if (isLoading) return;
+
+    const resolvedTheme = theme === "system" ? systemTheme : theme;
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add(theme === "system" ? systemTheme : theme);
-  }, [theme, systemTheme]);
+    root.classList.add(resolvedTheme);
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme, systemTheme, isLoading]);
 
-  const value = {
+  const value: ThemeProviderContextType = {
     theme,
-    setTheme: (newTheme: Theme) => {
-      localStorage.setItem(STORAGE_KEY, newTheme);
-      setTheme(newTheme);
-    },
+    setTheme: (newTheme: Theme) => updateConfig({ theme: newTheme }),
   };
 
   return (

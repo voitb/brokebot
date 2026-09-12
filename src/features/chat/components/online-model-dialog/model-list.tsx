@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { filterModelsByQuery } from "@/features/chat/utils/online-model-utils";
 import { ModelCard } from "./model-card";
 
+const MAX_RENDERED_MODELS = 50;
+
 interface ApiKeys {
   openrouter?: string | null;
-  openai?: string | null;
-  google?: string | null;
-  anthropic?: string | null;
 }
 
 interface ModelListProps {
@@ -29,6 +28,7 @@ export function ModelList({
 }: ModelListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const filteredModels = filterModelsByQuery(models, searchQuery);
+  const visibleModels = filteredModels.slice(0, MAX_RENDERED_MODELS);
   const isEnabled = !!availableKeys.openrouter;
 
   return (
@@ -48,18 +48,26 @@ export function ModelList({
           No models found matching "{searchQuery}"
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {filteredModels.map((model) => (
-            <ModelCard
-              key={model.id}
-              model={model}
-              isSelected={selectedModel?.id === model.id}
-              onSelect={onSelect}
-              isFree={isFree}
-              isEnabled={isEnabled}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {visibleModels.map((model) => (
+              <ModelCard
+                key={model.id}
+                model={model}
+                isSelected={selectedModel?.id === model.id}
+                onSelect={onSelect}
+                isFree={isFree}
+                isEnabled={isEnabled}
+              />
+            ))}
+          </div>
+          {filteredModels.length > MAX_RENDERED_MODELS && (
+            <p className="text-center text-xs text-muted-foreground">
+              Showing {MAX_RENDERED_MODELS} of {filteredModels.length} models.
+              Search to narrow the list.
+            </p>
+          )}
+        </>
       )}
     </div>
   );

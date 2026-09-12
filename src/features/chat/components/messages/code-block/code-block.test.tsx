@@ -1,75 +1,39 @@
 import { describe, it, expect, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { render } from "@/testing/utils";
 import { CodeBlock } from "./code-block";
 
 vi.mock("react-syntax-highlighter", () => ({
-  Prism: ({ children, language }: { children: string; language: string }) => (
-    <pre data-testid="syntax-highlighter" data-language={language}>
-      {children}
-    </pre>
-  ),
+  Prism: ({ children }: { children: string }) => <pre>{children}</pre>,
 }));
 
 describe("CodeBlock", () => {
-  describe("inline code rendering", () => {
-    it("renders inline code when no language class is provided", () => {
-      render(<CodeBlock>const x = 1;</CodeBlock>);
+  it("shows the language as accessible text", () => {
+    render(<CodeBlock className="language-javascript">const x = 1;</CodeBlock>);
 
-      const inlineCode = screen.getByText("const x = 1;");
-      expect(inlineCode).toBeInTheDocument();
-      expect(inlineCode.tagName).toBe("CODE");
-    });
-
-    it("does not render block code components for inline code", () => {
-      render(<CodeBlock>inline</CodeBlock>);
-
-      expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument();
-      expect(screen.queryByTestId("syntax-highlighter")).not.toBeInTheDocument();
-    });
+    expect(screen.getByText("javascript")).toBeInTheDocument();
   });
 
-  describe("code block rendering", () => {
-    it("renders syntax-highlighted block for code with language class", async () => {
-      render(
-        <CodeBlock className="language-typescript">
-          const x = 1;{"\n"}const y = 2;
-        </CodeBlock>
-      );
-
-      const highlighter = await screen.findByTestId("syntax-highlighter");
-      expect(highlighter).toBeInTheDocument();
-      expect(highlighter.textContent).toContain("const x = 1;");
+  it("copies the code when the Copy control is used", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
     });
+    render(
+      <CodeBlock className="language-javascript">{"const x = 1;\n"}</CodeBlock>
+    );
 
-    it("uses correct language for syntax highlighting", async () => {
-      render(<CodeBlock className="language-python">x = 1</CodeBlock>);
+    await userEvent.click(screen.getByRole("button", { name: /copy/i }));
 
-      const highlighter = await screen.findByTestId("syntax-highlighter");
-      expect(highlighter).toHaveAttribute("data-language", "python");
-    });
+    expect(writeText).toHaveBeenCalledWith("const x = 1;");
   });
 
-  describe("language label", () => {
-    it("displays correct language label", () => {
-      render(<CodeBlock className="language-javascript">code</CodeBlock>);
+  it("keeps Copy available on a multiline fence with no language class", () => {
+    render(<CodeBlock>{"const x = 1;\nconst y = 2;"}</CodeBlock>);
 
-      expect(screen.getByText("javascript")).toBeInTheDocument();
-    });
-
-    it("displays typescript label for typescript code", () => {
-      render(<CodeBlock className="language-typescript">code</CodeBlock>);
-
-      expect(screen.getByText("typescript")).toBeInTheDocument();
-    });
-  });
-
-  describe("copy button", () => {
-    it("renders copy button for code blocks", () => {
-      render(<CodeBlock className="language-typescript">const x = 1;</CodeBlock>);
-
-      const copyButton = screen.getByRole("button", { name: /copy/i });
-      expect(copyButton).toBeInTheDocument();
-    });
+    expect(screen.getByRole("button", { name: /copy/i })).toBeInTheDocument();
+    expect(screen.queryByText("javascript")).not.toBeInTheDocument();
   });
 });

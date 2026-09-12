@@ -1,6 +1,6 @@
 import { useNavigate, createSearchParams } from "react-router-dom";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { useTheme } from "@/app/providers/theme-provider";
+import { useTheme } from "@/hooks/use-theme";
 import { useConversationId } from "@/hooks/use-conversation-id";
 import { BreadcrumbNavigation } from "../breadcrumb-navigation";
 import { HeaderActions } from "../header-actions";
@@ -35,8 +35,20 @@ export function ChatHeader() {
     handleDeleteConfirm,
   } = useHeaderActions({ conversationId });
 
-  const handleToggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
+  const handleToggleTheme = async () => {
+    try {
+      if (theme === "system") {
+        await setTheme("light");
+        return;
+      }
+      if (theme === "light") {
+        await setTheme("dark");
+        return;
+      }
+      await setTheme("system");
+    } catch {
+      return;
+    }
   };
 
   const handleOpenSettings = () => {

@@ -105,8 +105,7 @@ describe("ModelList", () => {
     it("calls onSelect when model is clicked", async () => {
       render(<ModelList {...defaultProps} />);
 
-      const gpt4Card = screen.getByText("GPT-4").closest("[data-slot='card']");
-      await user.click(gpt4Card!);
+      await user.click(screen.getByRole("button", { name: "GPT-4" }));
 
       expect(mockOnSelect).toHaveBeenCalledWith(mockModels[0]);
     });
@@ -114,8 +113,7 @@ describe("ModelList", () => {
     it("does not call onSelect when disabled", async () => {
       render(<ModelList {...defaultProps} availableKeys={{}} />);
 
-      const gpt4Card = screen.getByText("GPT-4").closest("[data-slot='card']");
-      await user.click(gpt4Card!);
+      await user.click(screen.getByRole("button", { name: "GPT-4" }));
 
       expect(mockOnSelect).not.toHaveBeenCalled();
     });

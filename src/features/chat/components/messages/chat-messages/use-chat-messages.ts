@@ -1,8 +1,8 @@
 import type { RefObject } from "react";
-import { useConversation } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks/use-conversation-id";
+import { useActiveConversation } from "@/features/chat/hooks/use-active-conversation";
 import { useSmartAutoScroll } from "@/features/chat/hooks/use-smart-auto-scroll";
-import { useWebLLM } from "@/app/providers/web-llm-provider";
+import { useModel } from "@/hooks/use-model";
 import type { Message, Conversation } from "@/lib/db";
 import type { MessageBubbleProps } from "../message-bubble";
 
@@ -28,8 +28,8 @@ export function useChatMessages({
   onStopGeneration,
 }: UseChatMessagesProps): UseChatMessagesReturn {
   const conversationId = useConversationId();
-  const { messages, conversation } = useConversation(conversationId);
-  const { isLoading: isEngineLoading, status } = useWebLLM();
+  const { messages, conversation } = useActiveConversation();
+  const { currentModel, isModelLoading } = useModel();
   const { scrollAreaRef, showScrollButton, handleScrollToBottomClick } =
     useSmartAutoScroll({
       messageCount: messages.length,
@@ -37,7 +37,7 @@ export function useChatMessages({
       conversationId,
     });
 
-  const isModelReady = status === "Ready" && !isEngineLoading;
+  const isModelReady = !!currentModel && !isModelLoading;
 
   const getMessageBubbleProps = (
     message: Message,
@@ -51,8 +51,9 @@ export function useChatMessages({
       message,
       isGenerating,
       isLastMessage,
+      isModelReady,
       onRegenerate:
-        isLastAssistantMessage && isModelReady ? onRegenerate : undefined,
+        isLastAssistantMessage && !isGenerating ? onRegenerate : undefined,
       onStopGeneration:
         isLastAssistantMessage && isGenerating ? onStopGeneration : undefined,
     };

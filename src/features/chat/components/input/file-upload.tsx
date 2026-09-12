@@ -1,34 +1,25 @@
 import { useRef, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, FileText } from "lucide-react";
-import { useFileUpload, type AttachedFile } from "@/features/chat/hooks/use-file-upload";
+import type { AttachedFile } from "@/features/chat/hooks/use-file-upload";
 
 interface FileUploadProps {
-  supportsImages: boolean;
-  selectedModelName: string;
   disabled?: boolean;
-  onFilesChanged?: (files: AttachedFile[]) => void;
+  onFilesSelected: (files: FileList) => Promise<AttachedFile[]>;
 }
 
 export function FileUpload({
-  supportsImages,
-  selectedModelName,
   disabled = false,
-  onFilesChanged,
+  onFilesSelected,
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { handleFilesSelected } = useFileUpload({
-    supportsImages,
-    selectedModelName,
-  });
 
   const handleFileInputChange = async (
     e: ChangeEvent<HTMLInputElement>
   ) => {
     const files = e.target.files;
     if (files) {
-      const processed = await handleFilesSelected(files);
-      onFilesChanged?.(processed);
+      await onFilesSelected(files);
     }
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -41,7 +32,7 @@ export function FileUpload({
         ref={fileInputRef}
         type="file"
         multiple
-        accept={supportsImages ? "image/*,.txt,.md" : ".txt,.md"}
+        accept=".txt,.md"
         onChange={handleFileInputChange}
         className="hidden"
       />
@@ -71,13 +62,7 @@ function FilePreviewItem({
 }: FilePreviewItemProps) {
   return (
   <div className="relative bg-muted rounded-lg p-2 flex items-center gap-2 max-w-xs">
-    {file.type === "image" && file.preview ? (
-      <img
-        src={file.preview}
-        alt={file.file.name}
-        className="w-12 h-12 object-cover rounded"
-      />
-    ) : file.type === "text" ? (
+    {file.type === "text" ? (
       <FileText className="w-8 h-8 text-blue-500" />
     ) : (
       <Paperclip className="w-8 h-8 text-gray-500" />

@@ -7,14 +7,12 @@ export interface UseDocumentsReturn {
   isLoading: boolean;
   uploadDocument: (file: File) => Promise<Document | null>;
   deleteDocument: (id: number) => Promise<void>;
-  getDocumentContent: (id: number) => Promise<string | null>;
 }
 
 export function useDocuments(): UseDocumentsReturn {
 
   const documents = useLiveQuery(
     () => db.documents.orderBy("createdAt").reverse().toArray(),
-    [],
     []
   );
 
@@ -33,12 +31,7 @@ export function useDocuments(): UseDocumentsReturn {
         return null;
       }
 
-      const content = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target?.result as string);
-        reader.onerror = () => reject(new Error("Failed to read file"));
-        reader.readAsText(file);
-      });
+      const content = await file.text();
       if (!content.trim()) {
         toast.error("File appears to be empty.");
         return null;
@@ -69,30 +62,20 @@ export function useDocuments(): UseDocumentsReturn {
     }
   };
 
-  const getDocumentContent = async (id: number): Promise<string | null> => {
-    try {
-      const document = await db.documents.get(id);
-      return document?.content || null;
-    } catch {
-      return null;
-    }
-  };
-
   return {
     documents: documents ?? [],
     isLoading,
     uploadDocument,
     deleteDocument,
-    getDocumentContent,
   };
 }
 
 const getFileType = (file: File): "txt" | "md" | null => {
+  if (file.name.endsWith(".md") || file.type === "text/markdown") {
+    return "md";
+  }
   if (file.type === "text/plain" || file.name.endsWith(".txt")) {
     return "txt";
-  }
-  if (file.name.endsWith(".md")) {
-    return "md";
   }
   return null;
 };

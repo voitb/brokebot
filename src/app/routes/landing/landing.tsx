@@ -11,7 +11,7 @@ export function WelcomeScreen() {
     <>
       <PageSeo
         title="Welcome to BrokeBot"
-        description="Your local, private, and free AI chat assistant. Powered by WebLLM and running 100% in your browser."
+        description="Your free, private AI chat assistant. It runs locally in your browser by default with WebLLM, and connects to OpenRouter only if you choose."
       />
       <div className="flex flex-col h-screen overflow-hidden">
         <ChatHeader />

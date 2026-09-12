@@ -29,12 +29,7 @@ function getModelStatusKey(flags: {
 }
 
 interface ModelStatusProps {
-  selectedModel: {
-    name: string;
-    modelType: string;
-    supportsImages?: boolean;
-    specialization?: string;
-  };
+  selectedModel: { specialization?: string };
   isEngineLoading: boolean;
   isModelError: boolean;
   isModelReady: boolean;
@@ -60,7 +55,9 @@ export function ModelStatus({
         <div className="flex items-center gap-1">
           {isEngineLoading && <Loader2 className="w-3 h-3 animate-spin" />}
           {isModelError && <AlertCircle className="w-3 h-3 text-destructive" />}
-          <span className={STATUS_COLORS[statusKey]}>{STATUS_TEXT[statusKey]}</span>
+          <span role="status" aria-live="polite" className={STATUS_COLORS[statusKey]}>
+            {STATUS_TEXT[statusKey]}
+          </span>
         </div>
 
         {supportsImages && isModelReady && (

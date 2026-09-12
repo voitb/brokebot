@@ -1,59 +1,45 @@
-import { useRef, useState, useEffect } from "react";
-import { useModel } from "@/app/providers/model-provider";
+import { useModel } from "@/hooks/use-model";
 import type { OpenRouterMessage } from "@/features/chat/api/openrouter";
+import { abortGeneration, endGeneration, startGeneration } from "./active-generations";
 
 export interface StreamResult {
   content: string;
-  wasAborted: boolean;
   error?: Error;
+  isTruncated?: boolean;
 }
 
 interface UseMessageStreamReturn {
-  isGenerating: boolean;
   streamResponse: (
+    conversationId: string,
     messages: OpenRouterMessage[],
     onChunk: (content: string) => void
   ) => Promise<StreamResult>;
-  stopGeneration: () => void;
+  stopGeneration: (conversationId: string) => void;
 }
 
 export function useMessageStream(): UseMessageStreamReturn {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const { streamMessage, interruptGeneration } = useModel();
 
-  const { streamMessage, interruptGeneration, resetChat } = useModel();
-
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, []);
-
-  const stopGeneration = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+  const stopGeneration = (conversationId: string) => {
+    if (abortGeneration(conversationId)) {
       interruptGeneration();
     }
-    setIsGenerating(false);
   };
 
   const streamResponse = async (
+    conversationId: string,
     messages: OpenRouterMessage[],
     onChunk: (content: string) => void
   ): Promise<StreamResult> => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-    setIsGenerating(true);
+    const controller = new AbortController();
+    startGeneration(conversationId, controller);
 
     let accumulatedContent = "";
+    let isTruncated = false;
 
     try {
-      for await (const chunk of streamMessage(
-        messages,
-        undefined,
-        abortControllerRef.current.signal
-      )) {
-        if (abortControllerRef.current?.signal.aborted) {
+      for await (const chunk of streamMessage(messages, undefined, controller.signal)) {
+        if (controller.signal.aborted) {
           break;
         }
 
@@ -69,33 +55,23 @@ export function useMessageStream(): UseMessageStreamReturn {
         onChunk(accumulatedContent);
 
         if (chunk.isComplete) {
+          isTruncated = chunk.isTruncated ?? false;
           break;
         }
       }
 
-      return {
-        content: accumulatedContent,
-        wasAborted: abortControllerRef.current.signal.aborted,
-      };
+      return { content: accumulatedContent, isTruncated };
     } catch (error) {
       return {
         content: accumulatedContent,
-        wasAborted: abortControllerRef.current?.signal.aborted ?? false,
         error: error instanceof Error ? error : new Error(String(error)),
       };
     } finally {
-      setIsGenerating(false);
-      const wasAborted = abortControllerRef.current?.signal.aborted ?? false;
-      abortControllerRef.current = null;
-
-      if (wasAborted) {
-        await resetChat();
-      }
+      endGeneration(conversationId, controller);
     }
   };
 
   return {
-    isGenerating,
     streamResponse,
     stopGeneration,
   };

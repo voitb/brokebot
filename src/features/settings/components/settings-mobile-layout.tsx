@@ -16,7 +16,7 @@ export function SettingsMobileLayout({
   children,
 }: SettingsLayoutProps) {
   return (
-    <div className="flex md:hidden flex-col h-[90vh]">
+    <div className="flex flex-col h-[90vh]">
       <div className="shrink-0 p-4 space-y-4 bg-background">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Settings</h2>
