@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    allow:
+      - dependency-name: "@mlc-ai/web-llm"
+      - dependency-name: "@huggingface/transformers"
+    labels: [dependencies, models]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
