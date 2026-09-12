@@ -1,5 +1,5 @@
 # Security contact for brokebot (https://brokebot.b4r7.dev), per RFC 9116.
-Contact: mailto:v017dev@gmail.com
+Contact: mailto:b4r7dev@gmail.com
 Expires: 2027-09-12T00:00:00.000Z
 Preferred-Languages: en, pl
 Canonical: https://brokebot.b4r7.dev/.well-known/security.txt

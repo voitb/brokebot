@@ -18,11 +18,11 @@ const structuredData = {
   "image": DEFAULT_IMAGE,
   "author": {
     "@type": "Organization",
-    "name": "voitz"
+    "name": "b4r7x"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "voitz",
+    "name": "b4r7x",
     "logo": {
       "@type": "ImageObject",
       "url": `${SITE_URL}brokebot_light_square.png`
@@ -44,7 +44,7 @@ export function Seo() {
       <title>{DEFAULT_TITLE}</title>
       <meta name="description" content={DEFAULT_DESCRIPTION} />
       <meta name="keywords" content={KEYWORDS} />
-      <meta name="author" content="voitz" />
+      <meta name="author" content="b4r7x" />
       <link rel="canonical" href={SITE_URL} />
 
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />

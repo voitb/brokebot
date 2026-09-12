@@ -4,7 +4,7 @@
   "version": "4.0.3",
   "type": "module",
   "sideEffects": false,
-  "author": "voitz <v017dev@gmail.com>",
+  "author": "b4r7x <b4r7dev@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=20.19"

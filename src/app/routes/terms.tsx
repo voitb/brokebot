@@ -294,7 +294,7 @@ export function TermsOfService() {
           </p>
           <ul className="list-disc ml-6 mb-4">
             <li>
-              <strong>Email:</strong> v017dev@gmail.com
+              <strong>Email:</strong> b4r7dev@gmail.com
             </li>
             <li>
               <strong>GitHub:</strong>{" "}
