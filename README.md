@@ -265,5 +265,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 <div align="center">
   <strong>Built with privacy first</strong>
 
-  [Star us on GitHub](https://github.com/b4r7x/brokebot) • [Try brokebot](https://brokebot.voitz.dev)
+  [Star us on GitHub](https://github.com/b4r7x/brokebot) • [Try brokebot](https://brokebot.b4r7.dev)
 </div>

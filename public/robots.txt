@@ -14,4 +14,4 @@ Disallow: /auth/callback
 Disallow: /settings
 
 # Path to the sitemap
-Sitemap: https://brokebot.voitz.dev/sitemap.xml 
+Sitemap: https://brokebot.b4r7.dev/sitemap.xml 

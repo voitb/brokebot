@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 const SITE_NAME = 'brokebot';
-const SITE_URL = 'https://brokebot.voitz.dev/';
+const SITE_URL = 'https://brokebot.b4r7.dev/';
 const DEFAULT_TITLE = 'brokebot - Your Private AI Assistant';
 const DEFAULT_DESCRIPTION = 'Run a powerful AI assistant locally in your browser by default. Free, private, works offline, and connects to OpenRouter only if you choose.';
 const DEFAULT_IMAGE = `${SITE_URL}og-image.png`;
@@ -80,7 +80,7 @@ export function Seo() {
       <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
       <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
 
-      <link rel="dns-prefetch" href="https://brokebot.voitz.dev" />
+      <link rel="dns-prefetch" href="https://brokebot.b4r7.dev" />
 
       <script type="application/ld+json">
         {JSON.stringify(structuredData, null, 2)}
