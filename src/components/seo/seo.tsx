@@ -70,8 +70,6 @@ export function Seo() {
       <meta name="twitter:description" content={DEFAULT_DESCRIPTION} />
       <meta name="twitter:image" content={DEFAULT_IMAGE} />
       <meta name="twitter:image:alt" content={DEFAULT_TITLE} />
-      <meta name="twitter:creator" content="@voitz__" />
-      <meta name="twitter:site" content="@voitz__" />
 
       <meta name="format-detection" content="telephone=no" />
       <meta name="msapplication-TileColor" content="#000000" />
@@ -116,8 +114,6 @@ export function PageSeo({ title, description }: PageSeoProps) {
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={DEFAULT_IMAGE} />
       <meta name="twitter:image:alt" content={title} />
-      <meta name="twitter:creator" content="@voitz__" />
-      <meta name="twitter:site" content="@voitz__" />
     </Helmet>
   );
 }
