@@ -1,13 +1,30 @@
 import { useKeyboardShortcuts as useAppKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useConversationList } from "@/hooks/use-conversation-list";
-import { useConversations } from "@/app/providers/conversations-provider";
+import { useConversations } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks/use-conversation-id";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
+type LayoutShortcutEvent =
+  | "app:focus-search"
+  | "conversation:delete"
+  | "conversation:rename";
+
+type LayoutShortcutArgs<K extends LayoutShortcutEvent> =
+  DocumentEventMap[K]["detail"] extends undefined
+    ? []
+    : [detail: DocumentEventMap[K]["detail"]];
+
+function dispatchLayoutShortcutEvent<K extends LayoutShortcutEvent>(
+  type: K,
+  ...[detail]: LayoutShortcutArgs<K>
+): void {
+  document.dispatchEvent(new CustomEvent(type, { detail }));
+}
+
 export function useLayoutShortcuts(): void {
-  const { open, setOpen } = useSidebar();
+  const { open, setOpen, openMobile, setOpenMobile, isMobile } = useSidebar();
   const { handleNewChat } = useConversationList();
   const { togglePinConversation } = useConversations();
   const conversationId = useConversationId();
@@ -15,20 +32,26 @@ export function useLayoutShortcuts(): void {
   const [searchParams] = useSearchParams();
 
   useAppKeyboardShortcuts({
-    onToggleSidebar: () => setOpen(!open),
+    onToggleSidebar: () => {
+      if (isMobile) {
+        setOpenMobile(!openMobile);
+      } else {
+        setOpen(!open);
+      }
+    },
     onNewChat: handleNewChat,
     onSearch: () => {
-      document.dispatchEvent(new CustomEvent("app:focus-search"));
+      dispatchLayoutShortcutEvent("app:focus-search");
     },
-    onPinChat: () => {
+    onPinChat: async () => {
       if (conversationId) {
-        togglePinConversation(conversationId);
+        await togglePinConversation(conversationId);
         toast.success("Conversation pin status updated.");
       }
     },
     onDeleteChat: () => {
       if (conversationId) {
-        document.dispatchEvent(new CustomEvent("conversation:delete", { detail: { conversationId } }));
+        dispatchLayoutShortcutEvent("conversation:delete", { conversationId });
       }
     },
     onShowShortcuts: () => {
@@ -42,7 +65,7 @@ export function useLayoutShortcuts(): void {
       }
     },
     onRenameChat: () => {
-      document.dispatchEvent(new CustomEvent("conversation:rename"));
+      dispatchLayoutShortcutEvent("conversation:rename");
     },
   });
 }

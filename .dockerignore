@@ -36,4 +36,14 @@ pnpm-debug.log*
 
 # Docker
 Dockerfile
-.dockerignore 
+.dockerignore
+
+# Agent and tooling scratch dirs
+.nuke
+.splitbrief
+.claude
+.cursor
+
+# Docs (not read by the build)
+*.md
+docs

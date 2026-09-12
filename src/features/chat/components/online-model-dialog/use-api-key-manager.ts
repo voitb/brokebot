@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useUserConfig } from "@/hooks/use-user-config";
 
@@ -22,18 +22,16 @@ export function useApiKeyManager(provider: "openrouter"): UseApiKeyManagerReturn
   const { config, updateConfig } = useUserConfig();
 
   const hasStoredKey = !!(provider === "openrouter" && config?.openrouterApiKey);
-  const maskedKey = config?.openrouterApiKey ? maskApiKey(config.openrouterApiKey) : "";
 
-  const [apiKey, setApiKey] = useState(maskedKey);
+  const [apiKey, setApiKey] = useState(
+    config?.openrouterApiKey ? maskApiKey(config.openrouterApiKey) : ""
+  );
   const [isEditing, setIsEditing] = useState(false);
-  const prevMaskedKeyRef = useRef(maskedKey);
 
-  if (prevMaskedKeyRef.current !== maskedKey) {
-    prevMaskedKeyRef.current = maskedKey;
-    if (!isEditing) {
-      setApiKey(maskedKey);
-    }
-  }
+  useEffect(() => {
+    if (isEditing) return;
+    setApiKey(config?.openrouterApiKey ? maskApiKey(config.openrouterApiKey) : "");
+  }, [config?.openrouterApiKey, isEditing]);
 
   const handleApiKeySave = async () => {
     if (!apiKey.trim() || apiKey.includes("••••")) {

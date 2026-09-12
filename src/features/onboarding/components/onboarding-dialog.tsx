@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -34,20 +34,20 @@ const OnboardingContent = () => (
                 <strong>Welcome to brokebot!</strong>
             </p>
             <p>
-                Our main goal is to provide free access to powerful AI models, while giving you full control over your privacy. This overview explains how it works.
+                Our main goal is to keep your conversations private by running a local AI model on your device by default, while offering you the choice to use powerful online models. This overview explains how it works.
             </p>
         </div>
 
         <div className="space-y-1">
             <p>
-                <strong>Free Models First, Privacy by Design</strong>
+                <strong>Local by Default, Privacy by Design</strong>
             </p>
             <p>
-                By default, you can use powerful online AI models for free. For absolute privacy, you can switch to a local model (WebLLM) at any time, which runs entirely on your device.
+                By default, a local model (WebLLM) loads automatically and runs entirely on your device. If you want more powerful models, you can opt in to free models hosted on OpenRouter at any time.
             </p>
             <ul className="list-disc space-y-1 pl-6">
                 <li>Conversations and files with local models are stored only in your browser.</li>
-                <li>Settings and API keys are always encrypted and stored locally.</li>
+                <li>Your API key is encrypted; all settings are stored locally in your browser.</li>
             </ul>
         </div>
 
@@ -65,7 +65,7 @@ const OnboardingContent = () => (
                 <strong>Local Models & Your Own API Keys</strong>
             </p>
             <p>
-                When using local models (WebLLM) or your own API key, your data is sent directly to the respective service. We do not log or store it. Your privacy is protected.
+                Local models (WebLLM) run entirely in your browser: neither your conversations nor the model weights leave your device. When you use your own API key, requests go to that provider under your own account.
             </p>
         </div>
 
@@ -74,19 +74,10 @@ const OnboardingContent = () => (
                 <strong className="text-yellow-400/90">Free Models (via OpenRouter)</strong>
             </p>
             <p>
-                To provide free access, some models are routed through a secure proxy function before reaching OpenRouter. While our proxy does not log your conversation content, be aware that third-party providers may use your prompts to improve their services. This is the trade-off for free usage.
+                Free and paid models alike are reached directly from your browser with your own OpenRouter key. Be aware that the providers behind free models may use your prompts to improve their services. This is the trade-off for free usage.
             </p>
             <p className="font-semibold">
                 By using a free model, you acknowledge and accept this condition.
-            </p>
-        </div>
-
-        <div className="space-y-1">
-            <p>
-                <strong>Your Support Matters</strong>
-            </p>
-            <p>
-                Creating an account is a great way to show your support! It signals that you find brokebot useful and motivates further development—including free conversation sync (coming soon)!
             </p>
         </div>
 
@@ -112,6 +103,26 @@ export function OnboardingDialog({
     onClose,
 }: OnboardingDialogProps) {
     const [hasReadToBottom, setHasReadToBottom] = useState(false); 
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        if (!isOpen) return;
+
+        const viewport = scrollAreaRef.current?.querySelector<HTMLDivElement>(
+            '[data-slot="scroll-area-viewport"]'
+        );
+        if (!viewport) return;
+
+        const checkIfFullyVisible = () => {
+            if (viewport.scrollHeight - viewport.clientHeight <= 20) {
+                setHasReadToBottom(true);
+            }
+        };
+
+        checkIfFullyVisible();
+        window.addEventListener("resize", checkIfFullyVisible);
+        return () => window.removeEventListener("resize", checkIfFullyVisible);
+    }, [isOpen]);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target as HTMLDivElement;
@@ -122,14 +133,21 @@ export function OnboardingDialog({
             setHasReadToBottom(true);
         }
     };
+
+    const handleOpenChange = (open: boolean) => {
+        if (!open && hasReadToBottom) {
+            onClose();
+        }
+    };
+
     return (
-        <Dialog modal={true} open={isOpen}>
+        <Dialog modal={true} open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent showCloseButton={false} className="flex flex-col gap-0 p-0 max-h-[90vh] sm:max-w-lg [&>button:last-child]:top-3.5">
                 <DialogHeader className="contents space-y-0 text-left">
                     <DialogTitle className="border-b border-border px-6 py-4 text-base">
                         Welcome to brokebot!
                     </DialogTitle>
-                    <ScrollArea type="auto" onScrollCapture={handleScroll} className="h-[calc(90vh-203px)]">
+                    <ScrollArea ref={scrollAreaRef} type="auto" onScrollCapture={handleScroll} className="h-[calc(90vh-203px)]">
                         <DialogDescription asChild>
                             <div className="px-6 py-4">
                                 <p className="mb-4 text-muted-foreground">

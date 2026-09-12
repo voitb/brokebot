@@ -1,5 +1,4 @@
 import type { Message } from "@/lib/db";
-import { useWebLLM } from "@/app/providers/web-llm-provider";
 import { parseMessage } from "@/features/chat/utils/parse-message";
 import { MessageAvatar } from "./message-avatar";
 import { ThinkingSection } from "./thinking-section";
@@ -13,6 +12,7 @@ export interface MessageBubbleProps {
   message: Message;
   isGenerating?: boolean;
   isLastMessage?: boolean;
+  isModelReady?: boolean;
   onRegenerate?: () => void;
   onStopGeneration?: () => void;
 }
@@ -21,14 +21,15 @@ export function MessageBubble({
   message,
   isGenerating = false,
   isLastMessage = false,
+  isModelReady = false,
   onRegenerate,
   onStopGeneration,
 }: MessageBubbleProps) {
   const isUser = message.role === "user";
-  const { isLoading: isEngineLoading, status } = useWebLLM();
   const isAiGenerating = !isUser && isGenerating && isLastMessage;
-  const isModelReady = status === "Ready" && !isEngineLoading;
-  const parsedMessage = parseMessage(message.content);
+  const parsedMessage = parseMessage(message.content, {
+    extractThinking: message.role === "assistant",
+  });
 
   if (isAiGenerating && !message.content.trim()) {
     return <GeneratingIndicator />;
@@ -42,7 +43,10 @@ export function MessageBubble({
 
       <div className={`max-w-xl overflow-hidden ${isUser ? "ml-auto" : ""}`}>
         {!isUser && parsedMessage.thinking && (
-          <ThinkingSection thinking={parsedMessage.thinking} />
+          <ThinkingSection
+            thinking={parsedMessage.thinking}
+            isGenerating={isAiGenerating}
+          />
         )}
 
         <MessageContent
@@ -53,8 +57,8 @@ export function MessageBubble({
 
         {isUser && parsedMessage.attachments.length > 0 && (
           <div className="mt-2 space-y-2">
-            {parsedMessage.attachments.map((att) => (
-              <AttachmentBadge key={att.name} fileName={att.name} />
+            {parsedMessage.attachments.map((att, index) => (
+              <AttachmentBadge key={`${att.name}-${index}`} fileName={att.name} />
             ))}
           </div>
         )}

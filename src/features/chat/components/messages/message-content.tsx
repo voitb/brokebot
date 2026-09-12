@@ -1,9 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import { Loader2 } from "lucide-react";
-import { createMarkdownComponents } from "@/features/chat/components/markdown/markdown-components";
-
-const MARKDOWN_COMPONENTS = createMarkdownComponents();
+import { MARKDOWN_COMPONENTS } from "@/features/chat/components/markdown/markdown-components";
 
 interface MessageContentProps {
   content: string;

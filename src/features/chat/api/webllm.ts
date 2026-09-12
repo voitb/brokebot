@@ -1,19 +1,6 @@
-export interface ModelInfo {
-  id: string;
-  name: string;
-  size: string;
-  description: string;
-  ramRequirement: string;
-  downloadSize: string;
-  performance: string;
-  category: "light" | "medium" | "large" | "heavy" | "extreme";
-  modelType: "LLM" | "VLM" | "embedding";
-  supportsImages?: boolean;
-  supportsFunctions?: boolean;
-  specialization?: string;
-  warning?: string;
-  vramRequired?: number;
-}
+import type { LocalModelInfo } from "@/lib/schemas/model-schema";
+
+export type ModelInfo = LocalModelInfo;
 
 function deriveCategory(vramMB?: number): ModelInfo["category"] {
   if (!vramMB || vramMB < 2000) return "light";
@@ -57,11 +44,10 @@ function parseModelName(modelId: string): { name: string; size: string } {
 
 function deriveModelType(
   modelId: string,
-  modelType?: unknown,
+  modelType?: string,
 ): ModelInfo["modelType"] {
-  const typeStr = String(modelType ?? "");
-  if (typeStr === "embedding") return "embedding";
-  if (typeStr === "vlm" || modelId.toLowerCase().includes("vision"))
+  if (modelType === "embedding") return "embedding";
+  if (modelType === "VLM" || modelId.toLowerCase().includes("vision"))
     return "VLM";
   return "LLM";
 }
@@ -79,11 +65,8 @@ function deriveSupportsFunctions(modelId: string): boolean {
   return lowerCaseId.includes("hermes");
 }
 
-function deriveSupportsImages(modelId: string, modelType?: unknown): boolean {
-  return (
-    String(modelType ?? "") === "vlm" ||
-    modelId.toLowerCase().includes("vision")
-  );
+function deriveSupportsImages(modelId: string, modelType?: string): boolean {
+  return modelType === "VLM" || modelId.toLowerCase().includes("vision");
 }
 
 function formatRamRequirement(vramMB?: number): string {
@@ -128,36 +111,46 @@ let modelCatalogPromise: Promise<ModelInfo[]> | null = null;
  */
 export async function loadModelCatalog(): Promise<ModelInfo[]> {
   if (!modelCatalogPromise) {
-    modelCatalogPromise = import("@mlc-ai/web-llm").then(
-      ({ prebuiltAppConfig }) =>
-        prebuiltAppConfig.model_list.map((m) => {
-          const { name, size } = parseModelName(m.model_id);
-          const category = deriveCategory(m.vram_required_MB);
-          const modelType = deriveModelType(m.model_id, m.model_type);
-          const specialization = deriveSpecialization(m.model_id);
-          const supportsImages = deriveSupportsImages(m.model_id, m.model_type);
-          const supportsFunctions = deriveSupportsFunctions(m.model_id);
+    modelCatalogPromise = import("@mlc-ai/web-llm")
+      .then(({ prebuiltAppConfig, ModelType }) =>
+        prebuiltAppConfig.model_list
+          .map((m) => {
+            const { name, size } = parseModelName(m.model_id);
+            const category = deriveCategory(m.vram_required_MB);
+            const modelTypeName =
+              m.model_type === undefined ? undefined : ModelType[m.model_type];
+            const modelType = deriveModelType(m.model_id, modelTypeName);
+            const specialization = deriveSpecialization(m.model_id);
+            const supportsImages = deriveSupportsImages(
+              m.model_id,
+              modelTypeName,
+            );
+            const supportsFunctions = deriveSupportsFunctions(m.model_id);
 
-          return {
-            id: m.model_id,
-            name,
-            size,
-            description: CUSTOM_DESCRIPTIONS[m.model_id] ?? `${name} model`,
-            ramRequirement: formatRamRequirement(m.vram_required_MB),
-            downloadSize: "See web-llm",
-            performance: derivePerformance(category),
-            category,
-            modelType,
-            vramRequired: m.vram_required_MB,
-            ...(supportsImages && { supportsImages }),
-            ...(supportsFunctions && { supportsFunctions }),
-            ...(specialization && { specialization }),
-            ...(category === "extreme" && {
-              warning: "Requires high-end hardware",
-            }),
-          };
-        }),
-    );
+            return {
+              id: m.model_id,
+              name,
+              size,
+              description: CUSTOM_DESCRIPTIONS[m.model_id] ?? `${name} model`,
+              ramRequirement: formatRamRequirement(m.vram_required_MB),
+              performance: derivePerformance(category),
+              category,
+              modelType,
+              vramRequired: m.vram_required_MB,
+              ...(supportsImages && { supportsImages }),
+              ...(supportsFunctions && { supportsFunctions }),
+              ...(specialization && { specialization }),
+              ...(category === "extreme" && {
+                warning: "Requires high-end hardware",
+              }),
+            };
+          })
+          .filter((model) => model.modelType !== "embedding"),
+      )
+      .catch((error: unknown) => {
+        modelCatalogPromise = null;
+        throw error;
+      });
   }
   return modelCatalogPromise;
 }

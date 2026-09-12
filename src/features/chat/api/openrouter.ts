@@ -9,21 +9,10 @@ export interface StreamResponse {
   content: string;
   isComplete: boolean;
   error?: string;
+  isTruncated?: boolean;
 }
 
-export interface OpenRouterModel {
-  id: string;
-  name: string;
-  description: string;
-  provider: string;
-  category: OnlineModelCategory;
-  isFree: boolean;
-  contextLength: number;
-  pricing: {
-    prompt: string;
-    completion: string;
-  };
-}
+export type { OpenRouterModel } from "@/lib/schemas/model-schema";
 
 export interface OpenRouterClient {
   streamCompletion: (
@@ -63,8 +52,8 @@ export function getCategoryFromModel(model: {
 }
 
 interface ChatCompletionChoice {
-  message?: { content: string };
   delta?: { content?: string };
+  finish_reason?: string | null;
 }
 
 interface ChatCompletionResponse {
@@ -73,6 +62,9 @@ interface ChatCompletionResponse {
 }
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+// caps the reply so a runaway model cannot burn the user's credits on one turn
+const MAX_COMPLETION_TOKENS = 4096;
 
 function validateApiKey(key: string): boolean {
   return key.startsWith("sk-or-") && key.length > 20;
@@ -113,14 +105,19 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
       const response = await fetch(OPENROUTER_API_URL, {
         method: "POST",
         headers: buildHeaders(),
-        body: JSON.stringify({ model, messages, stream: true }),
+        body: JSON.stringify({
+          model,
+          messages,
+          stream: true,
+          max_tokens: MAX_COMPLETION_TOKENS,
+        }),
         signal: options?.signal,
       });
 
       if (!response.ok) {
         const errorData: unknown = await response.json().catch(() => ({}));
         const errorMessage =
-          (errorData as Record<string, Record<string, string>>)?.error?.message ||
+          (errorData as ChatCompletionResponse).error?.message ||
           `API request failed with status ${response.status}`;
         yield { content: "", isComplete: true, error: errorMessage };
         return;
@@ -139,6 +136,7 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
       const decoder = new TextDecoder();
       let accumulatedContent = "";
       let buffer = "";
+      let finishReason: string | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -157,7 +155,12 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
 
           try {
             const parsed: unknown = JSON.parse(data);
-            const delta = (parsed as ChatCompletionResponse)?.choices?.[0]?.delta?.content;
+            const choice = (parsed as ChatCompletionResponse)?.choices?.[0];
+            const delta = choice?.delta?.content;
+
+            if (choice?.finish_reason) {
+              finishReason = choice.finish_reason;
+            }
 
             if (delta) {
               accumulatedContent += delta;
@@ -170,7 +173,11 @@ export function createOpenRouterClient(apiKey: string): OpenRouterClient {
         }
       }
 
-      yield { content: accumulatedContent, isComplete: true };
+      yield {
+        content: accumulatedContent,
+        isComplete: true,
+        isTruncated: finishReason === "length",
+      };
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         yield { content: "", isComplete: true, error: "stopped" };

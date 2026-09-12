@@ -2,7 +2,13 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 import "fake-indexeddb/auto";
-import { mockToast, mockNavigate, mockSearchParams, resetMocks } from "./mocks/modules";
+import {
+  mockToast,
+  mockNavigate,
+  mockSearchParams,
+  mockSetSearchParams,
+  resetMocks,
+} from "./mocks/modules";
 
 // localStorage mock with proper implementation
 const localStorageStore: Record<string, string> = {};
@@ -28,8 +34,8 @@ Object.defineProperty(window, "localStorage", {
   writable: true,
 });
 
-// Mock @xenova/transformers to avoid sharp native module issues
-vi.mock("@xenova/transformers", () => ({
+// Mock @huggingface/transformers to avoid sharp native module issues
+vi.mock("@huggingface/transformers", () => ({
   pipeline: vi.fn(),
   env: {
     allowLocalModels: false,
@@ -49,7 +55,7 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useSearchParams: () => [mockSearchParams],
+    useSearchParams: () => [mockSearchParams, mockSetSearchParams],
   };
 });
 

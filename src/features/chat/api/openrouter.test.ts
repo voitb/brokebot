@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createOpenRouterClient } from "./openrouter";
+import { createOpenRouterClient, type StreamResponse } from "./openrouter";
 import { setupFetchMock } from "@/testing/mocks/modules";
 
 const { mockFetch } = setupFetchMock();
@@ -87,6 +87,93 @@ describe("createOpenRouterClient", () => {
 
       const result = await stream.next();
       expect(result.value?.error).toBe("stopped");
+    });
+
+    it("falls back to the response status when the error body carries an empty message", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        json: () => Promise.resolve({ error: { message: "" } }),
+      });
+
+      const client = createOpenRouterClient(validApiKey);
+
+      const stream = client.streamCompletion("gpt-4", [
+        { role: "user", content: "Hi" },
+      ]);
+
+      const result = await stream.next();
+      expect(result.value?.error).toBe("API request failed with status 502");
+    });
+
+    it("caps the reply by sending max_tokens in the completion body", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({}),
+      });
+
+      const client = createOpenRouterClient(validApiKey);
+      await client.streamCompletion("gpt-4", [{ role: "user", content: "Hi" }]).next();
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://openrouter.ai/api/v1/chat/completions",
+        expect.objectContaining({
+          body: expect.stringContaining('"max_tokens":4096'),
+        })
+      );
+    });
+
+    it("yields Hi from a valid SSE delta chunk", async () => {
+      const encoder = new TextEncoder();
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(
+            encoder.encode(`data: {"choices":[{"delta":{"content":"Hi"}}]}\n`)
+          );
+          controller.enqueue(encoder.encode("data: [DONE]\n"));
+          controller.close();
+        },
+      });
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 200, body });
+
+      const client = createOpenRouterClient(validApiKey);
+      const chunks: StreamResponse[] = [];
+      for await (const chunk of client.streamCompletion("gpt-4", [
+        { role: "user", content: "Hi" },
+      ])) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks.some((chunk) => chunk.content === "Hi")).toBe(true);
+      expect(chunks.at(-1)).toEqual({ content: "Hi", isComplete: true, isTruncated: false });
+    });
+
+    it("marks the final chunk as truncated when the reply stops on the token cap", async () => {
+      const encoder = new TextEncoder();
+      const body = new ReadableStream({
+        start(controller) {
+          controller.enqueue(
+            encoder.encode(`data: {"choices":[{"delta":{"content":"Cut"}}]}\n`)
+          );
+          controller.enqueue(
+            encoder.encode(`data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n`)
+          );
+          controller.enqueue(encoder.encode("data: [DONE]\n"));
+          controller.close();
+        },
+      });
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 200, body });
+
+      const client = createOpenRouterClient(validApiKey);
+      const chunks: StreamResponse[] = [];
+      for await (const chunk of client.streamCompletion("gpt-4", [
+        { role: "user", content: "Hi" },
+      ])) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks.at(-1)).toEqual({ content: "Cut", isComplete: true, isTruncated: true });
     });
   });
 });

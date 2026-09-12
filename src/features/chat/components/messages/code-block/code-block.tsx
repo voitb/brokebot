@@ -11,12 +11,12 @@ const SyntaxHighlighter = lazy(() =>
 
 const CODE_BLOCK_STYLE: CSSProperties = {
   margin: 0,
-  padding: '1rem',
+  padding: "1rem",
   borderRadius: 0,
-  border: 'none',
-  whiteSpace: 'pre',
-  minWidth: '100%',
-  width: 'max-content',
+  border: "none",
+  whiteSpace: "pre",
+  minWidth: "100%",
+  width: "max-content",
 };
 
 interface CodeBlockProps {

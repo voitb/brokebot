@@ -46,28 +46,16 @@ export function ConversationItem({
     isActive,
   } = useConversationItem(conversation);
 
-  const itemStyles = isEditing || isActive
-    ? "bg-primary/10 border-primary text-primary font-medium"
-    : isMenuOpen
-      ? "bg-muted/70"
-      : "hover:bg-muted/50";
+  const idleStyles = isMenuOpen ? "bg-muted/70" : "hover:bg-muted/50";
+  const itemStyles =
+    isEditing || isActive
+      ? "bg-primary/10 border-primary text-primary font-medium"
+      : idleStyles;
 
   return (
     <>
       <div
-        role="button"
-        tabIndex={0}
-        aria-current={isActive ? "page" : undefined}
-        aria-label={`${conversation.title}${isPinned ? ", pinned" : ""}${isActive ? ", currently selected" : ""}`}
         className={`group/item relative px-2 py-1.5 text-sm text-foreground rounded-md cursor-pointer ${itemStyles}`}
-        onClick={handleConversationClick}
-        onDoubleClick={handleRename}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleConversationClick();
-          }
-        }}
       >
         <div className="flex items-center justify-between min-w-0">
           {isEditing ? (
@@ -77,7 +65,16 @@ export function ConversationItem({
               onCancel={handleCancelRename}
             />
           ) : (
-            <span className="truncate flex-1">{conversation.title}</span>
+            <button
+              type="button"
+              aria-current={isActive ? "page" : undefined}
+              aria-label={`${conversation.title}${isPinned ? ", pinned" : ""}${isActive ? ", currently selected" : ""}`}
+              className="truncate flex-1 text-left min-w-0"
+              onClick={handleConversationClick}
+              onDoubleClick={handleRename}
+            >
+              {conversation.title}
+            </button>
           )}
 
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -92,7 +89,6 @@ export function ConversationItem({
                     ? "opacity-100"
                     : "opacity-0 group-hover/item:opacity-100"
                 }`}
-                onClick={(e) => e.stopPropagation()}
               >
                 <MoreHorizontal className="w-3 h-3" />
               </Button>

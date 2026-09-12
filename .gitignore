@@ -13,7 +13,8 @@ dist-ssr
 coverage
 *.local
 
-.env
+.env*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -28,3 +29,8 @@ coverage
 
 cursor_plan_for_eidolon_chat_assistant.md
 cursor_poprawa_skr_t_w_i_potwierdzenie.md
+
+.nuke/*
+.splitbrief/*
+.cursor/*
+*.tsbuildinfo

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
+import { toast } from "sonner";
 import { useUserConfig } from "./use-user-config";
 import { db, DEFAULT_USER_CONFIG } from "@/lib/db";
 import { clearTestDatabase } from "@/testing/db-helpers";
@@ -7,6 +8,10 @@ import { clearTestDatabase } from "@/testing/db-helpers";
 vi.mock("@/lib/encryption-service", () => ({
   encryptValue: vi.fn((val: string) => Promise.resolve(`encrypted_${val}`)),
   decryptValue: vi.fn((val: string) => Promise.resolve(val.replace("encrypted_", ""))),
+}));
+
+vi.mock("sonner", () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
 }));
 
 describe("useUserConfig", () => {
@@ -23,6 +28,16 @@ describe("useUserConfig", () => {
 
       await waitFor(() => {
         expect(result.current.config.username).toBe(DEFAULT_USER_CONFIG.username);
+      });
+    });
+
+    it("reports loading until the stored config arrives", async () => {
+      const { result } = renderHook(() => useUserConfig());
+
+      expect(result.current.isLoading).toBe(true);
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
       });
     });
 
@@ -87,6 +102,22 @@ describe("useUserConfig", () => {
       const saved = await db.userConfig.get("user_config");
       expect(saved?.updatedAt.getTime()).toBeGreaterThan(oldDate.getTime());
     });
+
+    it("rejects and announces the failure when saving fails", async () => {
+      vi.spyOn(db.userConfig, "update").mockRejectedValueOnce(new Error("QuotaExceededError"));
+
+      const { result } = renderHook(() => useUserConfig());
+
+      await waitFor(() => {
+        expect(result.current.config).toBeDefined();
+      });
+
+      await act(async () => {
+        await expect(result.current.updateConfig({ username: "Nope" })).rejects.toThrow();
+      });
+
+      expect(toast.error).toHaveBeenCalledWith("Failed to save settings.");
+    });
   });
 
   describe("resetConfig", () => {
@@ -109,6 +140,22 @@ describe("useUserConfig", () => {
       const saved = await db.userConfig.get("user_config");
       expect(saved?.username).toBe(DEFAULT_USER_CONFIG.username);
       expect(saved?.theme).toBe(DEFAULT_USER_CONFIG.theme);
+    });
+
+    it("rejects and announces the failure when resetting fails", async () => {
+      vi.spyOn(db.userConfig, "put").mockRejectedValueOnce(new Error("QuotaExceededError"));
+
+      const { result } = renderHook(() => useUserConfig());
+
+      await waitFor(() => {
+        expect(result.current.config).toBeDefined();
+      });
+
+      await act(async () => {
+        await expect(result.current.resetConfig()).rejects.toThrow();
+      });
+
+      expect(toast.error).toHaveBeenCalled();
     });
   });
 });

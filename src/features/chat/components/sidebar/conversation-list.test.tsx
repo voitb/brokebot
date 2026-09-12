@@ -12,6 +12,7 @@ const mockCreateEmptyConversation = vi.fn().mockResolvedValue("new-id");
 const mockConversationsContext = {
   conversations: [] as ReturnType<typeof createMockConversation>[],
   folders: [] as ReturnType<typeof createMockFolder>[],
+  isLoading: false,
   createFolder: mockCreateFolder,
   createEmptyConversation: mockCreateEmptyConversation,
 };
@@ -35,6 +36,7 @@ describe("ConversationList", () => {
     vi.clearAllMocks();
     mockConversationsContext.conversations = [];
     mockConversationsContext.folders = [];
+    mockConversationsContext.isLoading = false;
   });
 
   it("renders empty state when no conversations exist", () => {
@@ -79,5 +81,27 @@ describe("ConversationList", () => {
     expect(screen.getByText("Pinned Chat")).toBeInTheDocument();
     expect(screen.getByText("Recent")).toBeInTheDocument();
     expect(screen.getByText("Recent Chat")).toBeInTheDocument();
+  });
+
+  it("hides conversation sections while loading", () => {
+    mockConversationsContext.conversations = [
+      createMockConversation({ id: "1", title: "Recent Chat", pinned: false }),
+      createMockConversation({ id: "2", title: "Work Chat", pinned: false, folderId: "folder-1" }),
+    ];
+    mockConversationsContext.folders = [createMockFolder({ id: "folder-1", name: "Work" })];
+    mockConversationsContext.isLoading = true;
+
+    const { rerender } = render(<ConversationList />, { wrapper: Wrapper });
+
+    expect(screen.queryByText("Recent")).not.toBeInTheDocument();
+    expect(screen.queryByText("Recent Chat")).not.toBeInTheDocument();
+    expect(screen.queryByText("Work")).not.toBeInTheDocument();
+
+    mockConversationsContext.isLoading = false;
+    rerender(<ConversationList />);
+
+    expect(screen.getByText("Recent")).toBeInTheDocument();
+    expect(screen.getByText("Recent Chat")).toBeInTheDocument();
+    expect(screen.getByText("Work")).toBeInTheDocument();
   });
 });

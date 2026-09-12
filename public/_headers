@@ -2,15 +2,33 @@
   # Security Headers
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  
+  Permissions-Policy: camera=(), microphone=(self), geolocation=(), payment=()
+
   # CORS Headers for WebLLM
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: credentialless
-  
-  # Cache Control
+
+# App shell must be revalidated so new builds are picked up
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
+# Vite fingerprints everything it emits here
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The service worker and its registration shim must stay revalidated, or an
+# installed worker can never be replaced by a new build
+/sw.js
+  Cache-Control: no-cache
+
+/registerSW.js
+  Cache-Control: no-cache
+
+/workbox-*.js
   Cache-Control: public, max-age=31536000, immutable
 
 /manifest.json
@@ -26,13 +44,13 @@
   Cache-Control: public, max-age=86400
 
 /.well-known/security.txt
-  Content-Type: text/plain
+  Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=86400
 
-# Static assets
-/brokebot_*.png
-  Cache-Control: public, max-age=31536000, immutable
-  
+# Not fingerprinted, so a week and no immutable
+/*.png
+  Cache-Control: public, max-age=604800
+
 # Font files
 /*.woff2
-  Cache-Control: public, max-age=31536000, immutable 
+  Cache-Control: public, max-age=31536000, immutable

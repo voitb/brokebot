@@ -34,6 +34,35 @@ export function BreadcrumbNavigation({
     return null;
   }
 
+  const renderTitle = () => {
+    if (isLoadingConversation) {
+      return (
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
+      );
+    }
+    if (isEditingTitle) {
+      return (
+        <EditableConversationTitle
+          initialTitle={conversationTitle!}
+          onSave={onSaveTitle}
+          onCancel={onCancelTitleEdit}
+          className="max-w-64"
+        />
+      );
+    }
+    return (
+      <BreadcrumbPage
+        className="truncate max-w-64 cursor-pointer hover:text-foreground transition-colors"
+        onClick={onTitleClick}
+      >
+        {conversationTitle}
+      </BreadcrumbPage>
+    );
+  };
+
   return (
     <Breadcrumb>
       <BreadcrumbList>
@@ -48,26 +77,7 @@ export function BreadcrumbNavigation({
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem className={`${isEditingTitle ? "rounded-none!" : ""}`}>
-          {isLoadingConversation ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span className="text-sm text-muted-foreground">Loading...</span>
-            </div>
-          ) : isEditingTitle ? (
-            <EditableConversationTitle
-              initialTitle={conversationTitle!}
-              onSave={onSaveTitle}
-              onCancel={onCancelTitleEdit}
-              className="max-w-64"
-            />
-          ) : (
-            <BreadcrumbPage
-              className="truncate max-w-64 cursor-pointer hover:text-foreground transition-colors"
-              onClick={onTitleClick}
-            >
-              {conversationTitle}
-            </BreadcrumbPage>
-          )}
+          {renderTitle()}
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>

@@ -7,27 +7,27 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 import { useLayoutShortcuts } from "./use-layout-shortcuts";
-import { useOnboarding } from "@/features/onboarding/hooks/use-onboarding";
-import { OnboardingDialog } from "@/features/onboarding/components/onboarding-dialog";
 
 interface ResponsiveChatLayoutProps {
   children: ReactNode;
+  sidebar: ReactNode;
+  onboarding: ReactNode;
 }
 
 function LayoutManager() {
   useLayoutShortcuts();
-  const { showOnboarding, completeOnboarding } = useOnboarding();
 
-  return <OnboardingDialog isOpen={showOnboarding} onClose={completeOnboarding} />;
+  return null;
 }
 
-export function ResponsiveChatLayout({ children }: ResponsiveChatLayoutProps) {
+export function ResponsiveChatLayout({ children, sidebar, onboarding }: ResponsiveChatLayoutProps) {
   return (
     <SidebarProvider className="bg-background! overflow-hidden">
       <LayoutManager />
+      {onboarding}
       <Sidebar className="border-none! bg-background! [&>div]:bg-background! w-80 shrink-0">
         <SidebarContent className="bg-background! overflow-hidden">
-          <ChatSidebar />
+          <ChatSidebar sidebar={sidebar} />
         </SidebarContent>
       </Sidebar>
 

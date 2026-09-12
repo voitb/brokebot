@@ -1,4 +1,5 @@
 import { ChevronDown, Cpu, Cloud, Key, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,13 +36,17 @@ export function ModelSelectorDropdown({
     handleLocalModelSelect,
     handleOnlineModelSelect,
     handleDialogTrigger,
-    loadLocalModels,
+    loadAvailableModels,
   } = useModelSelectorDropdown();
 
-  const handleDropdownOpenChange = (open: boolean) => {
+  const handleDropdownOpenChange = async (open: boolean) => {
     setIsDropdownOpen(open);
     if (open && availableModels.length === 0 && !isLoadingModels) {
-      loadLocalModels();
+      try {
+        await loadAvailableModels();
+      } catch {
+        toast.error("Failed to load available models");
+      }
     }
   };
 

@@ -3,8 +3,8 @@ import { Helmet } from 'react-helmet-async';
 const SITE_NAME = 'brokebot';
 const SITE_URL = 'https://brokebot.voitz.dev/';
 const DEFAULT_TITLE = 'brokebot - Your Private AI Assistant';
-const DEFAULT_DESCRIPTION = 'Run a powerful AI assistant 100% locally in your browser. No data leaves your device. Free, private, and works offline.';
-const DEFAULT_IMAGE = `${SITE_URL}brokebot_dark.png`;
+const DEFAULT_DESCRIPTION = 'Run a powerful AI assistant locally in your browser by default. Free, private, works offline, and connects to OpenRouter only if you choose.';
+const DEFAULT_IMAGE = `${SITE_URL}og-image.png`;
 const KEYWORDS = 'AI Assistant, ChatGPT Clone, WebLLM, Local AI, Offline AI, Private AI, IndexedDB, React, Vite, brokebot';
 
 const structuredData = {
@@ -77,15 +77,10 @@ export function Seo() {
       <meta name="msapplication-TileColor" content="#000000" />
       <meta name="application-name" content={SITE_NAME} />
 
-      <link rel="apple-touch-icon" sizes="180x180" href="/brokebot_light_square.png" />
-      <link rel="icon" type="image/png" sizes="32x32" href="/brokebot_light_square.png" />
-      <link rel="icon" type="image/png" sizes="16x16" href="/brokebot_light_square.png" />
+      <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+      <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
 
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://brokebot.voitz.dev" />
-      <link rel="preload" href="/brokebot_light_square.png" as="image" />
-      <link rel="preload" href="/brokebot_dark.png" as="image" />
 
       <script type="application/ld+json">
         {JSON.stringify(structuredData, null, 2)}

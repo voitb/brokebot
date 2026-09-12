@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useUserConfig } from "@/hooks/use-user-config";
 import { toast } from "sonner";
 import { type UserConfig } from "@/lib/db";
@@ -20,29 +20,26 @@ export interface UseSettingsReturn {
 
 export function useSettings(): UseSettingsReturn {
   const { config, updateConfig } = useUserConfig();
-  const [settings, setSettings] = useState<Partial<UserConfig>>(() => config ?? {});
+  const [draft, setDraft] = useState<Partial<UserConfig>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const prevConfigRef = useRef(config);
-  if (config && prevConfigRef.current !== config) {
-    prevConfigRef.current = config;
-    setSettings(config);
-  }
+  const settings: Partial<UserConfig> = { ...config, ...draft };
 
   const handleFieldChange = <K extends keyof UserConfig>(field: K, value: UserConfig[K]) => {
-      setSettings((prev) => ({ ...prev, [field]: value }));
+    setDraft((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      await updateConfig(settings);
-      toast.success("Settings saved successfully!");
+      await updateConfig(draft);
     } catch {
-      toast.error("Failed to save settings.");
+      return;
     } finally {
       setIsSaving(false);
     }
+    setDraft({});
+    toast.success("Settings saved successfully!");
   };
 
   return {

@@ -16,10 +16,8 @@ export interface MockUserConfigHookOptions {
  * Creates a useUserConfig hook mock return value
  *
  * @example
- * const mockUpdateConfig = vi.fn();
- * vi.mock("@/hooks/use-user-config", () => ({
- *   useUserConfig: () => createMockUserConfigHook({ updateConfig: mockUpdateConfig }),
- * }));
+ * const seed = createMockUserConfigHook({ updateConfig: vi.fn() });
+ * // pass `seed` as the renderHook return value - do not vi.mock @/hooks/use-user-config
  */
 export function createMockUserConfigHook(options: MockUserConfigHookOptions = {}) {
   return {
@@ -75,7 +73,9 @@ export interface MockConversationBackupHookOptions {
 export function createMockConversationBackupHook(options: MockConversationBackupHookOptions = {}) {
   return {
     exportConversations: options.exportConversations ?? vi.fn().mockResolvedValue(undefined),
-    importConversations: options.importConversations ?? vi.fn().mockResolvedValue(1),
+    importConversations:
+      options.importConversations ??
+      vi.fn().mockResolvedValue({ conversations: [], folders: [], documents: [] }),
     isExporting: options.isExporting ?? false,
     isImporting: options.isImporting ?? false,
   };
@@ -87,6 +87,7 @@ export function createMockConversationBackupHook(options: MockConversationBackup
 export interface MockConversationsHookOptions {
   conversations?: Conversation[];
   folders?: unknown[];
+  isLoading?: boolean;
   createEmptyConversation?: ReturnType<typeof vi.fn>;
   addMessage?: ReturnType<typeof vi.fn>;
   updateMessage?: ReturnType<typeof vi.fn>;
@@ -103,17 +104,16 @@ export interface MockConversationsHookOptions {
  * Creates a useConversations hook mock return value
  *
  * @example
- * const mockCreateEmptyConversation = vi.fn().mockResolvedValue("new-id");
- * vi.mock("@/hooks/use-conversations", () => ({
- *   useConversations: () => createMockConversationsHook({
- *     createEmptyConversation: mockCreateEmptyConversation,
- *   }),
- * }));
+ * const seed = createMockConversationsHook({
+ *   createEmptyConversation: vi.fn().mockResolvedValue("new-id"),
+ * });
+ * // pass `seed` as the renderHook return value - do not vi.mock @/hooks/use-conversations
  */
 export function createMockConversationsHook(options: MockConversationsHookOptions = {}) {
   return {
     conversations: options.conversations ?? [],
     folders: options.folders ?? [],
+    isLoading: options.isLoading ?? false,
     createEmptyConversation: options.createEmptyConversation ?? vi.fn().mockResolvedValue("new-id"),
     addMessage: options.addMessage ?? vi.fn().mockResolvedValue("message-id"),
     updateMessage: options.updateMessage ?? vi.fn().mockResolvedValue(undefined),
@@ -139,11 +139,10 @@ export interface MockConversationHookOptions {
  * Creates a useConversation hook mock return value (for single conversation)
  *
  * @example
- * vi.mock("@/hooks/use-conversations", () => ({
- *   useConversation: () => createMockConversationHook({
- *     conversation: createMockConversation({ title: "Test" }),
- *   }),
- * }));
+ * const seed = createMockConversationHook({
+ *   conversation: createMockConversation({ title: "Test" }),
+ * });
+ * // pass `seed` as the renderHook return value - do not vi.mock @/hooks/use-conversations
  */
 export function createMockConversationHook(options: MockConversationHookOptions = {}) {
   const conversation = options.conversation !== undefined
@@ -281,8 +280,6 @@ export interface MockFileUploadHookOptions {
   handleFilesSelected?: ReturnType<typeof vi.fn>;
   removeFile?: ReturnType<typeof vi.fn>;
   clearFiles?: ReturnType<typeof vi.fn>;
-  replaceFiles?: ReturnType<typeof vi.fn>;
-  processFile?: ReturnType<typeof vi.fn>;
 }
 
 export function createMockFileUploadHook(options: MockFileUploadHookOptions = {}) {
@@ -291,8 +288,6 @@ export function createMockFileUploadHook(options: MockFileUploadHookOptions = {}
     handleFilesSelected: options.handleFilesSelected ?? vi.fn(),
     removeFile: options.removeFile ?? vi.fn(),
     clearFiles: options.clearFiles ?? vi.fn(),
-    replaceFiles: options.replaceFiles ?? vi.fn(),
-    processFile: options.processFile ?? vi.fn(),
   };
 }
 
@@ -311,34 +306,6 @@ export function createMockSpeechToTextHook(options: MockSpeechToTextHookOptions 
     stopRecording: options.stopRecording ?? vi.fn(),
     isModelLoading: options.isModelLoading ?? false,
     error: options.error ?? null,
-  };
-}
-
-/**
- * Options for creating a useMessageStream mock
- */
-export interface MockMessageStreamHookOptions {
-  isGenerating?: boolean;
-  streamResponse?: ReturnType<typeof vi.fn>;
-  stopGeneration?: ReturnType<typeof vi.fn>;
-}
-
-/**
- * Creates a useMessageStream hook mock return value
- *
- * @example
- * vi.mock("./use-message-stream", async () => {
- *   const { createMockMessageStreamHook } = await import("@/testing/mocks/hooks");
- *   return {
- *     useMessageStream: () => createMockMessageStreamHook({ isGenerating: false }),
- *   };
- * });
- */
-export function createMockMessageStreamHook(options: MockMessageStreamHookOptions = {}) {
-  return {
-    isGenerating: options.isGenerating ?? false,
-    streamResponse: options.streamResponse ?? vi.fn().mockResolvedValue({ content: "AI response", wasAborted: false }),
-    stopGeneration: options.stopGeneration ?? vi.fn(),
   };
 }
 

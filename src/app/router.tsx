@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { RootLayout } from "@/app/root-layout";
 import { ChatGuard } from "@/features/chat/components/interface/chat-guard";
 import { RouteLoadingFallback } from "@/components/ui/route-loading-fallback";
@@ -22,6 +22,18 @@ const TermsOfService = lazy(() =>
   }))
 );
 
+function ChatRoute() {
+  const { id } = useParams();
+
+  return (
+    <ChatGuard>
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <ChatInterface key={id} />
+      </Suspense>
+    </ChatGuard>
+  );
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -41,13 +53,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "chat/:id",
-        element: (
-          <ChatGuard>
-            <Suspense fallback={<RouteLoadingFallback />}>
-              <ChatInterface />
-            </Suspense>
-          </ChatGuard>
-        ),
+        element: <ChatRoute />,
       },
     ],
   },

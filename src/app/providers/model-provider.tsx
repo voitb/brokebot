@@ -6,6 +6,8 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { toast } from "sonner";
+
 import { useWebLLM, type ModelInfo } from "./web-llm-provider";
 import {
   createOpenRouterClient,
@@ -15,7 +17,6 @@ import {
   type StreamResponse,
 } from "@/features/chat/api/openrouter";
 import { useUserConfig } from "@/hooks/use-user-config";
-import { useModels } from "@/features/chat/hooks/use-models";
 import { UnifiedModelSchema } from "@/lib/schemas/model-schema";
 
 export type LocalModel = {
@@ -37,9 +38,6 @@ export interface ModelProviderState {
   isModelLoading: boolean;
   isModelSwitching: boolean;
   modelStatus: string;
-  availableOnlineModels: OpenRouterModel[];
-  isLoadingAvailableModels: boolean;
-  availableModelsError: Error | null;
   setCurrentModel: (model: UnifiedModel) => void;
   streamMessage: (
     messages: OpenRouterMessage[],
@@ -47,7 +45,6 @@ export interface ModelProviderState {
     signal?: AbortSignal
   ) => AsyncGenerator<StreamResponse, void, unknown>;
   interruptGeneration: () => void;
-  resetChat: () => Promise<void>;
 }
 
 export const ModelContext = createContext<ModelProviderState | undefined>(undefined);
@@ -60,11 +57,6 @@ export function ModelProvider({ children }: ModelProviderProps) {
   const webLLM = useWebLLM();
   const { config } = useUserConfig();
   const apiKey = config?.openrouterApiKey;
-  const {
-    models: availableOnlineModels,
-    isLoading: isLoadingAvailableModels,
-    error: availableModelsError
-  } = useModels({ apiKey });
   const [currentModel, setCurrentModelState] = useState<UnifiedModel | null>(
     null
   );
@@ -72,6 +64,22 @@ export function ModelProvider({ children }: ModelProviderProps) {
 
   // Hydrate online model from localStorage when apiKey is available
   useEffect(() => {
+    if (!apiKey) {
+      if (currentModel?.type === "online") {
+        setCurrentModelState(null);
+        localStorage.removeItem("unifiedModel");
+        webLLM
+          .loadDefaultModel()
+          .catch(() => toast.error("Failed to load the local model."));
+      }
+      return;
+    }
+
+    if (currentModel?.type === "online") {
+      setCurrentModelState(createOnlineModel(currentModel.onlineModel, apiKey));
+      return;
+    }
+
     const storedModel = localStorage.getItem("unifiedModel");
     if (!storedModel) return;
 
@@ -79,7 +87,7 @@ export function ModelProvider({ children }: ModelProviderProps) {
       const jsonData = JSON.parse(storedModel);
       const parsed = UnifiedModelSchema.safeParse(jsonData);
 
-      if (parsed.success && parsed.data.type === "online" && apiKey) {
+      if (parsed.success && parsed.data.type === "online") {
         setCurrentModelState(
           createOnlineModel(parsed.data.onlineModel, apiKey)
         );
@@ -89,6 +97,7 @@ export function ModelProvider({ children }: ModelProviderProps) {
     } catch {
       localStorage.removeItem("unifiedModel");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- React to key changes only; depending on currentModel would re-run on every model change
   }, [apiKey]);
 
   // Sync local model selection from WebLLM
@@ -104,12 +113,6 @@ export function ModelProvider({ children }: ModelProviderProps) {
     }
   };
 
-  const resetChat = async () => {
-    if (currentModel?.type === "local" && webLLM.engine) {
-      await webLLM.engine.reload(currentModel.localModel.id);
-    }
-  };
-
   const setCurrentModel = (model: UnifiedModel) => {
     startTransition(() => {
       setCurrentModelState(model);
@@ -119,6 +122,12 @@ export function ModelProvider({ children }: ModelProviderProps) {
         webLLM.setSelectedModel(model.localModel);
       }
     });
+
+    if (model.type === "online") {
+      webLLM
+        .unloadEngine()
+        .catch(() => toast.error("Failed to unload the local model."));
+    }
   };
 
   async function* streamMessage(
@@ -192,12 +201,8 @@ export function ModelProvider({ children }: ModelProviderProps) {
   }
 
   const isModelLoading = currentModel?.type === "local" && webLLM.isLoading;
-  const modelStatus =
-    currentModel?.type === "local"
-      ? webLLM.status
-      : currentModel
-      ? "Ready"
-      : "Initializing...";
+  const onlineModelStatus = currentModel ? "Ready" : "Initializing...";
+  const modelStatus = currentModel?.type === "local" ? webLLM.status : onlineModelStatus;
 
   const contextValue: ModelProviderState = {
     currentModel,
@@ -205,13 +210,9 @@ export function ModelProvider({ children }: ModelProviderProps) {
     isModelLoading,
     isModelSwitching,
     modelStatus,
-    availableOnlineModels,
-    isLoadingAvailableModels,
-    availableModelsError,
     setCurrentModel,
     streamMessage,
     interruptGeneration,
-    resetChat,
   };
 
   return (

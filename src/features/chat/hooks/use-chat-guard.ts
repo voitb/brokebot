@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useConversation } from "@/hooks/use-conversations";
+import type { Conversation, Message } from "@/lib/db";
 
 const DEFAULT_TIMEOUT_MS = 500;
 
@@ -13,6 +14,8 @@ interface UseChatGuardOptions {
 interface UseChatGuardReturn {
   isChecking: boolean;
   conversationExists: boolean;
+  conversation: Conversation | undefined;
+  messages: Message[];
 }
 
 export function useChatGuard({
@@ -20,7 +23,7 @@ export function useChatGuard({
   timeoutMs = DEFAULT_TIMEOUT_MS,
 }: UseChatGuardOptions): UseChatGuardReturn {
   const navigate = useNavigate();
-  const { conversation } = useConversation(conversationId);
+  const { conversation, messages } = useConversation(conversationId);
 
   const isChecking = !!conversationId && conversation === undefined;
 
@@ -41,5 +44,7 @@ export function useChatGuard({
   return {
     isChecking,
     conversationExists: conversationId ? conversation !== undefined : true,
+    conversation,
+    messages,
   };
 }

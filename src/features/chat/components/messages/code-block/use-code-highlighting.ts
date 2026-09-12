@@ -1,4 +1,4 @@
-import { useTheme } from "@/app/providers/theme-provider";
+import { useRootTheme } from "@/hooks/use-root-theme";
 import {
   oneDark,
   oneLight,
@@ -20,13 +20,16 @@ export function useCodeHighlighting({
   className,
   children,
 }: UseCodeHighlightingProps): UseCodeHighlightingReturn {
-  const { theme } = useTheme();
+  const isDarkTheme = useRootTheme() === "dark";
 
   const match = /language-(\w+)/.exec(className || "");
   const language = match ? match[1] : "";
   const code = String(children).replace(/\n$/, "");
-  const isInline = !match;
-  const syntaxStyle = theme === "dark" ? oneDark : oneLight;
+  const hasLanguage = Boolean(match);
+  const isMultiline = code.includes("\n");
+  const isInline = !hasLanguage && !isMultiline;
+
+  const syntaxStyle = isDarkTheme ? oneDark : oneLight;
 
   return { language, code, isInline, syntaxStyle };
 }

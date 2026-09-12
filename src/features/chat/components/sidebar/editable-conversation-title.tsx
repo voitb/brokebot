@@ -35,10 +35,7 @@ export function EditableConversationTitle({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && e.altKey) {
-      e.preventDefault();
-      commitEdit();
-    } else if (e.key === "Escape") {
+    if (e.key === "Escape") {
       e.preventDefault();
       onCancel();
     } else if (e.key === "Enter") {

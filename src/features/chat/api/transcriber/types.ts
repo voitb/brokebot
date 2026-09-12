@@ -19,12 +19,17 @@ export interface TranscribeResult {
 }
 
 export type WorkerMessage =
-  | { type: "transcribe"; audioData: Float32Array; options: TranscribeOptions }
+  | {
+      type: "transcribe";
+      requestId: number;
+      audioData: Float32Array;
+      options: TranscribeOptions;
+    }
   | { type: "dispose" };
 
 export type WorkerResponse =
   | { type: "status"; status: string; device?: "webgpu" | "wasm" }
   | { type: "progress"; data: ProgressInfo }
-  | { type: "result"; data: TranscribeResult }
-  | { type: "error"; error: string }
+  | { type: "result"; requestId: number; data: TranscribeResult }
+  | { type: "error"; requestId: number; error: string }
   | { type: "disposed" };

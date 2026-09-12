@@ -22,7 +22,6 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   const scrollAreaRef = useRef<T>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const userHasScrolledUp = useRef(false);
-  const isInitialRender = useRef(true);
   const scrollToBottomRef = useRef<(behavior?: "smooth" | "auto") => void>(
     () => {}
   );
@@ -47,6 +46,7 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     if (!viewport) return;
 
     let lastScrollTop = viewport.scrollTop;
+    let lastContentHeight = viewport.scrollHeight;
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = viewport;
@@ -70,7 +70,14 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
     viewport.addEventListener("scroll", handleScroll, { passive: true });
 
     const observer = new MutationObserver(() => {
+      const hasGrown = viewport.scrollHeight > lastContentHeight;
+      lastContentHeight = viewport.scrollHeight;
+
       handleScroll();
+
+      if (hasGrown && !userHasScrolledUp.current) {
+        scrollToBottomRef.current("auto");
+      }
     });
 
     observer.observe(viewport, {
@@ -87,14 +94,13 @@ export function useSmartAutoScroll<T extends HTMLElement = HTMLDivElement>(
   }, [conversationId]);
 
   useLayoutEffect(() => {
-    if (isInitialRender.current) {
-      scrollToBottomRef.current("auto");
-      isInitialRender.current = false;
-    }
+    userHasScrolledUp.current = false;
+
+    scrollToBottomRef.current("auto");
   }, [conversationId]);
 
   useEffect(() => {
-    if (!isInitialRender.current && !userHasScrolledUp.current) {
+    if (!userHasScrolledUp.current) {
       scrollToBottomRef.current("smooth");
     }
   }, [messageCount, isGenerating]);

@@ -1,12 +1,17 @@
 import { pipeline, env } from "@huggingface/transformers";
-import type { AutomaticSpeechRecognitionPipeline } from "@huggingface/transformers";
+import type {
+  AutomaticSpeechRecognitionPipeline,
+  ProgressInfo as TransformersProgressInfo,
+} from "@huggingface/transformers";
 import type { WorkerMessage, WorkerResponse } from "./types";
 
 env.allowLocalModels = false;
 env.allowRemoteModels = true;
 env.useBrowserCache = true;
 
-let transcriber: AutomaticSpeechRecognitionPipeline | null = null;
+const MODEL_ID = "onnx-community/whisper-base";
+
+let transcriberPromise: Promise<AutomaticSpeechRecognitionPipeline> | null = null;
 let device: "webgpu" | "wasm" = "webgpu";
 
 function postResponse(response: WorkerResponse): void {
@@ -23,50 +28,52 @@ async function checkWebGPUSupport(): Promise<boolean> {
   }
 }
 
-async function getTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
-  if (!transcriber) {
-    const hasWebGPU = await checkWebGPUSupport();
-    device = hasWebGPU ? "webgpu" : "wasm";
+async function loadTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
+  const hasWebGPU = await checkWebGPUSupport();
+  device = hasWebGPU ? "webgpu" : "wasm";
 
-    postResponse({ type: "status", status: "loading", device });
+  postResponse({ type: "status", status: "loading", device });
 
-    transcriber = await pipeline(
-      "automatic-speech-recognition",
-      "onnx-community/whisper-base",
-      {
-        device,
-        dtype: "fp32",
-        progress_callback: (progress: unknown) => {
-          // Library callback type is complex, cast to our type
-          self.postMessage({ type: "progress", data: progress });
-        },
-      }
-    );
-  }
+  const transcriber = await pipeline("automatic-speech-recognition", MODEL_ID, {
+    device,
+    dtype: device === "webgpu" ? "fp32" : "q8",
+    progress_callback: (progress: TransformersProgressInfo) => {
+      postResponse({ type: "progress", data: progress });
+    },
+  });
+
   return transcriber;
+}
+
+function getTranscriber(): Promise<AutomaticSpeechRecognitionPipeline> {
+  transcriberPromise ??= loadTranscriber().catch((error: unknown) => {
+    transcriberPromise = null;
+    throw error;
+  });
+  return transcriberPromise;
 }
 
 self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const { type } = event.data;
 
   if (type === "transcribe") {
-    const { audioData, options } = event.data;
+    const { requestId, audioData, options } = event.data;
     try {
       const recognizer = await getTranscriber();
       postResponse({ type: "status", status: "transcribing", device });
-      const result = await recognizer(audioData, options);
-      // Library result type is complex, cast to our type
-      self.postMessage({ type: "result", data: result });
+      const output = await recognizer(audioData, options);
+      const text = Array.isArray(output) ? output[0]?.text : output.text;
+      postResponse({ type: "result", requestId, data: { text } });
     } catch (error) {
-      postResponse({ type: "error", error: String(error) });
+      postResponse({ type: "error", requestId, error: String(error) });
     }
   }
 
   if (type === "dispose") {
-    if (transcriber) {
-      await transcriber.dispose();
-      transcriber = null;
-    }
+    const pendingTranscriber = transcriberPromise;
+    transcriberPromise = null;
+    const loadedTranscriber = await pendingTranscriber?.catch(() => null);
+    await loadedTranscriber?.dispose();
     postResponse({ type: "disposed" });
   }
 };

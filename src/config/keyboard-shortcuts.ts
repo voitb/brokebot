@@ -13,7 +13,7 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcutGroup[] = [
     title: "General",
     shortcuts: [
       { label: "New Chat", keys: "g n" },
-      { label: "Toggle Sidebar", keys: "g s" },
+      { label: "Toggle Sidebar", keys: "g s  or  Ctrl/⌘ B" },
       { label: "Search", keys: "g f  or  /" },
       { label: "Show Shortcuts", keys: "?" },
     ],

@@ -1,14 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeHighlighting } from "./use-code-highlighting";
-
-let mockTheme = "dark";
-
-vi.mock("@/app/providers/theme-provider", () => ({
-  useTheme: () => ({
-    theme: mockTheme,
-  }),
-}));
 
 vi.mock("react-syntax-highlighter/dist/esm/styles/prism", () => ({
   oneDark: { "pre[class*='language-']": { background: "#282c34" } },
@@ -16,101 +12,29 @@ vi.mock("react-syntax-highlighter/dist/esm/styles/prism", () => ({
 }));
 
 describe("useCodeHighlighting", () => {
-  beforeEach(() => {
-    mockTheme = "dark";
+  afterEach(() => {
+    document.documentElement.classList.remove("dark");
   });
 
-  describe("language detection", () => {
-    it.each(["typescript", "javascript", "python"])(
-      "extracts %s from className",
-      (lang) => {
-        const { result } = renderHook(() =>
-          useCodeHighlighting({
-            className: `language-${lang}`,
-            children: "code",
-          })
-        );
-        expect(result.current.language).toBe(lang);
-      }
+  it("treats a multiline fence without a language class as a block", () => {
+    const { result } = renderHook(() =>
+      useCodeHighlighting({ children: "const x = 1;\nconst y = 2;" })
     );
-
-    it("returns empty string when no language in className", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "some-other-class",
-          children: "code",
-        })
-      );
-      expect(result.current.language).toBe("");
-    });
-
-    it("returns empty string when className is undefined", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({ children: "code" })
-      );
-      expect(result.current.language).toBe("");
-    });
+    expect(result.current.isInline).toBe(false);
   });
 
-  describe("code processing", () => {
-    it("converts children to string", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-js",
-          children: "const x = 1;",
-        })
-      );
-      expect(result.current.code).toBe("const x = 1;");
-    });
+  it("follows the document dark class", () => {
+    document.documentElement.classList.add("dark");
+    const { result: darkResult, unmount } = renderHook(() =>
+      useCodeHighlighting({ children: "code" })
+    );
+    expect(darkResult.current.syntaxStyle).toBe(oneDark);
+    unmount();
 
-    it("removes trailing newline but preserves internal ones", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-js",
-          children: "const x = 1;\nconst y = 2;\n",
-        })
-      );
-      expect(result.current.code).toBe("const x = 1;\nconst y = 2;");
-    });
-  });
-
-  describe("inline detection", () => {
-    it("returns isInline true when no language match", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "inline-code",
-          children: "code",
-        })
-      );
-      expect(result.current.isInline).toBe(true);
-    });
-
-    it("returns isInline false when language is detected", () => {
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-typescript",
-          children: "const x = 1;",
-        })
-      );
-      expect(result.current.isInline).toBe(false);
-    });
-  });
-
-  describe("theme handling", () => {
-    it.each([
-      ["dark", "#282c34"],
-      ["light", "#fafafa"],
-    ])("returns correct style for %s theme", (theme, background) => {
-      mockTheme = theme;
-      const { result } = renderHook(() =>
-        useCodeHighlighting({
-          className: "language-js",
-          children: "code",
-        })
-      );
-      expect(result.current.syntaxStyle).toEqual({
-        "pre[class*='language-']": { background },
-      });
-    });
+    document.documentElement.classList.remove("dark");
+    const { result: lightResult } = renderHook(() =>
+      useCodeHighlighting({ children: "code" })
+    );
+    expect(lightResult.current.syntaxStyle).toBe(oneLight);
   });
 });

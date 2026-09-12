@@ -8,7 +8,7 @@ import { PrivacyTab } from "../privacy-tab";
 import { SettingsMobileLayout } from "../settings-mobile-layout";
 import { SettingsDesktopLayout } from "../settings-desktop-layout";
 import { useSettings, isValidSettingsTab, type SettingsTab } from "./use-settings";
-import { useConversations } from "@/hooks/use-conversations";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import type { SettingsNavItem } from "../settings-layout-types";
 
 interface SettingsDialogProps {
@@ -27,8 +27,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const tabParam = searchParams.get("tab");
   const activeTab: SettingsTab = isValidSettingsTab(tabParam) ? tabParam : "general";
 
-  const { settings, handleFieldChange, handleSaveChanges } = useSettings();
-  const { conversations } = useConversations();
+  const { settings, isSaving, handleFieldChange, handleSaveChanges } = useSettings();
+  const isMobile = useIsMobile();
 
   const setActiveTab = (tab: SettingsTab) => {
     const newParams = new URLSearchParams(searchParams);
@@ -38,16 +38,13 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   const handleClose = () => onOpenChange(false);
 
-  if (!settings) return null;
-
-  const hasConversations = conversations && conversations.length > 0;
   const commonProps = { settings, onFieldChange: handleFieldChange };
 
   const tabContent = (
     <ErrorBoundary>
-      {activeTab === "general" && <GeneralTab {...commonProps} onSaveChanges={handleSaveChanges} />}
+      {activeTab === "general" && <GeneralTab {...commonProps} onSaveChanges={handleSaveChanges} isSaving={isSaving} />}
       {activeTab === "documents" && <DocumentsTab />}
-      {activeTab === "privacy" && <PrivacyTab hasConversations={hasConversations} />}
+      {activeTab === "privacy" && <PrivacyTab />}
     </ErrorBoundary>
   );
 
@@ -69,8 +66,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <DialogDescription className="sr-only">
             Customize your brokebot settings here.
           </DialogDescription>
-          <SettingsMobileLayout {...layoutProps} />
-          <SettingsDesktopLayout {...layoutProps} />
+          {isMobile ? (
+            <SettingsMobileLayout {...layoutProps} />
+          ) : (
+            <SettingsDesktopLayout {...layoutProps} />
+          )}
       </DialogContent>
     </Dialog>
   );

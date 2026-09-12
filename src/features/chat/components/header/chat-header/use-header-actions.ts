@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect, useEffectEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useConversations, useConversation } from "@/hooks/use-conversations";
-import { useConversationBackup } from "@/hooks/use-conversation-backup";
-import { type Conversation } from "@/lib/db";
-import { ConversationSchema } from "@/lib/schemas/conversation-schema";
+import { useConversations } from "@/hooks/use-conversations";
+import {
+  useConversationBackup,
+  type ImportedBackupIds,
+} from "@/hooks/use-conversation-backup";
+import { useActiveConversation } from "@/features/chat/hooks/use-active-conversation";
+import {
+  parseConversationBackup,
+  type ConversationBackup,
+} from "@/lib/schemas/conversation-backup-schema";
 
 interface UseHeaderActionsOptions {
   conversationId?: string;
@@ -41,7 +47,7 @@ export function useHeaderActions({
     createEmptyConversation,
     deleteConversation,
   } = useConversations();
-  const { conversation } = useConversation(conversationId);
+  const { conversation } = useActiveConversation();
   const { importConversations } = useConversationBackup();
 
   const conversationTitle = conversation?.title;
@@ -50,7 +56,6 @@ export function useHeaderActions({
     ? conversation === undefined
     : false;
 
-  // --- Title editing ---
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const onRenameEvent = useEffectEvent(() => {
@@ -88,14 +93,18 @@ export function useHeaderActions({
     setIsEditingTitle(false);
   };
 
-  // --- Conversation IO ---
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportConversation = () => {
     if (!conversation) return;
 
     try {
-      const dataStr = JSON.stringify(conversation, null, 2);
+      const backup = {
+        conversations: [conversation],
+        folders: [],
+        documents: [],
+      };
+      const dataStr = JSON.stringify(backup, null, 2);
       const dataUri =
         "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
@@ -120,36 +129,56 @@ export function useHeaderActions({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== "application/json") {
+    const isJsonFile =
+      file.type === "application/json" ||
+      (file.type === "" && file.name.endsWith(".json"));
+
+    if (!isJsonFile) {
       toast.error("Please select a valid JSON file.");
       return;
     }
 
     try {
-      const text = await file.text();
-      const jsonData = JSON.parse(text);
-      const parsed = ConversationSchema.safeParse(jsonData);
+      let importedBackup: ConversationBackup;
 
-      if (!parsed.success) {
-        const firstIssue = parsed.error.issues[0];
-        const fieldPath = firstIssue?.path.join(".") || "unknown";
-        toast.error(
-          `Invalid conversation format: ${fieldPath} - ${firstIssue?.message}`
-        );
+      try {
+        const text = await file.text();
+        const parsed = parseConversationBackup(JSON.parse(text));
+
+        if (!parsed.success) {
+          const firstIssue = parsed.error.issues[0];
+          const fieldPath = firstIssue?.path.join(".") || "unknown";
+          toast.error(
+            `Invalid conversation format: ${fieldPath} - ${firstIssue?.message}`
+          );
+          return;
+        }
+
+        importedBackup = parsed.backup;
+      } catch {
+        toast.error("Failed to parse conversation file. Invalid JSON.");
         return;
       }
 
-      const importedConv = parsed.data as Conversation;
-      const importedCount = await importConversations([importedConv]);
+      let imported: ImportedBackupIds;
 
-      if (importedCount > 0) {
-        toast.success("Conversation imported successfully!");
-        navigate(`/chat/${importedConv.id}`);
-      } else {
-        toast.info("Conversation already exists. No changes were made.");
+      try {
+        imported = await importConversations(importedBackup);
+      } catch {
+        return;
       }
-    } catch {
-      toast.error("Failed to parse conversation file. Invalid JSON.");
+
+      if (imported.conversations.length > 0) {
+        toast.success("Conversation imported successfully!");
+        navigate(`/chat/${imported.conversations[0]}`);
+      } else {
+        const restoredCount = imported.folders.length + imported.documents.length;
+        toast.info(
+          restoredCount > 0
+            ? `Conversation already exists. Restored ${restoredCount} folder(s) and document(s).`
+            : "Conversation already exists. No changes were made."
+        );
+      }
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -157,7 +186,6 @@ export function useHeaderActions({
     }
   };
 
-  // --- Conversation delete ---
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const onDeleteEvent = useEffectEvent((eventConversationId: string) => {
@@ -167,9 +195,8 @@ export function useHeaderActions({
   });
 
   useEffect(() => {
-    const handleDelete = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      onDeleteEvent(customEvent.detail?.conversationId);
+    const handleDelete = (event: DocumentEventMap["conversation:delete"]) => {
+      onDeleteEvent(event.detail.conversationId);
     };
 
     document.addEventListener("conversation:delete", handleDelete);
@@ -188,25 +215,34 @@ export function useHeaderActions({
 
     try {
       await deleteConversation(conversationId);
-      toast.success("Conversation deleted successfully.");
-      setDeleteDialogOpen(false);
-      navigate("/chat");
     } catch {
-      toast.error("Failed to delete conversation.");
+      return;
     }
+
+    toast.success("Conversation deleted successfully.");
+    setDeleteDialogOpen(false);
+    navigate("/chat");
   };
 
-  // --- New chat ---
   const handleNewChat = async () => {
-    const newConversationId = await createEmptyConversation("New Conversation");
-    if (newConversationId) {
-      navigate(`/chat/${newConversationId}`);
+    let newConversationId: string;
+
+    try {
+      newConversationId = await createEmptyConversation("New Conversation");
+    } catch {
+      return;
     }
+
+    navigate(`/chat/${newConversationId}`);
   };
 
   const handleTogglePinConversation = async () => {
-    if (conversationId) {
+    if (!conversationId) return;
+
+    try {
       await togglePinConversation(conversationId);
+    } catch {
+      return;
     }
   };
 

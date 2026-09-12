@@ -74,33 +74,6 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('Test error message')).toBeInTheDocument();
   });
 
-  it('renders custom fallback when provided', () => {
-    render(
-      <ErrorBoundary fallback={<div>Custom fallback UI</div>}>
-        <ThrowingComponent shouldThrow={true} />
-      </ErrorBoundary>
-    );
-
-    expect(screen.getByText('Custom fallback UI')).toBeInTheDocument();
-    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
-  });
-
-  it('calls onError callback when error is caught', () => {
-    const onError = vi.fn();
-
-    render(
-      <ErrorBoundary onError={onError}>
-        <ThrowingComponent shouldThrow={true} />
-      </ErrorBoundary>
-    );
-
-    expect(onError).toHaveBeenCalledOnce();
-    expect(onError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Test error message' }),
-      expect.objectContaining({ componentStack: expect.any(String) })
-    );
-  });
-
   it('logs error to console when error is caught', () => {
     render(
       <ErrorBoundary>

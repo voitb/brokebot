@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ReactNode } from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@/testing/utils";
@@ -11,6 +12,7 @@ const mockTogglePinConversation = vi.fn().mockResolvedValue(undefined);
 const mockUpdateConversationTitle = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/app/providers/conversations-provider", () => ({
+  ConversationsProvider: ({ children }: { children: ReactNode }) => children,
   useConversations: () => ({
     deleteConversation: mockDeleteConversation,
     togglePinConversation: mockTogglePinConversation,
@@ -75,5 +77,47 @@ describe("ConversationItem", () => {
     await user.click(screen.getByRole("button", { name: /delete/i }));
 
     expect(mockDeleteConversation).toHaveBeenCalledWith(conversation.id);
+  });
+
+  it("pins the conversation from the actions menu", async () => {
+    const conversation = createMockConversation({
+      id: "conv-pin",
+      title: "Pin Me",
+    });
+    render(<ConversationItem conversation={conversation} />);
+
+    const actions = screen.getByRole("button", { name: /actions for/i });
+    expect(actions.parentElement?.closest('button, [role="button"]')).toBeNull();
+
+    await user.click(actions);
+    await user.click(
+      screen.getByRole("menuitem", { name: /add to favourites/i })
+    );
+
+    await waitFor(() => {
+      expect(mockTogglePinConversation).toHaveBeenCalledWith("conv-pin");
+    });
+  });
+
+  it("removes a pinned conversation from favourites", async () => {
+    const conversation = createMockConversation({
+      id: "conv-pinned",
+      title: "Pinned Chat",
+      pinned: true,
+    });
+    render(<ConversationItem conversation={conversation} />);
+
+    expect(
+      screen.getByRole("button", { name: /pinned chat, pinned/i })
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /actions for/i }));
+    await user.click(
+      screen.getByRole("menuitem", { name: /remove from favourites/i })
+    );
+
+    await waitFor(() => {
+      expect(mockTogglePinConversation).toHaveBeenCalledWith("conv-pinned");
+    });
   });
 });

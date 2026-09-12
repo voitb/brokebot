@@ -1,12 +1,8 @@
 interface DragDropOverlayProps {
   isDragOver: boolean;
-  supportsImages: boolean;
 }
 
-export function DragDropOverlay({
-  isDragOver,
-  supportsImages,
-}: DragDropOverlayProps) {
+export function DragDropOverlay({ isDragOver }: DragDropOverlayProps) {
   if (!isDragOver) return null;
 
   return (
@@ -16,11 +12,9 @@ export function DragDropOverlay({
       <div className="text-center">
         <div className="text-2xl mb-2">📎</div>
         <p className="text-sm font-medium">Drop files here</p>
-        {!supportsImages && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Images only supported by vision models
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground mt-1">
+          Text files only (.txt, .md)
+        </p>
       </div>
     </div>
   );

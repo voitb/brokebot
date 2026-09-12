@@ -1,11 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useOnlineModels } from "./use-online-models";
-import { createMockOpenRouterModel, createMockUserConfig } from "@/testing/mocks/modules";
+import {
+  createMockOpenRouterModel,
+  createMockUserConfig,
+  mockToast,
+} from "@/testing/mocks/modules";
 
-const mockConfig = createMockUserConfig({
+const { useModelsMock } = vi.hoisted(() => ({ useModelsMock: vi.fn() }));
+
+const keyedConfig = createMockUserConfig({
   openrouterApiKey: "test-api-key-12345",
 });
+
+let mockConfig = keyedConfig;
 
 const mockModels = [
   createMockOpenRouterModel({ id: "free-model-1", name: "Free Model 1", isFree: true }),
@@ -14,12 +22,6 @@ const mockModels = [
   createMockOpenRouterModel({ id: "paid-model-2", name: "Paid Model 2", isFree: false }),
 ];
 
-let mockUseModelReturn = {
-  availableOnlineModels: mockModels,
-  isLoadingAvailableModels: false,
-  availableModelsError: null as Error | null,
-};
-
 vi.mock("@/hooks/use-user-config", async () => {
   const { createMockUserConfigHook } = await import("@/testing/mocks/hooks");
   return {
@@ -27,8 +29,8 @@ vi.mock("@/hooks/use-user-config", async () => {
   };
 });
 
-vi.mock("@/app/providers/model-provider", () => ({
-  useModel: () => mockUseModelReturn,
+vi.mock("@/features/chat/hooks/use-models", () => ({
+  useModels: useModelsMock,
 }));
 
 describe("useOnlineModels", () => {
@@ -37,40 +39,32 @@ describe("useOnlineModels", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseModelReturn = {
-      availableOnlineModels: mockModels,
-      isLoadingAvailableModels: false,
-      availableModelsError: null,
-    };
+    mockConfig = keyedConfig;
+    useModelsMock.mockReturnValue({ models: mockModels, isLoading: false, error: null });
   });
 
   describe("initial state", () => {
-    it("returns loading state from useModel", () => {
-      mockUseModelReturn = { ...mockUseModelReturn, isLoadingAvailableModels: true };
-      const { result } = renderHook(() =>
-        useOnlineModels(mockOnModelSelect, mockOnOpenChange)
-      );
-      expect(result.current.isLoading).toBe(true);
-    });
-
-    it("returns error state from useModel", () => {
-      const error = new Error("Failed to fetch");
-      mockUseModelReturn = { ...mockUseModelReturn, availableModelsError: error };
-      const { result } = renderHook(() =>
-        useOnlineModels(mockOnModelSelect, mockOnOpenChange)
-      );
-      expect(result.current.error).toBe(error);
-    });
-
     it("separates free and paid models", () => {
       const { result } = renderHook(() =>
         useOnlineModels(mockOnModelSelect, mockOnOpenChange)
       );
 
-      expect(result.current.freeModels).toHaveLength(2);
-      expect(result.current.paidModels).toHaveLength(2);
-      expect(result.current.freeModels.every((m) => m.isFree)).toBe(true);
-      expect(result.current.paidModels.every((m) => !m.isFree)).toBe(true);
+      expect(result.current.freeModels.map((m) => m.id)).toEqual([
+        "free-model-1",
+        "free-model-2",
+      ]);
+      expect(result.current.paidModels.map((m) => m.id)).toEqual([
+        "paid-model-1",
+        "paid-model-2",
+      ]);
+    });
+
+    it("fetches the catalog with the stored OpenRouter key", () => {
+      renderHook(() => useOnlineModels(mockOnModelSelect, mockOnOpenChange));
+
+      expect(useModelsMock).toHaveBeenCalledWith({
+        apiKey: keyedConfig.openrouterApiKey,
+      });
     });
 
     it("returns hasOpenRouterKey as true when key exists", () => {
@@ -78,7 +72,17 @@ describe("useOnlineModels", () => {
         useOnlineModels(mockOnModelSelect, mockOnOpenChange)
       );
       expect(result.current.hasOpenRouterKey).toBe(true);
-      expect(result.current.hasPaidKey).toBe(true);
+    });
+
+    it("returns hasOpenRouterKey as false and fetches without a key when none is stored", () => {
+      mockConfig = createMockUserConfig({ openrouterApiKey: "" });
+
+      const { result } = renderHook(() =>
+        useOnlineModels(mockOnModelSelect, mockOnOpenChange)
+      );
+
+      expect(result.current.hasOpenRouterKey).toBe(false);
+      expect(useModelsMock).toHaveBeenCalledWith({ apiKey: "" });
     });
   });
 
@@ -98,38 +102,21 @@ describe("useOnlineModels", () => {
     });
 
     it("shows error toast when no API key exists", () => {
-      // The hook handles missing API key in handleModelSelect by calling toast.error
-      // This is tested implicitly since handleModelSelect guards against null apiKey
-      // A more complete test would require dynamic mock switching
-      const { result } = renderHook(() =>
-        useOnlineModels(mockOnModelSelect, mockOnOpenChange)
-      );
+      mockConfig = createMockUserConfig({ openrouterApiKey: "" });
 
-      // The hasOpenRouterKey flag correctly indicates key presence
-      expect(result.current.hasOpenRouterKey).toBe(true);
-    });
-  });
-
-  describe("handleOpenChange", () => {
-    it("calls onOpenChange callback", () => {
       const { result } = renderHook(() =>
         useOnlineModels(mockOnModelSelect, mockOnOpenChange)
       );
 
       act(() => {
-        result.current.handleOpenChange(true);
+        result.current.handleModelSelect(mockModels[0]);
       });
 
-      expect(mockOnOpenChange).toHaveBeenCalledWith(true);
-    });
-
-    it("works without onOpenChange callback", () => {
-      const { result } = renderHook(() => useOnlineModels(mockOnModelSelect));
-
-      // Should not throw
-      act(() => {
-        result.current.handleOpenChange(false);
-      });
+      expect(mockToast.error).toHaveBeenCalledWith(
+        "Please add your OpenRouter API key first in Settings."
+      );
+      expect(mockOnModelSelect).not.toHaveBeenCalled();
+      expect(mockOnOpenChange).not.toHaveBeenCalled();
     });
   });
 

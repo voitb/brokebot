@@ -39,7 +39,7 @@ export function ChatInput({
     supportsImages,
     attachedFiles,
     removeFile,
-    replaceFiles,
+    handleFilesSelected,
     isDragOver,
     handleDrop,
     handleDragOver,
@@ -59,30 +59,33 @@ export function ChatInput({
     setMessage,
     onSend,
     isLoading,
+    isGenerating,
   });
 
   return (
-      <div className="relative p-1 pb-4 bg-background w-full max-w-[95%] mx-auto">
+      <div
+        className="relative p-1 pb-4 bg-background w-full max-w-[95%] mx-auto"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+      >
         <ModelError
           isModelError={isModelError}
           status={modelStatus}
         />
 
-        <DragDropOverlay isDragOver={isDragOver} supportsImages={supportsImages} />
+        <DragDropOverlay isDragOver={isDragOver} />
 
-        <AttachedFilesPreview
-          attachedFiles={attachedFiles}
-          onFileRemoved={removeFile}
-        />
+        {!isLoading && (
+          <AttachedFilesPreview
+            attachedFiles={attachedFiles}
+            onFileRemoved={removeFile}
+          />
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div
-            className="flex items-end gap-1 rounded-md border p-1.5 overflow-hidden"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
-          >
+          <div className="flex items-end gap-1 rounded-md border p-1.5 overflow-hidden">
             <ScrollArea className="min-h-[60px] max-h-[200px] min-w-0 flex-grow [&>div]:max-h-[200px]">
               <Textarea
                 ref={textareaRef}
@@ -102,10 +105,8 @@ export function ChatInput({
                 disabled={isModelLoading || isModelError || isLoading}
               />
               <FileUpload
-                supportsImages={supportsImages}
-                selectedModelName={modelDisplayInfo.name}
                 disabled={isInputDisabled}
-                onFilesChanged={replaceFiles}
+                onFilesSelected={handleFilesSelected}
               />
               <div className="ml-1">
                 {isGenerating ? (
@@ -148,7 +149,7 @@ export function ChatInput({
             isModelError={isModelError}
             isModelReady={isModelReady}
             supportsImages={supportsImages}
-            disabled={isLoading || isModelLoading}
+            disabled={isLoading}
           />
         </form>
       </div>

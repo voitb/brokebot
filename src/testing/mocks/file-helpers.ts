@@ -15,6 +15,8 @@ export function createMockFile(
   if (size !== undefined) {
     Object.defineProperty(file, "size", { value: size });
   }
+  // jsdom implements no Blob.prototype.text
+  Object.defineProperty(file, "text", { value: async () => content, configurable: true });
   return file;
 }
 
@@ -35,22 +37,6 @@ export function createMockFileList(files: File[]): FileList {
     (fileList as Record<number, File>)[index] = file;
   });
   return fileList as unknown as FileList;
-}
-
-/**
- * Creates a mock DataTransfer object for testing drag-drop events
- */
-export function createMockDataTransfer(files: File[]): DataTransfer {
-  const fileList = createMockFileList(files);
-  return {
-    files: fileList,
-    items: files.map((file) => ({
-      kind: "file",
-      type: file.type,
-      getAsFile: () => file,
-    })),
-    types: ["Files"],
-  } as unknown as DataTransfer;
 }
 
 /**

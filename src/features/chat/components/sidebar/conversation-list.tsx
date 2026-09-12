@@ -7,7 +7,7 @@ import { NewChatButton } from "./new-chat-button";
 import { UserProfile } from "./user-profile";
 import { FolderItem } from "./folder-item";
 import { useConversationList } from "@/hooks/use-conversation-list";
-import { useConversations } from "@/app/providers/conversations-provider";
+import { useConversations } from "@/hooks/use-conversations";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -20,6 +20,7 @@ export function ConversationList() {
   const {
     searchTerm,
     isSearching,
+    isLoading,
     pinnedConversations,
     foldersWithConversations,
     unfoldedConversations,
@@ -43,8 +44,12 @@ export function ConversationList() {
     };
   }, []);
 
-  const handleCreateFolder = (name: string) => {
-    createFolder(name);
+  const handleCreateFolder = async (name: string) => {
+    try {
+      await createFolder(name);
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -84,40 +89,44 @@ export function ConversationList() {
       <div className="flex-1 min-h-0 px-4">
         <ScrollArea className="h-full">
           <div className="space-y-4">
-            {pinnedConversations.length > 0 && (
-              <ConversationGroup
-                title="Favourites"
-                conversations={pinnedConversations}
-              />
-            )}
+            {!isLoading && (
+              <>
+                {pinnedConversations.length > 0 && (
+                  <ConversationGroup
+                    title="Favourites"
+                    conversations={pinnedConversations}
+                  />
+                )}
 
-            {foldersWithConversations.map((folder) => (
-                <FolderItem key={folder.id} folder={folder} />
-            ))}
+                {foldersWithConversations.map((folder) => (
+                  <FolderItem key={folder.id} folder={folder} />
+                ))}
 
-            {unfoldedConversations.length > 0 && (
-              <ConversationGroup
-                title="Recent"
-                  conversations={unfoldedConversations}
-              />
-            )}
+                {unfoldedConversations.length > 0 && (
+                  <ConversationGroup
+                    title="Recent"
+                    conversations={unfoldedConversations}
+                  />
+                )}
 
-            {pinnedConversations.length === 0 &&
-                foldersWithConversations.length === 0 &&
-                unfoldedConversations.length === 0 && (
-                <div className="text-center text-muted-foreground py-8">
-                  <p className="text-sm">
-                    {searchTerm
-                        ? "No conversations found matching your search"
-                      : "No conversations yet"}
-                  </p>
-                  {searchTerm && (
-                    <p className="text-xs mt-1 text-muted-foreground/70">
-                      Try searching with different keywords
-                    </p>
+                {pinnedConversations.length === 0 &&
+                  foldersWithConversations.length === 0 &&
+                  unfoldedConversations.length === 0 && (
+                    <div className="text-center text-muted-foreground py-8">
+                      <p className="text-sm">
+                        {searchTerm
+                          ? "No conversations found matching your search"
+                          : "No conversations yet"}
+                      </p>
+                      {searchTerm && (
+                        <p className="text-xs mt-1 text-muted-foreground/70">
+                          Try searching with different keywords
+                        </p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
+              </>
+            )}
           </div>
         </ScrollArea>
       </div>

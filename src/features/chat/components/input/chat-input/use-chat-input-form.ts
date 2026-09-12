@@ -1,23 +1,43 @@
 import {
   useRef,
-  useEffect,
-  useEffectEvent,
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
 } from "react";
 import { toast } from "sonner";
-import { useModel } from "@/app/providers/model-provider";
+import { useModel, type UnifiedModel } from "@/hooks/use-model";
+import { useConversationId } from "@/hooks/use-conversation-id";
+import { useIsWaitingForSharedEngine } from "@/features/chat/hooks/active-generations";
 import { useDragDrop } from "@/features/chat/hooks/use-drag-drop";
 import { useFileUpload, type AttachedFile } from "@/features/chat/hooks/use-file-upload";
 import { useSpeechToText, type TranscriberStatus } from "@/features/chat/hooks/use-speech-to-text";
-import { buildMessageWithFiles } from "@/features/chat/utils/chat-input-utils";
+import {
+  buildMessageWithFiles,
+  WAITING_FOR_SHARED_ENGINE,
+} from "@/features/chat/utils/chat-input-utils";
 
 export interface ModelDisplayInfo {
   name: string;
-  modelType: "Online" | "Local" | "None";
   supportsImages: boolean;
   specialization?: string;
+}
+
+function getModelDisplayInfo(model: UnifiedModel | null): ModelDisplayInfo {
+  if (!model) {
+    return { name: "Initializing...", supportsImages: false };
+  }
+  if (model.type === "local") {
+    return {
+      name: model.localModel.name,
+      supportsImages: model.localModel.supportsImages ?? false,
+      specialization: model.localModel.specialization,
+    };
+  }
+  return {
+    name: model.onlineModel.name,
+    supportsImages: false,
+    specialization: model.onlineModel.category,
+  };
 }
 
 export interface UseChatInputFormProps {
@@ -25,6 +45,7 @@ export interface UseChatInputFormProps {
   setMessage: (message: string) => void;
   onSend: (message?: string) => Promise<void>;
   isLoading: boolean;
+  isGenerating: boolean;
 }
 
 export interface UseChatInputFormReturn {
@@ -36,7 +57,7 @@ export interface UseChatInputFormReturn {
 
   attachedFiles: AttachedFile[];
   removeFile: (fileId: string) => void;
-  replaceFiles: (files: AttachedFile[]) => void;
+  handleFilesSelected: (files: FileList) => Promise<AttachedFile[]>;
 
   isDragOver: boolean;
   handleDrop: (e: React.DragEvent) => void;
@@ -64,31 +85,19 @@ export function useChatInputForm({
   setMessage,
   onSend,
   isLoading,
+  isGenerating,
 }: UseChatInputFormProps): UseChatInputFormReturn {
   const { currentModel, isModelLoading, modelStatus } = useModel();
+  const conversationId = useConversationId();
+  const isWaitingForSharedEngine = useIsWaitingForSharedEngine(
+    conversationId,
+    currentModel?.type === "local"
+  );
 
   const isModelError = modelStatus.toLowerCase().includes("error");
   const isModelReady = !!currentModel && !isModelLoading;
 
-  const modelDisplayInfo: ModelDisplayInfo = currentModel
-    ? currentModel.type === "local"
-      ? {
-          name: currentModel.localModel.name,
-          modelType: "Local",
-          supportsImages: currentModel.localModel.supportsImages ?? false,
-          specialization: currentModel.localModel.specialization,
-        }
-      : {
-          name: currentModel.onlineModel.name,
-          modelType: "Online",
-          supportsImages: false,
-          specialization: currentModel.onlineModel.category,
-        }
-    : {
-        name: "Initializing...",
-        modelType: "None",
-        supportsImages: false,
-      };
+  const modelDisplayInfo = getModelDisplayInfo(currentModel);
 
   const currentModelName = modelDisplayInfo.name;
 
@@ -106,10 +115,7 @@ export function useChatInputForm({
     attachedFiles,
     handleFilesSelected,
     removeFile,
-    clearFiles,
-    replaceFiles,
   } = useFileUpload({
-    supportsImages,
     selectedModelName: currentModelName || "Model",
   });
 
@@ -127,37 +133,29 @@ export function useChatInputForm({
 
   const isSubmitDisabled =
     (!message.trim() && attachedFiles.length === 0) ||
-    isLoading ||
-    isModelError;
+    isLoading || isGenerating ||
+    isModelError ||
+    !isModelReady ||
+    isWaitingForSharedEngine;
   const isInputDisabled =
     isLoading || isModelLoading || isModelError;
 
-  const placeholderText =
+  const idlePlaceholder =
     isModelReady && currentModelName
       ? `Message ${currentModelName}... or click the mic to talk`
       : modelStatus;
+  const placeholderText = isWaitingForSharedEngine ? WAITING_FOR_SHARED_ENGINE : idlePlaceholder;
 
-  const onMicToggle = useEffectEvent(() => {
+  const handleMicToggle = () => {
     if (transcriberStatus === "recording") {
       stopRecording();
     } else {
       startRecording();
     }
-  });
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === "m") {
-        event.preventDefault();
-        onMicToggle();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onMicToggle]);
+  };
 
   const submitMessage = async () => {
+    if (isLoading || isGenerating || isWaitingForSharedEngine) return;
     if (!message.trim() && attachedFiles.length === 0) return;
     if (!isModelReady) {
       toast.error("Model is not ready. Please wait or try reloading.");
@@ -168,16 +166,15 @@ export function useChatInputForm({
     const filesToSend = [...attachedFiles];
 
     setMessage("");
-    clearFiles();
 
-    const fullMessage = buildMessageWithFiles(messageToSend, filesToSend);
+    const { message: fullMessage, sent } = buildMessageWithFiles(messageToSend, filesToSend);
 
     try {
       await onSend(fullMessage);
+      // files the budget dropped stay attached so the user can send them next
+      sent.forEach((file) => removeFile(file.id));
     } catch {
       setMessage(messageToSend);
-      replaceFiles(filesToSend);
-      toast.error("Failed to send message. Please try again.");
     }
   };
 
@@ -205,14 +202,14 @@ export function useChatInputForm({
     supportsImages,
     attachedFiles,
     removeFile,
-    replaceFiles,
+    handleFilesSelected,
     isDragOver,
     handleDrop,
     handleDragOver,
     handleDragLeave,
     handleDragEnter,
     transcriberStatus,
-    handleMicToggle: onMicToggle,
+    handleMicToggle,
     handleSubmit,
     handleKeyDown,
     isSubmitDisabled,

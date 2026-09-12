@@ -1,23 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, onTestFinished } from "vitest";
 import { screen } from "@testing-library/react";
 import { render } from "@/testing/utils";
 import { MessageBubble } from "./message-bubble";
 import { createMockMessage } from "@/testing/mocks/modules";
 
-vi.mock("@/app/providers/web-llm-provider", async () => {
-  const { createMinimalWebLLMProvider } = await import("@/testing/mocks/providers");
-  return createMinimalWebLLMProvider();
-});
-
-import { useWebLLM } from "@/app/providers/web-llm-provider";
-
 describe("MessageBubble", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useWebLLM).mockReturnValue({
-      isLoading: false,
-      status: "Ready",
-    } as ReturnType<typeof useWebLLM>);
   });
 
   it("renders user message content", () => {
@@ -76,6 +65,46 @@ describe("MessageBubble", () => {
     expect(screen.getByText(/let me think about this/i)).toBeInTheDocument();
   });
 
+  it("keeps think tags verbatim in user messages", () => {
+    const message = createMockMessage({
+      role: "user",
+      content: "<think>hidden</think>Summarise this",
+    });
+
+    render(<MessageBubble message={message} />);
+
+    expect(screen.getByText("<think>hidden</think>Summarise this")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Thinking" })).not.toBeInTheDocument();
+  });
+
+  it("renders an attachment badge instead of the file body for user messages", () => {
+    const message = createMockMessage({
+      role: "user",
+      content: '<file name="notes.txt">secret body</file>Check this',
+    });
+
+    render(<MessageBubble message={message} />);
+
+    expect(screen.getByText("notes.txt")).toBeInTheDocument();
+    expect(screen.getByText("Check this")).toBeInTheDocument();
+    expect(screen.queryByText(/secret body/)).not.toBeInTheDocument();
+  });
+
+  it("renders a badge for each attachment when two files share a name", () => {
+    const message = createMockMessage({
+      role: "user",
+      content:
+        '<file name="notes.txt">first</file>\n\n<file name="notes.txt">second</file>Check this',
+    });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    onTestFinished(() => consoleError.mockRestore());
+
+    render(<MessageBubble message={message} />);
+
+    expect(screen.getAllByText("notes.txt")).toHaveLength(2);
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
   it("shows stop button when generating", () => {
     const mockOnStop = vi.fn();
     const message = createMockMessage({ role: "assistant", content: "Generating..." });
@@ -102,20 +131,16 @@ describe("MessageBubble", () => {
         message={message}
         isGenerating={false}
         isLastMessage={true}
+        isModelReady={true}
         onRegenerate={mockOnRegenerate}
       />
     );
 
     const regenerateButton = screen.getByRole("button", { name: /regenerate/i });
-    expect(regenerateButton).toBeInTheDocument();
+    expect(regenerateButton).toBeEnabled();
   });
 
-  it("disables regenerate button when model is loading", () => {
-    vi.mocked(useWebLLM).mockReturnValue({
-      isLoading: true,
-      status: "Loading...",
-    } as ReturnType<typeof useWebLLM>);
-
+  it("disables regenerate button when the model is not ready", () => {
     const message = createMockMessage({ role: "assistant", content: "Response" });
 
     render(
@@ -123,6 +148,7 @@ describe("MessageBubble", () => {
         message={message}
         isGenerating={false}
         isLastMessage={true}
+        isModelReady={false}
         onRegenerate={vi.fn()}
       />
     );

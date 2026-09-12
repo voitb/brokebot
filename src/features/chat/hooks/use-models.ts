@@ -1,20 +1,9 @@
 import { useState, useEffect } from 'react';
 import { type OpenRouterModel, getCategoryFromModel } from '@/features/chat/api/openrouter';
-
-interface OpenRouterApiModel {
-  id: string;
-  name: string;
-  description: string;
-  context_length: number;
-  pricing: {
-    prompt: string;
-    completion: string;
-  };
-}
-
-interface OpenRouterModelsResponse {
-  data: OpenRouterApiModel[];
-}
+import {
+  OpenRouterModelsResponseSchema,
+  OpenRouterApiModelSchema,
+} from '@/lib/schemas/model-schema';
 
 interface UseModelsOptions {
   apiKey?: string;
@@ -50,22 +39,32 @@ export function useModels({ apiKey }: UseModelsOptions = {}): UseModelsReturn {
         if (!response.ok) {
           throw new Error(`Failed to fetch models: ${response.statusText}`);
         }
-        const { data } = (await response.json()) as OpenRouterModelsResponse;
-        if (!Array.isArray(data)) {
+        const parsed = OpenRouterModelsResponseSchema.safeParse(await response.json());
+        if (!parsed.success) {
           throw new Error('Unexpected response format from OpenRouter API.');
         }
 
-        const formattedModels: OpenRouterModel[] = data
-        .map((model: OpenRouterApiModel) => ({
-          id: model.id,
-          name: model.name,
-          description: model.description,
-          contextLength: model.context_length > 0 ? model.context_length : 0,
-          pricing: model.pricing,
-          provider: model.id.split('/')[0],
-          isFree: parseFloat(model.pricing.prompt) === 0 && parseFloat(model.pricing.completion) === 0,
-          category: getCategoryFromModel(model),
-        }));
+        const formattedModels: OpenRouterModel[] = parsed.data.data.flatMap((entry) => {
+          const parsedModel = OpenRouterApiModelSchema.safeParse(entry);
+          if (!parsedModel.success) {
+            return [];
+          }
+          const model = parsedModel.data;
+          return [{
+            id: model.id,
+            name: model.name,
+            description: model.description,
+            contextLength: Math.max(model.context_length ?? 0, 0),
+            pricing: model.pricing,
+            provider: model.id.split('/')[0],
+            isFree: parseFloat(model.pricing.prompt) === 0 && parseFloat(model.pricing.completion) === 0,
+            category: getCategoryFromModel(model),
+          }];
+        });
+
+        if (parsed.data.data.length > 0 && formattedModels.length === 0) {
+          throw new Error('Unexpected response format from OpenRouter API.');
+        }
 
         if (!controller.signal.aborted) {
           setModels(formattedModels);

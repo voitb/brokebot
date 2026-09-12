@@ -50,10 +50,14 @@ export function useKeyboardShortcuts({
 
     if (lastKeyRef.current === 'g') {
       lastKeyRef.current = '';
-      event.preventDefault();
+
+      if (ctrlKey || metaKey || altKey || shiftKey) {
+        return;
+      }
 
       switch (key) {
         case 'n':
+          event.preventDefault();
           if (onNewChat) {
             onNewChat();
           } else {
@@ -61,22 +65,27 @@ export function useKeyboardShortcuts({
           }
           break;
         case 's':
+          event.preventDefault();
           onToggleSidebar?.();
           break;
         case 'f':
+          event.preventDefault();
           onSearch?.();
           break;
         case 'p':
+          event.preventDefault();
           if (conversationId) {
             onPinChat?.();
           }
           break;
         case 'r':
+          event.preventDefault();
           if (conversationId) {
             onRenameChat?.();
           }
           break;
         case 'd':
+          event.preventDefault();
           if (conversationId) {
             onDeleteChat?.();
           }
@@ -99,7 +108,7 @@ export function useKeyboardShortcuts({
         onSearch?.();
         break;
 
-      case key === '?' && !ctrlKey && !metaKey && !altKey && !shiftKey:
+      case key === '?' && !ctrlKey && !metaKey && !altKey:
         event.preventDefault();
         onShowShortcuts?.();
         break;

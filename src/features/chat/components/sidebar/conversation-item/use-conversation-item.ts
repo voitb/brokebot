@@ -1,6 +1,7 @@
 import { useState, useOptimistic, startTransition } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConversations } from "@/app/providers/conversations-provider";
+import { toast } from "sonner";
+import { useConversations } from "@/hooks/use-conversations";
 import { useConversationId } from "@/hooks/use-conversation-id";
 import type { Conversation, Folder } from "@/lib/db";
 
@@ -59,11 +60,11 @@ export function useConversationItem(conversation: Conversation): UseConversation
 
   const handlePinToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    startTransition(() => {
-      setOptimisticPinned(!conversation.pinned);
-    });
     setIsMenuOpen(false);
-    await togglePinConversation(conversation.id);
+    startTransition(async () => {
+      setOptimisticPinned(!conversation.pinned);
+      await togglePinConversation(conversation.id);
+    });
   };
 
   const startEditing = () => {
@@ -95,7 +96,12 @@ export function useConversationItem(conversation: Conversation): UseConversation
   };
 
   const handleDeleteConfirm = async () => {
-    await deleteConversation(conversation.id);
+    try {
+      await deleteConversation(conversation.id);
+    } catch {
+      return;
+    }
+    toast.success("Conversation deleted successfully.");
     setDeleteDialogOpen(false);
     if (isActive) {
       navigate("/chat");
@@ -109,9 +115,7 @@ export function useConversationItem(conversation: Conversation): UseConversation
 
   const handleCreateFolderAndMove = async (folderName: string) => {
     const newFolderId = await createFolder(folderName);
-    if (newFolderId) {
-      await handleMove(newFolderId);
-    }
+    await handleMove(newFolderId);
   };
 
   return {

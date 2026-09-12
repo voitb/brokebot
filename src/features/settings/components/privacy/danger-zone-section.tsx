@@ -6,11 +6,17 @@ import { Trash2 } from "lucide-react";
 interface DangerZoneSectionProps {
   onClearAllDataClick: () => void;
   hasConversations?: boolean;
+  hasDocuments?: boolean;
+  hasFolders?: boolean;
+  hasApiKey?: boolean;
 }
 
 export function DangerZoneSection({
   onClearAllDataClick,
   hasConversations = false,
+  hasDocuments = false,
+  hasFolders = false,
+  hasApiKey = false,
 }: DangerZoneSectionProps) {
   return (
     <div>
@@ -34,7 +40,9 @@ export function DangerZoneSection({
             <Button
               variant="destructive"
               onClick={onClearAllDataClick}
-              disabled={!hasConversations}
+              disabled={
+                !hasConversations && !hasDocuments && !hasFolders && !hasApiKey
+              }
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Clear All Conversations & Documents

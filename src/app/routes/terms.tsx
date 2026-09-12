@@ -1,5 +1,7 @@
 import { PageSeo } from "@/components/seo/seo";
 
+const LAST_UPDATED = "September 12, 2026";
+
 export function TermsOfService() {
   return (
     <>
@@ -17,7 +19,7 @@ export function TermsOfService() {
             handled.
           </p>
           <p>
-            <strong>Last updated:</strong> {new Date().toLocaleDateString()}
+            <strong>Last updated:</strong> {LAST_UPDATED}
           </p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">
@@ -46,11 +48,13 @@ export function TermsOfService() {
             <li>
               <strong>Conversations:</strong> All your chat messages and
               conversations are stored locally in your browser using IndexedDB.
-              They never leave your device.
+              They stay on your device with a local model; with an online model, recent messages are sent to OpenRouter with your prompt.
             </li>
             <li>
-              <strong>Files:</strong> Any documents you upload (.txt, .md files)
-              are processed and stored entirely on your device.
+              <strong>Files:</strong> Any documents you attach (.txt, .md files)
+              are read and stored on your device. They stay there when you use a
+              local model. When an online model is selected, the text of the
+              attached files is sent to OpenRouter together with your prompt.
             </li>
             <li>
               <strong>Settings:</strong> Your preferences, selected models, and
@@ -62,9 +66,15 @@ export function TermsOfService() {
               transmission.
             </li>
             <li>
-              <strong>API Keys:</strong> If you provide your own API keys
-              (OpenAI, Anthropic, Google), they are encrypted using AES-256-GCM
-              encryption and stored only in your browser's local storage.
+              <strong>Voice Input:</strong> Your microphone is used only while
+              you are recording. The audio is transcribed on your device by a
+              speech-to-text model running in a Web Worker and is never
+              uploaded; only the resulting text is placed in the message box.
+            </li>
+            <li>
+              <strong>API Keys:</strong> If you provide your own OpenRouter API
+              key, it is encrypted with AES-GCM (256-bit) using the Web Crypto
+              API and stored only in your browser's IndexedDB.
             </li>
           </ul>
 
@@ -72,8 +82,11 @@ export function TermsOfService() {
             What Goes Online (Optional)
           </h3>
           <p>
-            Only when you choose to use online AI models is any data
-            transmitted:
+            Your conversations and files are transmitted only when you choose
+            to use an online AI model (model weights for WebLLM and speech-to-text
+            are downloaded separately, as described below). In that case the
+            request carries your prompt, recent messages from the conversation,
+            and the full text of any files attached to that message:
           </p>
 
           <h4 className="text-lg font-medium mt-4 mb-2">
@@ -81,8 +94,8 @@ export function TermsOfService() {
           </h4>
           <ul className="list-disc ml-6 mb-4">
             <li>
-              <strong>What's sent:</strong> Your chat messages and prompts when
-              using free OpenRouter models
+              <strong>What's sent:</strong> Your chat messages, prompts and the
+              contents of attached files when using free OpenRouter models
             </li>
             <li>
               <strong>Trade-off:</strong> In exchange for free access,
@@ -101,16 +114,17 @@ export function TermsOfService() {
           <h4 className="text-lg font-medium mt-4 mb-2">Your Own API Keys</h4>
           <ul className="list-disc ml-6 mb-4">
             <li>
-              <strong>Direct connection:</strong> When using your own API keys,
-              messages are sent directly to your chosen provider
+              <strong>Direct connection:</strong> When using your own OpenRouter
+              API key, messages are sent directly from your browser to OpenRouter
             </li>
             <li>
-              <strong>Your account:</strong> Data handling follows your
-              provider's terms of service
+              <strong>Your account:</strong> Data handling follows OpenRouter's
+              terms of service
             </li>
             <li>
-              <strong>Key security:</strong> API keys are encrypted locally and
-              never sent to our servers
+              <strong>Key security:</strong> Your API key is encrypted and stored
+              in IndexedDB on your device. It is never sent to a brokebot server,
+              because brokebot has no server.
             </li>
           </ul>
 
@@ -124,7 +138,7 @@ export function TermsOfService() {
             </li>
             <li>
               <strong>Conversation Exports:</strong> You can export your
-              conversations as HTML, JSON, or Markdown files
+              conversations as JSON files
             </li>
             <li>
               <strong>Complete Control:</strong> You have full control over all
@@ -189,8 +203,14 @@ export function TermsOfService() {
               leaves your device)
             </li>
             <li>
-              <strong>Model Providers:</strong> OpenAI, Anthropic, Google (only
-              when you provide your own API keys)
+              <strong>Hugging Face:</strong> Hosts the speech-to-text model
+              weights, which your browser downloads once the first time you use
+              voice input
+            </li>
+            <li>
+              <strong>Model Providers:</strong> Online models are reached through
+              OpenRouter, which routes your requests to the underlying model
+              providers (only when you choose an online model)
             </li>
           </ul>
           <p>
@@ -279,10 +299,10 @@ export function TermsOfService() {
             <li>
               <strong>GitHub:</strong>{" "}
               <a
-                href="https://github.com/voitb/brokebot"
+                href="https://github.com/b4r7x/brokebot"
                 className="text-blue-600 hover:underline"
               >
-                github.com/voitb/brokebot
+                github.com/b4r7x/brokebot
               </a>
             </li>
           </ul>

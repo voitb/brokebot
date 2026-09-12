@@ -15,10 +15,15 @@ function wrapper({ children }: { children: ReactNode }) {
   return <BrowserRouter>{children}</BrowserRouter>;
 }
 
-function dispatchKey(key: string, options: Partial<KeyboardEvent> = {}) {
-  document.dispatchEvent(
-    new KeyboardEvent("keydown", { key, bubbles: true, ...options })
-  );
+function dispatchKey(key: string, options: KeyboardEventInit = {}) {
+  const event = new KeyboardEvent("keydown", {
+    key,
+    bubbles: true,
+    cancelable: true,
+    ...options,
+  });
+  document.dispatchEvent(event);
+  return event;
 }
 
 describe("useKeyboardShortcuts", () => {
@@ -107,7 +112,7 @@ describe("useKeyboardShortcuts", () => {
       expect(onSearch).toHaveBeenCalledTimes(1);
 
       act(() => {
-        dispatchKey("?");
+        dispatchKey("?", { shiftKey: true });
       });
       expect(onShowShortcuts).toHaveBeenCalledTimes(1);
     });
@@ -152,6 +157,41 @@ describe("useKeyboardShortcuts", () => {
       expect(onSearch).not.toHaveBeenCalled();
 
       document.body.removeChild(input);
+    });
+
+    it("leaves the browser default intact for a modified or unmapped key after g", () => {
+      const onRenameChat = vi.fn();
+      mockConversationId = "test-id";
+      renderHook(() => useKeyboardShortcuts({ onRenameChat }), { wrapper });
+
+      let modifiedEvent!: KeyboardEvent;
+      act(() => {
+        dispatchKey("g");
+        modifiedEvent = dispatchKey("r", { ctrlKey: true });
+      });
+      expect(onRenameChat).not.toHaveBeenCalled();
+      expect(modifiedEvent.defaultPrevented).toBe(false);
+
+      let unmappedEvent!: KeyboardEvent;
+      act(() => {
+        dispatchKey("g");
+        unmappedEvent = dispatchKey("Enter");
+      });
+      expect(unmappedEvent.defaultPrevented).toBe(false);
+    });
+
+    it("prevents the browser default for a mapped key after g", () => {
+      const onNewChat = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onNewChat }), { wrapper });
+
+      let mappedEvent!: KeyboardEvent;
+      act(() => {
+        dispatchKey("g");
+        mappedEvent = dispatchKey("n");
+      });
+
+      expect(onNewChat).toHaveBeenCalledTimes(1);
+      expect(mappedEvent.defaultPrevented).toBe(true);
     });
   });
 
