@@ -49,7 +49,7 @@ This project uses:
 Launch the `unit-testing:test-automator` agent:
 
 ```
-Perform a comprehensive test audit of /Users/voitz/Projects/brokebot
+Perform a comprehensive test audit of .
 
 ## Test Quality Checks
 

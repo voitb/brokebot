@@ -46,7 +46,7 @@ Launch these agents **simultaneously**:
 
 ### Agent 1: `project-analyst` - Tech Stack Detection
 ```
-Analyze /Users/voitz/Projects/brokebot to detect:
+Analyze . to detect:
 
 1. TECH STACK INVENTORY
 - All dependencies in package.json
@@ -66,7 +66,7 @@ Output: JSON-formatted tech stack summary
 
 ### Agent 2: `code-archaeologist` - Deep Structure Exploration
 ```
-Explore /Users/voitz/Projects/brokebot/src and document:
+Explore ./src and document:
 
 1. DIRECTORY ANALYSIS
 - Complete tree structure with file counts
@@ -90,7 +90,7 @@ Output: Structured exploration report
 
 ### Agent 3: `code-architect` - Bulletproof React Compliance
 ```
-Audit /Users/voitz/Projects/brokebot/src against Bulletproof React architecture:
+Audit ./src against Bulletproof React architecture:
 
 EXPECTED STRUCTURE:
 src/
@@ -132,7 +132,7 @@ Output: Compliance report with specific violations and fixes
 
 ### Agent 4: `react-principles` - React 2026 Patterns
 ```
-Audit /Users/voitz/Projects/brokebot/src for React 2026 state-of-the-art:
+Audit ./src for React 2026 state-of-the-art:
 
 ## REACT COMPILER ERA CHECKS
 
@@ -179,7 +179,7 @@ Output: Violations list with file:line and modernization suggestions
 
 ### Agent 5: `react-component-architect` - Hooks Deep Dive
 ```
-Audit all custom hooks in /Users/voitz/Projects/brokebot/src:
+Audit all custom hooks in ./src:
 
 ## HOOK QUALITY CHECKLIST
 
@@ -236,7 +236,7 @@ Output: Hook-by-hook analysis with quality scores and specific fixes
 
 ### Agent 6: `typescript-pro` - TypeScript Quality
 ```
-Audit TypeScript implementation in /Users/voitz/Projects/brokebot/src:
+Audit TypeScript implementation in ./src:
 
 ## TYPE SAFETY STANDARDS
 
@@ -280,7 +280,7 @@ Output: Categorized violations (critical/warning/info) with fixes
 
 ### Agent 7: `code-reviewer` - KISS/DRY/YAGNI/SRP Analysis
 ```
-Audit /Users/voitz/Projects/brokebot/src for clean code principles:
+Audit ./src for clean code principles:
 
 ## KISS VIOLATIONS (Over-Engineering)
 
@@ -337,7 +337,7 @@ Output: Principle-by-principle violations with severity and refactoring suggesti
 
 ### Agent 8: `performance-optimizer` - Performance Patterns
 ```
-Audit /Users/voitz/Projects/brokebot/src for performance anti-patterns:
+Audit ./src for performance anti-patterns:
 
 ## MEMOIZATION ANALYSIS
 

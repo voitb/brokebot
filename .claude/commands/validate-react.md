@@ -15,7 +15,7 @@ This project uses:
 Launch the `react-principles` agent:
 
 ```
-Perform a comprehensive React 19 best practices audit of /Users/voitz/Projects/brokebot/src
+Perform a comprehensive React 19 best practices audit of ./src
 
 ## React 19 Specific Checks
 

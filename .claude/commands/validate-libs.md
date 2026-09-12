@@ -16,7 +16,7 @@ This project uses:
 Launch the `code-architect` agent:
 
 ```
-Perform a comprehensive library integration audit of /Users/voitz/Projects/brokebot/src/lib
+Perform a comprehensive library integration audit of ./src/lib
 
 ## Library Integration Checks
 

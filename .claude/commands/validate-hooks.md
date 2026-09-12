@@ -13,7 +13,7 @@ This project uses:
 Launch the `react-component-architect` agent:
 
 ```
-Perform a comprehensive hooks audit of /Users/voitz/Projects/brokebot/src
+Perform a comprehensive hooks audit of ./src
 
 ## Hook Quality Checks
 

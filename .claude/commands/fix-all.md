@@ -27,7 +27,7 @@ Launch these agents simultaneously to fix issues:
 
 #### Agent 1: TypeScript Fixer (`javascript-typescript:typescript-pro`)
 ```
-Fix all TypeScript issues in /Users/voitz/Projects/brokebot/src:
+Fix all TypeScript issues in ./src:
 
 TASKS:
 1. Find and fix all `as any` casts - replace with proper types or type guards
@@ -45,7 +45,7 @@ READ files before editing. Run `npm run build` to verify fixes.
 
 #### Agent 2: React Patterns Fixer (`react-principles`)
 ```
-Fix all React anti-patterns in /Users/voitz/Projects/brokebot/src:
+Fix all React anti-patterns in ./src:
 
 TASKS:
 1. Find useEffect used for derived state - convert to lazy useState or inline computation
@@ -63,7 +63,7 @@ READ files before editing. Run `npm test -- --run` to verify fixes.
 
 #### Agent 3: Test Fixer (`unit-testing:test-automator`)
 ```
-Fix all test issues in /Users/voitz/Projects/brokebot/src:
+Fix all test issues in ./src:
 
 TASKS:
 1. Fix any failing tests - read source to understand expected behavior
@@ -82,7 +82,7 @@ Run `npm test -- --run` to verify all tests pass.
 
 #### Agent 4: Accessibility Fixer (`react-component-architect`)
 ```
-Fix accessibility issues in /Users/voitz/Projects/brokebot/src:
+Fix accessibility issues in ./src:
 
 TASKS:
 1. Add missing aria-labels to icon-only buttons

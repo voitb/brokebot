@@ -17,7 +17,7 @@ You are the ORCHESTRATOR of a multi-round code-quality audit of the `brokebot` r
 ## 1. Constants
 
 ```
-REPO         = /Users/voitz/Projects/brokebot                 (cwd; at authoring: HEAD 108c5b7, branch cleanup)
+REPO         = .                 (cwd; at authoring: HEAD 108c5b7, branch cleanup)
 PROMPT_FILE  = .claude/prompts/nuke-audit-orchestrator.md     (this file; subagents read its appendices by path)
 SKILLS_DIR   = $HOME/.claude/skills                            (Phase 0 resolves $HOME; only the ABSOLUTE path is ever passed to a subagent)
 RUN_DIR      = .nuke/<YYYY-MM-DD>-<HHmmss>-audit-brokebot/     (fresh; on collision append -2, -3, … until mkdir succeeds)
@@ -251,7 +251,7 @@ Fill every `{…}`; send exactly the header plus the template body. Common heade
 
 ```
 ROLE: {role} · ROUND: {n|—} · UNIT: {unit}
-REPO: /Users/voitz/Projects/brokebot (read-only; HEAD {head})
+REPO: . (read-only; HEAD {head})
 RUN_DIR: {run_dir}
 PROMPT_FILE: {prompt_file} — read {appendix sections, e.g. "Appendix C.1 and Appendix D"} from it
 SKILLS_DIR: {skills_dir}

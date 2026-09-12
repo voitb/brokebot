@@ -60,7 +60,7 @@ const DEBOUNCE_MS = 300; // Matches iOS keyboard animation duration
 ### Task 1.1: Clean Chat Feature
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/features/chat/
+Remove all comments from ./src/features/chat/
 
 Process ALL files in:
 - src/features/chat/components/**/*.tsx
@@ -91,7 +91,7 @@ After cleaning, verify: npm run build
 ### Task 1.2: Clean Settings Feature
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/features/settings/
+Remove all comments from ./src/features/settings/
 
 Process ALL files in:
 - src/features/settings/components/*.tsx
@@ -113,7 +113,7 @@ After cleaning, verify: npm run build
 ### Task 1.3: Clean Other Features
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/features/
+Remove all comments from ./src/features/
 
 Process files in:
 - src/features/layout/**/*.ts
@@ -145,7 +145,7 @@ After cleaning, verify: npm run build
 ### Task 2.1: Clean Components
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/components/
+Remove all comments from ./src/components/
 
 Process ALL files:
 - src/components/**/*.tsx
@@ -167,7 +167,7 @@ After cleaning, verify: npm run build
 ### Task 2.2: Clean Hooks and Lib
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/hooks/ and /Users/voitz/Projects/brokebot/src/lib/
+Remove all comments from ./src/hooks/ and ./src/lib/
 
 Process:
 - src/hooks/*.ts (not test files)
@@ -188,7 +188,7 @@ After cleaning, verify: npm run build
 ### Task 2.3: Clean App Directory
 
 ```
-Remove all comments from /Users/voitz/Projects/brokebot/src/app/
+Remove all comments from ./src/app/
 
 Process:
 - src/app/*.tsx
@@ -215,7 +215,7 @@ After cleaning, verify: npm run build
 ### Task 3.1: Clean Config and Types
 
 ```
-Remove all comments from config and type files in /Users/voitz/Projects/brokebot/src/
+Remove all comments from config and type files in ./src/
 
 Process:
 - src/config/*.ts

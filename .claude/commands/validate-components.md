@@ -15,7 +15,7 @@ This project uses:
 Launch the `react-component-architect` agent:
 
 ```
-Perform a comprehensive component architecture audit of /Users/voitz/Projects/brokebot/src
+Perform a comprehensive component architecture audit of ./src
 
 ## Component Quality Checks
 

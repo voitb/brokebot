@@ -9,7 +9,7 @@ Execute the following analysis steps in sequence:
 ### Step 1: Analyze Tech Stack
 Launch the `project-analyst` agent to detect frameworks and current architecture:
 ```
-Analyze the project at /Users/voitz/Projects/brokebot to detect:
+Analyze the project at . to detect:
 - Framework and libraries in use
 - Current folder structure under src/
 - Architectural patterns detected
@@ -19,7 +19,7 @@ Return a summary of the tech stack and structure.
 ### Step 2: Deep Code Exploration
 Launch the `code-archaeologist` agent:
 ```
-Explore the codebase at /Users/voitz/Projects/brokebot/src and document:
+Explore the codebase at ./src and document:
 1. Complete directory tree with descriptions
 2. All feature modules and their internal structure
 3. Import patterns between directories
@@ -30,7 +30,7 @@ Focus on structure, not implementation details.
 ### Step 3: Architecture Design Review
 Launch the `code-architect` agent:
 ```
-Review the current structure of /Users/voitz/Projects/brokebot/src against Bulletproof React architecture:
+Review the current structure of ./src against Bulletproof React architecture:
 
 Expected Bulletproof React structure:
 - src/app/ (routes, providers, entry)

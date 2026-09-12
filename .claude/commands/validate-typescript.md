@@ -14,7 +14,7 @@ This project uses:
 Launch the `javascript-typescript:typescript-pro` agent:
 
 ```
-Perform a comprehensive TypeScript audit of /Users/voitz/Projects/brokebot/src
+Perform a comprehensive TypeScript audit of ./src
 
 ## Type Safety Checks
 

@@ -439,7 +439,7 @@ Launch **3-5 agents in parallel** to analyze different file batches:
 
 #### Agent 1: Hook Tests (`unit-testing:test-automator`)
 ```
-Analyze hook test files for over-engineering in /Users/voitz/Projects/brokebot
+Analyze hook test files for over-engineering in .
 
 FILES TO ANALYZE:
 - src/hooks/**/*.test.ts
@@ -471,7 +471,7 @@ Specific recommendations for each High/Medium file.
 
 #### Agent 2: Component Tests (`unit-testing:test-automator`)
 ```
-Analyze component test files for over-engineering in /Users/voitz/Projects/brokebot
+Analyze component test files for over-engineering in .
 
 FILES TO ANALYZE:
 - src/features/**/components/**/*.test.tsx
@@ -502,7 +502,7 @@ OUTPUT FORMAT per file:
 
 #### Agent 3: Utility/Library Tests (`unit-testing:test-automator`)
 ```
-Analyze utility and library test files in /Users/voitz/Projects/brokebot
+Analyze utility and library test files in .
 
 FILES TO ANALYZE:
 - src/lib/**/*.test.ts
@@ -529,7 +529,7 @@ OUTPUT FORMAT:
 
 #### Agent 4: Provider Tests (`unit-testing:test-automator`)
 ```
-Analyze provider/context test files in /Users/voitz/Projects/brokebot
+Analyze provider/context test files in .
 
 FILES TO ANALYZE:
 - src/app/providers/**/*.test.tsx
@@ -994,7 +994,7 @@ OUTPUT: Simplified test file with changelog of what was removed/merged.
 Launch `unit-testing:debugger` to verify:
 
 ```
-Verify test simplification results in /Users/voitz/Projects/brokebot
+Verify test simplification results in .
 
 TASKS:
 1. Run full test suite:

@@ -8,7 +8,7 @@ Run these agents IN PARALLEL for efficiency:
 
 ### 1. Project Analysis (project-analyst)
 ```
-Analyze /Users/voitz/Projects/brokebot:
+Analyze .:
 - Detect tech stack (React, TypeScript, build tools)
 - List all top-level src/ directories
 - Identify current architectural pattern
@@ -17,7 +17,7 @@ Return: Tech stack summary and structure overview
 
 ### 2. Codebase Exploration (code-archaeologist)
 ```
-Explore /Users/voitz/Projects/brokebot/src:
+Explore ./src:
 - Map complete directory hierarchy
 - Document each feature module's internal structure
 - Identify import patterns and dependencies

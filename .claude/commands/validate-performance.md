@@ -15,7 +15,7 @@ This project uses:
 Launch the `application-performance:performance-engineer` agent:
 
 ```
-Perform a comprehensive performance audit of /Users/voitz/Projects/brokebot/src
+Perform a comprehensive performance audit of ./src
 
 ## Performance Checks
 

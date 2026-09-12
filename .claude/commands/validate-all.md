@@ -34,7 +34,7 @@ Launch these agents simultaneously:
 
 #### 1. React Patterns Validator (`react-principles`)
 ```
-Validate React patterns in /Users/voitz/Projects/brokebot/src against React 19 best practices:
+Validate React patterns in ./src against React 19 best practices:
 
 CHECK FOR:
 ✅ CORRECT PATTERNS:
@@ -66,7 +66,7 @@ Return: List of violations with file:line and suggested fix
 
 #### 2. TypeScript Quality Validator (`typescript-pro`)
 ```
-Validate TypeScript implementation quality in /Users/voitz/Projects/brokebot/src:
+Validate TypeScript implementation quality in ./src:
 
 CHECK FOR:
 ✅ CORRECT PATTERNS:
@@ -96,7 +96,7 @@ Return: Violations categorized by severity (critical/warning/info)
 
 #### 3. Hooks Implementation Validator (`react-component-architect`)
 ```
-Validate custom hook implementations in /Users/voitz/Projects/brokebot/src:
+Validate custom hook implementations in ./src:
 
 CHECK FOR:
 ✅ CORRECT PATTERNS:
@@ -128,7 +128,7 @@ Return: Per-hook analysis with recommendations
 
 #### 4. Component Architecture Validator (`code-architect`)
 ```
-Validate component architecture in /Users/voitz/Projects/brokebot/src:
+Validate component architecture in ./src:
 
 CHECK FOR:
 ✅ CORRECT PATTERNS:
@@ -164,7 +164,7 @@ Return: Component health report with refactoring suggestions
 
 #### 5. Test Coverage Validator (`unit-testing:test-automator`)
 ```
-Analyze test coverage and quality in /Users/voitz/Projects/brokebot:
+Analyze test coverage and quality in .:
 
 CHECK FOR:
 ✅ CORRECT PATTERNS:
